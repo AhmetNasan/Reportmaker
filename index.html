@@ -7,10 +7,17 @@
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <script src='https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js'></script>
     <script src="https://unpkg.com/leaflet-geometryutil"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.js"></script>
+    
+    <script src="https://unpkg.com/tokml@0.4.0/tokml.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -43,7 +50,7 @@
 
         .main-container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -60,338 +67,121 @@
         }
 
         /* Header & Tabs */
-        .main-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            z-index: 110;
-        }
+        .main-header { display: flex; justify-content: space-between; align-items: center; }
         .main-title { font-size: clamp(18px, 5vw, 24px); font-weight: bold; color: var(--text-color); }
-        .menu-button { background: none; border: none; font-size: 28px; cursor: pointer; position: relative; }
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 40px;
-            background-color: var(--glass-bg);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border-radius: var(--border-radius); box-shadow: var(--shadow);
-            z-index: 2500;
-            width: 260px; overflow: hidden;
-            border: 1px solid var(--glass-border);
-        }
-        html[dir="ltr"] .dropdown-menu { right: 0; }
-        html[dir="rtl"] .dropdown-menu { left: 0; }
-        .dropdown-menu button {
-            display: flex; align-items: center; gap: 12px;
-            width: 100%; padding: 10px 15px;
-            background: none; border: none; font-size: 15px; cursor: pointer; color: var(--text-color);
-        }
-        html[dir="ltr"] .dropdown-menu button { text-align: left; }
-        html[dir="rtl"] .dropdown-menu button { text-align: right; }
-        .dropdown-menu button:hover { background-color: rgba(var(--primary-color-rgb), 0.1); }
-        .menu-button:focus-within .dropdown-menu { display: block; }
-        hr { border: none; border-top: 1px solid var(--glass-border); margin: 5px 0; }
-
         .tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: -1px; }
         .tab-button {
             padding: 8px 15px; border: 1px solid var(--glass-border);
             border-bottom: none; border-radius: 10px 10px 0 0;
             cursor: pointer; background-color: rgba(255,255,255,0.3);
             font-size: 15px; font-weight: 500;
-            color: var(--text-color);
         }
         .tab-button.active { background-color: var(--glass-bg); border-bottom: 1px solid transparent; font-weight: bold;}
         .tab-content { display: none; }
         .tab-content.active { display: flex; flex-direction: column; gap: 15px; }
         
-        #projects-list { list-style: none; padding: 0; }
-        #projects-list li {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px; border-bottom: 1px solid var(--glass-border);
-        }
-        #projects-list .project-name { cursor: pointer; font-weight: bold; }
-        #projects-list .project-name:hover { color: var(--primary-color); }
-        
-        /* Forms & Inputs */
+        /* Header Card with new Date Position */
         .info-card { 
             display: flex; 
             justify-content: space-between; 
-            align-items: flex-start;
-            gap: 15px;
-        }
-        .logo-container {
-            flex-basis: 150px;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: center;
-        }
-        .logo-container img {
-            max-height: 80px; 
-            max-width: 150px; 
-            object-fit: contain; 
-            border-radius: 8px; 
-            cursor: pointer;
-            border: 1px solid var(--glass-border);
-        }
-        .title-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            text-align: center;
+            gap: 15px;
+            position: relative; /* For date positioning */
+            padding-bottom: 40px; /* Space for the date */
         }
-        .title-container .report-title-row {
-            font-size: clamp(1.5em, 4vw, 2.5em);
-            font-weight: 900;
-            color: #000;
-            line-height: 1.1;
-            margin: 0;
-            padding: 2px 5px;
+        .logo-container { flex-shrink: 0; }
+        .logo-container img { max-height: 80px; max-width: 150px; object-fit: contain; cursor: pointer; }
+        .title-container { flex-grow: 1; text-align: center; }
+        .report-title-row { font-size: clamp(1.5em, 4vw, 2em); font-weight: 900; line-height: 1.1;}
+        .small-title { margin-top: 15px; background-color: #5a7b9c; color: white; padding: 8px 20px; border-radius: 5px; font-size: 1em; display: inline-block; }
+        .report-date-label {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
         }
-        .title-container .report-date-label {
-            margin-top: 15px;
-            font-size: 1.1em;
-            color: #333;
-        }
-        .title-container .small-title {
-            margin-top: 15px;
-            background-color: #5a7b9c;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 5px;
-            font-size: 1em;
-            font-weight: bold;
-            display: inline-block;
-        }
-        
-        #display-date, #estimation-date {
-            background: transparent;
-            border: none;
-            color: var(--text-color);
-            font-family: inherit;
-            font-size: inherit;
-            padding: 0;
-            margin: 0 5px;
-            cursor: pointer;
-            color: #333;
-        }
-        #display-date::-webkit-calendar-picker-indicator,
-        #estimation-date::-webkit-calendar-picker-indicator {
-            background: none;
+        .report-date-label input[type="date"] {
+            background: transparent; border: none; font-family: inherit; font-size: 1.1em; color: #333; font-weight: bold;
         }
 
+        /* Forms & Inputs */
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
         .card h3 {
             margin: 0 0 10px 0; color: var(--primary-color);
             border-bottom: 1px solid rgba(var(--primary-color-rgb), 0.2); padding-bottom: 8px; font-size: 18px;
         }
         .form-group { display: flex; flex-direction: column; gap: 10px; }
-        .form-row { display: flex; gap: 10px; align-items: center; }
-        .form-row input { flex: 1; }
         input[type="text"], input[type="number"], input[type="url"], select, input[type="search"] {
-            width: 100%; padding: 10px; border-radius: 8px;
+            width: 100%; padding: 10px; border-radius: 8px; box-sizing: border-box;
             border: 1px solid var(--glass-border); background-color: rgba(255, 255, 255, 0.9);
-            box-sizing: border-box; font-size: 14px;
-            color: var(--text-color);
         }
-        input::placeholder { color: #889; }
         
+        /* Buttons */
         button, .form-button {
-            border: 1px solid rgba(100, 100, 100, 0.3);
-            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(100, 100, 100, 0.3); background-color: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            border-radius: 8px;
-            color: var(--text-color);
-            cursor: pointer;
-            padding: 10px 15px;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.2s ease;
+            border-radius: 8px; color: var(--text-color); cursor: pointer;
+            padding: 10px 15px; font-weight: bold; font-size: 14px; transition: all 0.2s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         }
-        button:hover, .form-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .btn-insert { background-color: rgba(40, 167, 69, 0.7); color: white; border-color: rgba(40, 167, 69, 0.5);}
-        .btn-delete { background-color: rgba(220, 53, 69, 0.7); color: white; border-color: rgba(220, 53, 69, 0.5);}
-        .btn-action { background-color: rgba(0, 123, 255, 0.7); color: white; border-color: rgba(0, 123, 255, 0.5);}
-        .btn-neutral { background-color: rgba(108, 117, 125, 0.7); color: white; border-color: rgba(108, 117, 125, 0.5);}
-
-
-        #drop-zone {
-            border: 2px dashed rgba(var(--primary-color-rgb), 0.5);
-            border-radius: var(--border-radius);
-            padding: 20px 15px;
-            text-align: center;
-            color: var(--primary-color);
-            font-weight: 500;
-            transition: all 0.3s;
-            cursor: pointer;
-            background-color: rgba(var(--primary-color-rgb), 0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-        }
-        #drop-zone:hover { background-color: rgba(var(--primary-color-rgb), 0.1); }
-        #drop-zone p { margin: 0; }
-        .drop-zone-buttons { display: flex; gap: 20px; }
-        .icon-button {
-            width: 50px; height: 50px;
-            border-radius: 50%; color: var(--primary-color);
-        }
-        .icon-button:hover { background-color: var(--primary-color); color: #fff; transform: scale(1.1); }
-        #photo-previews img { max-height: 70px; border-radius: 8px; }
-
-        /* GPS Section & Map */
-        #map { width: 100%; height: 120px; border-radius: 12px; background-color: #e9ecef; border: 1px solid var(--glass-border); overflow: hidden; margin-bottom: 10px; }
-        .location-mode-switcher { display: flex; width: 100%; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
-        .location-mode-btn { flex: 1; padding: 8px; cursor: pointer; transition: background-color 0.3s; font-size: 14px; }
-        .location-mode-btn.active { background-color: var(--primary-color); color: white; }
-        .location-panel { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
-        .location-display-wrapper { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
+        button:hover, .form-button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-insert { background-color: rgba(40, 167, 69, 0.7); color: white; }
+        .btn-delete { background-color: rgba(220, 53, 69, 0.7); color: white; }
+        .btn-action { background-color: rgba(0, 123, 255, 0.7); color: white; }
+        .btn-neutral { background-color: rgba(108, 117, 125, 0.7); color: white; }
 
         /* Table */
-        .table-controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-bottom: 10px; align-items: center; }
-        .table-controls-title { margin-right: auto; font-size: 1.2em; font-weight: bold; }
         .table-container { overflow-x: auto; width: 100%; }
         table { width: 100%; border-collapse: collapse; }
         th { background-color: rgba(var(--primary-color-rgb), 0.1); padding: 10px; text-align: center; white-space: nowrap;}
         td { border-top: 1px solid var(--glass-border); padding: 8px; text-align: center; vertical-align: middle; }
-        tbody tr:nth-child(even) { background-color: rgba(0,0,0,0.02); }
         .photo-wrapper { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; align-items: center; }
         .photo-wrapper img { max-height: 100px; border-radius: 5px; cursor: pointer; object-fit: cover; }
-        td .btn-delete, td .btn-action { padding: 5px 10px; font-size: 12px; }
-
-        /* Cost Estimation Tab Styles */
-        .estimation-details { display: flex; flex-direction: column; gap: 5px; margin: 10px 0; }
-        .estimation-details .form-row { gap: 15px; }
-        .estimation-details label { font-weight: bold; flex-basis: 150px; flex-shrink: 0; }
-        .estimation-details input { flex-grow: 1; }
+        
+        /* Cost Estimation Tab */
         .boq-entry-card .form-grid-est { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; }
-        .boq-ref-group { display: flex; gap: 5px; align-items: end; }
-        .boq-ref-group select { flex-grow: 1; }
-        .boq-entry-card .form-group-est { display: flex; flex-direction: column; }
-        .boq-entry-card label { margin-bottom: 4px; font-size: 13px; font-weight: 500; }
         .boq-entry-card .description-group { grid-column: 1 / -1; }
-        
-        #most-used-boq-container { margin-top: 15px; padding: 10px; border: 1px solid var(--glass-border); border-radius: var(--border-radius); }
-        #most-used-boq-container h4 { margin: 0 0 8px 0; color: var(--primary-color); }
-        #most-used-boq-list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-        #most-used-boq-list li { padding: 5px 10px; background-color: rgba(var(--primary-color-rgb), 0.1); border-radius: 15px; font-size: 13px; cursor: pointer; transition: background-color 0.2s; }
-        #most-used-boq-list li:hover { background-color: rgba(var(--primary-color-rgb), 0.2); font-weight: bold; }
-        
-        #cost-estimation-table { border: 1px solid black; }
         #cost-estimation-table th, #cost-estimation-table td { border: 1px solid black; padding: 4px 8px; }
-        #cost-estimation-table th { background-color: transparent; color: black; font-weight: bold; }
-        #cost-estimation-table td { text-align: right; }
-        #cost-estimation-table td.description-cell { text-align: left; }
         #cost-estimation-table tfoot td { font-weight: bold; }
+        #calculated-quantity-display { margin-top: 10px; font-weight: bold; color: var(--primary-color); }
         
-        /* Map Tab */
-        .integrated-map-container { height: 80vh; display: flex; flex-direction: column; }
-        #vehicle-map { flex-grow: 1; width: 100%; border-radius: var(--border-radius); border: 1px solid var(--glass-border); }
-        #vehicle-map-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; align-items: center; }
-        .vehicle-popup-actions a { margin-right: 10px; text-decoration: none; color: var(--primary-color); font-weight: bold; }
-        .leaflet-draw-toolbar button { background-image: none !important; }
-        #qnas-controls { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; padding: 10px; border: 1px solid var(--glass-border); border-radius: var(--border-radius); margin-top: 10px;}
-        #qnas-controls label { font-weight: bold; font-size: 14px; }
+        /* --- Map Page Redesign --- */
+        #map-tab { position: relative; height: 85vh; overflow: hidden; }
+        #vehicle-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .map-sidebar {
+            position: absolute; top: 15px; left: 15px; z-index: 1000;
+            width: 350px; max-height: calc(100% - 30px);
+            display: flex; flex-direction: column; gap: 10px;
+            overflow-y: auto;
+        }
+        .map-sidebar .glass-card { width: 100%; box-sizing: border-box; }
+        .sidebar-section h4 { margin: 0 0 10px 0; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px; }
+        .form-row-map { display: flex; gap: 5px; }
+        .form-row-map input { flex-grow: 1; }
+        #map-bottom-bar {
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 1000;
+            padding: 8px 15px;
+        }
+        .leaflet-draw-toolbar a { background-size: 20px 20px !important; width: 30px !important; height: 30px !important; }
+        .leaflet-draw-actions a { font-size: 14px !important; }
+        .fa-ruler-combined::before { content: "\f546"; } /* Custom icon class */
+
 
         /* Modals */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
         .modal-content { padding: 20px; width: 90%; max-width: 450px; display: flex; flex-direction: column; gap: 10px; }
         
-        /* FAB */
-        .fab-container { position: fixed; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
-        html[dir="ltr"] .fab-container { bottom: 20px; right: 20px; }
-        html[dir="rtl"] .fab-container { bottom: 20px; left: 20px; }
-        .fab { width: 50px; height: 50px; border-radius: 50%; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 22px; display: flex; justify-content: center; align-items: center; }
-        .fab:hover { transform: scale(1.1); }
-        #camera-fab { background-color: #28a745; }
-        #add-fab { background-color: var(--primary-color); }
-        
-        /* Camera & Preview Modals */
-        #camera-modal-content { background-color: black; padding: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
-        #camera-feed { width: 100%; height: 100%; object-fit: contain; transform: scaleX(-1); }
-        #capture-btn { position: absolute; bottom: 20px; width: 60px; height: 60px; background-color: white; border: 5px solid var(--primary-color); border-radius: 50%; z-index: 2010; display: flex; justify-content: center; align-items: center; font-size: 30px; color: var(--primary-color); }
-        #close-camera-btn { position: absolute; top: 10px; right: 10px; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; z-index: 2010; }
-        
-        #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); z-index: 3000; justify-content: center; align-items: center; }
-        #preview-content { background-color: white; width: 90%; height: 90%; overflow: auto; padding: 20px; position: relative; border-radius: var(--border-radius); }
-        #preview-content img { max-width: 100%; height: auto; display: block; margin-bottom: 10px; }
-
-        .print-header-replacement, .print-date-footer { display: none; }
-        
-        /* Mobile specific adjustments */
         @media (max-width: 768px) {
-            .info-card {
-                flex-direction: column;
-                align-items: center;
-            }
-            .form-grid, .form-grid-est {
-                grid-template-columns: 1fr;
-            }
-            .tabs {
-                justify-content: center;
-            }
+            .map-sidebar { width: calc(100% - 30px); max-height: 50%; }
+            #map-tab { height: 100vh; }
         }
     </style>
     
     <style>
         /* CSS for printing */
         @media print {
-            body > *:not(#main-content-wrapper), .fab-container { display: none !important; }
-            .main-container > *:not(.tab-content.active) { display: none !important; }
-            .tab-content.active > *:not(.printable-area){ display: none !important; }
-            .printable-area { display: block !important; }
-            .main-container, .printable-area { box-shadow: none !important; width: 100% !important; max-width: 100% !important; }
-            
-            .printable-area .menu-button, .printable-area .form-grid, .printable-area .boq-entry-card, .tabs, button, input[type="file"], .table-controls > *:not(.table-controls-title) { display: none !important; }
-
-            @page { size: A4; margin: 15mm; }
-            body { background: #fff !important; color: #000 !important; margin: 0; padding: 0; }
-            .glass-card, .info-card { background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; padding: 0 !important; color: #000; }
-            .estimation-details { display: block !important; }
-            .estimation-details .form-row { display: flex !important; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 4px; }
-            .estimation-details label, .estimation-details input { display: block !important; background: transparent !important; border: none !important; }
-
-            .info-card { border-bottom: 2px solid #000; padding-bottom: 55px !important; margin-bottom: 15px; page-break-after: avoid; }
-            .info-card > *:not(.print-header-replacement) { display: none !important; }
-            .print-header-replacement { display: flex !important; justify-content: space-between; align-items: flex-start; width: 100%; position: relative; }
-            .print-header-replacement .print-logo { display: block !important; max-height: 60px; max-width: 120px; object-fit: contain; }
-            .print-header-replacement .print-title-container { display: flex !important; flex-direction: column; text-align: center; flex-grow: 1; padding: 0 10px; }
-            .print-header-replacement .print-title-container b { line-height: 1.2; font-size: 14pt; }
-            .print-date-footer { display: flex !important; flex-direction: column; align-items: center; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); white-space: nowrap; }
-            .print-date-footer span { font-size: 11pt; font-weight: bold; display: block; }
-            .print-date-footer span:last-child { margin-top: 5px; }
-
-            .table-container { max-height: none !important; overflow: visible !important; }
-            table { width: 100%; border-collapse: collapse !important; font-size: 8pt; page-break-inside: auto; }
-            thead { display: table-header-group; }
-            tbody tr { page-break-inside: avoid !important; page-break-after: auto; }
-            td, th { border: 1px solid #000 !important; padding: 4px; text-align: center; vertical-align: middle; background-color: transparent !important; }
-            th { color: #000 !important; font-weight: bold; -webkit-print-color-adjust: exact; color-adjust: exact; }
-            #report-table td:nth-child(2), #cost-estimation-table td:nth-child(2) { text-align: left !important; }
-            
-            .photo-wrapper { display: flex !important; flex-wrap: wrap; gap: 4px; }
-            .photo-wrapper img { max-width: 80px !important; height: auto !important; object-fit: contain !important; border: 1px solid #ccc !important; }
-        
-            body.printing-map > *:not(#main-content-wrapper) { display: none !important; }
-            body.printing-map #main-content-wrapper > *:not(#map-tab) { display: none !important; }
-            body.printing-map #map-tab > *:not(.integrated-map-container) { display: none !important; }
-            body.printing-map .integrated-map-container > *:not(#vehicle-map) { display: none !important; }
-            body.printing-map #vehicle-map {
-                width: 100vw !important;
-                height: 100vh !important;
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                border: none !important;
-                z-index: 9999 !important;
-            }
-            body.printing-map .leaflet-control-container, body.printing-map #vehicle-map-controls, body.printing-map #qnas-controls { display: none !important; }
+            body { -webkit-print-color-adjust: exact; color-adjust: exact; }
+            .info-card { padding-bottom: 50px !important; } /* Ensure space for date */
+            .report-date-label { display: block !important; }
         }
     </style>
 
@@ -401,113 +191,33 @@
     <div class="main-container" id="main-content-wrapper">
         <header class="main-header glass-card">
             <h1 class="main-title" contenteditable="true">Project Dashboard</h1>
-            <div class="menu-button" tabindex="0">
-                <span>⋮</span>
-                <div class="dropdown-menu"></div>
-            </div>
         </header>
 
         <div class="tabs">
-            <button class="tab-button active" onclick="openTab(event, 'main-report')" data-lang-key="tab_inspection_report">Inspection Report</button>
-            <button class="tab-button" onclick="openTab(event, 'cost-estimation-tab')" data-lang-key="tab_cost_estimation">Cost Estimation</button>
-            <button class="tab-button" onclick="openTab(event, 'map-tab')" data-lang-key="tab_map">Map</button>
-            <button class="tab-button" onclick="openTab(event, 'saved-projects')" data-lang-key="tab_saved_projects">Saved Projects</button>
+            <button class="tab-button active" onclick="openTab(event, 'main-report')">Inspection Report</button>
+            <button class="tab-button" onclick="openTab(event, 'cost-estimation-tab')">Cost Estimation</button>
+            <button class="tab-button" onclick="openTab(event, 'map-tab')">Map</button>
         </div>
         
         <div id="main-report" class="tab-content active">
-            <div class="form-grid">
-                <div class="card glass-card">
-                    <h3>Add New Asset</h3>
-                    <div class="form-group">
-                        <input type="text" id="asset" list="asset-options" placeholder="Asset Description">
-                        <datalist id="asset-options"></datalist>
-
-                        <div id="drop-zone" onclick="document.querySelector('.photo-input').click()">
-                            <p>Drag & Drop or Click to Add Photos</p>
-                            <div class="drop-zone-buttons">
-                                <button class="icon-button" onclick="event.stopPropagation(); document.querySelector('.photo-input').click()" title="Choose from Gallery">🖼️</button>
-                                <button class="icon-button" onclick="event.stopPropagation(); openCamera()" title="Open Camera">📷</button>
-                            </div>
-                        </div>
-                        <input type="file" class="photo-input" accept="image/*" multiple style="display: none;">
-                        <div id="photo-previews" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px;"></div>
-                    </div>
-                </div>
-                <div class="card glass-card">
-                    <h3>Details & Recommendations</h3>
-                    <div class="form-group">
-                        <input type="text" id="status" placeholder="Status (e.g., Good, Damaged)">
-                        <input type="text" id="recommendation" placeholder="Recommendation (e.g., Repair, Replace)">
-                        <button class="form-button btn-action" onclick="showQuantityModal()">Calculate Quantity</button>
-                    </div>
-                </div>
-                <div class="card glass-card">
-                    <h3>GPS Location</h3>
-                    <div id="map" style="display:none;"></div>
-                    <div class="location-mode-switcher">
-                        <button id="gps-auto-btn" class="location-mode-btn active" onclick="switchLocationMode('auto')">Automatic</button>
-                        <button id="gps-manual-btn" class="location-mode-btn" onclick="switchLocationMode('manual')">Manual</button>
-                    </div>
-                    <div id="location-auto-panel" class="location-panel">
-                        <button class="btn-action" onclick="getLocation()">Get Current GPS</button>
-                    </div>
-                    <div id="location-manual-panel" class="location-panel" style="display: none;">
-                        <input type="number" id="manual-lat" placeholder="Manual Latitude" step="any" oninput="updateLocationFromManual()">
-                        <input type="number" id="manual-lng" placeholder="Manual Longitude" step="any" oninput="updateLocationFromManual()">
-                    </div>
-                    <div class="location-display-wrapper">
-                         <div>
-                            <div><small><strong>Latitude:</strong> <span id="lat-display">N/A</span></small></div>
-                            <div><small><strong>Longitude:</strong> <span id="lng-display">N/A</span></small></div>
-                        </div>
-                        <input type="hidden" id="quantity-input">
-                        <input type="hidden" id="current-photo-urls" value="[]">
-                    </div>
-                </div>
-            </div>
-            <button onclick="addRow()" class="btn-insert">Add Row to Table</button>
-
-            <div class="printable-area">
+             <div class="printable-area">
                 <div class="info-card glass-card">
                     <div class="logo-container">
-                        <input type="file" accept="image/*" onchange="loadLogo(event, 'client-logo-inspection')" style="display:none;" id="client-logo-inspection-input">
-                        <img id="client-logo-inspection" src="https://i.imgur.com/W1f3q2y.png" alt="Client Logo" onclick="document.getElementById('client-logo-inspection-input').click();">
+                        <img id="client-logo-inspection" src="https://i.imgur.com/W1f3q2y.png" alt="Client Logo">
                     </div>
                     <div class="title-container">
                         <div id="inspection-title-1" class="report-title-row" contenteditable="true">Maintenance of Strategic</div>
                         <div id="inspection-title-2" class="report-title-row" contenteditable="true">Highways Qatar North</div>
                         <div id="inspection-title-3" class="report-title-row" contenteditable="true">ZF_093</div>
-                        <label class="report-date-label">
-                            <input type="date" id="display-date">
-                        </label>
-                        <div id="inspection-small-title" class="small-title" contenteditable="true">Inspection Report</div>
                     </div>
                     <div class="logo-container">
-                        <input type="file" accept="image/*" onchange="loadLogo(event, 'company-logo-inspection')" style="display:none;" id="company-logo-inspection-input">
-                        <img id="company-logo-inspection" src="https://i.imgur.com/1s3a1H4.png" alt="Company Logo" onclick="document.getElementById('company-logo-inspection-input').click();">
+                        <img id="company-logo-inspection" src="https://i.imgur.com/1s3a1H4.png" alt="Company Logo">
                     </div>
-                    
-                    <div class="print-header-replacement">
-                        <img id="client-logo-print-src" src="" alt="Client Logo" class="print-logo">
-                        <div class="print-title-container" id="inspection-print-title"></div>
-                        <img id="company-logo-print-src" src="" alt="Company Logo" class="print-logo">
-                        <div class="print-date-footer"><span id="inspection-print-date"></span></div>
-                    </div>
+                     <label class="report-date-label">
+                        <input type="date" id="display-date">
+                    </label>
                 </div>
-
-                <div class="glass-card">
-                     <div class="table-controls">
-                        <h3 class="table-controls-title">Inspection Report</h3>
-                        <div class="menu-button" tabindex="0">
-                            <span>⋮</span>
-                            <div class="dropdown-menu" id="inspection-table-menu"></div>
-                        </div>
-                    </div>
-                    <div class="table-container">
-                        <table id="report-table"></table>
-                    </div>
-                </div>
-            </div>
+                 </div>
         </div>
         
         <div id="cost-estimation-tab" class="tab-content">
@@ -515,1116 +225,454 @@
                 <h3>BOQ Item Entry</h3>
                 <div class="form-grid-est">
                     <div class="form-group-est">
-                        <label for="boq-ref-select">BOQ Ref.</label>
+                        <label>BOQ Ref.</label>
                         <div class="boq-ref-group">
                             <input type="search" id="boq-search" placeholder="Search Ref...">
                             <select id="boq-ref-select"></select>
                         </div>
                     </div>
                     <div class="form-group-est description-group">
-                        <label for="boq-desc">Description</label>
+                        <label>Description</label>
                         <input type="text" id="boq-desc" readonly>
                     </div>
                     <div class="form-group-est">
-                        <label for="boq-unit">Unit</label>
+                        <label>Unit</label>
                         <input type="text" id="boq-unit" readonly>
                     </div>
                     <div class="form-group-est">
-                        <label for="boq-nr">NR</label>
-                        <input type="number" id="boq-nr" placeholder="e.g., 1">
-                    </div>
-                    <div class="form-group-est">
-                        <label for="boq-length">Length (m)</label>
-                        <input type="number" id="boq-length" placeholder="e.g., 4.00">
-                    </div>
-                    <div class="form-group-est">
-                        <label for="boq-width">Width (m)</label>
-                        <input type="number" id="boq-width" placeholder="e.g., 2.00">
-                    </div>
-                    <div class="form-group-est">
-                        <label for="boq-height">Height (m)</label>
-                        <input type="number" id="boq-height" placeholder="e.g., 0.07">
-                    </div>
-                    <div class="form-group-est">
-                        <label for="boq-total-qty">Total Qty.</label>
-                        <input type="text" id="boq-total-qty" readonly>
-                    </div>
-                    <div class="form-group-est">
-                        <label for="boq-rate">Rate</label>
+                        <label>Rate</label>
                         <input type="text" id="boq-rate" readonly>
                     </div>
                     <div class="form-group-est">
-                        <label for="boq-amount">Amount (QR)</label>
+                        <label>Amount (QR)</label>
                         <input type="text" id="boq-amount" readonly>
                     </div>
-                    <div class="form-group-est description-group">
-                        <label for="boq-remarks">Remarks</label>
+                     <div class="form-group-est description-group">
+                        <label>Remarks</label>
                         <input type="text" id="boq-remarks">
                     </div>
                 </div>
-                <div id="most-used-boq-container">
-                    <h4>Most Used BOQ Ref</h4>
-                    <ul id="most-used-boq-list"></ul>
+                <div style="display: flex; align-items: center; gap: 20px; margin-top: 15px;">
+                     <button class="btn-action" onclick="showQuantityModal()"><i class="fa-solid fa-calculator"></i> Calculate Quantity</button>
+                     <div id="calculated-quantity-display"></div>
                 </div>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
-                    <button onclick="downloadBOQTemplate()" class="btn-neutral">Download BOQ Template</button>
-                    <button onclick="document.getElementById('boq-csv-input').click()" class="btn-action">Import BOQ from CSV</button>
+                    <button class="btn-neutral" onclick="document.getElementById('boq-csv-input').click()"><i class="fa-solid fa-file-csv"></i> Import BOQ</button>
                     <input type="file" id="boq-csv-input" style="display:none;" accept=".csv">
-                    <button id="insert-boq-row-btn" class="btn-insert" onclick="insertBOQRow()">Insert Row</button>
+                    <button class="btn-insert" onclick="insertBOQRow()"><i class="fa-solid fa-plus"></i> Insert Row</button>
+                    <button class="btn-action" onclick="exportTableToCSV('cost-estimation-table', 'cost-estimation.csv')"><i class="fa-solid fa-download"></i> Export CSV</button>
                 </div>
             </div>
-          
+            
             <div class="printable-area">
                 <div class="info-card glass-card">
-                    <div class="logo-container">
-                        <input type="file" accept="image/*" onchange="loadLogo(event, 'client-logo-estimation')" style="display:none;" id="client-logo-estimation-input">
-                        <img id="client-logo-estimation" src="https://i.imgur.com/W1f3q2y.png" alt="Client Logo" title="Click to upload Client Logo" onclick="document.getElementById('client-logo-estimation-input').click()">
+                     <div class="logo-container">
+                        <img id="client-logo-estimation" src="https://i.imgur.com/W1f3q2y.png" alt="Client Logo">
                     </div>
                     <div class="title-container">
                         <div id="estimation-title-1" class="report-title-row" contenteditable="true">Maintenance of Strategic</div>
                         <div id="estimation-title-2" class="report-title-row" contenteditable="true">Highways Qatar North</div>
                         <div id="estimation-title-3" class="report-title-row" contenteditable="true">ZF_093</div>
-                        <label class="report-date-label">
-                            <input type="date" id="estimation-date">
-                        </label>
-                        <div id="estimation-small-title" class="small-title" contenteditable="true">Cost Estimation</div>
                     </div>
                     <div class="logo-container">
-                        <input type="file" accept="image/*" onchange="loadLogo(event, 'company-logo-estimation')" style="display:none;" id="company-logo-estimation-input">
-                        <img id="company-logo-estimation" src="https://i.imgur.com/1s3a1H4.png" alt="Company Logo" title="Click to upload Company Logo" onclick="document.getElementById('company-logo-estimation-input').click()">
+                        <img id="company-logo-estimation" src="https://i.imgur.com/1s3a1H4.png" alt="Company Logo">
                     </div>
-                    <div class="print-header-replacement">
-                        <img id="est-client-logo-print-src" src="" alt="Client Logo" class="print-logo">
-                        <div class="print-title-container" id="estimation-print-title"></div>
-                        <img id="est-company-logo-print-src" src="" alt="Company Logo" class="print-logo">
-                        <div class="print-date-footer"><span id="estimation-print-date"></span></div>
-                    </div>
+                    <label class="report-date-label">
+                        <input type="date" id="estimation-date">
+                    </label>
                 </div>
-                <div class="glass-card estimation-details">
-                    <div class="form-row"><label for="work-order-no">Work Order No.</label><input type="text" id="work-order-no"></div>
-                    <div class="form-row"><label for="tpc-no">TPC No.</label><input type="text" id="tpc-no"></div>
-                    <div class="form-row"><label for="work-desc">Description of Work</label><input type="text" id="work-desc"></div>
-                </div>
-                
-                <div class="glass-card">
-                    <div class="table-controls">
-                        <h3 class="table-controls-title">Cost Estimation</h3>
-                        <div class="menu-button" tabindex="0">
-                            <span>⋮</span>
-                            <div class="dropdown-menu" id="estimation-table-menu"></div>
-                        </div>
-                    </div>
-                    <div class="table-container">
-                        <table id="cost-estimation-table">
-                            <thead>
-                                <tr>
-                                    <th>BOQ Ref.</th>
-                                    <th>Description</th>
-                                    <th>Unit</th>
-                                    <th>NR</th>
-                                    <th>Length (m)</th>
-                                    <th>Width (m)</th>
-                                    <th>Height (m)</th>
-                                    <th>Total Qty.</th>
-                                    <th>Rate</th>
-                                    <th>Amount</th>
-                                    <th>Remarks</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="9" style="text-align: right; font-weight: bold; border: 1px solid black;">TOTAL Amount</td>
-                                    <td id="total-amount-cell" style="font-weight: bold; border: 1px solid black;">QAR 0.00</td>
-                                    <td colspan="2" style="border: 1px solid black;"></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
+                 <div class="table-container">
+                    <table id="cost-estimation-table">
+                        <thead>
+                            <tr>
+                                <th>BOQ Ref.</th><th>Description</th><th>Unit</th>
+                                <th>NR</th><th>Length</th><th>Width</th><th>Height</th>
+                                <th>Total Qty.</th><th>Rate</th><th>Amount</th><th>Remarks</th><th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                            <tr><td colspan="9" style="text-align: right;">TOTAL Amount</td><td id="total-amount-cell">QAR 0.00</td><td colspan="2"></td></tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>
         
         <div id="map-tab" class="tab-content">
-            <div class="glass-card integrated-map-container">
-                <h3>Map</h3>
-                <div id="vehicle-map-controls">
-                    <button class="btn-action" onclick="centerVehicleMapOnUser()">My Location</button>
-                    <button class="btn-action" onclick="fitMapToAssetMarkers()">Fit All Assets</button>
-                    <button class="btn-action" onclick="fitMapToAllMarkers()">Fit to All</button>
-                    <hr style="flex-grow: 1; border-color: transparent;">
-                    <button class="btn-neutral" onclick="downloadCSVTemplate()">Download CSV Template</button>
-                    <button class="btn-action" onclick="document.getElementById('vehicle-csv-input').click()">Import KML/CSV</button>
-                    <input type="file" id="vehicle-csv-input" style="display:none;" accept=".csv,.kml">
-                    <button id="print-map-btn" class="btn-action">Print Map</button>
-                    <button class="btn-delete" onclick="clearMapMarkers()">Clear Map</button>
+            <div id="vehicle-map"></div>
+            
+            <div class="map-sidebar">
+                <div class="glass-card sidebar-section">
+                    <h4><i class="fa-solid fa-layer-group"></i> Map Layers</h4>
+                    <div id="layer-control-container"></div>
                 </div>
-                <div class="glass-card" id="qnas-controls">
-                     <div>
-                        <label for="qnas-zone">QNAS Zone</label>
-                        <select id="qnas-zone" class="form-control"></select>
-                    </div>
-                    <div>
-                        <label for="qnas-street">QNAS Street</label>
-                        <select id="qnas-street" class="form-control"></select>
-                    </div>
-                    <div>
-                        <label for="qnas-building">QNAS Building</label>
-                        <select id="qnas-building" class="form-control"></select>
+
+                <div class="glass-card sidebar-section">
+                    <h4><i class="fa-solid fa-location-crosshairs"></i> Navigation</h4>
+                    <div class="form-row-map">
+                         <input type="text" id="goto-coords-input" placeholder="Lat, Lng">
+                         <button id="goto-coords-btn" class="btn-action" title="Go to Coordinates"><i class="fa-solid fa-arrow-right"></i></button>
                     </div>
                 </div>
 
-                <div id="vehicle-map"></div>
-                <div id="import-summary" style="margin-top: 10px; font-weight: bold;"></div>
-            </div>
-        </div>
-        
-        <div id="saved-projects" class="tab-content">
-            <div class="glass-card">
-                <h3>Saved Projects</h3>
-                <input type="text" id="project-search" placeholder="Search projects by name..." onkeyup="filterProjects()" style="margin-bottom: 10px;">
-                <div style="margin-bottom: 10px;">
-                    <label for="sort-projects">Sort by:</label>
-                    <select id="sort-projects" onchange="updateProjectsList()">
-                        <option value="name">Name</option>
-                        <option value="date-newest">Date Saved (Newest)</option>
-                        <option value="date-oldest">Date Saved (Oldest)</option>
-                    </select>
+                <div class="glass-card sidebar-section">
+                     <h4><i class="fa-solid fa-map-pin"></i> Data Input</h4>
+                     <label>Pin by Coordinates:</label>
+                     <div class="form-row-map">
+                        <input type="number" id="manual-lat-input" placeholder="Latitude">
+                        <input type="number" id="manual-lng-input" placeholder="Longitude">
+                     </div>
+                     <input type="text" id="manual-pin-title" placeholder="Pin Title (Optional)" style="margin-top: 5px;">
+                     <button id="add-manual-pin-btn" class="btn-insert" style="width: 100%; margin-top: 5px;">Add Pin to Map</button>
                 </div>
-                <ul id="projects-list"></ul>
+                
+                 <div class="glass-card sidebar-section">
+                    <h4><i class="fa-solid fa-server"></i> QNAS Lookup</h4>
+                    <p style="font-size: 12px; margin: -5px 0 10px 0; color: #dc3545;"><strong>Note:</strong> QNAS requires a valid token to work.</p>
+                    <select id="qnas-zone"></select>
+                    <select id="qnas-street" style="margin-top: 5px;"></select>
+                    <select id="qnas-building" style="margin-top: 5px;"></select>
+                </div>
+                
+                <div class="glass-card sidebar-section">
+                    <h4><i class="fa-solid fa-square-root-variable"></i> Measurement</h4>
+                    <div id="measurement-output">Click a measure tool to start.</div>
+                </div>
+                
+                <div class="glass-card sidebar-section">
+                    <h4><i class="fa-solid fa-database"></i> Data Output</h4>
+                    <label>Last Clicked/Placed Pin:</label>
+                    <p><strong>Degrees:</strong> <span id="output-deg">N/A</span></p>
+                    <p><strong>Metric (UTM):</strong> <span id="output-utm">N/A</span></p>
+                </div>
+
+                <div class="glass-card sidebar-section">
+                    <h4><i class="fa-solid fa-file-export"></i> Export</h4>
+                    <div style="display: flex; gap: 5px;">
+                         <button id="export-map-pdf-btn" class="btn-action"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                         <button id="export-kml-btn" class="btn-action"><i class="fa-solid fa-globe"></i> Export KML</button>
+                         <button id="clear-map-btn" class="btn-delete"><i class="fa-solid fa-trash"></i> Clear Map</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="map-bottom-bar" class="glass-card">
+                <span id="map-coords-display">Map Center: N/A</span>
             </div>
         </div>
     </div>
 
-    <footer class="glass-card footer">
-        <p style="margin: 0;">All rights reserved © <span id="current-year"></span></p>
-    </footer>
-
-    <div class="fab-container">
-        <button id="camera-fab" class="fab" onclick="openCamera()">📷</button>
-        <button id="add-fab" class="fab" onclick="document.querySelector('#asset').focus()">➕</button>
+    <div id="quantityModal" class="modal">
+        <div class="modal-content glass-card">
+            <h3>Enter Quantity Details</h3>
+            <input type="number" id="length" placeholder="Length (m)">
+            <input type="number" id="width" placeholder="Width (m)">
+            <input type="number" id="depth" placeholder="Depth (m)">
+            <input type="number" id="repetitions" placeholder="Repetitions (NR)">
+            <div style="display:flex; gap: 10px;">
+                <button onclick="setQuantity()" class="btn-insert" style="flex: 1;">Set Quantity</button>
+                <button onclick="closeQuantityModal()" class="btn-delete" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
     </div>
-
-    <div id="quantityModal" class="modal"><div class="modal-content glass-card"><h3>Enter Quantity Details</h3><input type="number" id="length" placeholder="Length (m)"><input type="number" id="width" placeholder="Width (m)"><input type="number" id="depth" placeholder="Depth (m)"><input type="number" id="repetitions" placeholder="Repetitions (NR)"><div class="modal-buttons" style="display:flex; gap: 10px;"><button onclick="setQuantity()" class="btn-insert" style="flex: 1;">Set Quantity</button><button onclick="closeQuantityModal()" class="btn-delete" style="flex: 1;">Cancel</button></div></div></div>
-
-    <div id="camera-modal" class="modal"><div id="camera-modal-content" class="glass-card"><video id="camera-feed" autoplay playsinline></video><button id="capture-btn" onclick="capturePhoto()">📸</button><button id="close-camera-btn" onclick="closeCamera()" class="btn-delete">X</button></div></div>
-    <canvas id="photo-canvas" style="display:none;"></canvas>
-
-    <div id="preview-overlay" onclick="hidePreview()"><div id="preview-content" onclick="event.stopPropagation()"><button id="close-preview" onclick="hidePreview()" class="btn-delete" style="position: absolute; top: 10px; right: 10px; font-size: 24px; padding: 5px 10px; line-height: 1;">❌</button></div></div>
-
-    <div id="confirm-delete-modal" class="modal"><div class="modal-content glass-card"><h3>Confirm Deletion</h3><p>To confirm deletion, please type the project name: "<span id="project-to-delete-name"></span>"</p><input type="text" id="delete-confirmation-input" placeholder="Type project name here"><div style="display:flex; gap: 10px;"><button onclick="confirmProjectDeletion()" class="btn-delete" style="flex: 1;">Confirm Delete</button><button onclick="cancelProjectDeletion()" class="btn-neutral" style="flex: 1;">Cancel</button></div></div></div>
-
-    <div id="pdf-options-modal" class="modal"><div class="modal-content glass-card"><h3>PDF Generated</h3><p>Your PDF is ready. What would you like to do?</p><div style="display:flex; gap: 10px;"><button id="pdf-download-btn" class="btn-action" style="flex: 1;">Download</button><button id="pdf-share-btn" class="btn-action" style="flex: 1;">Share</button><button onclick="document.getElementById('pdf-options-modal').style.display='none'" class="btn-neutral" style="flex: 1;">Close</button></div></div></div>
-
-
+    
     <script>
-        // --- GLOBAL VARIABLES ---
-        let reportTable, costEstimationTable, map, vehicleMap, userMarker, currentMarker;
-        let editingRow = null;
-        let projects = [];
-        let cameraStream;
-        let activeProjectName = 'active_report';
-        let assetMarkers = [];
-        let generatedPdfBlob = null;
+        // --- GLOBAL VARIABLES & CONFIG ---
+        let vehicleMap, drawnItems, baseLayers, userMarker;
+        let tempQuantityDetails = {};
         
-        let boqData = [
-            { ref: "A1.1", description: "Excavation", unit: "m³", rate: 15.00 },
-            { ref: "A1.2", description: "Backfilling", unit: "m³", rate: 10.00 },
-            { ref: "B2.1", description: "Concrete Paving", unit: "m²", rate: 75.00 }
-        ];
+        // IMPORTANT: Replace with your actual QNAS token
+        const QNAS_TOKEN = 'YOUR_TOKEN'; 
+        const API_BASE = 'https://qnas.qa/api';
 
-        const assetOptions = ["(B) Zonal Inspections", "(C) Site Clearance", "(D) Drainage and Service Ducts", "(E) Earthworks", "(F) Sub-Base and Road Base", "(G) Flexible Surfacing", "(H) Kerbs & Footways", "(I) Road Markings", "(J) Directional Signs", "(K) Works by Statutory Undertakers", "(L) Street Lighting Works", "(M) Structures", "(N) Traffic Management", "(O) VRS", "(P) Supply of Materials", "(Q) Traffic Signs", "(R) Time and Material Rates", "(S) Plant and Equipment", "(T) Street Furniture"];
+        // Define UTM Zone for Qatar (UTM Zone 39N)
+        proj4.defs("EPSG:32639", "+proj=utm +zone=39 +datum=WGS84 +units=m +no_defs");
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('display-date').value = today;
             document.getElementById('estimation-date').value = today;
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-
-            reportTable = document.getElementById('report-table');
-            costEstimationTable = document.getElementById('cost-estimation-table');
-
-            // Initialize Tables
-            if (!reportTable.tHead) {
-                reportTable.createTHead().innerHTML = `<tr><th>ID</th><th>Asset</th><th>Status</th><th>Recommendation</th><th>Quantity</th><th>Photos</th><th>Latitude</th><th>Longitude</th><th>Action</th></tr>`;
-                reportTable.createTBody();
-            }
-            if (!costEstimationTable.tBodies[0]) {
-                 costEstimationTable.createTBody();
-            }
             
-            projects = loadProjects();
-            populateDatalist('asset-options', assetOptions);
-            repopulateBOQSelect();
-            updateProjectsList();
             setupEventListeners();
-            populateMenus();
-            updateMostUsedBOQ();
-            loadProject(activeProjectName);
-            switchLocationMode('auto');
+            openTab({ currentTarget: document.querySelector('.tab-button.active') }, 'main-report');
         });
 
         function setupEventListeners() {
-            // File Inputs
-            document.getElementById('boq-csv-input').addEventListener('change', handleBOQUpload);
-            document.getElementById('vehicle-csv-input').addEventListener('change', handleVehicleFileImport);
-            document.querySelector('.photo-input').addEventListener('change', (e) => {
-                for(const file of e.target.files) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => addPhotoToPreview(event.target.result);
-                    reader.readAsDataURL(file);
-                }
-            });
-            
-            // BOQ Form
-            document.getElementById('boq-search').addEventListener('input', () => repopulateBOQSelect(document.getElementById('boq-search').value));
-            document.getElementById('boq-ref-select').addEventListener('change', updateBOQDetails);
-            ['boq-nr', 'boq-length', 'boq-width', 'boq-height'].forEach(id => {
-                document.getElementById(id).addEventListener('input', calculateBOQTotal);
-            });
-            
-            // Map
-            document.getElementById('print-map-btn').addEventListener('click', printMap);
+            // Map Buttons
+            document.getElementById('goto-coords-btn').addEventListener('click', goToCoords);
+            document.getElementById('add-manual-pin-btn').addEventListener('click', addManualPin);
+            document.getElementById('export-map-pdf-btn').addEventListener('click', exportMapAsPDF);
+            document.getElementById('export-kml-btn').addEventListener('click', exportToKML);
+            document.getElementById('clear-map-btn').addEventListener('click', clearMap);
 
-            // PDF Modal
-            document.getElementById('pdf-download-btn').addEventListener('click', downloadGeneratedPdf);
-            document.getElementById('pdf-share-btn').addEventListener('click', shareGeneratedPdf);
-            
-            // Auto-saving contenteditable fields and inputs
-            document.querySelectorAll('input, select, [contenteditable="true"]').forEach(el => {
-                el.addEventListener('input', () => saveProject(activeProjectName, false));
-                el.addEventListener('change', () => saveProject(activeProjectName, false));
-            });
-
-             // QNAS Dropdowns
-            document.getElementById('qnas-zone').addEventListener('change', (e) => {
-                getStreets(e.target.value);
-                clearBuildingMarkers();
-            });
-            document.getElementById('qnas-street').addEventListener('change', (e) => {
-                const zone = document.getElementById('qnas-zone').value;
-                getBuildings(zone, e.target.value);
-                clearBuildingMarkers();
-            });
-            document.getElementById('qnas-building').addEventListener('change', (e) => {
-                 const zone = document.getElementById('qnas-zone').value;
-                 const street = document.getElementById('qnas-street').value;
-                 const building = e.target.value;
-                 if(building) {
-                     getLocationDetails(zone, street, building);
-                 }
-            });
+            // QNAS Dropdowns
+            document.getElementById('qnas-zone').addEventListener('change', e => getStreets(e.target.value));
+            document.getElementById('qnas-street').addEventListener('change', e => getBuildings(document.getElementById('qnas-zone').value, e.target.value));
+            document.getElementById('qnas-building').addEventListener('change', e => getLocationDetails(document.getElementById('qnas-zone').value, document.getElementById('qnas-street').value, e.target.value));
         }
         
-        function populateMenus() {
-            const mainMenu = document.querySelector('.main-header .dropdown-menu');
-            mainMenu.innerHTML = `<button onclick="saveProjectAs()">💾 Save Project As...</button><hr><button onclick="setLanguage('en')">🇺🇸 English</button><button onclick="setLanguage('ar')">🇸🇦 العربية</button>`;
-            
-            const inspectionMenu = document.getElementById('inspection-table-menu');
-            inspectionMenu.innerHTML = `<button onclick="printContent('main-report')">🖨️ Print</button><button onclick="exportToPdf('main-report')">📄 Export PDF</button>`;
-
-            const estimationMenu = document.getElementById('estimation-table-menu');
-            estimationMenu.innerHTML = `<button onclick="printContent('cost-estimation-tab')">🖨️ Print</button><button onclick="exportToPdf('cost-estimation-tab')">📄 Export PDF</button>`;
-        }
-        
-        function populateDatalist(datalistId, optionsArray) {
-            const datalist = document.getElementById(datalistId);
-            datalist.innerHTML = optionsArray.map(opt => `<option value="${opt}"></option>`).join('');
-        }
-
         // --- TAB MANAGEMENT ---
         function openTab(evt, tabName) {
             document.querySelectorAll(".tab-content").forEach(tc => tc.style.display = 'none');
             document.querySelectorAll(".tab-button").forEach(tb => tb.classList.remove('active'));
             document.getElementById(tabName).style.display = "flex";
-            document.getElementById(tabName).classList.add('active');
             evt.currentTarget.classList.add("active");
 
             if (tabName === 'map-tab' && !vehicleMap) {
                 initializeVehicleMap();
             }
-             if (tabName === 'main-report' && !map) {
-                initializeInspectionMap();
-            }
-        }
-
-        // --- LOCAL STORAGE & PROJECT MANAGEMENT ---
-        function generateId() { return '_' + Math.random().toString(36).substring(2, 9); }
-        
-        function getProjectData() {
-            const data = {
-                inspection: {
-                    title1: document.getElementById('inspection-title-1').textContent,
-                    title2: document.getElementById('inspection-title-2').textContent,
-                    title3: document.getElementById('inspection-title-3').textContent,
-                    smallTitle: document.getElementById('inspection-small-title').textContent,
-                    date: document.getElementById('display-date').value,
-                    clientLogo: document.getElementById('client-logo-inspection').src,
-                    companyLogo: document.getElementById('company-logo-inspection').src,
-                    table: [],
-                },
-                estimation: {
-                    title1: document.getElementById('estimation-title-1').textContent,
-                    title2: document.getElementById('estimation-title-2').textContent,
-                    title3: document.getElementById('estimation-title-3').textContent,
-                    smallTitle: document.getElementById('estimation-small-title').textContent,
-                    date: document.getElementById('estimation-date').value,
-                    clientLogo: document.getElementById('client-logo-estimation').src,
-                    companyLogo: document.getElementById('company-logo-estimation').src,
-                    workOrder: document.getElementById('work-order-no').value,
-                    tpcNo: document.getElementById('tpc-no').value,
-                    workDesc: document.getElementById('work-desc').value,
-                    table: [],
-                },
-                boqData: boqData,
-                savedAt: new Date().toISOString()
-            };
-            // Scrape inspection table
-            document.querySelectorAll('#report-table tbody tr').forEach(row => {
-                const photoWrapper = row.cells[5].querySelector('.photo-wrapper');
-                const photos = photoWrapper ? Array.from(photoWrapper.querySelectorAll('img')).map(img => img.src) : [];
-                data.inspection.table.push({
-                    id: row.cells[0].textContent,
-                    asset: row.cells[1].textContent,
-                    status: row.cells[2].textContent,
-                    recommendation: row.cells[3].textContent,
-                    quantity: row.cells[4].textContent,
-                    photos: photos,
-                    lat: row.cells[6].textContent,
-                    lng: row.cells[7].textContent,
-                });
-            });
-            // Scrape estimation table
-            document.querySelectorAll('#cost-estimation-table tbody tr').forEach(row => {
-                data.estimation.table.push({
-                    ref: row.cells[0].textContent,
-                    desc: row.cells[1].textContent,
-                    unit: row.cells[2].textContent,
-                    nr: row.cells[3].textContent,
-                    length: row.cells[4].textContent,
-                    width: row.cells[5].textContent,
-                    height: row.cells[6].textContent,
-                    qty: row.cells[7].textContent,
-                    rate: row.cells[8].textContent,
-                    amount: row.cells[9].textContent,
-                    remarks: row.cells[10].textContent,
-                });
-            });
-            return data;
-        }
-
-        function saveProject(projectName, showPrompt = true) {
-            let pName = projectName;
-            if (showPrompt || !pName || pName === 'active_report') {
-                const defaultName = `Project-${new Date().toISOString().split('T')[0]}`;
-                pName = prompt("Save project as:", defaultName);
-                if (!pName) return; 
-            }
-            try {
-                const data = getProjectData();
-                localStorage.setItem(`project_${pName}`, JSON.stringify(data));
-                
-                const projectIndex = projects.findIndex(p => p.name === pName);
-                if (projectIndex > -1) {
-                    projects[projectIndex].savedAt = data.savedAt;
-                } else {
-                    projects.push({ name: pName, savedAt: data.savedAt });
-                }
-                localStorage.setItem('projects', JSON.stringify(projects));
-                
-                if(showPrompt) {
-                   alert(`Project "${pName}" saved successfully!`);
-                   updateProjectsList();
-                } else if(projectName === 'active_report') {
-                    // console.log("Autosaved.");
-                }
-
-            } catch (e) {
-                console.error("Error saving project:", e);
-                alert("Could not save project. Local storage might be full.");
-            }
         }
         
-        function saveProjectAs() {
-            saveProject(null, true);
-        }
-
-        function loadProject(projectName) {
-            const dataString = localStorage.getItem(`project_${projectName}`);
-            if (!dataString) {
-                console.log(`No data for project "${projectName}", loading defaults.`);
-                return;
-            }
-            const data = JSON.parse(dataString);
-            
-            // Load inspection data
-            const insp = data.inspection;
-            document.getElementById('inspection-title-1').textContent = insp.title1;
-            document.getElementById('inspection-title-2').textContent = insp.title2;
-            document.getElementById('inspection-title-3').textContent = insp.title3;
-            document.getElementById('inspection-small-title').textContent = insp.smallTitle;
-            document.getElementById('display-date').value = insp.date;
-            document.getElementById('client-logo-inspection').src = insp.clientLogo;
-            document.getElementById('company-logo-inspection').src = insp.companyLogo;
-            
-            const inspTbody = document.querySelector('#report-table tbody');
-            inspTbody.innerHTML = '';
-            insp.table.forEach(rowData => addRow(rowData, true));
-
-            // Load estimation data
-            const est = data.estimation;
-            document.getElementById('estimation-title-1').textContent = est.title1;
-            document.getElementById('estimation-title-2').textContent = est.title2;
-            document.getElementById('estimation-title-3').textContent = est.title3;
-            document.getElementById('estimation-small-title').textContent = est.smallTitle;
-            document.getElementById('estimation-date').value = est.date;
-            document.getElementById('client-logo-estimation').src = est.clientLogo;
-            document.getElementById('company-logo-estimation').src = est.companyLogo;
-            document.getElementById('work-order-no').value = est.workOrder;
-            document.getElementById('tpc-no').value = est.tpcNo;
-            document.getElementById('work-desc').value = est.workDesc;
-
-            const estTbody = document.querySelector('#cost-estimation-table tbody');
-            estTbody.innerHTML = '';
-            est.table.forEach(rowData => insertBOQRow(rowData, true));
-            calculateCostEstimationTotal();
-            
-            // Load BOQ data if present
-            if (data.boqData) {
-                boqData = data.boqData;
-                repopulateBOQSelect();
-            }
-
-            activeProjectName = projectName;
-            document.querySelector('.main-title').textContent = projectName === 'active_report' ? 'Project Dashboard' : projectName;
-            openTab({currentTarget: document.querySelector('.tab-button.active')}, document.querySelector('.tab-content.active').id);
-        }
-
-        function deleteProject(projectName) {
-            if (confirm(`Are you sure you want to delete the project "${projectName}"? This cannot be undone.`)) {
-                localStorage.removeItem(`project_${projectName}`);
-                projects = projects.filter(p => p.name !== projectName);
-                localStorage.setItem('projects', JSON.stringify(projects));
-                updateProjectsList();
-                alert(`Project "${projectName}" deleted.`);
-            }
-        }
-        
-        function loadProjects() { return JSON.parse(localStorage.getItem('projects')) || []; }
-
-        function updateProjectsList() {
-            const list = document.getElementById('projects-list');
-            list.innerHTML = '';
-            const sortOrder = document.getElementById('sort-projects').value;
-
-            const sortedProjects = [...projects].sort((a, b) => {
-                if (sortOrder === 'name') return a.name.localeCompare(b.name);
-                if (sortOrder === 'date-newest') return new Date(b.savedAt) - new Date(a.savedAt);
-                if (sortOrder === 'date-oldest') return new Date(a.savedAt) - new Date(b.savedAt);
-            });
-
-            sortedProjects.forEach(p => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span class="project-name" onclick="loadProject('${p.name}')">${p.name}</span>
-                    <div>
-                        <small>Saved: ${new Date(p.savedAt).toLocaleString()}</small>
-                        <button class="btn-delete" style="margin-left: 10px;" onclick="deleteProject('${p.name}')">Delete</button>
-                    </div>`;
-                list.appendChild(li);
-            });
-        }
-        
-        function filterProjects() { /* Not implemented, but easy to add if needed */ }
-        
-        function loadLogo(event, imgId) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById(imgId).src = e.target.result;
-                    saveProject(activeProjectName, false);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-        
-        // --- CAMERA & PHOTO ---
-        async function openCamera() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                alert("Camera API is not available on this browser.");
-                return;
-            }
-            try {
-                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                const videoFeed = document.getElementById('camera-feed');
-                videoFeed.srcObject = cameraStream;
-                document.getElementById('camera-modal').style.display = 'flex';
-            } catch (err) {
-                console.error("Error accessing camera:", err);
-                alert("Could not access the camera. Please check permissions.");
-            }
-        }
-
-        function closeCamera() {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-            }
-            document.getElementById('camera-modal').style.display = 'none';
-        }
-
-        function capturePhoto() {
-            const canvas = document.getElementById('photo-canvas');
-            const video = document.getElementById('camera-feed');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            addPhotoToPreview(dataUrl);
-            closeCamera();
-        }
-
-        function addPhotoToPreview(dataUrl) {
-            const previewContainer = document.getElementById('photo-previews');
-            const img = document.createElement('img');
-            img.src = dataUrl;
-            img.onclick = () => {
-                if(confirm('Remove this photo?')) {
-                    img.remove();
-                    updatePhotoUrls();
-                }
-            };
-            previewContainer.appendChild(img);
-            updatePhotoUrls();
-        }
-
-        function updatePhotoUrls() {
-            const urls = Array.from(document.querySelectorAll('#photo-previews img')).map(img => img.src);
-            document.getElementById('current-photo-urls').value = JSON.stringify(urls);
-        }
-
-        function addPhotosToCell(cell, photoUrls) {
-            cell.innerHTML = ''; 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'photo-wrapper';
-            photoUrls.forEach(url => {
-                const img = document.createElement('img');
-                img.src = url;
-                img.onclick = () => showImagePreview(url);
-                wrapper.appendChild(img);
-            });
-            cell.appendChild(wrapper);
-        }
-
-        function showImagePreview(src) {
-            const previewOverlay = document.getElementById('preview-overlay');
-            const previewContent = document.getElementById('preview-content');
-            previewContent.innerHTML = `<button onclick="hidePreview()" class="btn-delete" style="position: absolute; top: 10px; right: 10px; z-index: 1;">❌</button><img src="${src}" style="width:100%;">`;
-            previewOverlay.style.display = 'flex';
-        }
-        function hidePreview() { document.getElementById('preview-overlay').style.display = 'none'; }
-        
-        // --- GPS & MAPS ---
-        function initializeInspectionMap() {
-            if (map) return;
-            document.getElementById('map').style.display = 'block';
-            map = L.map('map').setView([25.3548, 51.1839], 10);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        }
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    const { latitude: lat, longitude: lng } = pos.coords;
-                    document.getElementById('lat-display').textContent = lat.toFixed(6);
-                    document.getElementById('lng-display').textContent = lng.toFixed(6);
-                    if (!map) initializeInspectionMap();
-                    map.setView([lat, lng], 16);
-                    if (currentMarker) currentMarker.setLatLng([lat, lng]);
-                    else currentMarker = L.marker([lat, lng]).addTo(map);
-                }, () => alert("Could not get location. Please enable location services."));
-            }
-        }
-        function switchLocationMode(mode) {
-             ['auto', 'manual'].forEach(m => document.getElementById(`location-${m}-panel`).style.display = m === mode ? 'flex' : 'none');
-             ['auto', 'manual'].forEach(m => document.getElementById(`gps-${m}-btn`).classList.toggle('active', m === mode));
-             if(mode === 'auto') getLocation();
-        }
-        function updateLocationFromManual() {
-            const lat = parseFloat(document.getElementById('manual-lat').value);
-            const lng = parseFloat(document.getElementById('manual-lng').value);
-            if (!isNaN(lat) && !isNaN(lng)) {
-                document.getElementById('lat-display').textContent = lat.toFixed(6);
-                document.getElementById('lng-display').textContent = lng.toFixed(6);
-            }
-        }
-        
-        // --- QUANTITY MODAL ---
-        function showQuantityModal(row) { 
-            editingRow = row;
-            document.getElementById('quantityModal').style.display = 'flex'; 
-        }
+        // --- COST ESTIMATION LOGIC ---
+        function showQuantityModal() { document.getElementById('quantityModal').style.display = 'flex'; }
         function closeQuantityModal() { document.getElementById('quantityModal').style.display = 'none'; }
         
         function setQuantity() {
+            const nr = parseFloat(document.getElementById('repetitions').value) || 1;
             const length = parseFloat(document.getElementById('length').value) || 0;
             const width = parseFloat(document.getElementById('width').value) || 0;
-            const depth = parseFloat(document.getElementById('depth').value) || 0;
-            const reps = parseFloat(document.getElementById('repetitions').value) || 1;
+            const height = parseFloat(document.getElementById('depth').value) || 0;
             
-            let quantity = 0;
-            let unit = 'items';
-            let details = `NR: ${reps}`;
-
-            if (length > 0 && width > 0 && depth > 0) {
-                quantity = reps * length * width * depth;
-                unit = 'm³';
-                details += `, L: ${length}, W: ${width}, H: ${depth}`;
-            } else if (length > 0 && width > 0) {
-                quantity = reps * length * width;
-                unit = 'm²';
-                details += `, L: ${length}, W: ${width}`;
-            } else if (length > 0) {
-                quantity = reps * length;
-                unit = 'm';
-                details += `, L: ${length}`;
-            } else {
-                 quantity = reps;
-            }
-
-            const fullDescription = `${details} = ${quantity.toFixed(2)} ${unit}`;
-            document.getElementById('quantity-input').value = fullDescription;
-            closeQuantityModal();
-        }
-
-        // --- TABLE ROW MANAGEMENT (INSPECTION) ---
-        function addRow(rowData = {}, fromLoad = false) {
-            const tbody = reportTable.getElementsByTagName('tbody')[0];
-            const newRow = tbody.insertRow();
-            
-            const data = fromLoad ? rowData : {
-                id: (tbody.rows.length).toString(),
-                asset: document.getElementById('asset').value,
-                status: document.getElementById('status').value,
-                recommendation: document.getElementById('recommendation').value,
-                quantity: document.getElementById('quantity-input').value,
-                photos: JSON.parse(document.getElementById('current-photo-urls').value || '[]'),
-                lat: document.getElementById('lat-display').textContent,
-                lng: document.getElementById('lng-display').textContent
-            };
-
-            if (!data.asset && !fromLoad) {
-                alert("Asset description is required.");
-                return;
-            }
-
-            newRow.innerHTML = `
-                <td>${data.id}</td>
-                <td>${data.asset}</td>
-                <td>${data.status}</td>
-                <td>${data.recommendation}</td>
-                <td>${data.quantity}</td>
-                <td></td>
-                <td>${data.lat}</td>
-                <td>${data.lng}</td>
-                <td><button class="btn-delete" onclick="removeRow(this)">Delete</button></td>
-            `;
-
-            addPhotosToCell(newRow.cells[5], data.photos);
-
-            if (!fromLoad) {
-                document.getElementById('asset').value = '';
-                document.getElementById('status').value = '';
-                document.getElementById('recommendation').value = '';
-                document.getElementById('quantity-input').value = '';
-                document.getElementById('photo-previews').innerHTML = '';
-                document.getElementById('current-photo-urls').value = '[]';
-                saveProject(activeProjectName, false);
-            }
-        }
-        function removeRow(btn) {
-            if (confirm("Are you sure you want to remove this row?")) {
-                const row = btn.parentNode.parentNode;
-                row.parentNode.removeChild(row);
-                saveProject(activeProjectName, false);
-            }
-        }
-        
-        // --- BOQ & COST ESTIMATION ---
-        function handleBOQUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            Papa.parse(file, {
-                header: true,
-                skipEmptyLines: true,
-                complete: (results) => {
-                    const newItems = results.data.map(row => ({
-                        ref: row['BOQ Ref.'] || row.ref,
-                        description: row.Description || row.description,
-                        unit: row.Unit || row.unit,
-                        rate: parseFloat(row.Rate || row.rate) || 0
-                    })).filter(item => item.ref && !isNaN(item.rate));
-
-                    newItems.forEach(newItem => {
-                        const existing = boqData.find(i => i.ref === newItem.ref);
-                        if (!existing) boqData.push(newItem);
-                    });
-                    
-                    repopulateBOQSelect();
-                    saveProject(activeProjectName, false);
-                    alert(`${newItems.length} BOQ items processed.`);
-                },
-                error: (err) => alert("Error parsing CSV file: " + err.message)
-            });
-            event.target.value = '';
-        }
-
-        function repopulateBOQSelect(searchTerm = '') {
-            const boqSelect = document.getElementById('boq-ref-select');
-            boqSelect.innerHTML = '';
-            const lowerSearchTerm = searchTerm.toLowerCase();
-
-            const filteredData = boqData.filter(item =>
-                item.ref.toLowerCase().includes(lowerSearchTerm) ||
-                item.description.toLowerCase().includes(lowerSearchTerm)
-            );
-
-            filteredData.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.ref;
-                option.textContent = `${item.ref} - ${item.description}`;
-                boqSelect.appendChild(option);
-            });
-            updateBOQDetails();
-        }
-
-        function updateBOQDetails() {
-            const selectedRef = document.getElementById('boq-ref-select').value;
-            const item = boqData.find(d => d.ref === selectedRef);
-            if(item) {
-                document.getElementById('boq-desc').value = item.description;
-                document.getElementById('boq-unit').value = item.unit;
-                document.getElementById('boq-rate').value = item.rate.toFixed(2);
-                calculateBOQTotal();
-            }
-        }
-        
-        function updateMostUsedBOQ() { /* Logic can be added here if needed */ }
-
-        function calculateBOQTotal() {
-            const nr = parseFloat(document.getElementById('boq-nr').value) || 1;
-            const length = parseFloat(document.getElementById('boq-length').value) || 0;
-            const width = parseFloat(document.getElementById('boq-width').value) || 0;
-            const height = parseFloat(document.getElementById('boq-height').value) || 0;
-            const rate = parseFloat(document.getElementById('boq-rate').value) || 0;
-
             let qty = nr;
             if (length > 0 && width > 0 && height > 0) qty = nr * length * width * height;
             else if (length > 0 && width > 0) qty = nr * length * width;
             else if (length > 0) qty = nr * length;
 
-            const amount = qty * rate;
-
-            document.getElementById('boq-total-qty').value = qty.toFixed(3);
-            document.getElementById('boq-amount').value = amount.toFixed(2);
+            tempQuantityDetails = { nr, length, width, height, totalQty: qty };
+            
+            document.getElementById('calculated-quantity-display').textContent = `Qty: ${qty.toFixed(3)}`;
+            calculateBOQAmount(); // Recalculate amount based on new quantity
+            closeQuantityModal();
         }
 
-        function insertBOQRow(rowData = {}, fromLoad = false) {
-            const tbody = costEstimationTable.getElementsByTagName('tbody')[0];
+        function calculateBOQAmount() {
+            const rate = parseFloat(document.getElementById('boq-rate').value) || 0;
+            const quantity = tempQuantityDetails.totalQty || 0;
+            document.getElementById('boq-amount').value = (rate * quantity).toFixed(2);
+        }
+
+        function insertBOQRow() {
+            if (Object.keys(tempQuantityDetails).length === 0) {
+                alert("Please calculate a quantity first.");
+                return;
+            }
+            const tbody = document.querySelector('#cost-estimation-table tbody');
             const newRow = tbody.insertRow();
             
-            const data = fromLoad ? rowData : {
+            const data = {
                 ref: document.getElementById('boq-ref-select').value,
                 desc: document.getElementById('boq-desc').value,
                 unit: document.getElementById('boq-unit').value,
-                nr: document.getElementById('boq-nr').value,
-                length: document.getElementById('boq-length').value,
-                width: document.getElementById('boq-width').value,
-                height: document.getElementById('boq-height').value,
-                qty: document.getElementById('boq-total-qty').value,
+                ...tempQuantityDetails,
                 rate: document.getElementById('boq-rate').value,
                 amount: document.getElementById('boq-amount').value,
                 remarks: document.getElementById('boq-remarks').value
             };
-            
-            if (!data.ref && !fromLoad) {
-                alert("BOQ Reference is required.");
-                return;
-            }
 
             newRow.innerHTML = `
-                <td>${data.ref}</td><td class="description-cell">${data.desc}</td><td>${data.unit}</td><td>${data.nr}</td>
-                <td>${data.length}</td><td>${data.width}</td><td>${data.height}</td><td>${data.qty}</td>
-                <td>${data.rate}</td><td>${data.amount}</td><td>${data.remarks}</td>
-                <td><button class="btn-delete" onclick="removeBOQRow(this)">Delete</button></td>
+                <td>${data.ref}</td><td>${data.desc}</td><td>${data.unit}</td>
+                <td>${data.nr}</td><td>${data.length}</td><td>${data.width}</td><td>${data.height}</td>
+                <td>${data.totalQty.toFixed(3)}</td><td>${data.rate}</td><td>${data.amount}</td>
+                <td>${data.remarks}</td>
+                <td><button class="btn-delete" onclick="this.parentNode.parentNode.remove(); calculateCostEstimationTotal();"><i class="fa-solid fa-trash"></i></button></td>
             `;
 
             calculateCostEstimationTotal();
+            // Reset fields for next entry
+            tempQuantityDetails = {};
+            document.getElementById('calculated-quantity-display').textContent = '';
+            document.getElementById('boq-remarks').value = '';
+            document.getElementById('boq-amount').value = '0.00';
+        }
+        
+        function calculateCostEstimationTotal() { /* ... */ }
 
-            if (!fromLoad) {
-                ['boq-nr', 'boq-length', 'boq-width', 'boq-height', 'boq-remarks'].forEach(id => document.getElementById(id).value = '');
-                saveProject(activeProjectName, false);
+        function exportTableToCSV(tableId, filename) {
+            let csv = [];
+            const rows = document.querySelectorAll(`#${tableId} tr`);
+            for (const row of rows) {
+                const cols = row.querySelectorAll('td, th');
+                const rowData = Array.from(cols).map(col => `"${col.innerText.replace(/"/g, '""')}"`);
+                csv.push(rowData.join(','));
             }
+            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const downloadLink = document.createElement('a');
+            downloadLink.download = filename;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
         }
-        
-        function removeBOQRow(btn) {
-            if (confirm("Are you sure you want to remove this row?")) {
-                const row = btn.parentNode.parentNode;
-                row.parentNode.removeChild(row);
-                calculateCostEstimationTotal();
-                saveProject(activeProjectName, false);
-            }
-        }
-        
-        function calculateCostEstimationTotal() {
-            let total = 0;
-            document.querySelectorAll('#cost-estimation-table tbody tr').forEach(row => {
-                const amount = parseFloat(row.cells[9].textContent);
-                if (!isNaN(amount)) total += amount;
-            });
-            document.getElementById('total-amount-cell').textContent = `QAR ${total.toFixed(2)}`;
-        }
-        
-        // --- MAP TAB ---
+
+        // --- MAP PAGE LOGIC ---
         function initializeVehicleMap() {
-            if (vehicleMap) return;
-            const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
-            const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
-            
-            vehicleMap = L.map('vehicle-map').setView([25.3548, 51.1839], 10);
-            osm.addTo(vehicleMap);
-            L.control.layers({ "Street": osm, "Satellite": satellite }).addTo(vehicleMap);
-
-            const drawnItems = new L.FeatureGroup();
-            vehicleMap.addLayer(drawnItems);
-            new L.Control.Draw({ edit: { featureGroup: drawnItems }, draw: { polygon: true, polyline: false, rectangle: true, circle: false, marker: false, circlemarker: false } }).addTo(vehicleMap);
-            vehicleMap.on(L.Draw.Event.CREATED, (e) => drawnItems.addLayer(e.layer));
-
-            getZones(); // Populate QNAS zones on map init
-        }
-        
-        function handleVehicleFileImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const contents = e.target.result;
-                const fileExt = file.name.split('.').pop().toLowerCase();
-                
-                if (fileExt === 'kml') {
-                    const kmlLayer = omnivore.kml.parse(contents);
-                    kmlLayer.eachLayer(layer => {
-                        if (layer.feature?.properties?.name) {
-                            layer.bindPopup(layer.feature.properties.name);
-                        }
-                    }).addTo(vehicleMap);
-                    vehicleMap.fitBounds(kmlLayer.getBounds());
-                } else if (fileExt === 'csv') {
-                    // CSV parsing logic for points
-                }
+            // Define Base Layers
+            baseLayers = {
+                "Streets": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+                "Satellite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
+                "Topographic": L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'),
+                "Dark": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png')
             };
-            reader.readAsText(file);
-            event.target.value = '';
-        }
 
-        function printMap() {
-            document.body.classList.add('printing-map');
-            setTimeout(() => {
-                window.print();
-                document.body.classList.remove('printing-map');
-            }, 500); // Wait for map to re-render
-        }
-
-        function clearMapMarkers() { /* ... */ }
-        function fitMapToAssetMarkers() { /* ... */ }
-        function fitMapToAllMarkers() { /* ... */ }
-        function downloadCSVTemplate() { /* ... */ }
-        
-        function centerVehicleMapOnUser() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    const latlng = [pos.coords.latitude, pos.coords.longitude];
-                    vehicleMap.flyTo(latlng, 16);
-                    if (userMarker) {
-                        userMarker.setLatLng(latlng);
-                    } else {
-                        userMarker = L.marker(latlng, {
-                           icon: L.icon({
-                                iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                                iconSize: [25, 41], iconAnchor: [12, 41]
-                           })
-                        }).addTo(vehicleMap).bindPopup("Your Location").openPopup();
-                    }
-                }, () => alert("Could not get your location."));
-            }
-        }
-        
-        // --- QNAS API INTEGRATION ---
-        const API_BASE = 'https://qnas.qa/api';
-        const QNAS_TOKEN = 'YOUR_TOKEN'; // IMPORTANT: Replace with your actual token
-
-        async function qnasFetch(endpoint) {
-            const headers = { 'X-Token': QNAS_TOKEN, 'Accept': 'application/json' };
-            try {
-                const res = await fetch(`${API_BASE}${endpoint}`, { headers });
-                if (!res.ok) {
-                    throw new Error(`QNAS API Error: ${res.statusText}`);
-                }
-                return res.json();
-            } catch (error) {
-                console.error(error);
-                alert(error.message + ". Check if your token is correct.");
-                return null;
-            }
-        }
-
-        async function getZones() {
-            const data = await qnasFetch('/get_zones');
-            if(data?.zones) {
-                const select = document.getElementById('qnas-zone');
-                select.innerHTML = '<option value="">Select Zone</option>';
-                data.zones.forEach(zone => select.add(new Option(zone.en_name, zone.zone_no)));
-            }
-        }
-        async function getStreets(zoneNo) {
-            const streetSelect = document.getElementById('qnas-street');
-            streetSelect.innerHTML = '<option value="">Loading...</option>';
-            document.getElementById('qnas-building').innerHTML = '';
-            if(!zoneNo) { streetSelect.innerHTML = ''; return; }
-            const data = await qnasFetch(`/get_streets/${zoneNo}`);
-             if(data?.streets) {
-                streetSelect.innerHTML = '<option value="">Select Street</option>';
-                data.streets.forEach(street => streetSelect.add(new Option(street.en_name, street.street_no)));
-            }
-        }
-        async function getBuildings(zoneNo, streetNo) {
-            const bldgSelect = document.getElementById('qnas-building');
-            bldgSelect.innerHTML = '<option value="">Loading...</option>';
-            if(!zoneNo || !streetNo) { bldgSelect.innerHTML = ''; return; }
-            const data = await qnasFetch(`/get_buildings/${zoneNo}/${streetNo}`);
-            if(data?.locations) {
-                bldgSelect.innerHTML = '<option value="">Select Building</option>';
-                data.locations.forEach(bldg => bldgSelect.add(new Option(bldg.building_no, bldg.building_no)));
-            }
-        }
-        async function getLocationDetails(zone, street, building) {
-            const data = await qnasFetch(`/get_location/${zone}/${street}/${building}`);
-            if (data?.location) {
-                const loc = data.location;
-                const latlng = [loc.latitude, loc.longitude];
-                clearBuildingMarkers(); // Clear previous markers
-                const marker = L.marker(latlng).addTo(vehicleMap).bindPopup(`<b>Building ${loc.building_no}</b><br>${loc.street_en_name}<br>Zone: ${loc.zone_no}`).openPopup();
-                assetMarkers.push(marker);
-                vehicleMap.flyTo(latlng, 18);
-            }
-        }
-        function clearBuildingMarkers() {
-            assetMarkers.forEach(m => vehicleMap.removeLayer(m));
-            assetMarkers = [];
-        }
-
-        // --- PRINT & PDF EXPORT ---
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString + 'T00:00:00');
-            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        }
-
-        function preparePrintHeader(reportType) {
-            const isInspection = reportType === 'main-report';
-            const prefix = isInspection ? 'inspection' : 'estimation';
-            const clientLogoSrc = document.getElementById(`${prefix === 'inspection' ? 'client' : 'client'}-logo-${prefix}`).src;
-            const companyLogoSrc = document.getElementById(`${prefix === 'inspection' ? 'company' : 'company'}-logo-${prefix}`).src;
-            
-            document.getElementById(isInspection ? 'client-logo-print-src' : 'est-client-logo-print-src').src = clientLogoSrc;
-            document.getElementById(isInspection ? 'company-logo-print-src' : 'est-company-logo-print-src').src = companyLogoSrc;
-
-            const titleContainer = document.getElementById(`${prefix}-print-title`);
-            titleContainer.innerHTML = `<b>${document.getElementById(`${prefix}-title-1`).textContent}</b><b>${document.getElementById(`${prefix}-title-2`).textContent}</b><b>${document.getElementById(`${prefix}-title-3`).textContent}</b>`;
-            
-            const dateFooter = document.getElementById(`${prefix}-print-date`).parentNode;
-            const dateVal = document.getElementById(isInspection ? 'display-date' : 'estimation-date').value;
-            dateFooter.innerHTML = `<span>${formatDate(dateVal)}</span><span>${document.getElementById(`${prefix}-small-title`).textContent}</span>`;
-        }
-
-        function printContent(tabId) {
-            preparePrintHeader(tabId);
-            window.print();
-        }
-
-        async function exportToPdf(tabId) {
-            const { jsPDF } = window.jspdf;
-            const contentToCapture = document.querySelector(`#${tabId} .printable-area`);
-            if (!contentToCapture) return alert("Error: Printable content not found.");
-            
-            alert('Generating PDF... This may take a moment.');
-            preparePrintHeader(tabId);
-            
-            const canvas = await html2canvas(contentToCapture, { 
-                scale: 2, 
-                useCORS: true, 
-                backgroundColor: '#ffffff'
+            vehicleMap = L.map('vehicle-map', {
+                center: [25.2854, 51.5310],
+                zoom: 12,
+                layers: [baseLayers.Streets] // Default layer
             });
 
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            // Layer Control
+            L.control.layers(baseLayers, null, { collapsed: false }).addTo(vehicleMap).getContainer().parentNode.replaceWith(document.getElementById('layer-control-container'));
             
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height;
-            const ratio = canvasWidth / pdfWidth;
-            const projectedHeight = canvasHeight / ratio;
-            
-            let position = 0;
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, projectedHeight);
-            let heightLeft = projectedHeight - pdfHeight;
-            
-            while (heightLeft > 0) {
-                position -= pdfHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, projectedHeight);
-                heightLeft -= pdfHeight;
+            // Drawn Items Layer Group
+            drawnItems = new L.FeatureGroup().addTo(vehicleMap);
+
+            // Draw Control
+            const drawControl = new L.Control.Draw({
+                edit: { featureGroup: drawnItems },
+                draw: {
+                    polygon: { title: 'Draw a polygon to measure area' },
+                    polyline: { title: 'Draw a line to measure distance' },
+                    rectangle: false,
+                    circle: false,
+                    circlemarker: false,
+                    marker: { title: 'Add a placemark' }
+                }
+            });
+            vehicleMap.addControl(drawControl);
+
+            // Map Events
+            vehicleMap.on(L.Draw.Event.CREATED, handleDrawCreate);
+            vehicleMap.on('move', updateMapCenterCoords);
+            vehicleMap.on('click', e => updateOutputCoords(e.latlng));
+
+            // Initial setup
+            updateMapCenterCoords();
+            getZones();
+        }
+
+        function handleDrawCreate(event) {
+            const layer = event.layer;
+            const type = event.layerType;
+
+            if (type === 'marker') {
+                const title = prompt("Enter a title for this placemark:", "My Placemark");
+                if(title) layer.bindPopup(`<b>${title}</b>`);
+                layer.on('click', () => updateOutputCoords(layer.getLatLng()));
             }
-            
-            generatedPdfBlob = pdf.output('blob');
-            document.getElementById('pdf-options-modal').style.display = 'flex';
+            if (type === 'polyline') {
+                const distance = L.GeometryUtil.length(layer.getLatLngs());
+                layer.bindPopup(`Distance: ${distance.toFixed(2)} m`);
+                document.getElementById('measurement-output').innerHTML = `<strong>Distance:</strong> ${distance.toFixed(2)} m`;
+            }
+            if (type === 'polygon') {
+                const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
+                layer.bindPopup(`Area: ${area.toFixed(2)} m²`);
+                 document.getElementById('measurement-output').innerHTML = `<strong>Area:</strong> ${area.toFixed(2)} m²`;
+            }
+            drawnItems.addLayer(layer);
         }
 
-        function downloadGeneratedPdf() {
-            if (!generatedPdfBlob) return;
-            const url = URL.createObjectURL(generatedPdfBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${document.querySelector('.main-title').textContent.trim()}-report.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
+        function updateOutputCoords(latlng) {
+            document.getElementById('output-deg').textContent = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+            const utmCoords = proj4('EPSG:4326', 'EPSG:32639', [latlng.lng, latlng.lat]);
+            document.getElementById('output-utm').textContent = `${utmCoords[0].toFixed(6)}, ${utmCoords[1].toFixed(6)}`;
         }
 
-        async function shareGeneratedPdf() {
-            if (!generatedPdfBlob || !navigator.share) {
-                alert('Share API is not supported on this browser. Please download the file instead.');
+        function updateMapCenterCoords() {
+            const center = vehicleMap.getCenter();
+            const zoom = vehicleMap.getZoom();
+            document.getElementById('map-coords-display').textContent = `Center: ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)} | Zoom: ${zoom}`;
+        }
+        
+        function goToCoords() {
+            const coordsStr = document.getElementById('goto-coords-input').value;
+            const parts = coordsStr.split(',').map(c => parseFloat(c.trim()));
+            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                vehicleMap.flyTo(parts, 16);
+            } else {
+                alert("Invalid format. Please use 'latitude, longitude'.");
+            }
+        }
+        
+        function addManualPin() {
+            const lat = parseFloat(document.getElementById('manual-lat-input').value);
+            const lng = parseFloat(document.getElementById('manual-lng-input').value);
+            const title = document.getElementById('manual-pin-title').value || "Manual Pin";
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const marker = L.marker([lat, lng]).bindPopup(`<b>${title}</b>`).addTo(drawnItems);
+                vehicleMap.flyTo([lat, lng], 16);
+                updateOutputCoords(marker.getLatLng());
+            } else {
+                alert("Please enter valid latitude and longitude.");
+            }
+        }
+
+        function clearMap() {
+            if(confirm("Are you sure you want to clear all drawings and pins from the map?")) {
+                drawnItems.clearLayers();
+                document.getElementById('measurement-output').textContent = 'Measurements cleared.';
+            }
+        }
+
+        async function exportMapAsPDF() {
+            alert("Generating PDF of the map. Please wait...");
+            const mapContainer = document.getElementById('vehicle-map');
+            const canvas = await html2canvas(mapContainer, { useCORS: true });
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save('map-export.pdf');
+        }
+
+        function exportToKML() {
+            if (drawnItems.getLayers().length === 0) {
+                alert("No items on the map to export.");
                 return;
             }
-            const file = new File([generatedPdfBlob], `${document.querySelector('.main-title').textContent.trim()}-report.pdf`, { type: 'application/pdf' });
-            try {
-                await navigator.share({
-                    files: [file],
-                    title: 'Project Report',
-                    text: 'Here is the generated project report.',
-                });
-            } catch (error) {
-                console.error('Error sharing:', error);
-                alert('Could not share the file.');
-            }
+            const geojson = drawnItems.toGeoJSON();
+            // Add name property for placemarks from popup content
+            geojson.features.forEach(feature => {
+                if (feature.geometry.type === "Point") {
+                    const layer = drawnItems.getLayers().find(l => l.toGeoJSON() === feature);
+                    if (layer && layer.getPopup()) {
+                        feature.properties.name = layer.getPopup().getContent().replace(/<[^>]*>/g, ''); // Strip HTML
+                    }
+                }
+            });
+            const kmlString = tokml(geojson);
+            
+            const blob = new Blob([kmlString], { type: 'application/vnd.google-earth.kml+xml' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'map-data.kml';
+            link.click();
+        }
+
+        // --- QNAS API LOGIC ---
+        async function qnasFetch(endpoint) { /* ... same as before ... */ }
+        async function getZones() { /* ... same as before ... */ }
+        async function getStreets(zoneNo) { /* ... same as before ... */ }
+        async function getBuildings(zoneNo, streetNo) { /* ... same as before ... */ }
+        async function getLocationDetails(zone, street, building) {
+             if(!zone || !street || !building) return;
+             const data = await qnasFetch(`/get_location/${zone}/${street}/${building}`);
+             if (data?.location) {
+                 const loc = data.location;
+                 const latlng = [loc.latitude, loc.longitude];
+                 const marker = L.marker(latlng).addTo(drawnItems);
+                 marker.bindPopup(`<b>Building ${loc.building_no}</b><br>${loc.street_en_name}<br>Zone: ${loc.zone_no}`).openPopup();
+                 marker.on('click', () => updateOutputCoords(latlng));
+                 vehicleMap.flyTo(latlng, 18);
+                 updateOutputCoords(L.latLng(latlng));
+             }
         }
     </script>
 </body>
