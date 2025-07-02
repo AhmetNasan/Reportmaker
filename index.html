@@ -117,11 +117,11 @@
         .info-card { 
             display: flex; 
             justify-content: space-between; 
-            align-items: flex-start; /* Align items to the top */
+            align-items: flex-start;
             gap: 15px;
         }
         .logo-container {
-            flex-basis: 150px; /* Give logos a base width */
+            flex-basis: 150px;
             flex-shrink: 0;
             display: flex;
             justify-content: center;
@@ -142,7 +142,7 @@
             text-align: center;
         }
         .title-container .report-title-row {
-            font-size: clamp(1.5em, 4vw, 2.5em); /* Responsive font size */
+            font-size: clamp(1.5em, 4vw, 2.5em);
             font-weight: 900;
             color: #000;
             line-height: 1.1;
@@ -156,7 +156,7 @@
         }
         .title-container .small-title {
             margin-top: 15px;
-            background-color: #5a7b9c; /* Blue-grey color from photo */
+            background-color: #5a7b9c;
             color: white;
             padding: 8px 20px;
             border-radius: 5px;
@@ -189,7 +189,7 @@
         .form-group { display: flex; flex-direction: column; gap: 10px; }
         .form-row { display: flex; gap: 10px; align-items: center; }
         .form-row input { flex: 1; }
-        input[type="text"], input[type="number"], input[type="url"], select {
+        input[type="text"], input[type="number"], input[type="url"], select, input[type="search"] {
             width: 100%; padding: 10px; border-radius: 8px;
             border: 1px solid var(--glass-border); background-color: rgba(255, 255, 255, 0.9);
             box-sizing: border-box; font-size: 14px;
@@ -197,7 +197,6 @@
         }
         input::placeholder { color: #889; }
         
-        /* Frosted Button Styles */
         button, .form-button {
             border: 1px solid rgba(100, 100, 100, 0.3);
             background-color: rgba(255, 255, 255, 0.2);
@@ -214,11 +213,10 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        /* Color-coded buttons */
-        .btn-insert { background-color: rgba(40, 167, 69, 0.6); color: white; border-color: rgba(40, 167, 69, 0.4);}
-        .btn-delete { background-color: rgba(220, 53, 69, 0.6); color: white; border-color: rgba(220, 53, 69, 0.4);}
-        .btn-action { background-color: rgba(0, 123, 255, 0.6); color: white; border-color: rgba(0, 123, 255, 0.4);}
-        .btn-neutral { background-color: rgba(108, 117, 125, 0.6); color: white; border-color: rgba(108, 117, 125, 0.4);}
+        .btn-insert { background-color: rgba(40, 167, 69, 0.7); color: white; border-color: rgba(40, 167, 69, 0.5);}
+        .btn-delete { background-color: rgba(220, 53, 69, 0.7); color: white; border-color: rgba(220, 53, 69, 0.5);}
+        .btn-action { background-color: rgba(0, 123, 255, 0.7); color: white; border-color: rgba(0, 123, 255, 0.5);}
+        .btn-neutral { background-color: rgba(108, 117, 125, 0.7); color: white; border-color: rgba(108, 117, 125, 0.5);}
 
 
         #drop-zone {
@@ -256,20 +254,21 @@
         .location-display-wrapper { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
 
         /* Table */
-        .table-controls { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; align-items: center; }
+        .table-controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-bottom: 10px; align-items: center; }
         .table-controls-title { margin-right: auto; font-size: 1.2em; font-weight: bold; }
-
+        .table-container { overflow-x: auto; width: 100%; }
         table { width: 100%; border-collapse: collapse; }
-        th { background-color: rgba(var(--primary-color-rgb), 0.1); padding: 10px; text-align: center; }
+        th { background-color: rgba(var(--primary-color-rgb), 0.1); padding: 10px; text-align: center; white-space: nowrap;}
         td { border-top: 1px solid var(--glass-border); padding: 8px; text-align: center; vertical-align: middle; }
         tbody tr:nth-child(even) { background-color: rgba(0,0,0,0.02); }
         .photo-wrapper { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; align-items: center; }
         .photo-wrapper img { max-height: 100px; border-radius: 5px; cursor: pointer; object-fit: cover; }
+        td .btn-delete, td .btn-action { padding: 5px 10px; font-size: 12px; }
 
-        /* --- Cost Estimation Tab Styles --- */
+        /* Cost Estimation Tab Styles */
         .estimation-details { display: flex; flex-direction: column; gap: 5px; margin: 10px 0; }
         .estimation-details .form-row { gap: 15px; }
-        .estimation-details label { font-weight: bold; flex-basis: 150px; }
+        .estimation-details label { font-weight: bold; flex-basis: 150px; flex-shrink: 0; }
         .estimation-details input { flex-grow: 1; }
         .boq-entry-card .form-grid-est { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; }
         .boq-ref-group { display: flex; gap: 5px; align-items: end; }
@@ -291,12 +290,14 @@
         #cost-estimation-table td.description-cell { text-align: left; }
         #cost-estimation-table tfoot td { font-weight: bold; }
         
-        /* Vehicle Tracking / Integrated Map Tab */
+        /* Map Tab */
         .integrated-map-container { height: 80vh; display: flex; flex-direction: column; }
         #vehicle-map { flex-grow: 1; width: 100%; border-radius: var(--border-radius); border: 1px solid var(--glass-border); }
         #vehicle-map-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; align-items: center; }
         .vehicle-popup-actions a { margin-right: 10px; text-decoration: none; color: var(--primary-color); font-weight: bold; }
         .leaflet-draw-toolbar button { background-image: none !important; }
+        #qnas-controls { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; padding: 10px; border: 1px solid var(--glass-border); border-radius: var(--border-radius); margin-top: 10px;}
+        #qnas-controls label { font-weight: bold; font-size: 14px; }
 
         /* Modals */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
@@ -311,42 +312,51 @@
         #camera-fab { background-color: #28a745; }
         #add-fab { background-color: var(--primary-color); }
         
-        .footer { padding: 10px; margin-top: 10px; text-align:center; font-size: 12px; }
-        
         /* Camera & Preview Modals */
-        #camera-modal-content { background-color: black; padding: 0; width: 90vw; height: 90vh; max-width: 600px; max-height: 800px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+        #camera-modal-content { background-color: black; padding: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
         #camera-feed { width: 100%; height: 100%; object-fit: contain; transform: scaleX(-1); }
         #capture-btn { position: absolute; bottom: 20px; width: 60px; height: 60px; background-color: white; border: 5px solid var(--primary-color); border-radius: 50%; z-index: 2010; display: flex; justify-content: center; align-items: center; font-size: 30px; color: var(--primary-color); }
         #close-camera-btn { position: absolute; top: 10px; right: 10px; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; z-index: 2010; }
+        
         #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); z-index: 3000; justify-content: center; align-items: center; }
         #preview-content { background-color: white; width: 90%; height: 90%; overflow: auto; padding: 20px; position: relative; border-radius: var(--border-radius); }
         #preview-content img { max-width: 100%; height: auto; display: block; margin-bottom: 10px; }
 
         .print-header-replacement, .print-date-footer { display: none; }
+        
+        /* Mobile specific adjustments */
+        @media (max-width: 768px) {
+            .info-card {
+                flex-direction: column;
+                align-items: center;
+            }
+            .form-grid, .form-grid-est {
+                grid-template-columns: 1fr;
+            }
+            .tabs {
+                justify-content: center;
+            }
+        }
     </style>
     
     <style>
         /* CSS for printing */
         @media print {
-            /* --- General Hiding Rules --- */
-            body > *:not(#main-content-wrapper) { display: none !important; }
+            body > *:not(#main-content-wrapper), .fab-container { display: none !important; }
             .main-container > *:not(.tab-content.active) { display: none !important; }
             .tab-content.active > *:not(.printable-area){ display: none !important; }
             .printable-area { display: block !important; }
             .main-container, .printable-area { box-shadow: none !important; width: 100% !important; max-width: 100% !important; }
             
-            /* --- Hide specific elements inside the printable area --- */
-            .printable-area .menu-button, .printable-area .form-grid, .printable-area .boq-entry-card, .printable-area .primary-button, .tabs, .fab-container, button, input[type="file"] { display: none !important; }
+            .printable-area .menu-button, .printable-area .form-grid, .printable-area .boq-entry-card, .tabs, button, input[type="file"], .table-controls > *:not(.table-controls-title) { display: none !important; }
 
-            /* --- Page Setup & Styling Resets --- */
-            @page { size: A4 landscape; margin: 15mm; }
+            @page { size: A4; margin: 15mm; }
             body { background: #fff !important; color: #000 !important; margin: 0; padding: 0; }
             .glass-card, .info-card { background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; padding: 0 !important; color: #000; }
             .estimation-details { display: block !important; }
             .estimation-details .form-row { display: flex !important; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 4px; }
             .estimation-details label, .estimation-details input { display: block !important; background: transparent !important; border: none !important; }
 
-            /* --- Print Header Styles --- */
             .info-card { border-bottom: 2px solid #000; padding-bottom: 55px !important; margin-bottom: 15px; page-break-after: avoid; }
             .info-card > *:not(.print-header-replacement) { display: none !important; }
             .print-header-replacement { display: flex !important; justify-content: space-between; align-items: flex-start; width: 100%; position: relative; }
@@ -357,8 +367,6 @@
             .print-date-footer span { font-size: 11pt; font-weight: bold; display: block; }
             .print-date-footer span:last-child { margin-top: 5px; }
 
-
-            /* --- Table Styling --- */
             .table-container { max-height: none !important; overflow: visible !important; }
             table { width: 100%; border-collapse: collapse !important; font-size: 8pt; page-break-inside: auto; }
             thead { display: table-header-group; }
@@ -367,12 +375,12 @@
             th { color: #000 !important; font-weight: bold; -webkit-print-color-adjust: exact; color-adjust: exact; }
             #report-table td:nth-child(2), #cost-estimation-table td:nth-child(2) { text-align: left !important; }
             
-            .photo-wrapper, .photo-wrapper img { display: block !important; width: 100% !important; height: auto !important; object-fit: contain !important; border: none !important; margin: 0; padding: 0; }
+            .photo-wrapper { display: flex !important; flex-wrap: wrap; gap: 4px; }
+            .photo-wrapper img { max-width: 80px !important; height: auto !important; object-fit: contain !important; border: 1px solid #ccc !important; }
         
-            /* --- Map Printing --- */
             body.printing-map > *:not(#main-content-wrapper) { display: none !important; }
-            body.printing-map #main-content-wrapper > *:not(#vehicle-tracking-tab) { display: none !important; }
-            body.printing-map #vehicle-tracking-tab > *:not(.integrated-map-container) { display: none !important; }
+            body.printing-map #main-content-wrapper > *:not(#map-tab) { display: none !important; }
+            body.printing-map #map-tab > *:not(.integrated-map-container) { display: none !important; }
             body.printing-map .integrated-map-container > *:not(#vehicle-map) { display: none !important; }
             body.printing-map #vehicle-map {
                 width: 100vw !important;
@@ -383,7 +391,7 @@
                 border: none !important;
                 z-index: 9999 !important;
             }
-            body.printing-map .leaflet-control-container { display: none !important; }
+            body.printing-map .leaflet-control-container, body.printing-map #vehicle-map-controls, body.printing-map #qnas-controls { display: none !important; }
         }
     </style>
 
@@ -400,23 +408,22 @@
         </header>
 
         <div class="tabs">
-            <button class="tab-button active" onclick="openTab(event, 'main-report')" data-lang-key="tab_inspection_report"></button>
-            <button class="tab-button" onclick="openTab(event, 'cost-estimation-tab')" data-lang-key="tab_cost_estimation"></button>
-            <button class="tab-button" onclick="openTab(event, 'vehicle-tracking-tab')" data-lang-key="tab_vehicle_tracking"></button>
-            <button class="tab-button" onclick="openTab(event, 'saved-projects')" data-lang-key="tab_saved_projects"></button>
+            <button class="tab-button active" onclick="openTab(event, 'main-report')" data-lang-key="tab_inspection_report">Inspection Report</button>
+            <button class="tab-button" onclick="openTab(event, 'cost-estimation-tab')" data-lang-key="tab_cost_estimation">Cost Estimation</button>
+            <button class="tab-button" onclick="openTab(event, 'map-tab')" data-lang-key="tab_map">Map</button>
+            <button class="tab-button" onclick="openTab(event, 'saved-projects')" data-lang-key="tab_saved_projects">Saved Projects</button>
         </div>
         
         <div id="main-report" class="tab-content active">
             <div class="form-grid">
                 <div class="card glass-card">
-                    <h3 data-lang-key="add_new_asset"></h3>
+                    <h3>Add New Asset</h3>
                     <div class="form-group">
-                        <input type="text" id="asset" list="asset-options" data-lang-placeholder="asset_description_placeholder">
-                        <datalist id="asset-options">
-                        </datalist>
+                        <input type="text" id="asset" list="asset-options" placeholder="Asset Description">
+                        <datalist id="asset-options"></datalist>
 
-                        <div id="drop-zone">
-                            <p data-lang-key="drop_or_click_photos"></p>
+                        <div id="drop-zone" onclick="document.querySelector('.photo-input').click()">
+                            <p>Drag & Drop or Click to Add Photos</p>
                             <div class="drop-zone-buttons">
                                 <button class="icon-button" onclick="event.stopPropagation(); document.querySelector('.photo-input').click()" title="Choose from Gallery">🖼️</button>
                                 <button class="icon-button" onclick="event.stopPropagation(); openCamera()" title="Open Camera">📷</button>
@@ -427,55 +434,56 @@
                     </div>
                 </div>
                 <div class="card glass-card">
-                    <h3 data-lang-key="details_and_recommendations"></h3>
+                    <h3>Details & Recommendations</h3>
                     <div class="form-group">
-                        <input type="text" id="status" data-lang-placeholder="status_placeholder">
-                        <input type="text" id="recommendation" data-lang-placeholder="recommendation_placeholder">
-                        <button class="form-button btn-action" onclick="showQuantityModal()" data-lang-key="calculate_quantity"></button>
+                        <input type="text" id="status" placeholder="Status (e.g., Good, Damaged)">
+                        <input type="text" id="recommendation" placeholder="Recommendation (e.g., Repair, Replace)">
+                        <button class="form-button btn-action" onclick="showQuantityModal()">Calculate Quantity</button>
                     </div>
                 </div>
                 <div class="card glass-card">
-                    <h3 data-lang-key="gps_location"></h3>
+                    <h3>GPS Location</h3>
                     <div id="map" style="display:none;"></div>
                     <div class="location-mode-switcher">
-                        <button id="gps-auto-btn" class="location-mode-btn" onclick="switchLocationMode('auto')" data-lang-key="location_mode_auto"></button>
-                        <button id="gps-manual-btn" class="location-mode-btn" onclick="switchLocationMode('manual')" data-lang-key="location_mode_manual"></button>
+                        <button id="gps-auto-btn" class="location-mode-btn active" onclick="switchLocationMode('auto')">Automatic</button>
+                        <button id="gps-manual-btn" class="location-mode-btn" onclick="switchLocationMode('manual')">Manual</button>
                     </div>
                     <div id="location-auto-panel" class="location-panel">
-                        <button class="btn-action" onclick="getLocation()" data-lang-key="get_current_gps"></button>
+                        <button class="btn-action" onclick="getLocation()">Get Current GPS</button>
                     </div>
                     <div id="location-manual-panel" class="location-panel" style="display: none;">
-                        <input type="number" id="manual-lat" data-lang-placeholder="manual_lat_placeholder" step="any" oninput="updateLocationFromManual()">
-                        <input type="number" id="manual-lng" data-lang-placeholder="manual_lng_placeholder" step="any" oninput="updateLocationFromManual()">
+                        <input type="number" id="manual-lat" placeholder="Manual Latitude" step="any" oninput="updateLocationFromManual()">
+                        <input type="number" id="manual-lng" placeholder="Manual Longitude" step="any" oninput="updateLocationFromManual()">
                     </div>
                     <div class="location-display-wrapper">
-                        <div>
-                            <div><small><strong><span data-lang-key="latitude"></span>:</strong> <span id="lat-display">N/A</span></small></div>
-                            <div><small><strong><span data-lang-key="longitude"></span>:</strong> <span id="lng-display">N/A</span></small></div>
+                         <div>
+                            <div><small><strong>Latitude:</strong> <span id="lat-display">N/A</span></small></div>
+                            <div><small><strong>Longitude:</strong> <span id="lng-display">N/A</span></small></div>
                         </div>
-                        <button id="insert-location-btn" class="btn-insert" onclick="insertLocationToForm()" data-lang-key="insert_location_to_form"></button>
+                        <input type="hidden" id="quantity-input">
+                        <input type="hidden" id="current-photo-urls" value="[]">
                     </div>
                 </div>
             </div>
-            <button onclick="addRow()" class="btn-insert"><span data-lang-key="add_row_to_table"></span></button>
+            <button onclick="addRow()" class="btn-insert">Add Row to Table</button>
 
             <div class="printable-area">
                 <div class="info-card glass-card">
                     <div class="logo-container">
-                        <input type="file" accept="image/*" onchange="loadClientLogo('inspection')" style="display:none;" id="client-logo-inspection-input">
+                        <input type="file" accept="image/*" onchange="loadLogo(event, 'client-logo-inspection')" style="display:none;" id="client-logo-inspection-input">
                         <img id="client-logo-inspection" src="https://i.imgur.com/W1f3q2y.png" alt="Client Logo" onclick="document.getElementById('client-logo-inspection-input').click();">
                     </div>
                     <div class="title-container">
-                        <div id="inspection-title-1" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">Maintenance of Strategic</div>
-                        <div id="inspection-title-2" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">Highways Qatar North</div>
-                        <div id="inspection-title-3" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">ZF_093</div>
+                        <div id="inspection-title-1" class="report-title-row" contenteditable="true">Maintenance of Strategic</div>
+                        <div id="inspection-title-2" class="report-title-row" contenteditable="true">Highways Qatar North</div>
+                        <div id="inspection-title-3" class="report-title-row" contenteditable="true">ZF_093</div>
                         <label class="report-date-label">
-                            <input type="date" id="display-date" onchange="saveActiveReport()">
+                            <input type="date" id="display-date">
                         </label>
-                        <div id="inspection-small-title" class="small-title" contenteditable="true" oninput="saveActiveReport()">Inspection Report</div>
+                        <div id="inspection-small-title" class="small-title" contenteditable="true">Inspection Report</div>
                     </div>
                     <div class="logo-container">
-                        <input type="file" accept="image/*" onchange="loadCompanyLogo('inspection')" style="display:none;" id="company-logo-inspection-input">
+                        <input type="file" accept="image/*" onchange="loadLogo(event, 'company-logo-inspection')" style="display:none;" id="company-logo-inspection-input">
                         <img id="company-logo-inspection" src="https://i.imgur.com/1s3a1H4.png" alt="Company Logo" onclick="document.getElementById('company-logo-inspection-input').click();">
                     </div>
                     
@@ -495,7 +503,7 @@
                             <div class="dropdown-menu" id="inspection-table-menu"></div>
                         </div>
                     </div>
-                    <div class="table-container" style="max-height: 50vh; overflow-y: auto;">
+                    <div class="table-container">
                         <table id="report-table"></table>
                     </div>
                 </div>
@@ -569,20 +577,20 @@
             <div class="printable-area">
                 <div class="info-card glass-card">
                     <div class="logo-container">
-                        <input type="file" accept="image/*" onchange="loadClientLogo('estimation')" style="display:none;" id="client-logo-estimation-input">
+                        <input type="file" accept="image/*" onchange="loadLogo(event, 'client-logo-estimation')" style="display:none;" id="client-logo-estimation-input">
                         <img id="client-logo-estimation" src="https://i.imgur.com/W1f3q2y.png" alt="Client Logo" title="Click to upload Client Logo" onclick="document.getElementById('client-logo-estimation-input').click()">
                     </div>
                     <div class="title-container">
-                        <div id="estimation-title-1" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">Maintenance of Strategic</div>
-                        <div id="estimation-title-2" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">Highways Qatar North</div>
-                        <div id="estimation-title-3" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">ZF_093</div>
+                        <div id="estimation-title-1" class="report-title-row" contenteditable="true">Maintenance of Strategic</div>
+                        <div id="estimation-title-2" class="report-title-row" contenteditable="true">Highways Qatar North</div>
+                        <div id="estimation-title-3" class="report-title-row" contenteditable="true">ZF_093</div>
                         <label class="report-date-label">
-                            <input type="date" id="estimation-date" oninput="saveActiveReport()">
+                            <input type="date" id="estimation-date">
                         </label>
-                        <div id="estimation-small-title" class="small-title" contenteditable="true" oninput="saveActiveReport()">Cost Estimation</div>
+                        <div id="estimation-small-title" class="small-title" contenteditable="true">Cost Estimation</div>
                     </div>
                     <div class="logo-container">
-                        <input type="file" accept="image/*" onchange="loadCompanyLogo('estimation')" style="display:none;" id="company-logo-estimation-input">
+                        <input type="file" accept="image/*" onchange="loadLogo(event, 'company-logo-estimation')" style="display:none;" id="company-logo-estimation-input">
                         <img id="company-logo-estimation" src="https://i.imgur.com/1s3a1H4.png" alt="Company Logo" title="Click to upload Company Logo" onclick="document.getElementById('company-logo-estimation-input').click()">
                     </div>
                     <div class="print-header-replacement">
@@ -593,9 +601,9 @@
                     </div>
                 </div>
                 <div class="glass-card estimation-details">
-                    <div class="form-row"><label for="work-order-no">Work Order No.</label><input type="text" id="work-order-no" oninput="saveActiveReport()"></div>
-                    <div class="form-row"><label for="tpc-no">TPC No.</label><input type="text" id="tpc-no" oninput="saveActiveReport()"></div>
-                    <div class="form-row"><label for="work-desc">Description of Work</label><input type="text" id="work-desc" oninput="saveActiveReport()"></div>
+                    <div class="form-row"><label for="work-order-no">Work Order No.</label><input type="text" id="work-order-no"></div>
+                    <div class="form-row"><label for="tpc-no">TPC No.</label><input type="text" id="tpc-no"></div>
+                    <div class="form-row"><label for="work-desc">Description of Work</label><input type="text" id="work-desc"></div>
                 </div>
                 
                 <div class="glass-card">
@@ -638,9 +646,9 @@
             </div>
         </div>
         
-        <div id="vehicle-tracking-tab" class="tab-content">
+        <div id="map-tab" class="tab-content">
             <div class="glass-card integrated-map-container">
-                <h3 data-lang-key="tab_vehicle_tracking"></h3>
+                <h3>Map</h3>
                 <div id="vehicle-map-controls">
                     <button class="btn-action" onclick="centerVehicleMapOnUser()">My Location</button>
                     <button class="btn-action" onclick="fitMapToAssetMarkers()">Fit All Assets</button>
@@ -652,6 +660,21 @@
                     <button id="print-map-btn" class="btn-action">Print Map</button>
                     <button class="btn-delete" onclick="clearMapMarkers()">Clear Map</button>
                 </div>
+                <div class="glass-card" id="qnas-controls">
+                     <div>
+                        <label for="qnas-zone">QNAS Zone</label>
+                        <select id="qnas-zone" class="form-control"></select>
+                    </div>
+                    <div>
+                        <label for="qnas-street">QNAS Street</label>
+                        <select id="qnas-street" class="form-control"></select>
+                    </div>
+                    <div>
+                        <label for="qnas-building">QNAS Building</label>
+                        <select id="qnas-building" class="form-control"></select>
+                    </div>
+                </div>
+
                 <div id="vehicle-map"></div>
                 <div id="import-summary" style="margin-top: 10px; font-weight: bold;"></div>
             </div>
@@ -659,11 +682,11 @@
         
         <div id="saved-projects" class="tab-content">
             <div class="glass-card">
-                <h3 data-lang-key="tab_saved_projects"></h3>
+                <h3>Saved Projects</h3>
                 <input type="text" id="project-search" placeholder="Search projects by name..." onkeyup="filterProjects()" style="margin-bottom: 10px;">
                 <div style="margin-bottom: 10px;">
                     <label for="sort-projects">Sort by:</label>
-                    <select id="sort-projects" onchange="sortProjects()">
+                    <select id="sort-projects" onchange="updateProjectsList()">
                         <option value="name">Name</option>
                         <option value="date-newest">Date Saved (Newest)</option>
                         <option value="date-oldest">Date Saved (Oldest)</option>
@@ -676,7 +699,6 @@
 
     <footer class="glass-card footer">
         <p style="margin: 0;">All rights reserved © <span id="current-year"></span></p>
-        <p style="margin: 0;" data-lang-key="created_by"></p>
     </footer>
 
     <div class="fab-container">
@@ -684,108 +706,28 @@
         <button id="add-fab" class="fab" onclick="document.querySelector('#asset').focus()">➕</button>
     </div>
 
-    <div id="quantityModal" class="modal"><div class="modal-content glass-card"><h3 data-lang-key="enter_quantity_details"></h3><input type="number" id="length" data-lang-placeholder="length_m"><input type="number" id="width" data-lang-placeholder="width_m"><input type="number" id="depth" data-lang-placeholder="depth_m"><input type="number" id="repetitions" data-lang-placeholder="repetitions_nr"><div class="modal-buttons" style="display:flex; gap: 10px;"><button onclick="setQuantity()" class="btn-insert" data-lang-key="set_quantity" style="flex: 1;"></button><button onclick="closeQuantityModal()" class="btn-delete" style="flex: 1;" data-lang-key="cancel"></button></div></div></div>
+    <div id="quantityModal" class="modal"><div class="modal-content glass-card"><h3>Enter Quantity Details</h3><input type="number" id="length" placeholder="Length (m)"><input type="number" id="width" placeholder="Width (m)"><input type="number" id="depth" placeholder="Depth (m)"><input type="number" id="repetitions" placeholder="Repetitions (NR)"><div class="modal-buttons" style="display:flex; gap: 10px;"><button onclick="setQuantity()" class="btn-insert" style="flex: 1;">Set Quantity</button><button onclick="closeQuantityModal()" class="btn-delete" style="flex: 1;">Cancel</button></div></div></div>
 
-    <div id="camera-modal" class="modal"><div id="camera-modal-content" class="glass-card"><video id="camera-feed" autoplay playsinline></video><button id="capture-btn" onclick="capturePhoto()">📸</button><button id="close-camera-btn" onclick="closeCamera()">X</button></div></div>
+    <div id="camera-modal" class="modal"><div id="camera-modal-content" class="glass-card"><video id="camera-feed" autoplay playsinline></video><button id="capture-btn" onclick="capturePhoto()">📸</button><button id="close-camera-btn" onclick="closeCamera()" class="btn-delete">X</button></div></div>
     <canvas id="photo-canvas" style="display:none;"></canvas>
 
-    <div id="preview-overlay">
-        <div id="preview-content">
-             <button id="close-preview" onclick="hidePreview()" class="btn-delete" style="position: absolute; top: 10px; right: 10px; font-size: 24px; padding: 5px 10px; line-height: 1;">❌</button>
-        </div>
-    </div>
+    <div id="preview-overlay" onclick="hidePreview()"><div id="preview-content" onclick="event.stopPropagation()"><button id="close-preview" onclick="hidePreview()" class="btn-delete" style="position: absolute; top: 10px; right: 10px; font-size: 24px; padding: 5px 10px; line-height: 1;">❌</button></div></div>
 
-    <div id="confirm-delete-modal" class="modal">
-        <div class="modal-content glass-card">
-            <h3>Confirm Deletion</h3>
-            <p>To confirm deletion, please type the project name: "<span id="project-to-delete-name"></span>"</p>
-            <input type="text" id="delete-confirmation-input" placeholder="Type project name here">
-            <div style="display:flex; gap: 10px;">
-                <button onclick="confirmProjectDeletion()" class="btn-delete" style="flex: 1;">Confirm Delete</button>
-                <button onclick="cancelProjectDeletion()" class="btn-neutral" style="flex: 1;">Cancel</button>
-            </div>
-        </div>
-    </div>
+    <div id="confirm-delete-modal" class="modal"><div class="modal-content glass-card"><h3>Confirm Deletion</h3><p>To confirm deletion, please type the project name: "<span id="project-to-delete-name"></span>"</p><input type="text" id="delete-confirmation-input" placeholder="Type project name here"><div style="display:flex; gap: 10px;"><button onclick="confirmProjectDeletion()" class="btn-delete" style="flex: 1;">Confirm Delete</button><button onclick="cancelProjectDeletion()" class="btn-neutral" style="flex: 1;">Cancel</button></div></div></div>
+
+    <div id="pdf-options-modal" class="modal"><div class="modal-content glass-card"><h3>PDF Generated</h3><p>Your PDF is ready. What would you like to do?</p><div style="display:flex; gap: 10px;"><button id="pdf-download-btn" class="btn-action" style="flex: 1;">Download</button><button id="pdf-share-btn" class="btn-action" style="flex: 1;">Share</button><button onclick="document.getElementById('pdf-options-modal').style.display='none'" class="btn-neutral" style="flex: 1;">Close</button></div></div></div>
+
 
     <script>
-        // --- DICTIONARY ---
-        const langDict = {
-            en: {
-                report_title: "Asset Inspection Report",
-                tab_inspection_report: "Inspection Report",
-                tab_saved_projects: "Saved Projects",
-                tab_cost_estimation: "Cost Estimation",
-                tab_vehicle_tracking: "Vehicle Tracking",
-                date: "Date",
-                add_new_asset: "Add New Asset",
-                asset_description_placeholder: "Asset Description",
-                drop_or_click_photos: "Drag & Drop or Click to Add Photos",
-                details_and_recommendations: "Details & Recommendations",
-                status_placeholder: "Status (e.g., Good, Damaged)",
-                recommendation_placeholder: "Recommendation (e.g., Repair, Replace)",
-                calculate_quantity: "Calculate Quantity",
-                gps_location: "GPS Location",
-                location_mode_auto: "Automatic",
-                location_mode_manual: "Manual",
-                get_current_gps: "Get Current GPS",
-                manual_lat_placeholder: "Manual Latitude",
-                manual_lng_placeholder: "Manual Longitude",
-                latitude: "Latitude",
-                longitude: "Longitude",
-                insert_location_to_form: "Insert to Form",
-                add_row_to_table: "Add Row to Table",
-                print_report: "Print Report",
-                export_pdf_report: "Export PDF",
-                print_estimation: "Print Estimation",
-                export_pdf_estimation: "Export PDF",
-                enter_quantity_details: "Enter Quantity Details",
-                length_m: "Length (m)",
-                width_m: "Width (m)",
-                depth_m: "Depth (m)",
-                repetitions_nr: "Repetitions (NR)",
-                set_quantity: "Set Quantity",
-                cancel: "Cancel",
-                download_csv_template: "Download CSV Template",
-                clear_map: "Clear Map",
-                assets_loaded: "Assets loaded:",
-                total_assets: "Total assets:",
-                last_modified: "Last Modified:",
-                saved_date: "Saved Date:",
-                project_name_placeholder: "Type project name to confirm",
-                confirm_delete: "Confirm Deletion",
-                cancel_delete: "Cancel",
-                type_project_name: "Type the project name to confirm:",
-                confirm_deletion_message: "Are you sure you want to delete this project?",
-            },
-        };
-
-        let currentLang = 'en';
-
-        function setLanguage(lang) {
-            currentLang = lang;
-            document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
-            document.querySelectorAll('[data-lang-key]').forEach(element => {
-                const key = element.getAttribute('data-lang-key');
-                if (langDict[currentLang]?.[key]) {
-                    element.textContent = langDict[currentLang][key];
-                }
-            });
-            document.querySelectorAll('[data-lang-placeholder]').forEach(element => {
-                const key = element.getAttribute('data-lang-placeholder');
-                if (langDict[currentLang]?.[key]) {
-                    element.placeholder = langDict[currentLang][key];
-                }
-            });
-        }
-
         // --- GLOBAL VARIABLES ---
-        let reportTable, costEstimationTable, map, vehicleMap, currentMarker;
+        let reportTable, costEstimationTable, map, vehicleMap, userMarker, currentMarker;
         let editingRow = null;
-        let projects = loadProjects();
-        let clientLogoInspection = null, companyLogoInspection = null;
-        let clientLogoEstimation = null, companyLogoEstimation = null;
+        let projects = [];
+        let cameraStream;
+        let activeProjectName = 'active_report';
+        let assetMarkers = [];
+        let generatedPdfBlob = null;
         
-        // Default BOQ Data, can be extended by uploading a CSV
         let boqData = [
             { ref: "A1.1", description: "Excavation", unit: "m³", rate: 15.00 },
             { ref: "A1.2", description: "Backfilling", unit: "m³", rate: 10.00 },
@@ -804,44 +746,87 @@
             reportTable = document.getElementById('report-table');
             costEstimationTable = document.getElementById('cost-estimation-table');
 
+            // Initialize Tables
             if (!reportTable.tHead) {
-                reportTable.createTHead().insertRow().innerHTML = `<th>ID</th><th>Asset</th><th>Status</th><th>Recommendation</th><th>Quantity</th><th>Photos</th><th>Latitude</th><th>Longitude</th><th>Action</th>`;
+                reportTable.createTHead().innerHTML = `<tr><th>ID</th><th>Asset</th><th>Status</th><th>Recommendation</th><th>Quantity</th><th>Photos</th><th>Latitude</th><th>Longitude</th><th>Action</th></tr>`;
                 reportTable.createTBody();
             }
+            if (!costEstimationTable.tBodies[0]) {
+                 costEstimationTable.createTBody();
+            }
             
+            projects = loadProjects();
             populateDatalist('asset-options', assetOptions);
             repopulateBOQSelect();
-            
-            loadActiveReport();
             updateProjectsList();
             setupEventListeners();
             populateMenus();
             updateMostUsedBOQ();
-            setLanguage('en');
+            loadProject(activeProjectName);
+            switchLocationMode('auto');
         });
 
         function setupEventListeners() {
+            // File Inputs
             document.getElementById('boq-csv-input').addEventListener('change', handleBOQUpload);
-            document.getElementById('vehicle-csv-input').addEventListener('change', handleVehicleCSVUpload);
+            document.getElementById('vehicle-csv-input').addEventListener('change', handleVehicleFileImport);
+            document.querySelector('.photo-input').addEventListener('change', (e) => {
+                for(const file of e.target.files) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => addPhotoToPreview(event.target.result);
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // BOQ Form
             document.getElementById('boq-search').addEventListener('input', () => repopulateBOQSelect(document.getElementById('boq-search').value));
             document.getElementById('boq-ref-select').addEventListener('change', updateBOQDetails);
+            ['boq-nr', 'boq-length', 'boq-width', 'boq-height'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calculateBOQTotal);
+            });
+            
+            // Map
             document.getElementById('print-map-btn').addEventListener('click', printMap);
 
-            ['boq-nr', 'boq-length', 'boq-width', 'boq-height'].forEach(id => {
-                document.getElementById(id).addEventListener('input', calculateBOQTotalQuantity);
+            // PDF Modal
+            document.getElementById('pdf-download-btn').addEventListener('click', downloadGeneratedPdf);
+            document.getElementById('pdf-share-btn').addEventListener('click', shareGeneratedPdf);
+            
+            // Auto-saving contenteditable fields and inputs
+            document.querySelectorAll('input, select, [contenteditable="true"]').forEach(el => {
+                el.addEventListener('input', () => saveProject(activeProjectName, false));
+                el.addEventListener('change', () => saveProject(activeProjectName, false));
+            });
+
+             // QNAS Dropdowns
+            document.getElementById('qnas-zone').addEventListener('change', (e) => {
+                getStreets(e.target.value);
+                clearBuildingMarkers();
+            });
+            document.getElementById('qnas-street').addEventListener('change', (e) => {
+                const zone = document.getElementById('qnas-zone').value;
+                getBuildings(zone, e.target.value);
+                clearBuildingMarkers();
+            });
+            document.getElementById('qnas-building').addEventListener('change', (e) => {
+                 const zone = document.getElementById('qnas-zone').value;
+                 const street = document.getElementById('qnas-street').value;
+                 const building = e.target.value;
+                 if(building) {
+                     getLocationDetails(zone, street, building);
+                 }
             });
         }
         
-        // --- MENU & LIST POPULATION ---
         function populateMenus() {
             const mainMenu = document.querySelector('.main-header .dropdown-menu');
-            mainMenu.innerHTML = `<button onclick="saveProject()">💾 Save Project</button><hr><button onclick="setLanguage('en')">🇺🇸 English</button><button onclick="setLanguage('ar')">🇸🇦 العربية</button>`;
+            mainMenu.innerHTML = `<button onclick="saveProjectAs()">💾 Save Project As...</button><hr><button onclick="setLanguage('en')">🇺🇸 English</button><button onclick="setLanguage('ar')">🇸🇦 العربية</button>`;
             
             const inspectionMenu = document.getElementById('inspection-table-menu');
-            inspectionMenu.innerHTML = `<button onclick="printContent('inspection')">🖨️ Print</button><button onclick="exportToPdf('inspection')">📄 Export PDF</button>`;
+            inspectionMenu.innerHTML = `<button onclick="printContent('main-report')">🖨️ Print</button><button onclick="exportToPdf('main-report')">📄 Export PDF</button>`;
 
             const estimationMenu = document.getElementById('estimation-table-menu');
-            estimationMenu.innerHTML = `<button onclick="printContent('estimation')">🖨️ Print</button><button onclick="exportToPdf('estimation')">📄 Export PDF</button>`;
+            estimationMenu.innerHTML = `<button onclick="printContent('cost-estimation-tab')">🖨️ Print</button><button onclick="exportToPdf('cost-estimation-tab')">📄 Export PDF</button>`;
         }
         
         function populateDatalist(datalistId, optionsArray) {
@@ -857,7 +842,7 @@
             document.getElementById(tabName).classList.add('active');
             evt.currentTarget.classList.add("active");
 
-            if (tabName === 'vehicle-tracking-tab' && !vehicleMap) {
+            if (tabName === 'map-tab' && !vehicleMap) {
                 initializeVehicleMap();
             }
              if (tabName === 'main-report' && !map) {
@@ -866,35 +851,289 @@
         }
 
         // --- LOCAL STORAGE & PROJECT MANAGEMENT ---
-        function generateId() { return '_' + Math.random().toString(36).substring(2, 11); }
-        function saveActiveReport() { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function loadActiveReport() { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function loadClientLogo(tab) { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function loadCompanyLogo(tab) { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function saveProject() { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function loadProject(projectName) { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function deleteProject(projectName) { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function confirmProjectDeletion() { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function cancelProjectDeletion() { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function loadProjects() { return JSON.parse(localStorage.getItem('projects')) || []; }
-        function updateProjectsList() { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function filterProjects() { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
-        function getSortedProjects() { /* Functionality remains complex, omitted for brevity but assumed functional from previous steps */ }
+        function generateId() { return '_' + Math.random().toString(36).substring(2, 9); }
+        
+        function getProjectData() {
+            const data = {
+                inspection: {
+                    title1: document.getElementById('inspection-title-1').textContent,
+                    title2: document.getElementById('inspection-title-2').textContent,
+                    title3: document.getElementById('inspection-title-3').textContent,
+                    smallTitle: document.getElementById('inspection-small-title').textContent,
+                    date: document.getElementById('display-date').value,
+                    clientLogo: document.getElementById('client-logo-inspection').src,
+                    companyLogo: document.getElementById('company-logo-inspection').src,
+                    table: [],
+                },
+                estimation: {
+                    title1: document.getElementById('estimation-title-1').textContent,
+                    title2: document.getElementById('estimation-title-2').textContent,
+                    title3: document.getElementById('estimation-title-3').textContent,
+                    smallTitle: document.getElementById('estimation-small-title').textContent,
+                    date: document.getElementById('estimation-date').value,
+                    clientLogo: document.getElementById('client-logo-estimation').src,
+                    companyLogo: document.getElementById('company-logo-estimation').src,
+                    workOrder: document.getElementById('work-order-no').value,
+                    tpcNo: document.getElementById('tpc-no').value,
+                    workDesc: document.getElementById('work-desc').value,
+                    table: [],
+                },
+                boqData: boqData,
+                savedAt: new Date().toISOString()
+            };
+            // Scrape inspection table
+            document.querySelectorAll('#report-table tbody tr').forEach(row => {
+                const photoWrapper = row.cells[5].querySelector('.photo-wrapper');
+                const photos = photoWrapper ? Array.from(photoWrapper.querySelectorAll('img')).map(img => img.src) : [];
+                data.inspection.table.push({
+                    id: row.cells[0].textContent,
+                    asset: row.cells[1].textContent,
+                    status: row.cells[2].textContent,
+                    recommendation: row.cells[3].textContent,
+                    quantity: row.cells[4].textContent,
+                    photos: photos,
+                    lat: row.cells[6].textContent,
+                    lng: row.cells[7].textContent,
+                });
+            });
+            // Scrape estimation table
+            document.querySelectorAll('#cost-estimation-table tbody tr').forEach(row => {
+                data.estimation.table.push({
+                    ref: row.cells[0].textContent,
+                    desc: row.cells[1].textContent,
+                    unit: row.cells[2].textContent,
+                    nr: row.cells[3].textContent,
+                    length: row.cells[4].textContent,
+                    width: row.cells[5].textContent,
+                    height: row.cells[6].textContent,
+                    qty: row.cells[7].textContent,
+                    rate: row.cells[8].textContent,
+                    amount: row.cells[9].textContent,
+                    remarks: row.cells[10].textContent,
+                });
+            });
+            return data;
+        }
 
+        function saveProject(projectName, showPrompt = true) {
+            let pName = projectName;
+            if (showPrompt || !pName || pName === 'active_report') {
+                const defaultName = `Project-${new Date().toISOString().split('T')[0]}`;
+                pName = prompt("Save project as:", defaultName);
+                if (!pName) return; 
+            }
+            try {
+                const data = getProjectData();
+                localStorage.setItem(`project_${pName}`, JSON.stringify(data));
+                
+                const projectIndex = projects.findIndex(p => p.name === pName);
+                if (projectIndex > -1) {
+                    projects[projectIndex].savedAt = data.savedAt;
+                } else {
+                    projects.push({ name: pName, savedAt: data.savedAt });
+                }
+                localStorage.setItem('projects', JSON.stringify(projects));
+                
+                if(showPrompt) {
+                   alert(`Project "${pName}" saved successfully!`);
+                   updateProjectsList();
+                } else if(projectName === 'active_report') {
+                    // console.log("Autosaved.");
+                }
+
+            } catch (e) {
+                console.error("Error saving project:", e);
+                alert("Could not save project. Local storage might be full.");
+            }
+        }
+        
+        function saveProjectAs() {
+            saveProject(null, true);
+        }
+
+        function loadProject(projectName) {
+            const dataString = localStorage.getItem(`project_${projectName}`);
+            if (!dataString) {
+                console.log(`No data for project "${projectName}", loading defaults.`);
+                return;
+            }
+            const data = JSON.parse(dataString);
+            
+            // Load inspection data
+            const insp = data.inspection;
+            document.getElementById('inspection-title-1').textContent = insp.title1;
+            document.getElementById('inspection-title-2').textContent = insp.title2;
+            document.getElementById('inspection-title-3').textContent = insp.title3;
+            document.getElementById('inspection-small-title').textContent = insp.smallTitle;
+            document.getElementById('display-date').value = insp.date;
+            document.getElementById('client-logo-inspection').src = insp.clientLogo;
+            document.getElementById('company-logo-inspection').src = insp.companyLogo;
+            
+            const inspTbody = document.querySelector('#report-table tbody');
+            inspTbody.innerHTML = '';
+            insp.table.forEach(rowData => addRow(rowData, true));
+
+            // Load estimation data
+            const est = data.estimation;
+            document.getElementById('estimation-title-1').textContent = est.title1;
+            document.getElementById('estimation-title-2').textContent = est.title2;
+            document.getElementById('estimation-title-3').textContent = est.title3;
+            document.getElementById('estimation-small-title').textContent = est.smallTitle;
+            document.getElementById('estimation-date').value = est.date;
+            document.getElementById('client-logo-estimation').src = est.clientLogo;
+            document.getElementById('company-logo-estimation').src = est.companyLogo;
+            document.getElementById('work-order-no').value = est.workOrder;
+            document.getElementById('tpc-no').value = est.tpcNo;
+            document.getElementById('work-desc').value = est.workDesc;
+
+            const estTbody = document.querySelector('#cost-estimation-table tbody');
+            estTbody.innerHTML = '';
+            est.table.forEach(rowData => insertBOQRow(rowData, true));
+            calculateCostEstimationTotal();
+            
+            // Load BOQ data if present
+            if (data.boqData) {
+                boqData = data.boqData;
+                repopulateBOQSelect();
+            }
+
+            activeProjectName = projectName;
+            document.querySelector('.main-title').textContent = projectName === 'active_report' ? 'Project Dashboard' : projectName;
+            openTab({currentTarget: document.querySelector('.tab-button.active')}, document.querySelector('.tab-content.active').id);
+        }
+
+        function deleteProject(projectName) {
+            if (confirm(`Are you sure you want to delete the project "${projectName}"? This cannot be undone.`)) {
+                localStorage.removeItem(`project_${projectName}`);
+                projects = projects.filter(p => p.name !== projectName);
+                localStorage.setItem('projects', JSON.stringify(projects));
+                updateProjectsList();
+                alert(`Project "${projectName}" deleted.`);
+            }
+        }
+        
+        function loadProjects() { return JSON.parse(localStorage.getItem('projects')) || []; }
+
+        function updateProjectsList() {
+            const list = document.getElementById('projects-list');
+            list.innerHTML = '';
+            const sortOrder = document.getElementById('sort-projects').value;
+
+            const sortedProjects = [...projects].sort((a, b) => {
+                if (sortOrder === 'name') return a.name.localeCompare(b.name);
+                if (sortOrder === 'date-newest') return new Date(b.savedAt) - new Date(a.savedAt);
+                if (sortOrder === 'date-oldest') return new Date(a.savedAt) - new Date(b.savedAt);
+            });
+
+            sortedProjects.forEach(p => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="project-name" onclick="loadProject('${p.name}')">${p.name}</span>
+                    <div>
+                        <small>Saved: ${new Date(p.savedAt).toLocaleString()}</small>
+                        <button class="btn-delete" style="margin-left: 10px;" onclick="deleteProject('${p.name}')">Delete</button>
+                    </div>`;
+                list.appendChild(li);
+            });
+        }
+        
+        function filterProjects() { /* Not implemented, but easy to add if needed */ }
+        
+        function loadLogo(event, imgId) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById(imgId).src = e.target.result;
+                    saveProject(activeProjectName, false);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
         // --- CAMERA & PHOTO ---
-        let cameraStream;
-        async function openCamera() { /* Omitted for brevity */ }
-        function closeCamera() { /* Omitted for brevity */ }
-        function capturePhoto() { /* Omitted for brevity */ }
-        function addPhotoToPreview(dataUrl) { /* Omitted for brevity */ }
-        function addPhotoToCell(row, dataUrl) { /* Omitted for brevity */ }
-        function showImagePreview(src) { /* Omitted for brevity */ }
+        async function openCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Camera API is not available on this browser.");
+                return;
+            }
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                const videoFeed = document.getElementById('camera-feed');
+                videoFeed.srcObject = cameraStream;
+                document.getElementById('camera-modal').style.display = 'flex';
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                alert("Could not access the camera. Please check permissions.");
+            }
+        }
+
+        function closeCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('camera-modal').style.display = 'none';
+        }
+
+        function capturePhoto() {
+            const canvas = document.getElementById('photo-canvas');
+            const video = document.getElementById('camera-feed');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            addPhotoToPreview(dataUrl);
+            closeCamera();
+        }
+
+        function addPhotoToPreview(dataUrl) {
+            const previewContainer = document.getElementById('photo-previews');
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            img.onclick = () => {
+                if(confirm('Remove this photo?')) {
+                    img.remove();
+                    updatePhotoUrls();
+                }
+            };
+            previewContainer.appendChild(img);
+            updatePhotoUrls();
+        }
+
+        function updatePhotoUrls() {
+            const urls = Array.from(document.querySelectorAll('#photo-previews img')).map(img => img.src);
+            document.getElementById('current-photo-urls').value = JSON.stringify(urls);
+        }
+
+        function addPhotosToCell(cell, photoUrls) {
+            cell.innerHTML = ''; 
+            const wrapper = document.createElement('div');
+            wrapper.className = 'photo-wrapper';
+            photoUrls.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.onclick = () => showImagePreview(url);
+                wrapper.appendChild(img);
+            });
+            cell.appendChild(wrapper);
+        }
+
+        function showImagePreview(src) {
+            const previewOverlay = document.getElementById('preview-overlay');
+            const previewContent = document.getElementById('preview-content');
+            previewContent.innerHTML = `<button onclick="hidePreview()" class="btn-delete" style="position: absolute; top: 10px; right: 10px; z-index: 1;">❌</button><img src="${src}" style="width:100%;">`;
+            previewOverlay.style.display = 'flex';
+        }
         function hidePreview() { document.getElementById('preview-overlay').style.display = 'none'; }
         
         // --- GPS & MAPS ---
         function initializeInspectionMap() {
             if (map) return;
-            map = L.map('map').setView([25.3548, 51.1839], 13);
+            document.getElementById('map').style.display = 'block';
+            map = L.map('map').setView([25.3548, 51.1839], 10);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         }
 
@@ -905,22 +1144,31 @@
                     document.getElementById('lat-display').textContent = lat.toFixed(6);
                     document.getElementById('lng-display').textContent = lng.toFixed(6);
                     if (!map) initializeInspectionMap();
-                    map.setView([lat, lng], 13);
+                    map.setView([lat, lng], 16);
                     if (currentMarker) currentMarker.setLatLng([lat, lng]);
                     else currentMarker = L.marker([lat, lng]).addTo(map);
-                }, () => alert("Could not get location."));
+                }, () => alert("Could not get location. Please enable location services."));
             }
         }
         function switchLocationMode(mode) {
-             ['auto', 'manual'].forEach(m => document.getElementById(`location-${m}-panel`).style.display = m === mode ? 'block' : 'none');
+             ['auto', 'manual'].forEach(m => document.getElementById(`location-${m}-panel`).style.display = m === mode ? 'flex' : 'none');
              ['auto', 'manual'].forEach(m => document.getElementById(`gps-${m}-btn`).classList.toggle('active', m === mode));
              if(mode === 'auto') getLocation();
         }
-        function updateLocationFromManual() { /* Omitted for brevity */ }
-        function insertLocationToForm() { /* Omitted for brevity */ }
+        function updateLocationFromManual() {
+            const lat = parseFloat(document.getElementById('manual-lat').value);
+            const lng = parseFloat(document.getElementById('manual-lng').value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                document.getElementById('lat-display').textContent = lat.toFixed(6);
+                document.getElementById('lng-display').textContent = lng.toFixed(6);
+            }
+        }
         
         // --- QUANTITY MODAL ---
-        function showQuantityModal() { document.getElementById('quantityModal').style.display = 'flex'; }
+        function showQuantityModal(row) { 
+            editingRow = row;
+            document.getElementById('quantityModal').style.display = 'flex'; 
+        }
         function closeQuantityModal() { document.getElementById('quantityModal').style.display = 'none'; }
         
         function setQuantity() {
@@ -950,17 +1198,62 @@
             }
 
             const fullDescription = `${details} = ${quantity.toFixed(2)} ${unit}`;
-            
-            if (editingRow) {
-                editingRow.cells[4].textContent = fullDescription;
-                saveActiveReport();
-            }
+            document.getElementById('quantity-input').value = fullDescription;
             closeQuantityModal();
         }
 
-        // --- TABLE ROW MANAGEMENT ---
-        function addRow(rowData = {}) { /* Complex logic, assumed functional */ }
-        function removeRow(row) { /* Omitted for brevity */ }
+        // --- TABLE ROW MANAGEMENT (INSPECTION) ---
+        function addRow(rowData = {}, fromLoad = false) {
+            const tbody = reportTable.getElementsByTagName('tbody')[0];
+            const newRow = tbody.insertRow();
+            
+            const data = fromLoad ? rowData : {
+                id: (tbody.rows.length).toString(),
+                asset: document.getElementById('asset').value,
+                status: document.getElementById('status').value,
+                recommendation: document.getElementById('recommendation').value,
+                quantity: document.getElementById('quantity-input').value,
+                photos: JSON.parse(document.getElementById('current-photo-urls').value || '[]'),
+                lat: document.getElementById('lat-display').textContent,
+                lng: document.getElementById('lng-display').textContent
+            };
+
+            if (!data.asset && !fromLoad) {
+                alert("Asset description is required.");
+                return;
+            }
+
+            newRow.innerHTML = `
+                <td>${data.id}</td>
+                <td>${data.asset}</td>
+                <td>${data.status}</td>
+                <td>${data.recommendation}</td>
+                <td>${data.quantity}</td>
+                <td></td>
+                <td>${data.lat}</td>
+                <td>${data.lng}</td>
+                <td><button class="btn-delete" onclick="removeRow(this)">Delete</button></td>
+            `;
+
+            addPhotosToCell(newRow.cells[5], data.photos);
+
+            if (!fromLoad) {
+                document.getElementById('asset').value = '';
+                document.getElementById('status').value = '';
+                document.getElementById('recommendation').value = '';
+                document.getElementById('quantity-input').value = '';
+                document.getElementById('photo-previews').innerHTML = '';
+                document.getElementById('current-photo-urls').value = '[]';
+                saveProject(activeProjectName, false);
+            }
+        }
+        function removeRow(btn) {
+            if (confirm("Are you sure you want to remove this row?")) {
+                const row = btn.parentNode.parentNode;
+                row.parentNode.removeChild(row);
+                saveProject(activeProjectName, false);
+            }
+        }
         
         // --- BOQ & COST ESTIMATION ---
         function handleBOQUpload(event) {
@@ -978,20 +1271,18 @@
                         rate: parseFloat(row.Rate || row.rate) || 0
                     })).filter(item => item.ref && !isNaN(item.rate));
 
-                    // Add new items to boqData, avoiding duplicates by 'ref'
                     newItems.forEach(newItem => {
-                        const exists = boqData.some(existingItem => existingItem.ref === newItem.ref);
-                        if (!exists) {
-                            boqData.push(newItem);
-                        }
+                        const existing = boqData.find(i => i.ref === newItem.ref);
+                        if (!existing) boqData.push(newItem);
                     });
                     
                     repopulateBOQSelect();
-                    alert(`${newItems.length} BOQ items processed and added to dropdown.`);
+                    saveProject(activeProjectName, false);
+                    alert(`${newItems.length} BOQ items processed.`);
                 },
                 error: (err) => alert("Error parsing CSV file: " + err.message)
             });
-            event.target.value = ''; // Reset file input to allow re-uploading the same file
+            event.target.value = '';
         }
 
         function repopulateBOQSelect(searchTerm = '') {
@@ -1020,147 +1311,320 @@
                 document.getElementById('boq-desc').value = item.description;
                 document.getElementById('boq-unit').value = item.unit;
                 document.getElementById('boq-rate').value = item.rate.toFixed(2);
-                calculateBOQTotalQuantity();
+                calculateBOQTotal();
             }
         }
-
-        function trackBOQUsage(boqRef) { /* Omitted for brevity */ }
-        function updateMostUsedBOQ() { /* Omitted for brevity */ }
-        function calculateBOQTotalQuantity() { /* Omitted for brevity */ }
-        function insertBOQRow(rowData = {}, fromLoad = false) { /* Complex logic, assumed functional */ }
-        function removeBOQRow(row) { /* Omitted for brevity */ }
-        function calculateCostEstimationTotal() { /* Omitted for brevity */ }
         
-        // --- VEHICLE & KML MAP ---
+        function updateMostUsedBOQ() { /* Logic can be added here if needed */ }
+
+        function calculateBOQTotal() {
+            const nr = parseFloat(document.getElementById('boq-nr').value) || 1;
+            const length = parseFloat(document.getElementById('boq-length').value) || 0;
+            const width = parseFloat(document.getElementById('boq-width').value) || 0;
+            const height = parseFloat(document.getElementById('boq-height').value) || 0;
+            const rate = parseFloat(document.getElementById('boq-rate').value) || 0;
+
+            let qty = nr;
+            if (length > 0 && width > 0 && height > 0) qty = nr * length * width * height;
+            else if (length > 0 && width > 0) qty = nr * length * width;
+            else if (length > 0) qty = nr * length;
+
+            const amount = qty * rate;
+
+            document.getElementById('boq-total-qty').value = qty.toFixed(3);
+            document.getElementById('boq-amount').value = amount.toFixed(2);
+        }
+
+        function insertBOQRow(rowData = {}, fromLoad = false) {
+            const tbody = costEstimationTable.getElementsByTagName('tbody')[0];
+            const newRow = tbody.insertRow();
+            
+            const data = fromLoad ? rowData : {
+                ref: document.getElementById('boq-ref-select').value,
+                desc: document.getElementById('boq-desc').value,
+                unit: document.getElementById('boq-unit').value,
+                nr: document.getElementById('boq-nr').value,
+                length: document.getElementById('boq-length').value,
+                width: document.getElementById('boq-width').value,
+                height: document.getElementById('boq-height').value,
+                qty: document.getElementById('boq-total-qty').value,
+                rate: document.getElementById('boq-rate').value,
+                amount: document.getElementById('boq-amount').value,
+                remarks: document.getElementById('boq-remarks').value
+            };
+            
+            if (!data.ref && !fromLoad) {
+                alert("BOQ Reference is required.");
+                return;
+            }
+
+            newRow.innerHTML = `
+                <td>${data.ref}</td><td class="description-cell">${data.desc}</td><td>${data.unit}</td><td>${data.nr}</td>
+                <td>${data.length}</td><td>${data.width}</td><td>${data.height}</td><td>${data.qty}</td>
+                <td>${data.rate}</td><td>${data.amount}</td><td>${data.remarks}</td>
+                <td><button class="btn-delete" onclick="removeBOQRow(this)">Delete</button></td>
+            `;
+
+            calculateCostEstimationTotal();
+
+            if (!fromLoad) {
+                ['boq-nr', 'boq-length', 'boq-width', 'boq-height', 'boq-remarks'].forEach(id => document.getElementById(id).value = '');
+                saveProject(activeProjectName, false);
+            }
+        }
+        
+        function removeBOQRow(btn) {
+            if (confirm("Are you sure you want to remove this row?")) {
+                const row = btn.parentNode.parentNode;
+                row.parentNode.removeChild(row);
+                calculateCostEstimationTotal();
+                saveProject(activeProjectName, false);
+            }
+        }
+        
+        function calculateCostEstimationTotal() {
+            let total = 0;
+            document.querySelectorAll('#cost-estimation-table tbody tr').forEach(row => {
+                const amount = parseFloat(row.cells[9].textContent);
+                if (!isNaN(amount)) total += amount;
+            });
+            document.getElementById('total-amount-cell').textContent = `QAR ${total.toFixed(2)}`;
+        }
+        
+        // --- MAP TAB ---
         function initializeVehicleMap() {
             if (vehicleMap) return;
             const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
             const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
-            const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution: '© OpenTopoMap' });
-
+            
             vehicleMap = L.map('vehicle-map').setView([25.3548, 51.1839], 10);
             osm.addTo(vehicleMap);
+            L.control.layers({ "Street": osm, "Satellite": satellite }).addTo(vehicleMap);
 
-            const baseMaps = { "OpenStreetMap": osm, "Satellite": satellite, "Topographic": topo };
-            L.control.layers(baseMaps).addTo(vehicleMap);
-            
             const drawnItems = new L.FeatureGroup();
             vehicleMap.addLayer(drawnItems);
-            
-            const drawControl = new L.Control.Draw({
-                edit: { featureGroup: drawnItems },
-                draw: { polygon: true, polyline: false, rectangle: true, circle: false, marker: false, circlemarker: false }
-            });
-            vehicleMap.addControl(drawControl);
+            new L.Control.Draw({ edit: { featureGroup: drawnItems }, draw: { polygon: true, polyline: false, rectangle: true, circle: false, marker: false, circlemarker: false } }).addTo(vehicleMap);
+            vehicleMap.on(L.Draw.Event.CREATED, (e) => drawnItems.addLayer(e.layer));
 
-            vehicleMap.on(L.Draw.Event.CREATED, function (event) {
-                const layer = event.layer;
-                drawnItems.addLayer(layer);
-                const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
-                layer.bindPopup(`Area: ${area.toFixed(2)} m²`).openPopup();
-            });
+            getZones(); // Populate QNAS zones on map init
         }
         
-        function handleVehicleCSVUpload(event) {
+        function handleVehicleFileImport(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
                 const contents = e.target.result;
-                const fileExtension = file.name.split('.').pop().toLowerCase();
+                const fileExt = file.name.split('.').pop().toLowerCase();
                 
-                if (fileExtension === 'kml') {
+                if (fileExt === 'kml') {
                     const kmlLayer = omnivore.kml.parse(contents);
                     kmlLayer.eachLayer(layer => {
                         if (layer.feature?.properties?.name) {
                             layer.bindPopup(layer.feature.properties.name);
                         }
-                    });
-                    vehicleMap.addLayer(kmlLayer);
+                    }).addTo(vehicleMap);
                     vehicleMap.fitBounds(kmlLayer.getBounds());
-                } else if (fileExtension === 'csv') {
+                } else if (fileExt === 'csv') {
                     // CSV parsing logic for points
                 }
             };
             reader.readAsText(file);
+            event.target.value = '';
         }
 
         function printMap() {
-            window.addEventListener('afterprint', () => {
-                document.body.classList.remove('printing-map');
-            }, { once: true });
             document.body.classList.add('printing-map');
-            window.print();
+            setTimeout(() => {
+                window.print();
+                document.body.classList.remove('printing-map');
+            }, 500); // Wait for map to re-render
         }
 
-        function clearMapMarkers() { /* Omitted for brevity */ }
-        function centerVehicleMapOnUser() { /* Omitted for brevity */ }
-        function fitMapToAssetMarkers() { /* Omitted for brevity */ }
-        function fitMapToAllMarkers() { /* Omitted for brevity */ }
-        function downloadCSVTemplate() { /* Omitted for brevity */ }
+        function clearMapMarkers() { /* ... */ }
+        function fitMapToAssetMarkers() { /* ... */ }
+        function fitMapToAllMarkers() { /* ... */ }
+        function downloadCSVTemplate() { /* ... */ }
+        
+        function centerVehicleMapOnUser() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const latlng = [pos.coords.latitude, pos.coords.longitude];
+                    vehicleMap.flyTo(latlng, 16);
+                    if (userMarker) {
+                        userMarker.setLatLng(latlng);
+                    } else {
+                        userMarker = L.marker(latlng, {
+                           icon: L.icon({
+                                iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                                iconSize: [25, 41], iconAnchor: [12, 41]
+                           })
+                        }).addTo(vehicleMap).bindPopup("Your Location").openPopup();
+                    }
+                }, () => alert("Could not get your location."));
+            }
+        }
+        
+        // --- QNAS API INTEGRATION ---
+        const API_BASE = 'https://qnas.qa/api';
+        const QNAS_TOKEN = 'YOUR_TOKEN'; // IMPORTANT: Replace with your actual token
+
+        async function qnasFetch(endpoint) {
+            const headers = { 'X-Token': QNAS_TOKEN, 'Accept': 'application/json' };
+            try {
+                const res = await fetch(`${API_BASE}${endpoint}`, { headers });
+                if (!res.ok) {
+                    throw new Error(`QNAS API Error: ${res.statusText}`);
+                }
+                return res.json();
+            } catch (error) {
+                console.error(error);
+                alert(error.message + ". Check if your token is correct.");
+                return null;
+            }
+        }
+
+        async function getZones() {
+            const data = await qnasFetch('/get_zones');
+            if(data?.zones) {
+                const select = document.getElementById('qnas-zone');
+                select.innerHTML = '<option value="">Select Zone</option>';
+                data.zones.forEach(zone => select.add(new Option(zone.en_name, zone.zone_no)));
+            }
+        }
+        async function getStreets(zoneNo) {
+            const streetSelect = document.getElementById('qnas-street');
+            streetSelect.innerHTML = '<option value="">Loading...</option>';
+            document.getElementById('qnas-building').innerHTML = '';
+            if(!zoneNo) { streetSelect.innerHTML = ''; return; }
+            const data = await qnasFetch(`/get_streets/${zoneNo}`);
+             if(data?.streets) {
+                streetSelect.innerHTML = '<option value="">Select Street</option>';
+                data.streets.forEach(street => streetSelect.add(new Option(street.en_name, street.street_no)));
+            }
+        }
+        async function getBuildings(zoneNo, streetNo) {
+            const bldgSelect = document.getElementById('qnas-building');
+            bldgSelect.innerHTML = '<option value="">Loading...</option>';
+            if(!zoneNo || !streetNo) { bldgSelect.innerHTML = ''; return; }
+            const data = await qnasFetch(`/get_buildings/${zoneNo}/${streetNo}`);
+            if(data?.locations) {
+                bldgSelect.innerHTML = '<option value="">Select Building</option>';
+                data.locations.forEach(bldg => bldgSelect.add(new Option(bldg.building_no, bldg.building_no)));
+            }
+        }
+        async function getLocationDetails(zone, street, building) {
+            const data = await qnasFetch(`/get_location/${zone}/${street}/${building}`);
+            if (data?.location) {
+                const loc = data.location;
+                const latlng = [loc.latitude, loc.longitude];
+                clearBuildingMarkers(); // Clear previous markers
+                const marker = L.marker(latlng).addTo(vehicleMap).bindPopup(`<b>Building ${loc.building_no}</b><br>${loc.street_en_name}<br>Zone: ${loc.zone_no}`).openPopup();
+                assetMarkers.push(marker);
+                vehicleMap.flyTo(latlng, 18);
+            }
+        }
+        function clearBuildingMarkers() {
+            assetMarkers.forEach(m => vehicleMap.removeLayer(m));
+            assetMarkers = [];
+        }
 
         // --- PRINT & PDF EXPORT ---
         function formatDate(dateString) {
-            const date = new Date(dateString + 'T00:00:00'); // Ensure it's parsed as local, not UTC
+            if (!dateString) return '';
+            const date = new Date(dateString + 'T00:00:00');
             return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
         function preparePrintHeader(reportType) {
-            const isInspection = reportType === 'inspection';
-            const clientLogoSrc = document.getElementById(isInspection ? 'client-logo-inspection' : 'client-logo-estimation').src;
-            const companyLogoSrc = document.getElementById(isInspection ? 'company-logo-inspection' : 'company-logo-estimation').src;
-            const printTitleContainerId = isInspection ? 'inspection-print-title' : 'estimation-print-title';
-            const printDateFooterId = isInspection ? 'inspection-print-date' : 'estimation-print-date';
+            const isInspection = reportType === 'main-report';
+            const prefix = isInspection ? 'inspection' : 'estimation';
+            const clientLogoSrc = document.getElementById(`${prefix === 'inspection' ? 'client' : 'client'}-logo-${prefix}`).src;
+            const companyLogoSrc = document.getElementById(`${prefix === 'inspection' ? 'company' : 'company'}-logo-${prefix}`).src;
             
             document.getElementById(isInspection ? 'client-logo-print-src' : 'est-client-logo-print-src').src = clientLogoSrc;
             document.getElementById(isInspection ? 'company-logo-print-src' : 'est-company-logo-print-src').src = companyLogoSrc;
 
-            const titleContainer = document.getElementById(printTitleContainerId);
-            titleContainer.innerHTML = `
-                <b>${document.getElementById(`${reportType}-title-1`).textContent}</b>
-                <b>${document.getElementById(`${reportType}-title-2`).textContent}</b>
-                <b>${document.getElementById(`${reportType}-title-3`).textContent}</b>
-            `;
-
-            const dateFooter = document.getElementById(printDateFooterId).parentNode;
-            dateFooter.innerHTML = `
-                <span>${formatDate(document.getElementById(isInspection ? 'display-date' : 'estimation-date').value)}</span>
-                <span>${document.getElementById(`${reportType}-small-title`).textContent}</span>
-            `;
+            const titleContainer = document.getElementById(`${prefix}-print-title`);
+            titleContainer.innerHTML = `<b>${document.getElementById(`${prefix}-title-1`).textContent}</b><b>${document.getElementById(`${prefix}-title-2`).textContent}</b><b>${document.getElementById(`${prefix}-title-3`).textContent}</b>`;
+            
+            const dateFooter = document.getElementById(`${prefix}-print-date`).parentNode;
+            const dateVal = document.getElementById(isInspection ? 'display-date' : 'estimation-date').value;
+            dateFooter.innerHTML = `<span>${formatDate(dateVal)}</span><span>${document.getElementById(`${prefix}-small-title`).textContent}</span>`;
         }
 
-        function printContent(reportType) {
-            preparePrintHeader(reportType);
+        function printContent(tabId) {
+            preparePrintHeader(tabId);
             window.print();
         }
 
-        async function exportToPdf(reportType) {
+        async function exportToPdf(tabId) {
             const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('landscape', 'mm', 'a4');
-            const contentToCapture = document.querySelector(`#${reportType}-tab .printable-area`);
+            const contentToCapture = document.querySelector(`#${tabId} .printable-area`);
+            if (!contentToCapture) return alert("Error: Printable content not found.");
             
-            if (!contentToCapture) { return alert("Error: Printable content not found."); }
+            alert('Generating PDF... This may take a moment.');
+            preparePrintHeader(tabId);
             
-            preparePrintHeader(reportType);
-
-            await html2canvas(contentToCapture, { scale: 2, useCORS: true }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdfWidth = pdf.internal.pageSize.getWidth() - 20;
-                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                let heightLeft = pdfHeight;
-                let position = 10;
-                
-                pdf.addImage(imgData, 'PNG', 10, position, pdfWidth, pdfHeight);
-                heightLeft -= (pdf.internal.pageSize.getHeight() - 20);
-
-                while (heightLeft > 0) {
-                  position = - (pdfHeight - heightLeft);
-                  pdf.addPage();
-                  pdf.addImage(imgData, 'PNG', 10, position, pdfWidth, pdfHeight);
-                  heightLeft -= (pdf.internal.pageSize.getHeight() - 20);
-                }
-                pdf.save(`${document.querySelector('.main-title').textContent.trim()}-${reportType}.pdf`);
+            const canvas = await html2canvas(contentToCapture, { 
+                scale: 2, 
+                useCORS: true, 
+                backgroundColor: '#ffffff'
             });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const ratio = canvasWidth / pdfWidth;
+            const projectedHeight = canvasHeight / ratio;
+            
+            let position = 0;
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, projectedHeight);
+            let heightLeft = projectedHeight - pdfHeight;
+            
+            while (heightLeft > 0) {
+                position -= pdfHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, projectedHeight);
+                heightLeft -= pdfHeight;
+            }
+            
+            generatedPdfBlob = pdf.output('blob');
+            document.getElementById('pdf-options-modal').style.display = 'flex';
+        }
+
+        function downloadGeneratedPdf() {
+            if (!generatedPdfBlob) return;
+            const url = URL.createObjectURL(generatedPdfBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${document.querySelector('.main-title').textContent.trim()}-report.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }
+
+        async function shareGeneratedPdf() {
+            if (!generatedPdfBlob || !navigator.share) {
+                alert('Share API is not supported on this browser. Please download the file instead.');
+                return;
+            }
+            const file = new File([generatedPdfBlob], `${document.querySelector('.main-title').textContent.trim()}-report.pdf`, { type: 'application/pdf' });
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'Project Report',
+                    text: 'Here is the generated project report.',
+                });
+            } catch (error) {
+                console.error('Error sharing:', error);
+                alert('Could not share the file.');
+            }
         }
     </script>
 </body>
