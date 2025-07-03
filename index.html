@@ -4,11 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Dashboard</title>
-    
-    <!-- Leaflet & Plugins CSS -->
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script defer src='https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js'></script>
+    <script defer src="https://unpkg.com/leaflet-geometryutil"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.js"></script>
+    <script defer src="https://unpkg.com/tokml@0.4.0/tokml.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
     <style>
         :root {
@@ -19,40 +29,37 @@
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--background-color); margin: 0; }
         .page { display: none; }
         .page.active { display: block; }
-
-        /* Login & Contracts Page Styles */
         .centered-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .form-card { background: #fff; padding: 40px; border-radius: 12px; box-shadow: var(--shadow); text-align: center; width: 100%; max-width: 450px; }
         .form-card h1, .form-card h2 { color: var(--text-color); }
         .form-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        .form-card button { width: 100%; padding: 12px; border-radius: 8px; border: none; background-color: var(--primary-color); color: white; font-size: 16px; cursor: pointer; transition: background-color 0.3s; }
-        .form-card button:hover { background-color: #0056b3; }
+        .form-card button, .card button { width: 100%; padding: 12px; border-radius: 8px; border: none; background-color: var(--primary-color); color: white; font-size: 16px; cursor: pointer; transition: background-color 0.3s; margin-top: 10px; }
+        .form-card button:hover, .card button:hover { background-color: #0056b3; }
         .toggle-link { color: var(--primary-color); cursor: pointer; text-decoration: none; margin-top: 15px; display: inline-block; }
         .error-message { color: red; margin-top: 10px; min-height: 1em; }
-        
-        /* App Layout Styles */
         .main-container { max-width: 1600px; margin: 0 auto; padding: 10px; }
-        .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--border-radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); padding: 15px; }
+        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .header button { width: auto; }
+        .btn-logout { background-color: #dc3545; }
+        .btn-logout:hover { background-color: #c82333; }
+        .contract-list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .contract-list-item:hover { background-color: #f8f9fa; }
         .tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: -1px; }
         .tab-button { padding: 8px 15px; border: 1px solid var(--glass-border); border-bottom: none; border-radius: 10px 10px 0 0; cursor: pointer; background-color: rgba(255,255,255,0.3); }
         .tab-button.active { background-color: var(--glass-bg); border-bottom: 1px solid transparent; font-weight: bold; }
         .tab-content { display: none; }
         .tab-content.active { display: flex; flex-direction: column; gap: 15px; }
-        
-        /* Map Page Layout Fix */
+        .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--border-radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); padding: 15px; }
         #map-tab-content { position: relative; height: 85vh; overflow: hidden; }
         #vehicle-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         .map-sidebar { position: absolute; top: 15px; left: 15px; z-index: 1000; width: 350px; max-height: calc(100% - 30px); display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
-        .leaflet-top.leaflet-left { margin-left: 370px; }
+        .leaflet-top.leaflet-left { margin-left: 370px; transition: margin-left 0.3s ease; }
         @media (max-width: 768px) { .leaflet-top.leaflet-left { margin-left: 0; } .map-sidebar { width: calc(100% - 30px); max-height: 50%; } }
-
-        /* Other styles from previous version... */
     </style>
 </head>
 <body>
 
-    <!-- LOGIN PAGE -->
     <div id="login-page" class="page centered-container">
         <div class="form-card">
             <div id="login-view">
@@ -69,7 +76,6 @@
         </div>
     </div>
     
-    <!-- SIGNUP PAGE -->
     <div id="signup-page" class="page centered-container">
          <div class="form-card">
             <div id="signup-view">
@@ -86,11 +92,10 @@
         </div>
     </div>
 
-    <!-- CONTRACTS PAGE -->
     <div id="contracts-page" class="page main-container">
         <div class="header">
             <h1>Contracts Dashboard</h1>
-            <button class="btn-logout" onclick="signOutUser()">Sign Out</button>
+            <button class="btn-logout" onclick="window.signOutUser()">Sign Out</button>
         </div>
         <div class="card">
             <h2>Choose a Saved Contract</h2>
@@ -103,63 +108,41 @@
                 <label>Sub-Title 1:</label><input type="text" id="contract-subtitle1">
                 <label>Sub-Title 2:</label><input type="text" id="contract-subtitle2">
                 <h4>Add BOQ</h4>
-                <button type="button" onclick="downloadBOQTemplate()">Download BOQ Template</button>
+                <button type="button" onclick="window.downloadBOQTemplate()">Download BOQ Template</button>
                 <input type="file" id="boq-file-input" accept=".csv" required>
-                <button type="submit" style="margin-top:10px;">Save & Add Contract</button>
+                <button type="submit">Save & Add Contract</button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP PAGE -->
     <div id="app-page" class="page main-container">
         <div class="header">
             <h1 id="app-main-title">Project Dashboard</h1>
             <div>
                 <button onclick="showPage('contracts-page')">Back to Contracts</button>
-                <button class="btn-logout" onclick="signOutUser()">Sign Out</button>
+                <button class="btn-logout" onclick="window.signOutUser()">Sign Out</button>
             </div>
         </div>
         <div class="tabs">
-            <button class="tab-button active" onclick="openTab(event, 'inspection-report-content')">Inspection Report</button>
-            <button class="tab-button" onclick="openTab(event, 'cost-estimation-content')">Cost Estimation</button>
-            <button class="tab-button" onclick="openTab(event, 'map-tab-content')">Map</button>
-            <button class="tab-button" onclick="openTab(event, 'saved-projects-content')">Saved Projects</button>
+            <button class="tab-button active" onclick="window.openTab(event, 'inspection-report-content')">Inspection Report</button>
+            <button class="tab-button" onclick="window.openTab(event, 'cost-estimation-content')">Cost Estimation</button>
+            <button class="tab-button" onclick="window.openTab(event, 'map-tab-content')">Map</button>
+            <button class="tab-button" onclick="window.openTab(event, 'saved-projects-content')">Saved Projects</button>
         </div>
 
-        <!-- Inspection Report Tab -->
-        <div id="inspection-report-content" class="tab-content active">
-            <!-- All HTML for the Inspection Report page goes here, as per your images/previous code -->
-        </div>
-        <!-- Cost Estimation Tab -->
-        <div id="cost-estimation-content" class="tab-content">
-            <!-- All HTML for the Cost Estimation page goes here -->
-        </div>
-        <!-- Map Tab -->
-        <div id="map-tab-content" class="tab-content">
-             <!-- All HTML for the Map page goes here -->
-        </div>
-        <!-- Saved Projects Tab -->
-        <div id="saved-projects-content" class="tab-content">
-             <div class="glass-card">
-                <h3>Saved Projects</h3>
-                <div id="projects-list"></div>
-            </div>
-        </div>
+        <div id="inspection-report-content" class="tab-content active">...</div>
+        <div id="cost-estimation-content" class="tab-content">...</div>
+        <div id="map-tab-content" class="tab-content">...</div>
+        <div id="saved-projects-content" class="tab-content">...</div>
     </div>
 
-
-    <!-- Leaflet & Plugins JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- ... other library scripts ... -->
-
-    <!-- Firebase SDK - Modular -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
+        // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAnvvNO40rvO_X6MvJ65F62Tnsa3vASrIQ",
             authDomain: "report-maker-c45e4.firebaseapp.com",
@@ -175,15 +158,16 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
+        // --- GLOBAL STATE ---
         let currentUser;
         let currentContractData;
-        let boqData = []; // This will be loaded from the selected contract
+        let boqData = [];
 
         // --- PAGE ROUTING & AUTH ---
-        function showPage(pageId) {
+        window.showPage = (pageId) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
-        }
+        };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -204,9 +188,9 @@
         window.signOutUser = () => {
             signOut(auth).then(() => {
                 sessionStorage.removeItem('selectedContractId');
-                showPage('login-page');
+                // The onAuthStateChanged listener will handle showing the login page
             });
-        }
+        };
 
         // --- AUTH FORM HANDLERS ---
         document.getElementById('login-form').addEventListener('submit', (e) => {
@@ -247,7 +231,7 @@
             }
             contracts.forEach(contract => {
                 const item = document.createElement('div');
-                item.className = 'contract-list-item'; // Make sure this class is styled
+                item.className = 'contract-list-item';
                 item.innerHTML = `<span>${contract.title}</span>`;
                 item.onclick = () => {
                     sessionStorage.setItem('selectedContractId', contract.id);
@@ -262,10 +246,8 @@
             const boqFile = document.getElementById('boq-file-input').files[0];
             if (!boqFile) return alert("Please select a BOQ CSV file.");
 
-            // Using PapaParse library (ensure it's included in your HTML)
             Papa.parse(boqFile, {
-                header: true,
-                skipEmptyLines: true,
+                header: true, skipEmptyLines: true,
                 complete: async (results) => {
                     const parsedBoq = results.data.map(row => ({
                         ref: row['BOQ Ref.'] || row.ref || '',
@@ -282,18 +264,15 @@
                         createdAt: new Date()
                     };
 
-                    try {
-                        await addDoc(collection(db, 'users', currentUser.uid, 'contracts'), newContract);
-                        alert("Contract saved successfully!");
-                        document.getElementById('add-contract-form').reset();
-                        loadContracts();
-                    } catch (error) {
-                        console.error("Error adding contract: ", error);
-                        alert("Failed to save contract.");
-                    }
+                    await addDoc(collection(db, 'users', currentUser.uid, 'contracts'), newContract);
+                    alert("Contract saved successfully!");
+                    document.getElementById('add-contract-form').reset();
+                    loadContracts();
                 }
             });
         });
+        
+        window.downloadBOQTemplate = () => { /* Add download logic if needed */ };
 
         // --- MAIN APP LOGIC ---
         async function loadContractAndShowApp(contractId) {
@@ -310,31 +289,37 @@
             boqData = currentContractData.boq || [];
 
             document.getElementById('app-main-title').textContent = currentContractData.title;
-            // TODO: Populate other contract details into the app page headers
             
             showPage('app-page');
-            initializeAppLogic(); // This function contains all your old setup logic
+            initializeAppLogic();
         }
 
         function initializeAppLogic() {
-            // All your original setup logic from the previous response goes here.
-            // For example: openTab, repopulateBOQSelect, initializeVehicleMap etc.
-            // This ensures the app is fully functional once the contract data is loaded.
             console.log("Main app initialized with contract:", currentContractData.title);
-            console.log("BOQ for this contract:", boqData);
-            
-            // Example:
-            // openTab({currentTarget: document.querySelector('.tab-button.active')}, 'inspection-report-content');
-            // repopulateBOQSelect();
+            // Any logic that needs to run every time the app page is shown
+            // For example, re-populating select dropdowns or opening the first tab.
+            openTab({ currentTarget: document.querySelector('.tab-button') }, 'inspection-report-content');
         }
+        
+        window.openTab = (evt, tabName) => {
+             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+             document.querySelectorAll('.tab-button').forEach(tb => tb.classList.remove('active'));
+             document.getElementById(tabName).classList.add('active');
+             evt.currentTarget.classList.add('active');
+             
+             if (tabName === 'map-tab-content' && !window.vehicleMap) {
+                 initializeVehicleMap();
+             }
+        };
 
-        // --- QNAS TOKEN ---
-        const QNAS_TOKEN = 'ba80a013eb1d4a08a198f79991aefd4b';
-
-        // --- PASTE ALL YOUR OTHER JS FUNCTIONS HERE ---
-        // (openTab, initializeVehicleMap, handleDrawCreate, qnasFetch, exportToKML, etc.)
-        // Make sure they are defined within this <script type="module"> tag.
-
+        // --- All your other application functions (Leaflet, reports, etc.) go here ---
+        function initializeVehicleMap() {
+            // Your entire map initialization logic
+            console.log("Initializing map...");
+            window.vehicleMap = L.map('vehicle-map'); // Attach to window to check if initialized
+            // ... rest of the map code
+        }
+        
     </script>
 </body>
 </html>
