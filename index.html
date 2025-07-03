@@ -24,75 +24,78 @@
         :root {
             --primary-color: #007bff; --primary-color-rgb: 0, 123, 255; --background-color: #f0f4f8;
             --glass-bg: rgba(255, 255, 255, 0.85); --glass-border: rgba(200, 210, 220, 0.7);
-            --shadow: 0 8px 30px rgba(0,0,0,0.12); --text-color: #2c3e50; --border-radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.12); --text-color: #2c3e50; --border-radius: 12px;
         }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--background-color); margin: 0; }
         .page { display: none; }
         .page.active { display: block; }
         .centered-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .form-card { background: #fff; padding: 40px; border-radius: 12px; box-shadow: var(--shadow); text-align: center; width: 100%; max-width: 450px; }
-        .form-card h1 { color: var(--text-color); }
+        .form-card h1, .form-card h2 { color: var(--text-color); }
         .form-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
         .form-card button, .card button { width: 100%; padding: 12px; border-radius: 8px; border: none; background-color: var(--primary-color); color: white; font-size: 16px; cursor: pointer; transition: background-color 0.3s; margin-top: 10px; }
         .form-card button:hover, .card button:hover { background-color: #0056b3; }
         .toggle-link { color: var(--primary-color); cursor: pointer; text-decoration: none; margin-top: 15px; display: inline-block; }
         .error-message { color: red; margin-top: 10px; min-height: 1em; }
-        
-        /* Modal Styles */
-        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: #fff; border-radius: 12px; padding: 20px; width: 90%; max-width: 450px; text-align: center; }
-        .modal-content h2 { margin-top: 0; }
-
         .main-container { max-width: 1600px; margin: 0 auto; padding: 10px; }
-        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 10px; }
+        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .header button { width: auto; }
         .btn-logout { background-color: #dc3545; }
         .btn-logout:hover { background-color: #c82333; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-        .list-item:hover { background-color: #f8f9fa; }
-        .list-item > span { cursor: pointer; }
-        .admin-section { border-top: 2px solid var(--primary-color); margin-top: 20px; padding-top: 20px; }
+        .contract-list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .contract-list-item:hover { background-color: #f8f9fa; }
+        .tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: -1px; }
+        .tab-button { padding: 8px 15px; border: 1px solid var(--glass-border); border-bottom: none; border-radius: 10px 10px 0 0; cursor: pointer; background-color: rgba(255,255,255,0.3); }
+        .tab-button.active { background-color: var(--glass-bg); border-bottom: 1px solid transparent; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 15px; }
+        .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--border-radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); padding: 15px; }
+        #map-tab-content { position: relative; height: 85vh; overflow: hidden; }
+        #vehicle-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .map-sidebar { position: absolute; top: 15px; left: 15px; z-index: 1000; width: 350px; max-height: calc(100% - 30px); display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+        .leaflet-top.leaflet-left { margin-left: 370px; transition: margin-left 0.3s ease; }
+        @media (max-width: 768px) { .leaflet-top.leaflet-left { margin-left: 0; } .map-sidebar { width: calc(100% - 30px); max-height: 50%; } }
     </style>
 </head>
 <body>
 
-    <div id="request-access-modal" class="modal">
-        <div class="modal-content">
-            <h2>Request Access</h2>
-            <p>Your request will be sent to the administrator for approval.</p>
-            <form id="request-access-form">
-                <input type="email" id="request-email" placeholder="Enter your email" required>
-                <button type="submit">Submit Request</button>
-                <p class="error-message" id="request-error-message"></p>
-                <a href="#" class="toggle-link" onclick="document.getElementById('request-access-modal').classList.remove('active')">Cancel</a>
-            </form>
-        </div>
-    </div>
-
     <div id="login-page" class="page centered-container">
         <div class="form-card">
-            <h1>Welcome!</h1>
-            <p>Sign in to access your contracts.</p>
-            <form id="login-form">
-                <input type="email" id="login-email" placeholder="Email" required>
-                <input type="password" id="login-password" placeholder="Password" required>
-                <button type="submit">Sign In</button>
-                <p class="error-message" id="login-error-message"></p>
-                <a href="#" class="toggle-link" onclick="document.getElementById('request-access-modal').classList.add('active')">Need an account? Request Access</a>
-            </form>
+            <div id="login-view">
+                <h1>Welcome Back!</h1>
+                <p>Sign in to access your contracts.</p>
+                <form id="login-form">
+                    <input type="email" id="login-email" placeholder="Email" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button type="submit">Sign In</button>
+                    <p class="error-message" id="login-error-message"></p>
+                    <a href="#" class="toggle-link" onclick="showPage('signup-page')">Don't have an account? Create one</a>
+                </form>
+            </div>
         </div>
     </div>
     
+    <div id="signup-page" class="page centered-container">
+         <div class="form-card">
+            <div id="signup-view">
+                <h1>Create an Account</h1>
+                <p>Sign up to start managing your projects.</p>
+                <form id="signup-form">
+                    <input type="email" id="signup-email" placeholder="Email" required>
+                    <input type="password" id="signup-password" placeholder="Password (min. 6 characters)" required>
+                    <button type="submit">Create Account</button>
+                    <p class="error-message" id="signup-error-message"></p>
+                    <a href="#" class="toggle-link" onclick="showPage('login-page')">Already have an account? Sign In</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div id="contracts-page" class="page main-container">
         <div class="header">
             <h1>Contracts Dashboard</h1>
             <button class="btn-logout" onclick="window.signOutUser()">Sign Out</button>
-        </div>
-        <div id="admin-panel" class="card" style="display:none;">
-            <h2 class="admin-section">Pending User Requests</h2>
-            <div id="pending-requests-list"><p>Loading requests...</p></div>
         </div>
         <div class="card">
             <h2>Choose a Saved Contract</h2>
@@ -113,14 +116,31 @@
     </div>
 
     <div id="app-page" class="page main-container">
+        <div class="header">
+            <h1 id="app-main-title">Project Dashboard</h1>
+            <div>
+                <button onclick="showPage('contracts-page')">Back to Contracts</button>
+                <button class="btn-logout" onclick="window.signOutUser()">Sign Out</button>
+            </div>
+        </div>
+        <div class="tabs">
+            <button class="tab-button active" onclick="window.openTab(event, 'inspection-report-content')">Inspection Report</button>
+            <button class="tab-button" onclick="window.openTab(event, 'cost-estimation-content')">Cost Estimation</button>
+            <button class="tab-button" onclick="window.openTab(event, 'map-tab-content')">Map</button>
+            <button class="tab-button" onclick="window.openTab(event, 'saved-projects-content')">Saved Projects</button>
         </div>
 
+        <div id="inspection-report-content" class="tab-content active">...</div>
+        <div id="cost-estimation-content" class="tab-content">...</div>
+        <div id="map-tab-content" class="tab-content">...</div>
+        <div id="saved-projects-content" class="tab-content">...</div>
+    </div>
 
     <script type="module">
+        // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, getDocs, addDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-functions.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         // Your Firebase configuration
         const firebaseConfig = {
@@ -137,33 +157,27 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const functions = getFunctions(app);
         
-        const ADMIN_EMAIL = "ahmetnasan1993@gmail.com";
+        // --- GLOBAL STATE ---
         let currentUser;
+        let currentContractData;
+        let boqData = [];
 
-        // --- GLOBAL FUNCTIONS ---
+        // --- PAGE ROUTING & AUTH ---
         window.showPage = (pageId) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
         };
 
-        window.signOutUser = () => signOut(auth).then(() => sessionStorage.removeItem('selectedContractId'));
-
-        // --- AUTH STATE LOGIC ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 const selectedContractId = sessionStorage.getItem('selectedContractId');
                 if (selectedContractId) {
-                    // loadContractAndShowApp(selectedContractId); // Logic to load main app
+                    loadContractAndShowApp(selectedContractId);
                 } else {
                     showPage('contracts-page');
                     loadContracts();
-                    if (currentUser.email === ADMIN_EMAIL) {
-                        document.getElementById('admin-panel').style.display = 'block';
-                        loadPendingRequests();
-                    }
                 }
             } else {
                 currentUser = null;
@@ -171,78 +185,141 @@
             }
         });
         
+        window.signOutUser = () => {
+            signOut(auth).then(() => {
+                sessionStorage.removeItem('selectedContractId');
+                // The onAuthStateChanged listener will handle showing the login page
+            });
+        };
+
         // --- AUTH FORM HANDLERS ---
-        document.getElementById('login-form').addEventListener('submit', e => {
+        document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            signInWithEmailAndPassword(auth, e.target['login-email'].value, e.target['login-password'].value)
-                .catch(err => document.getElementById('login-error-message').innerText = err.message);
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            signInWithEmailAndPassword(auth, email, password)
+                .catch(error => {
+                    document.getElementById('login-error-message').innerText = error.message;
+                });
         });
 
-        document.getElementById('request-access-form').addEventListener('submit', async e => {
+        document.getElementById('signup-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = e.target['request-email'].value;
-            const requestRef = doc(db, 'registrationRequests', email);
-            try {
-                await setDoc(requestRef, { email: email, requestedAt: new Date() });
-                alert("Request submitted successfully! The admin has been notified.");
-                document.getElementById('request-access-modal').classList.remove('active');
-                e.target.reset();
-            } catch (error) {
-                document.getElementById('request-error-message').innerText = error.message;
-            }
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    alert("Account created! Please sign in.");
+                    showPage('login-page');
+                })
+                .catch(error => {
+                    document.getElementById('signup-error-message').innerText = error.message;
+                });
         });
 
-        // --- ADMIN PANEL LOGIC ---
-        async function loadPendingRequests() {
-            const listContainer = document.getElementById('pending-requests-list');
-            const requestsCol = collection(db, 'registrationRequests');
-            const requestSnapshot = await getDocs(requestsCol);
-            const requests = requestSnapshot.docs.map(doc => doc.data());
-
-            if (requests.length === 0) {
-                listContainer.innerHTML = '<p>No pending requests.</p>';
+        // --- CONTRACTS PAGE LOGIC ---
+        async function loadContracts() {
+            const listContainer = document.getElementById('contracts-list');
+            listContainer.innerHTML = '';
+            const contractsCol = collection(db, 'users', currentUser.uid, 'contracts');
+            const contractSnapshot = await getDocs(contractsCol);
+            const contracts = contractSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            if (contracts.length === 0) {
+                listContainer.innerHTML = '<p>No contracts found. Add one below!</p>';
                 return;
             }
-
-            listContainer.innerHTML = '';
-            requests.forEach(req => {
+            contracts.forEach(contract => {
                 const item = document.createElement('div');
-                item.className = 'list-item';
-                item.innerHTML = `<span>${req.email}</span>`;
-                const approveBtn = document.createElement('button');
-                approveBtn.textContent = 'Approve';
-                approveBtn.onclick = () => approveUser(req.email);
-                item.appendChild(approveBtn);
+                item.className = 'contract-list-item';
+                item.innerHTML = `<span>${contract.title}</span>`;
+                item.onclick = () => {
+                    sessionStorage.setItem('selectedContractId', contract.id);
+                    loadContractAndShowApp(contract.id);
+                };
                 listContainer.appendChild(item);
             });
         }
         
-        async function approveUser(email) {
-            if (!confirm(`Are you sure you want to approve user: ${email}?`)) return;
-            
-            const createUser = httpsCallable(functions, 'createUserAccount');
-            try {
-                const result = await createUser({ email: email });
-                if (result.data.success) {
-                    await deleteDoc(doc(db, "registrationRequests", email));
-                    alert(`User ${email} approved and account created successfully.`);
-                    loadPendingRequests();
-                } else {
-                    throw new Error(result.data.error);
-                }
-            } catch (error) {
-                console.error("Error approving user:", error);
-                alert(`Failed to approve user: ${error.message}`);
-            }
-        }
-
-        // Placeholder for contract logic from previous step
-        async function loadContracts() { /* ... your contract loading logic ... */ }
         document.getElementById('add-contract-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            // ... your contract saving logic ...
-        });
+            const boqFile = document.getElementById('boq-file-input').files[0];
+            if (!boqFile) return alert("Please select a BOQ CSV file.");
 
+            Papa.parse(boqFile, {
+                header: true, skipEmptyLines: true,
+                complete: async (results) => {
+                    const parsedBoq = results.data.map(row => ({
+                        ref: row['BOQ Ref.'] || row.ref || '',
+                        description: row.Description || row.description || '',
+                        unit: row.Unit || row.unit || '',
+                        rate: parseFloat(row.Rate || row.rate) || 0
+                    })).filter(item => item.ref);
+                    
+                    const newContract = {
+                        title: document.getElementById('contract-title').value,
+                        subTitle1: document.getElementById('contract-subtitle1').value,
+                        subTitle2: document.getElementById('contract-subtitle2').value,
+                        boq: parsedBoq,
+                        createdAt: new Date()
+                    };
+
+                    await addDoc(collection(db, 'users', currentUser.uid, 'contracts'), newContract);
+                    alert("Contract saved successfully!");
+                    document.getElementById('add-contract-form').reset();
+                    loadContracts();
+                }
+            });
+        });
+        
+        window.downloadBOQTemplate = () => { /* Add download logic if needed */ };
+
+        // --- MAIN APP LOGIC ---
+        async function loadContractAndShowApp(contractId) {
+            const contractRef = doc(db, 'users', currentUser.uid, 'contracts', contractId);
+            const contractSnap = await getDoc(contractRef);
+
+            if (!contractSnap.exists()) {
+                alert("Contract not found!");
+                sessionStorage.removeItem('selectedContractId');
+                showPage('contracts-page');
+                return;
+            }
+            currentContractData = { id: contractSnap.id, ...contractSnap.data() };
+            boqData = currentContractData.boq || [];
+
+            document.getElementById('app-main-title').textContent = currentContractData.title;
+            
+            showPage('app-page');
+            initializeAppLogic();
+        }
+
+        function initializeAppLogic() {
+            console.log("Main app initialized with contract:", currentContractData.title);
+            // Any logic that needs to run every time the app page is shown
+            // For example, re-populating select dropdowns or opening the first tab.
+            openTab({ currentTarget: document.querySelector('.tab-button') }, 'inspection-report-content');
+        }
+        
+        window.openTab = (evt, tabName) => {
+             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+             document.querySelectorAll('.tab-button').forEach(tb => tb.classList.remove('active'));
+             document.getElementById(tabName).classList.add('active');
+             evt.currentTarget.classList.add('active');
+             
+             if (tabName === 'map-tab-content' && !window.vehicleMap) {
+                 initializeVehicleMap();
+             }
+        };
+
+        // --- All your other application functions (Leaflet, reports, etc.) go here ---
+        function initializeVehicleMap() {
+            // Your entire map initialization logic
+            console.log("Initializing map...");
+            window.vehicleMap = L.map('vehicle-map'); // Attach to window to check if initialized
+            // ... rest of the map code
+        }
+        
     </script>
 </body>
 </html>
