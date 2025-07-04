@@ -19,80 +19,293 @@
 
     <style>
         :root {
-            --primary-color: #007bff; --background-color: #f0f4f8;
-            --glass-bg: rgba(255, 255, 255, 0.7); --glass-border: rgba(200, 210, 220, 0.5);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1); --text-color: #2c3e50; --border-radius: 12px;
+            --primary-color: #007bff; 
+            --background-color: #f0f4f8;
+            --glass-bg: rgba(255, 255, 255, 0.7); 
+            --glass-border: rgba(200, 210, 220, 0.5);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1); 
+            --text-color: #2c3e50; 
+            --border-radius: 12px;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
         }
 
         /* Base & Bilingual Support */
         html[dir="rtl"] { font-family: 'Tahoma', sans-serif; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--background-color); margin: 0; color: var(--text-color); transition: background-color 0.3s; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0; 
+            color: var(--text-color); 
+            min-height: 100vh;
+        }
         
         /* Page Visibility */
-        .page { display: none; animation: fadeIn 0.5s; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .page { 
+            display: none; 
+            animation: fadeIn 0.5s; 
+        }
+        .page.active { 
+            display: block; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
 
         /* Layouts */
-        .main-container { max-width: 1800px; margin: 0 auto; padding: 20px; }
-        .centered-container { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .main-container { 
+            max-width: 1800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .centered-container { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            padding: 20px; 
+            box-sizing: border-box; 
+        }
 
         /* Glass Card Style */
         .glass-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
-            padding: 25px; border-radius: var(--border-radius);
-            box-shadow: var(--shadow); margin-bottom: 20px;
+            padding: 25px; 
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow); 
+            margin-bottom: 20px;
         }
-        html[dir="rtl"] .glass-card { text-align: right; }
+        html[dir="rtl"] .glass-card { 
+            text-align: right; 
+        }
 
         /* Forms & Buttons */
-        .form-card { max-width: 480px; width: 100%; position: relative; }
-        .form-card h1, .form-card p { text-align: center; }
-        html[dir="rtl"] .form-card h1, html[dir="rtl"] .form-card p { text-align: center; }
+        .form-card { 
+            max-width: 480px; 
+            width: 100%; 
+            position: relative; 
+        }
+        .form-card h1, .form-card p { 
+            text-align: center; 
+        }
+        html[dir="rtl"] .form-card h1, html[dir="rtl"] .form-card p { 
+            text-align: center; 
+        }
         
         input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="number"], input[type="file"] {
-            width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 15px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            box-sizing: border-box;
+            font-size: 16px;
         }
         
         button {
-            padding: 10px 20px; border-radius: 8px; border: none; background-color: var(--primary-color);
-            color: white; font-size: 16px; cursor: pointer; transition: background-color 0.3s;
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            border: none; 
+            background-color: var(--primary-color);
+            color: white; 
+            font-size: 16px; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            font-weight: 500;
         }
-        button:hover { background-color: #0056b3; }
-        button:disabled { background-color: #aaa; cursor: not-allowed; }
+        button:hover { 
+            background-color: #0056b3; 
+            transform: translateY(-2px);
+        }
+        button:disabled { 
+            background-color: #aaa; 
+            cursor: not-allowed; 
+            transform: none;
+        }
+        
+        .btn-success { background-color: var(--success-color); }
+        .btn-success:hover { background-color: #218838; }
+        .btn-danger { background-color: var(--danger-color); }
+        .btn-danger:hover { background-color: #c82333; }
         
         /* Header */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 20px; }
-        .header h1 { margin: 0; font-size: 1.5em; }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px 20px; 
+            margin-bottom: 20px; 
+            flex-wrap: wrap;
+        }
+        .header h1 { 
+            margin: 0; 
+            font-size: 1.5em; 
+            color: var(--primary-color);
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
         
         /* Contract Selection */
-        .contract-selection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
-        .contract-select-card { background-color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        .contract-select-card:hover { transform: translateY(-5px); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .contract-select-card h3 { margin-top: 0; }
+        .contract-selection-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 20px; 
+            margin-top: 20px; 
+        }
+        .contract-select-card { 
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px; 
+            border-radius: var(--border-radius); 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            border: 2px solid transparent;
+        }
+        .contract-select-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-color: var(--primary-color);
+        }
+        .contract-select-card h3 { 
+            margin-top: 0; 
+            color: var(--primary-color);
+        }
+        .contract-select-card p {
+            margin: 10px 0;
+            opacity: 0.8;
+        }
 
-        /* NEW: Popup Styles */
+        /* App Content */
+        .app-page-content {
+            min-height: 60vh;
+        }
+        
+        /* Map Container */
+        #map-container {
+            height: 600px;
+            width: 100%;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Popup Styles */
         .popup-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
-            display: none; /* Hidden by default */
-            justify-content: center; align-items: center;
-            z-index: 1000; animation: fadeIn 0.3s;
+            display: none;
+            justify-content: center; 
+            align-items: center;
+            z-index: 1000; 
+            animation: fadeIn 0.3s;
         }
         .popup-close-btn {
-            position: absolute; top: 10px; right: 20px; font-size: 30px;
-            color: #555; cursor: pointer; border: none; background: none;
+            position: absolute; 
+            top: 10px; 
+            right: 20px; 
+            font-size: 30px;
+            color: #555; 
+            cursor: pointer; 
+            border: none; 
+            background: none;
+        }
+
+        /* Error/Success Messages */
+        .error-message {
+            color: var(--danger-color);
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .success-message {
+            color: var(--success-color);
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Links */
+        .toggle-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .toggle-link:hover {
+            text-decoration: underline;
         }
 
         /* Footer */
-        .footer { text-align: center; margin-top: 30px; padding: 20px; }
-        html[dir="rtl"] .footer { text-align: center; }
+        .footer { 
+            text-align: center; 
+            margin-top: 50px; 
+            padding: 20px; 
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .footer em {
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .header-actions {
+                justify-content: center;
+            }
+            .contract-selection-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="login-page" class="page centered-container">
+    <!-- Login Page -->
+    <div id="login-page" class="page active centered-container">
         <div class="form-card glass-card">
             <h1 data-translate="welcome_title">Welcome to the Engineering Project Platform 👷‍♂️</h1>
             <p data-translate="welcome_subtitle">Smart tools for managing maps, data, inspections, and reports for engineers and managers.</p>
@@ -101,44 +314,138 @@
                 <input type="password" id="login-password" placeholder="Password" required>
                 <button type="submit" data-translate="sign_in">Sign In</button>
                 <p class="error-message" id="login-error-message"></p>
-                <a href="#" class="toggle-link" onclick="window.showPopup('signup-popup')" data-translate="need_account">Need an account? Sign Up</a>
+                <a href="#" class="toggle-link" onclick="showPopup('signup-popup')" data-translate="need_account">Need an account? Sign Up</a>
             </form>
         </div>
     </div>
 
+    <!-- Contract Selection Page -->
     <div id="contract-selection-page" class="page main-container">
         <div class="glass-card">
             <h1 data-translate="select_contract_title">Select a Contract</h1>
             <p data-translate="select_contract_subtitle">Choose a contract to access the project dashboard.</p>
-            <div id="contract-selection-list" class="contract-selection-grid"></div>
+            <div id="contract-selection-list" class="contract-selection-grid">
+                <!-- Sample contracts will be loaded here -->
+            </div>
         </div>
     </div>
 
+    <!-- Main App Container -->
     <div id="app-container" class="page main-container">
         <div class="header glass-card">
             <h1 id="app-main-title">Project Dashboard</h1>
             <div class="header-actions">
-                <button id="map-nav-btn" onclick="window.showPage('map-page-content')" disabled>🗺️ Map</button>
-                <button id="tables-nav-btn" onclick="window.showPage('tables-page-content')" disabled>📊 Tables</button>
-                <button id="reports-nav-btn" onclick="window.showPage('reports-page-content')" disabled>📄 Reports</button>
+                <button id="map-nav-btn" onclick="showAppPage('map-page-content')">🗺️ Map</button>
+                <button id="tables-nav-btn" onclick="showAppPage('tables-page-content')">📊 Tables</button>
+                <button id="reports-nav-btn" onclick="showAppPage('reports-page-content')">📄 Reports</button>
+                <button id="contracts-nav-btn" onclick="showAppPage('contracts-page-content')">📋 Contracts</button>
                 <span style="border-left: 1px solid #ccc; height: 30px; margin: 0 10px;"></span>
-                <select id="language-switcher" onchange="window.switchLanguage(this.value)">
+                <select id="language-switcher" onchange="switchLanguage(this.value)">
                     <option value="en">English</option>
                     <option value="ar">العربية</option>
                 </select>
-                <button class="btn-danger" onclick="window.signOutUser()" data-translate="sign_out">Sign Out</button>
+                <button class="btn-danger" onclick="signOut()" data-translate="sign_out">Sign Out</button>
             </div>
         </div>
+        
         <div id="app-content">
-            <div id="map-page-content" class="app-page-content" style="display: none;"><div class="glass-card"><h2>Map View</h2><p>Map functionality will be displayed here.</p></div></div>
-            <div id="tables-page-content" class="app-page-content" style="display: none;"><div class="glass-card"><h2>Tables View</h2><p>Data tables will be displayed here.</p></div></div>
-            <div id="reports-page-content" class="app-page-content" style="display: none;"><div class="glass-card"><h2>Reports View</h2><p>Report generation tools will be displayed here.</p></div></div>
+            <!-- Map Page -->
+            <div id="map-page-content" class="app-page-content">
+                <div class="glass-card">
+                    <h2>🗺️ Interactive Map</h2>
+                    <div class="table-container">
+                        <button class="btn-success" onclick="initializeMap()">Initialize Map</button>
+                        <button onclick="exportMapToPDF()">📄 Export to PDF</button>
+                        <button onclick="saveMapState()">💾 Save Map</button>
+                        <button onclick="loadMapState()">📂 Load Map</button>
+                    </div>
+                    <div id="map-container"></div>
+                </div>
+            </div>
+
+            <!-- Tables Page -->
+            <div id="tables-page-content" class="app-page-content" style="display: none;">
+                <div class="glass-card">
+                    <h2>📊 Data Tables</h2>
+                    <div class="table-container">
+                        <button class="btn-success" onclick="addTableRow()">➕ Add Row</button>
+                        <button onclick="exportTableToPDF()">📄 Export to PDF</button>
+                        <button onclick="exportTableToExcel()">📊 Export to Excel</button>
+                        <button onclick="importFromCSV()">📥 Import CSV</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="main-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Description</th>
+                                    <th>Quantity</th>
+                                    <th>Unit</th>
+                                    <th>Rate</th>
+                                    <th>Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <tr>
+                                    <td contenteditable="true">001</td>
+                                    <td contenteditable="true">Sample Item</td>
+                                    <td contenteditable="true">10</td>
+                                    <td contenteditable="true">m²</td>
+                                    <td contenteditable="true">100</td>
+                                    <td>1000</td>
+                                    <td><button class="btn-danger" onclick="deleteRow(this)">❌</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div id="reports-page-content" class="app-page-content" style="display: none;">
+                <div class="glass-card">
+                    <h2>📄 Reports Generation</h2>
+                    <div class="table-container">
+                        <button class="btn-success" onclick="generateReport()">📋 Generate Report</button>
+                        <button onclick="exportReportToPDF()">📄 Export to PDF</button>
+                        <button onclick="saveReport()">💾 Save Report</button>
+                    </div>
+                    <div id="report-content">
+                        <h3>Project Report</h3>
+                        <p><strong>Date:</strong> <span id="report-date"></span></p>
+                        <p><strong>Project:</strong> <span id="report-project"></span></p>
+                        <div id="report-summary">
+                            <h4>Summary</h4>
+                            <p>This report contains the current status of the selected project including maps, tables, and analysis results.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contracts Page -->
+            <div id="contracts-page-content" class="app-page-content" style="display: none;">
+                <div class="glass-card">
+                    <h2>📋 Contract Management</h2>
+                    <div class="table-container">
+                        <button class="btn-success" onclick="addNewContract()">➕ Add Contract</button>
+                        <button onclick="downloadBOQTemplate()">📥 Download BOQ Template</button>
+                    </div>
+                    <div id="contracts-list">
+                        <h3>Saved Contracts</h3>
+                        <div class="contract-selection-grid" id="saved-contracts">
+                            <!-- Saved contracts will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Sign Up Popup -->
     <div id="signup-popup" class="popup-overlay">
         <div class="form-card glass-card">
-            <button class="popup-close-btn" onclick="window.hidePopup('signup-popup')">&times;</button>
+            <button class="popup-close-btn" onclick="hidePopup('signup-popup')">&times;</button>
             <h1 data-translate="create_account">Create Your Account</h1>
             <form id="signup-form">
                 <input type="text" id="signup-name" placeholder="Full Name" required>
@@ -146,198 +453,282 @@
                 <input type="password" id="signup-password" placeholder="Password" required>
                 <button type="submit" data-translate="sign_up">Sign Up</button>
                 <p id="signup-message" class="error-message"></p>
-                <a href="#" class="toggle-link" onclick="window.hidePopup('signup-popup')" data-translate="have_account">Already have an account? Sign In</a>
+                <a href="#" class="toggle-link" onclick="hidePopup('signup-popup')" data-translate="have_account">Already have an account? Sign In</a>
             </form>
         </div>
     </div>
 
-    <div id="pending-popup" class="popup-overlay">
-        <div class="form-card glass-card">
-            <h1 data-translate="pending_title">Request Received</h1>
-            <p data-translate="pending_message">Your access request has been sent to the administrator for approval. You will be notified via email once your account is activated.</p>
-            <button onclick="window.signOutUser()" data-translate="sign_out">Sign Out</button>
+    <!-- Contract Form Popup -->
+    <div id="contract-form-popup" class="popup-overlay">
+        <div class="form-card glass-card" style="max-width: 600px;">
+            <button class="popup-close-btn" onclick="hidePopup('contract-form-popup')">&times;</button>
+            <h1>Add New Contract</h1>
+            <form id="contract-form">
+                <input type="text" id="contract-title" placeholder="Contract Title" required>
+                <input type="text" id="contract-number" placeholder="Contract Number" required>
+                <input type="date" id="contract-start" required>
+                <input type="date" id="contract-end" required>
+                <input type="number" id="contract-value" placeholder="Project Value" required>
+                <input type="text" id="contract-company" placeholder="Company Name" required>
+                <input type="text" id="contract-client" placeholder="Client Name" required>
+                <div>
+                    <label>Upload BOQ (CSV):</label>
+                    <input type="file" id="contract-boq" accept=".csv" />
+                    <small>Note: This BOQ will be used in the Cost Estimation page.</small>
+                </div>
+                <button type="submit" class="btn-success">Save Contract</button>
+            </form>
         </div>
     </div>
     
     <div class="footer">
-        <p>Developed by Eng. Ahmet Nasan</p>
+        <p><strong>Developed by Eng. Ahmet Nasan</strong></p>
         <p>Civil Engineer & Software Developer</p>
-        <em>“Blending engineering precision with modern tech.”</em>
+        <em>"Blending engineering precision with modern tech."</em>
     </div>
 
-    <script type="module">
-        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-        
-        // --- Supabase Client Setup ---
-        const supabaseUrl = 'https://cykjjrrexaqmsqwrgnzp.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5a2pqcnJleGFxbXNxd3JnbnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MjUyMDksImV4cCI6MjA2NzIwMTIwOX0.Fx6f23TWCQQMCIkc5hcx8LqHyskVMm6WAhJl1UFZpMA';
-        const supabase = createClient(supabaseUrl, supabaseKey);
-
+    <script>
         // --- GLOBAL STATE ---
-        let currentUser;
+        let currentUser = null;
         let selectedContract = null;
+        let mapInstance = null;
+        let tableData = [];
+        let contractsData = [];
 
         // --- BILINGUAL DICTIONARY ---
         const translations = {
             en: {
                 welcome_title: "Welcome to the Engineering Project Platform 👷‍♂️",
+                welcome_subtitle: "Smart tools for managing maps, data, inspections, and reports for engineers and managers.",
                 sign_in: "Sign In",
                 need_account: "Need an account? Sign Up",
                 create_account: "Create Your Account",
                 sign_up: "Sign Up",
                 have_account: "Already have an account? Sign In",
-                pending_title: "Request Received",
-                pending_message: "Your access request has been sent to the administrator for approval. You will be notified via email once your account is activated.",
                 sign_out: "Sign Out",
                 select_contract_title: "Select a Contract",
                 select_contract_subtitle: "Choose a contract to access the project dashboard."
             },
             ar: {
                 welcome_title: "مرحبًا بك في منصة المشاريع الهندسية 👷‍♂️",
+                welcome_subtitle: "أدوات ذكية لإدارة الخرائط والبيانات والتفتيش والتقارير للمهندسين والمديرين.",
                 sign_in: "تسجيل الدخول",
                 need_account: "تحتاج حساب؟ اشتراك",
                 create_account: "أنشئ حسابك",
                 sign_up: "اشتراك",
                 have_account: "لديك حساب بالفعل؟ تسجيل الدخول",
-                pending_title: "تم استلام الطلب",
-                pending_message: "تم إرسال طلب الوصول الخاص بك إلى المسؤول للموافقة عليه. سيتم إعلامك عبر البريد الإلكتر الإلكتروني بمجرد تفعيل حسابك.",
                 sign_out: "تسجيل الخروج",
                 select_contract_title: "اختر عقدًا",
                 select_contract_subtitle: "اختر عقدًا للوصول إلى لوحة تحكم المشروع."
             }
         };
 
-        // --- UI & NAVIGATION FUNCTIONS ---
-        window.showPopup = (popupId) => {
+        // --- SAMPLE DATA ---
+        const sampleContracts = [
+            {
+                id: 1,
+                title: "Highway Construction Project",
+                number: "HC-2024-001",
+                startDate: "2024-01-15",
+                endDate: "2024-12-31",
+                value: 5000000,
+                company: "ABC Engineering",
+                client: "Ministry of Transport"
+            },
+            {
+                id: 2,
+                title: "Bridge Renovation Project",
+                number: "BR-2024-002",
+                startDate: "2024-03-01",
+                endDate: "2024-08-30",
+                value: 2500000,
+                company: "XYZ Construction",
+                client: "City Council"
+            },
+            {
+                id: 3,
+                title: "Water Treatment Plant",
+                number: "WTP-2024-003",
+                startDate: "2024-02-01",
+                endDate: "2024-11-30",
+                value: 8000000,
+                company: "Water Solutions Ltd",
+                client: "Water Authority"
+            }
+        ];
+
+        // --- UTILITY FUNCTIONS ---
+        function showPopup(popupId) {
             const popup = document.getElementById(popupId);
             if(popup) popup.style.display = 'flex';
-        };
+        }
 
-        window.hidePopup = (popupId) => {
+        function hidePopup(popupId) {
             const popup = document.getElementById(popupId);
             if(popup) popup.style.display = 'none';
-        };
+        }
 
-        window.showPage = (pageId) => {
+        function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             const page = document.getElementById(pageId);
             if (page) page.classList.add('active');
+        }
 
+        function showAppPage(pageId) {
             document.querySelectorAll('.app-page-content').forEach(p => p.style.display = 'none');
-            const appContentPage = document.getElementById(pageId);
-            if (appContentPage && appContentPage.classList.contains('app-page-content')) {
-                document.getElementById('app-container').classList.add('active');
-                appContentPage.style.display = 'block';
-            }
-        };
-        
-        window.signOutUser = async () => {
-            await supabase.auth.signOut();
-            selectedContract = null; 
-            hidePopup('pending-popup');
-        };
-        
-        window.switchLanguage = (lang) => {
+            const page = document.getElementById(pageId);
+            if (page) page.style.display = 'block';
+        }
+
+        function switchLanguage(lang) {
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
             document.querySelectorAll('[data-translate]').forEach(el => {
                 const key = el.getAttribute('data-translate');
-                el.innerText = translations[lang][key] || el.innerText;
+                if (translations[lang] && translations[lang][key]) {
+                    el.innerText = translations[lang][key];
+                }
             });
-        };
+        }
 
-        // --- AUTH STATE & ROUTING ---
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_OUT' || !session) {
-                currentUser = null;
-                showPage('login-page');
-            } else if (session) {
-                currentUser = session.user;
-                const { data: profile, error } = await supabase
-                    .from('profiles')
-                    .select('status, is_admin')
-                    .eq('id', currentUser.id)
-                    .single();
+        function signOut() {
+            currentUser = null;
+            selectedContract = null;
+            showPage('login-page');
+        }
 
-                if (error || !profile) {
-                    showPopup('pending-popup'); // Show pending popup if profile not found
-                    return;
-                }
-
-                if (profile.status === 'approved') {
-                    showPage('contract-selection-page');
-                    loadContractsForSelection();
-                } else {
-                    showPopup('pending-popup'); // Or if status is 'pending'
-                }
+        // --- AUTH FUNCTIONS ---
+        function handleLogin(email, password) {
+            // Simulate login - replace with actual authentication
+            if (email && password) {
+                currentUser = { email: email, name: email.split('@')[0] };
+                showPage('contract-selection-page');
+                loadContractsForSelection();
+                document.getElementById('login-error-message').innerText = '';
+                return true;
             }
-        });
+            return false;
+        }
 
-        // --- FORM HANDLERS ---
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) document.getElementById('login-error-message').innerText = error.message;
-        });
-
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('signup-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const messageEl = document.getElementById('signup-message');
-
-            const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
-            
-            if (error) {
-                messageEl.innerText = error.message;
-                messageEl.style.color = 'red';
-            } else {
-                hidePopup('signup-popup');
-                showPopup('pending-popup'); // Show request received popup on success
+        function handleSignup(name, email, password) {
+            // Simulate signup - replace with actual registration
+            if (name && email && password) {
+                const messageEl = document.getElementById('signup-message');
+                messageEl.innerText = 'Account created successfully! Please sign in.';
+                messageEl.className = 'success-message';
+                setTimeout(() => {
+                    hidePopup('signup-popup');
+                    messageEl.innerText = '';
+                    messageEl.className = 'error-message';
+                }, 2000);
+                return true;
             }
-        });
+            return false;
+        }
 
-        // --- CONTRACT SELECTION ---
-        async function loadContractsForSelection() {
+        // --- CONTRACT FUNCTIONS ---
+        function loadContractsForSelection() {
             const listContainer = document.getElementById('contract-selection-list');
-            listContainer.innerHTML = '<p>Loading contracts...</p>';
-
-            const { data: contracts, error } = await supabase.from('contracts').select('*');
-
-            if (error || !contracts || contracts.length === 0) {
-                listContainer.innerHTML = '<p>No contracts available. Please contact an administrator.</p>';
-                return;
-            }
-
             listContainer.innerHTML = '';
-            contracts.forEach(contract => {
+
+            sampleContracts.forEach(contract => {
                 const card = document.createElement('div');
                 card.className = 'contract-select-card';
-                card.innerHTML = `<h3>${contract.title}</h3><p>${contract.contract_number || ''}</p>`;
+                card.innerHTML = `
+                    <h3>${contract.title}</h3>
+                    <p><strong>Contract #:</strong> ${contract.number}</p>
+                    <p><strong>Value:</strong> $${contract.value.toLocaleString()}</p>
+                    <p><strong>Client:</strong> ${contract.client}</p>
+                    <p><strong>Duration:</strong> ${contract.startDate} to ${contract.endDate}</p>
+                `;
                 card.onclick = () => selectContract(contract);
                 listContainer.appendChild(card);
             });
         }
-        
-        window.selectContract = (contract) => {
+
+        function selectContract(contract) {
             selectedContract = contract;
-            document.getElementById('app-main-title').innerText = `Contract: ${contract.title}`;
-            document.getElementById('map-nav-btn').disabled = false;
-            document.getElementById('tables-nav-btn').disabled = false;
-            document.getElementById('reports-nav-btn').disabled = false;
-            showPage('map-page-content');
-        };
+            document.getElementById('app-main-title').innerText = `${contract.title}`;
+            showPage('app-container');
+            showAppPage('map-page-content');
+            loadSavedContracts();
+        }
 
-        // --- INITIAL LOAD ---
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
-                showPage('login-page');
+        function loadSavedContracts() {
+            const savedContracts = JSON.parse(localStorage.getItem('savedContracts') || '[]');
+            contractsData = [...sampleContracts, ...savedContracts];
+            
+            const container = document.getElementById('saved-contracts');
+            container.innerHTML = '';
+            
+            contractsData.forEach(contract => {
+                const card = document.createElement('div');
+                card.className = 'contract-select-card';
+                card.innerHTML = `
+                    <h3>${contract.title}</h3>
+                    <p><strong>Contract #:</strong> ${contract.number}</p>
+                    <p><strong>Value:</strong> $${contract.value.toLocaleString()}</p>
+                    <div style="margin-top: 15px;">
+                        <button class="btn-success" onclick="editContract(${contract.id})">Edit</button>
+                        <button class="btn-danger" onclick="deleteContract(${contract.id})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addNewContract() {
+            showPopup('contract-form-popup');
+        }
+
+        function saveContract(contractData) {
+            const savedContracts = JSON.parse(localStorage.getItem('savedContracts') || '[]');
+            contractData.id = Date.now();
+            savedContracts.push(contractData);
+            localStorage.setItem('savedContracts', JSON.stringify(savedContracts));
+            loadSavedContracts();
+            hidePopup('contract-form-popup');
+        }
+
+        function editContract(id) {
+            alert('Edit functionality will be implemented');
+        }
+
+        function deleteContract(id) {
+            if (confirm('Are you sure you want to delete this contract?')) {
+                const savedContracts = JSON.parse(localStorage.getItem('savedContracts') || '[]');
+                const filtered = savedContracts.filter(c => c.id !== id);
+                localStorage.setItem('savedContracts', JSON.stringify(filtered));
+                loadSavedContracts();
             }
-        });
+        }
 
-    </script>
-</body>
-</html>
+        function downloadBOQTemplate() {
+            const csvContent = "BOQ Ref.,Asset,Description,Unit,Rate\n001,Foundation,Concrete Foundation,m³,150\n002,Walls,Brick Walls,m²,45\n003,Roofing,Metal Roofing,m²,75";
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'BOQ_Template.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // --- MAP FUNCTIONS ---
+        function initializeMap() {
+            if (mapInstance) {
+                mapInstance.remove();
+            }
+            
+            const mapContainer = document.getElementById('map-container');
+            mapInstance = L.map(mapContainer).setView([25.2854, 51.5310], 10); // Doha coordinates
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(mapInstance);
+            
+            // Add drawing controls
+            mapInstance.pm.addControls({
+                position: 'topleft',
+                drawCircle: true,
+                drawMarker
