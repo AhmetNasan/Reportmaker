@@ -577,7 +577,7 @@ const openContract = (contractId) => {
     const contracts = DB.get('contracts');
     const contract = contracts.find(c => c.id === contractId);
     if (!contract) return;
-    
+
     localStorage.setItem('activeContractId', contractId);
     getEl('app-main-title').textContent = contract.title;
     loadBoqTable(contract.boq);
@@ -624,4 +624,239 @@ const addBoqRow = (rowData = {}) => {
 
 const deleteRow = (btn) => {
     const row = btn.parentNode.parentNode;
-    row.parentNode.removeChil
+    row.parentNode.removeChild(row);
+};
+
+const handleUnitInput = (event) => {
+    const cell = event.target;
+    const dimensions = cell.textContent.trim();
+    const unitCell = cell.nextElementSibling;
+
+    if (dimensions.includes('x')) {
+        const parts = dimensions.split('x').map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
+        if (parts.length >= 2) {
+            const area = parts.reduce((a, b) => a * b, 1);
+            unitCell.textContent = parts.length === 2 ? `${area.toFixed(2)} m²` : `${area.toFixed(2)} m³`;
+        }
+    }
+};
+
+const exportTableToCsv = (filename) => {
+    const table = getEl('boq-table');
+    const rows = Array.from(table.querySelectorAll('tr'));
+    const csvContent = rows.map(row => {
+        const cells = Array.from(row.querySelectorAll('th, td'));
+        return cells.slice(0, -1).map(cell => `"${cell.textContent.replace(/"/g, '""')}"`).join(',');
+    }).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+const exportTableToPdf = () => {
+    const element = getEl('boq-table-container');
+    html2canvas(element).then(canvas => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 210;
+        const pageHeight = 295;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+
+        let position = 0;
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+        pdf.save('boq-table.pdf');
+    });
+};
+
+// ======== 6. AI ANALYSIS ========
+const handleAIAnalysis = () => {
+    const fileInput = getEl('ai-image-upload');
+    if (!fileInput.files[0]) {
+        alert('Please select an image first.');
+        return;
+    }
+
+    getEl('ai-results-card').style.display = 'block';
+    getEl('ai-spinner').style.display = 'block';
+    getEl('ai-results-table').innerHTML = '';
+
+    // Simulate AI analysis with mock results
+    setTimeout(() => {
+        getEl('ai-spinner').style.display = 'none';
+        const mockResults = [
+            { defect: 'Pothole', severity: 'High', location: 'Center-left', description: 'Deep circular depression', action: 'Immediate repair required' },
+            { defect: 'Cracking', severity: 'Medium', location: 'Right edge', description: 'Longitudinal cracks', action: 'Monitor and seal' }
+        ];
+
+        let tableHTML = '<table><thead><tr><th>Defect Type</th><th>Severity</th><th>Location</th><th>Description</th><th>Recommended Action</th></tr></thead><tbody>';
+        mockResults.forEach(result => {
+            tableHTML += `<tr><td>${result.defect}</td><td>${result.severity}</td><td>${result.location}</td><td>${result.description}</td><td>${result.action}</td></tr>`;
+        });
+        tableHTML += '</tbody></table>';
+        getEl('ai-results-table').innerHTML = tableHTML;
+
+        addNotification('AI Analysis', 'Road defect analysis completed.');
+    }, 3000);
+};
+
+const loadAIPrompt = () => {
+    const prompt = localStorage.getItem('ai_prompt') || '';
+    getEl('ai-prompt-textarea').value = prompt;
+};
+
+const saveAIPrompt = () => {
+    const prompt = getEl('ai-prompt-textarea').value;
+    localStorage.setItem('ai_prompt', prompt);
+    alert('AI prompt saved successfully!');
+};
+
+// ======== 7. ADMIN PANEL ========
+const loadAdminRequests = () => {
+    const requests = DB.get('user_requests');
+    const tbody = getEl('admin-requests-body');
+    tbody.innerHTML = '';
+
+    requests.forEach((request, index) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td>${request.email}</td>
+            <td>${new Date(request.date).toLocaleDateString()}</td>
+            <td>
+                <button class="btn-success" onclick="approveUser(${index})"><i class="fa-solid fa-check"></i> Approve</button>
+                <button class="btn-danger" onclick="rejectUser(${index})"><i class="fa-solid fa-times"></i> Reject</button>
+            </td>
+        `;
+    });
+};
+
+const approveUser = (index) => {
+    const requests = DB.get('user_requests');
+    const users = DB.get('users');
+    const request = requests[index];
+
+    users.push({
+        email: request.email,
+        password: request.password,
+        is_admin: false,
+        is_approved: true
+    });
+
+    requests.splice(index, 1);
+    DB.set('users', users);
+    DB.set('user_requests', requests);
+
+    loadAdminRequests();
+    addNotification('User Approved', `User ${request.email} has been approved.`);
+};
+
+const rejectUser = (index) => {
+    const requests = DB.get('user_requests');
+    const request = requests[index];
+    requests.splice(index, 1);
+    DB.set('user_requests', requests);
+    loadAdminRequests();
+    addNotification('User Rejected', `User ${request.email} has been rejected.`);
+};
+
+// ======== 8. NOTIFICATIONS ========
+const loadNotifications = () => {
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    const tbody = getEl('notifications-table-body');
+    tbody.innerHTML = '';
+
+    notifications.forEach(notification => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td>${notification.date}</td>
+            <td>${notification.type}</td>
+            <td>${notification.message}</td>
+        `;
+    });
+};
+
+// ======== 9. MAP INITIALIZATION ========
+let map;
+window.mapInitialized = false;
+
+const initializeMap = () => {
+    if (window.mapInitialized) return;
+
+    map = L.map('map-container').setView([25.2048, 55.2708], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    map.pm.addControls({
+        position: 'topleft',
+        drawCircle: false,
+    });
+
+    window.mapInitialized = true;
+    setTimeout(() => map.invalidateSize(), 100);
+};
+
+// ======== 10. LANGUAGE SWITCHING ========
+const switchLanguage = (lang) => {
+    if (lang === 'ar') {
+        document.documentElement.setAttribute('dir', 'rtl');
+        document.documentElement.setAttribute('lang', 'ar');
+    } else {
+        document.documentElement.setAttribute('dir', 'ltr');
+        document.documentElement.setAttribute('lang', 'en');
+    }
+};
+
+// ======== 11. EVENT LISTENERS ========
+getEl('login-form').addEventListener('submit', Auth.handleLogin);
+getEl('signup-form').addEventListener('submit', Auth.handleSignup);
+getEl('contract-form').addEventListener('submit', handleSaveContract);
+
+getEl('show-signup-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    showModal('signup-modal');
+});
+
+// Global functions for HTML onclick handlers
+window.showModal = showModal;
+window.hideModal = hideModal;
+window.showAppPage = showAppPage;
+window.signOut = Auth.signOut;
+window.switchLanguage = switchLanguage;
+window.addBoqRow = addBoqRow;
+window.deleteRow = deleteRow;
+window.handleUnitInput = handleUnitInput;
+window.exportTableToCsv = exportTableToCsv;
+window.exportTableToPdf = exportTableToPdf;
+window.downloadBoqTemplate = downloadBoqTemplate;
+window.handleAIAnalysis = handleAIAnalysis;
+window.saveAIPrompt = saveAIPrompt;
+window.approveUser = approveUser;
+window.rejectUser = rejectUser;
+
+// ======== 12. INITIALIZATION ========
+document.addEventListener('DOMContentLoaded', () => {
+    DB.init();
+    Auth.checkSession();
+});
+
+// ======== SCRIPT END ========
+</script>
+</body>
+</html>
