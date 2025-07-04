@@ -34,8 +34,9 @@
         .form-card { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); padding: 40px; border-radius: var(--border-radius); box-shadow: var(--shadow); text-align: center; width: 100%; max-width: 450px; }
         .form-card h1 { margin-top: 0; }
         .form-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        .form-card button { width: 100%; padding: 12px; border-radius: 8px; border: none; background-color: var(--primary-color); color: white; font-size: 16px; cursor: pointer; transition: background-color 0.3s; margin-top: 10px; }
-        .form-card button:hover { background-color: #0056b3; }
+        .form-card button, .card button { width: 100%; padding: 12px; border-radius: 8px; border: none; background-color: var(--primary-color); color: white; font-size: 16px; cursor: pointer; transition: background-color 0.3s; margin-top: 10px; }
+        .form-card button:hover, .card button:hover { background-color: #0056b3; }
+        .form-card button:disabled { background-color: #aaa; cursor: not-allowed; }
         .toggle-link { color: var(--primary-color); cursor: pointer; text-decoration: none; margin-top: 15px; display: inline-block; }
         .error-message { color: red; margin-top: 10px; min-height: 1em; }
         
@@ -174,8 +175,7 @@
 
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-functions.js"; // This should be Supabase functions, corrected below
-
+        
         // --- Supabase Client Setup ---
         const supabaseUrl = 'https://cykjjrrexaqmsqwrgnzp.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5a2pqcnJleGFxbXNxd3JnbnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MjUyMDksImV4cCI6MjA2NzIwMTIwOX0.Fx6f23TWCQQMCIkc5hcx8LqHyskVMm6WAhJl1UFZpMA';
@@ -184,18 +184,28 @@
         // --- GLOBAL STATE & CONSTANTS ---
         const ADMIN_EMAIL = "ahmetnasan1993@gmail.com";
         let currentUser;
-        let currentContractData;
-        let boqData = [];
         let map; // Global map instance
 
-        // --- PAGE ROUTING & AUTH ---
+        // --- GLOBAL FUNCTIONS ATTACHED TO WINDOW ---
         window.showPage = (pageId) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
         };
+        window.signOutUser = async () => await supabase.auth.signOut();
+        window.openTab = (evt, tabName) => {
+             document.querySelectorAll('#app-page .tab-content').forEach(tc => tc.classList.remove('active'));
+             document.querySelectorAll('#app-page .tab-button').forEach(tb => tb.classList.remove('active'));
+             document.getElementById(tabName).classList.add('active');
+             evt.currentTarget.classList.add('active');
+             
+             if (tabName === 'map-tab-content' && !map) {
+                 initializeVehicleMap();
+             }
+        };
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_OUT') {
+        // --- AUTH STATE LOGIC ---
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT' || !session) {
                 currentUser = null;
                 sessionStorage.removeItem('selectedContractId');
                 showPage('login-page');
@@ -212,33 +222,49 @@
                         loadPendingRequests();
                     }
                 }
-            } else {
-                 showPage('login-page');
             }
         });
         
-        window.signOutUser = async () => await supabase.auth.signOut();
-
         // --- AUTH FORM HANDLERS ---
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const { error } = await supabase.auth.signInWithPassword({
-                email: e.target.email.value,
-                password: e.target.password.value,
-            });
-            if (error) document.getElementById('login-error-message').innerText = error.message;
+            const loginButton = e.target.querySelector('button');
+            const errorMessage = document.getElementById('login-error-message');
+            
+            // Get values by ID - THIS IS THE FIX
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            loginButton.disabled = true;
+            errorMessage.innerText = '';
+
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            
+            if (error) {
+                errorMessage.innerText = error.message;
+            }
+            loginButton.disabled = false;
         });
 
         document.getElementById('request-access-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = e.target.email.value;
+            const requestButton = e.target.querySelector('button');
+            const errorMessage = document.getElementById('request-error-message');
+            const email = document.getElementById('request-email').value;
+
+            requestButton.disabled = true;
+            errorMessage.innerText = '';
+            
             const { error } = await supabase.from('user_requests').insert({ email: email, status: 'pending' });
+            
             if (error) {
-                document.getElementById('request-error-message').innerText = error.message;
+                errorMessage.innerText = error.message;
             } else {
                 alert("Request submitted successfully! The admin has been notified.");
                 document.getElementById('request-access-modal').classList.remove('active');
+                e.target.reset();
             }
+            requestButton.disabled = false;
         });
 
         // --- ADMIN PANEL LOGIC ---
@@ -256,32 +282,39 @@
                 item.innerHTML = `<span>${req.email}</span>`;
                 const approveBtn = document.createElement('button');
                 approveBtn.textContent = 'Approve';
-                approveBtn.onclick = () => approveUser(req);
+                approveBtn.onclick = (e) => approveUser(req, e.currentTarget);
                 item.appendChild(approveBtn);
                 listContainer.appendChild(item);
             });
         }
         
-        async function approveUser(request) {
+        async function approveUser(request, button) {
             if (!confirm(`Are you sure you want to approve user: ${request.email}?`)) return;
+            button.disabled = true;
+            button.textContent = 'Approving...';
+            
             try {
-                const { data, error } = await supabase.functions.invoke('handle-user-request', {
+                const { error } = await supabase.functions.invoke('handle-user-request', {
                     body: { requestId: request.id, action: 'approve' }
                 });
                 if (error) throw error;
-                alert(`User ${request.email} approved.`);
-                loadPendingRequests();
+                alert(`User ${request.email} approved. They will receive an invitation email.`);
+                loadPendingRequests(); // Refresh the list
             } catch (error) {
                 alert(`Failed to approve user: ${error.message}`);
+                button.disabled = false;
+                button.textContent = 'Approve';
             }
         }
 
         // --- CONTRACTS PAGE LOGIC ---
         async function loadContracts() {
+            if (!currentUser) return;
             const listContainer = document.getElementById('contracts-list');
+            listContainer.innerHTML = '<p>Loading contracts...</p>';
             const { data: contracts, error } = await supabase.from('contracts').select('*').eq('user_id', currentUser.id);
             if (error) return listContainer.innerHTML = `<p>Error loading contracts.</p>`;
-            if (contracts.length === 0) return listContainer.innerHTML = '<p>No contracts found.</p>';
+            if (!contracts || contracts.length === 0) return listContainer.innerHTML = '<p>No contracts found. Please add one.</p>';
             
             listContainer.innerHTML = '';
             contracts.forEach(contract => {
@@ -317,6 +350,7 @@
                     else {
                         alert("Contract saved!");
                         loadContracts();
+                        e.target.reset();
                     }
                 }
             });
@@ -326,38 +360,31 @@
         async function loadContractAndShowApp(contractId) {
             const { data, error } = await supabase.from('contracts').select('*').eq('id', contractId).single();
             if (error || !data) {
-                alert("Contract not found!");
+                alert("Contract not found! Redirecting.");
                 sessionStorage.removeItem('selectedContractId');
                 showPage('contracts-page');
                 return;
             }
-            currentContractData = data;
-            boqData = data.boq || [];
+            let currentContractData = data;
+            let boqData = data.boq || [];
             document.getElementById('app-main-title').textContent = currentContractData.title;
             showPage('app-page');
             initializeAppLogic();
         }
 
         function initializeAppLogic() {
+            // This function is the entry point for the main app page.
+            // All event listeners and initializations for the dashboard tabs should go here.
             openTab({ currentTarget: document.querySelector('#app-page .tab-button') }, 'inspection-report-content');
         }
         
-        window.openTab = (evt, tabName) => {
-             document.querySelectorAll('#app-page .tab-content').forEach(tc => tc.classList.remove('active'));
-             document.querySelectorAll('#app-page .tab-button').forEach(tb => tb.classList.remove('active'));
-             document.getElementById(tabName).classList.add('active');
-             evt.currentTarget.classList.add('active');
-             
-             if (tabName === 'map-tab-content' && !map) {
-                 initializeVehicleMap();
-             }
-        };
-
         function initializeVehicleMap() {
-            if (map) map.remove(); // Remove previous instance if it exists
+            if (map) map.remove(); 
             map = L.map('map-container').setView([25.2861, 51.5348], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            // ... Add Leaflet.Draw/Geoman and other map logic here ...
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            // Add other map logic like Leaflet.Draw/Geoman here.
         }
 
     </script>
