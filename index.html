@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -391,7 +393,7 @@ const showAppPage = (pageId) => {
 
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     const navButtonId = pageId.replace('-page', '');
-    getEl(`nav-${navButtonId}`).classList.add('active');
+    getEl(nav-${navButtonId}).classList.add('active');
 
     // Special handler for map initialization
     if (pageId === 'map-page' && !window.mapInitialized) {
@@ -402,13 +404,14 @@ const showAppPage = (pageId) => {
 const displayMessage = (elementId, text, type) => {
     const el = getEl(elementId);
     el.textContent = text;
-    el.className = `message ${type}`;
+    el.className = message ${type};
     el.style.display = 'block';
     setTimeout(() => el.style.display = 'none', 5000);
 };
 
 const addNotification = (type, message) => {
-    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]'
+);
     notifications.unshift({ date: new Date().toLocaleString(), type, message });
     localStorage.setItem('notifications', JSON.stringify(notifications));
     loadNotifications();
@@ -483,7 +486,7 @@ const Auth = {
         requests.push({ email, password, date: new Date().toISOString() });
         DB.set('user_requests', requests);
         displayMessage('signup-message', 'Sign up successful! An admin will approve your account shortly.', 'success');
-        addNotification('New User', `New user request from ${email}.`);
+        addNotification('New User', New user request from ${email}.);
         setTimeout(() => hideModal('signup-modal'), 2000);
     },
     signOut: () => {
@@ -536,7 +539,7 @@ const handleSaveContract = (e) => {
         complete: (results) => {
             const contracts = DB.get('contracts');
             const newContract = {
-                id: `C${Date.now()}`,
+                id: C${Date.now()},
                 title, number, start, end,
                 boq: results.data
             };
@@ -544,7 +547,7 @@ const handleSaveContract = (e) => {
             DB.set('contracts', contracts);
             hideModal('contract-form-modal');
             loadContracts();
-            addNotification('Contract', `New contract "${title}" added.`);
+            addNotification('Contract', New contract "${title}" added.);
         },
         error: (err) => {
             alert('Error parsing CSV file: ' + err.message);
@@ -628,235 +631,311 @@ const deleteRow = (btn) => {
 };
 
 const handleUnitInput = (event) => {
-    const cell = event.target;
-    const dimensions = cell.textContent.trim();
-    const unitCell = cell.nextElementSibling;
+    const dimensions = event.target.textContent.toLowerCase();
+    const unitCell = event.target.nextElementSibling;
 
-    if (dimensions.includes('x')) {
-        const parts = dimensions.split('x').map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
-        if (parts.length >= 2) {
-            const area = parts.reduce((a, b) => a * b, 1);
-            unitCell.textContent = parts.length === 2 ? `${area.toFixed(2)} m²` : `${area.toFixed(2)} m³`;
-        }
+    // L x W x H -> m³
+    if (dimensions.match(/(\d|\.)+\s?x\s?(\d|\.)+\s?x\s?(\d|\.)+/)) {
+        unitCell.textContent = 'm³';
+    } 
+    // L x W -> m²
+    else if (dimensions.match(/(\d|\.)+\s?x\s?(\d|\.)+/)) {
+        unitCell.textContent = 'm²';
+    }
+    // L -> m
+    else if (dimensions.match(/^(\d|\.)+$/)) {
+        unitCell.textContent = 'm';
+    }
+    // NR
+    else if (dimensions.toUpperCase() === 'NR') {
+         unitCell.textContent = 'NR';
+    }
+    else {
+        unitCell.textContent = 'Unit'; // Default
     }
 };
 
 const exportTableToCsv = (filename) => {
-    const table = getEl('boq-table');
-    const rows = Array.from(table.querySelectorAll('tr'));
-    const csvContent = rows.map(row => {
-        const cells = Array.from(row.querySelectorAll('th, td'));
-        return cells.slice(0, -1).map(cell => `"${cell.textContent.replace(/"/g, '""')}"`).join(',');
-    }).join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    let csv = [];
+    const rows = document.querySelectorAll("#boq-table tr");
+    for (const row of rows) {
+        let cols = row.querySelectorAll("td, th");
+        let csvrow = [];
+        for (const col of cols) {
+            // To handle cases where a cell might have a comma
+            let data = "${col.innerText.replace(/"/g, '""')}";
+            csvrow.push(data);
+        }
+        // Exclude the action column from export
+        csvrow.pop();
+        csv.push(csvrow.join(","));
+    }
+    const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
     const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
+    link.href = URL.createObjectURL(csvFile);
+    link.download = filename;
     link.click();
-    document.body.removeChild(link);
 };
 
 const exportTableToPdf = () => {
-    const element = getEl('boq-table-container');
-    html2canvas(element).then(canvas => {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const container = getEl('boq-table-container').cloneNode(true);
+
+    // Clean up for printing
+    container.querySelectorAll('button').forEach(b => b.remove());
+    container.querySelectorAll('[contenteditable="true"]').forEach(el => el.removeAttribute('contenteditable'));
+
+    document.body.appendChild(container); // Needs to be in DOM for html2canvas
+
+    html2canvas(container).then(canvas => {
+        document.body.removeChild(container);
         const imgData = canvas.toDataURL('image/png');
-        const imgWidth = 210;
-        const pageHeight = 295;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-
-        let position = 0;
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-        pdf.save('boq-table.pdf');
+        const imgProps = doc.getImageProperties(imgData);
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        doc.save("boq-report.pdf");
     });
 };
 
-// ======== 6. AI ANALYSIS ========
-const handleAIAnalysis = () => {
-    const fileInput = getEl('ai-image-upload');
-    if (!fileInput.files[0]) {
-        alert('Please select an image first.');
-        return;
+// ======== 6. GIS MAP ========
+let map;
+let drawnItems;
+window.mapInitialized = false;
+
+const initializeMap = () => {
+    map = L.map('map-page').setView([25.2854, 51.5310], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    const geomanControls = new L.Control.Geoman(map, {
+        position: 'topleft',
+        drawMarker: true,
+        drawCircleMarker: false,
+        drawCircle: false,
+        drawRectangle: true,
+        drawPolygon: true,
+        drawPolyline: true,
+    });
+    map.addControl(geomanControls);
+
+    map.on('pm:create', (e) => {
+        const layer = e.layer;
+        drawnItems.addLayer(layer);
+        calculateAndBindPopup(layer);
+    });
+
+    addCustomMapControls();
+    window.mapInitialized = true;
+};
+
+const calculateAndBindPopup = (layer) => {
+    const geojson = layer.toGeoJSON();
+    let content = '<h4>Shape Details</h4>';
+
+    if (geojson.geometry.type === 'Polygon') {
+        const area = turf.area(geojson); // in square meters
+        content += <p><strong>Area:</strong> ${area.toFixed(2)} m²</p>;
+    } else if (geojson.geometry.type === 'LineString') {
+        const length = turf.length(geojson, { units: 'meters' });
+        content += <p><strong>Length:</strong> ${length.toFixed(2)} m</p>;
     }
 
+    const center = layer.getBounds().getCenter();
+    content += <p><strong>Center Coords:</strong> ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}</p>;
+    content += <button class="btn-danger btn-sm" onclick="removeLayer(${layer._leaflet_id})">Delete</button>;
+    layer.bindPopup(content).openPopup();
+};
+
+window.removeLayer = (id) => {
+    drawnItems.eachLayer(layer => {
+        if (layer._leaflet_id === id) {
+            drawnItems.removeLayer(layer);
+        }
+    });
+};
+
+const addCustomMapControls = () => {
+    const customControl = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd: function (map) {
+            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+            container.innerHTML = `
+                <a href="#" title="More Actions" role="button" aria-label="More Actions">
+                    <i class="fa-solid fa-ellipsis-vertical" style="font-size: 1.2em; padding: 5px;"></i>
+                </a>
+                <div class="custom-menu" style="display:none; background:white; padding: 5px; box-shadow: var(--shadow);">
+                    <button class="btn" style="width:100%; margin-bottom:5px;" onclick="getEl('kml-input').click()">Import KML</button>
+                    <button class="btn" style="width:100%;" onclick="getEl('csv-input').click()">Import CSV</button>
+                </div>
+                <input type="file" id="kml-input" style="display:none" accept=".kml" onchange="importKML(event)">
+                <input type="file" id="csv-input" style="display:none" accept=".csv" onchange="importCSV(event)">
+            `;
+            container.onclick = (e) => {
+                e.stopPropagation();
+                const menu = container.querySelector('.custom-menu');
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            }
+            L.DomEvent.disableClickPropagation(container);
+            return container;
+        }
+    });
+    map.addControl(new customControl());
+};
+
+const importKML = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const kmlLayer = omnivore.kml.parse(e.target.result);
+        drawnItems.addLayer(kmlLayer);
+        map.fitBounds(kmlLayer.getBounds());
+    };
+    reader.readAsText(file);
+};
+
+const importCSV = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    Papa.parse(file, {
+        header: true,
+        dynamicTyping: true,
+        complete: (results) => {
+            results.data.forEach(point => {
+                if (point.lat && point.lng) {
+                    const marker = L.marker([point.lat, point.lng]).addTo(drawnItems);
+                    let popupContent = '<ul>';
+                    for (const key in point) {
+                        popupContent += <li><strong>${key}:</strong> ${point[key]}</li>;
+                    }
+                    popupContent += '</ul>';
+                    marker.bindPopup(popupContent);
+                }
+            });
+        }
+    });
+};
+
+
+// ======== 7. AI & NOTIFICATIONS ========
+const handleAIAnalysis = () => {
+    const file = getEl('ai-image-upload').files[0];
+    if (!file) {
+        alert("Please upload an image first.");
+        return;
+    }
     getEl('ai-results-card').style.display = 'block';
+    getEl('ai-results-table').style.display = 'none';
     getEl('ai-spinner').style.display = 'block';
-    getEl('ai-results-table').innerHTML = '';
 
-    // Simulate AI analysis with mock results
+    // Simulate AI processing
     setTimeout(() => {
+        const exampleResult = `
+            <table>
+                <thead>
+                    <tr><th>Defect Type</th><th>Severity</th><th>Location</th><th>Description</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Pothole</td><td>High</td><td>Lower-left</td><td>Surface collapse due to traffic and environmental factors.</td><td>Immediate Patching Required</td></tr>
+                    <tr><td>Longitudinal Crack</td><td>Medium</td><td>Center</td><td>Crack running parallel to the pavement's centerline, potential for water ingress.</td><td>Seal Crack</td></tr>
+                </tbody>
+            </table>
+        `;
         getEl('ai-spinner').style.display = 'none';
-        const mockResults = [
-            { defect: 'Pothole', severity: 'High', location: 'Center-left', description: 'Deep circular depression', action: 'Immediate repair required' },
-            { defect: 'Cracking', severity: 'Medium', location: 'Right edge', description: 'Longitudinal cracks', action: 'Monitor and seal' }
-        ];
-
-        let tableHTML = '<table><thead><tr><th>Defect Type</th><th>Severity</th><th>Location</th><th>Description</th><th>Recommended Action</th></tr></thead><tbody>';
-        mockResults.forEach(result => {
-            tableHTML += `<tr><td>${result.defect}</td><td>${result.severity}</td><td>${result.location}</td><td>${result.description}</td><td>${result.action}</td></tr>`;
-        });
-        tableHTML += '</tbody></table>';
-        getEl('ai-results-table').innerHTML = tableHTML;
-
-        addNotification('AI Analysis', 'Road defect analysis completed.');
-    }, 3000);
+        getEl('ai-results-table').innerHTML = exampleResult;
+        getEl('ai-results-table').style.display = 'block';
+        addNotification('AI Analysis', Analysis complete for image ${file.name}.);
+    }, 2500);
 };
 
 const loadAIPrompt = () => {
-    const prompt = localStorage.getItem('ai_prompt') || '';
-    getEl('ai-prompt-textarea').value = prompt;
+    getEl('ai-prompt-textarea').value = localStorage.getItem('ai_prompt');
 };
-
 const saveAIPrompt = () => {
-    const prompt = getEl('ai-prompt-textarea').value;
-    localStorage.setItem('ai_prompt', prompt);
-    alert('AI prompt saved successfully!');
+    localStorage.setItem('ai_prompt', getEl('ai-prompt-textarea').value);
+    alert('AI prompt saved!');
 };
 
-// ======== 7. ADMIN PANEL ========
+const loadNotifications = () => {
+    const notifications = DB.get('notifications');
+    const tableBody = getEl('notifications-table-body');
+    tableBody.innerHTML = '';
+    notifications.forEach(n => {
+        const row = tableBody.insertRow();
+        row.innerHTML = <td>${n.date}</td><td>${n.type}</td><td>${n.message}</td>;
+    });
+};
+
+
+// ======== 8. ADMIN PANEL ========
 const loadAdminRequests = () => {
     const requests = DB.get('user_requests');
-    const tbody = getEl('admin-requests-body');
-    tbody.innerHTML = '';
-
-    requests.forEach((request, index) => {
-        const row = tbody.insertRow();
+    const tableBody = getEl('admin-requests-body');
+    tableBody.innerHTML = '';
+    if (requests.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3">No pending user requests.</td></tr>';
+        return;
+    }
+    requests.forEach(req => {
+        const row = tableBody.insertRow();
         row.innerHTML = `
-            <td>${request.email}</td>
-            <td>${new Date(request.date).toLocaleDateString()}</td>
+            <td>${req.email}</td>
+            <td>${new Date(req.date).toLocaleDateString()}</td>
             <td>
-                <button class="btn-success" onclick="approveUser(${index})"><i class="fa-solid fa-check"></i> Approve</button>
-                <button class="btn-danger" onclick="rejectUser(${index})"><i class="fa-solid fa-times"></i> Reject</button>
+                <button class="btn-success btn-sm" onclick="approveUser('${req.email}')">Approve</button>
+                <button class="btn-danger btn-sm" onclick="rejectUser('${req.email}')">Reject</button>
             </td>
         `;
     });
 };
 
-const approveUser = (index) => {
-    const requests = DB.get('user_requests');
-    const users = DB.get('users');
-    const request = requests[index];
+const approveUser = (email) => {
+    let requests = DB.get('user_requests');
+    let users = DB.get('users');
+    const userRequest = requests.find(r => r.email === email);
 
-    users.push({
-        email: request.email,
-        password: request.password,
-        is_admin: false,
-        is_approved: true
-    });
-
-    requests.splice(index, 1);
-    DB.set('users', users);
-    DB.set('user_requests', requests);
-
-    loadAdminRequests();
-    addNotification('User Approved', `User ${request.email} has been approved.`);
-};
-
-const rejectUser = (index) => {
-    const requests = DB.get('user_requests');
-    const request = requests[index];
-    requests.splice(index, 1);
-    DB.set('user_requests', requests);
-    loadAdminRequests();
-    addNotification('User Rejected', `User ${request.email} has been rejected.`);
-};
-
-// ======== 8. NOTIFICATIONS ========
-const loadNotifications = () => {
-    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-    const tbody = getEl('notifications-table-body');
-    tbody.innerHTML = '';
-
-    notifications.forEach(notification => {
-        const row = tbody.insertRow();
-        row.innerHTML = `
-            <td>${notification.date}</td>
-            <td>${notification.type}</td>
-            <td>${notification.message}</td>
-        `;
-    });
-};
-
-// ======== 9. MAP INITIALIZATION ========
-let map;
-window.mapInitialized = false;
-
-const initializeMap = () => {
-    if (window.mapInitialized) return;
-
-    map = L.map('map-container').setView([25.2048, 55.2708], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    map.pm.addControls({
-        position: 'topleft',
-        drawCircle: false,
-    });
-
-    window.mapInitialized = true;
-    setTimeout(() => map.invalidateSize(), 100);
-};
-
-// ======== 10. LANGUAGE SWITCHING ========
-const switchLanguage = (lang) => {
-    if (lang === 'ar') {
-        document.documentElement.setAttribute('dir', 'rtl');
-        document.documentElement.setAttribute('lang', 'ar');
-    } else {
-        document.documentElement.setAttribute('dir', 'ltr');
-        document.documentElement.setAttribute('lang', 'en');
+    if(userRequest) {
+        users.push({ ...userRequest, is_approved: true, is_admin: false });
+        requests = requests.filter(r => r.email !== email);
+        DB.set('users', users);
+        DB.set('user_requests', requests);
+        addNotification('Admin', User ${email} has been approved.);
+        loadAdminRequests();
     }
 };
 
-// ======== 11. EVENT LISTENERS ========
-getEl('login-form').addEventListener('submit', Auth.handleLogin);
-getEl('signup-form').addEventListener('submit', Auth.handleSignup);
-getEl('contract-form').addEventListener('submit', handleSaveContract);
+const rejectUser = (email) => {
+    let requests = DB.get('user_requests');
+    requests = requests.filter(r => r.email !== email);
+    DB.set('user_requests', requests);
+    addNotification('Admin', User request for ${email} has been rejected.);
+    loadAdminRequests();
+};
 
-getEl('show-signup-link').addEventListener('click', (e) => {
-    e.preventDefault();
-    showModal('signup-modal');
-});
 
-// Global functions for HTML onclick handlers
-window.showModal = showModal;
-window.hideModal = hideModal;
-window.showAppPage = showAppPage;
-window.signOut = Auth.signOut;
-window.switchLanguage = switchLanguage;
-window.addBoqRow = addBoqRow;
-window.deleteRow = deleteRow;
-window.handleUnitInput = handleUnitInput;
-window.exportTableToCsv = exportTableToCsv;
-window.exportTableToPdf = exportTableToPdf;
-window.downloadBoqTemplate = downloadBoqTemplate;
-window.handleAIAnalysis = handleAIAnalysis;
-window.saveAIPrompt = saveAIPrompt;
-window.approveUser = approveUser;
-window.rejectUser = rejectUser;
-
-// ======== 12. INITIALIZATION ========
+// ======== 9. EVENT LISTENERS ========
 document.addEventListener('DOMContentLoaded', () => {
     DB.init();
     Auth.checkSession();
+
+    // Attach form submit listeners
+    getEl('login-form').addEventListener('submit', Auth.handleLogin);
+    getEl('signup-form').addEventListener('submit', Auth.handleSignup);
+    getEl('contract-form').addEventListener('submit', handleSaveContract);
+
+    // *FIX:* Attach click listener for signup link safely
+    getEl('show-signup-link').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent page jump
+        showModal('signup-modal');
+    });
 });
 
-// ======== SCRIPT END ========
 </script>
 </body>
 </html>
