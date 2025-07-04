@@ -211,7 +211,7 @@
                 <button type="submit" class="btn-primary" style="width:100%;">Sign In</button>
                 <div id="login-message" class="message" style="display:none;"></div>
             </form>
-            <a href="#" class="toggle-link" onclick="showModal('signup-modal')">Need an account? Sign Up</a>
+            <a href="#" class="toggle-link" id="show-signup-link">Need an account? Sign Up</a>
         </div>
     </div>
 
@@ -408,7 +408,8 @@ const displayMessage = (elementId, text, type) => {
 };
 
 const addNotification = (type, message) => {
-    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]'
+);
     notifications.unshift({ date: new Date().toLocaleString(), type, message });
     localStorage.setItem('notifications', JSON.stringify(notifications));
     loadNotifications();
@@ -921,9 +922,16 @@ document.addEventListener('DOMContentLoaded', () => {
     DB.init();
     Auth.checkSession();
 
+    // Attach form submit listeners
     getEl('login-form').addEventListener('submit', Auth.handleLogin);
     getEl('signup-form').addEventListener('submit', Auth.handleSignup);
     getEl('contract-form').addEventListener('submit', handleSaveContract);
+
+    // *FIX:* Attach click listener for signup link safely
+    getEl('show-signup-link').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent page jump
+        showModal('signup-modal');
+    });
 });
 
 </script>
