@@ -655,10 +655,12 @@
         }
 
         function loadSavedContracts() {
-            const savedContracts = JSON.parse(localStorage.getItem('savedContracts') || '[]');
-            contractsData = [...sampleContracts, ...savedContracts];
+            // Use in-memory storage instead of localStorage
+            contractsData = [...sampleContracts];
             
             const container = document.getElementById('saved-contracts');
+            if (!container) return;
+            
             container.innerHTML = '';
             
             contractsData.forEach(contract => {
@@ -682,10 +684,9 @@
         }
 
         function saveContract(contractData) {
-            const savedContracts = JSON.parse(localStorage.getItem('savedContracts') || '[]');
+            // Use in-memory storage instead of localStorage
             contractData.id = Date.now();
-            savedContracts.push(contractData);
-            localStorage.setItem('savedContracts', JSON.stringify(savedContracts));
+            contractsData.push(contractData);
             loadSavedContracts();
             hidePopup('contract-form-popup');
         }
@@ -696,9 +697,7 @@
 
         function deleteContract(id) {
             if (confirm('Are you sure you want to delete this contract?')) {
-                const savedContracts = JSON.parse(localStorage.getItem('savedContracts') || '[]');
-                const filtered = savedContracts.filter(c => c.id !== id);
-                localStorage.setItem('savedContracts', JSON.stringify(filtered));
+                contractsData = contractsData.filter(c => c.id !== id);
                 loadSavedContracts();
             }
         }
@@ -731,4 +730,19 @@
             mapInstance.pm.addControls({
                 position: 'topleft',
                 drawCircle: true,
-                drawMarker
+                drawMarker: true,
+                drawPolyline: true,
+                drawRectangle: true,
+                drawPolygon: true,
+                editMode: true,
+                dragMode: true,
+                cutPolygon: true,
+                removalMode: true,
+            });
+        }
+
+        function exportMapToPDF() {
+            alert('Map PDF export functionality will be implemented');
+        }
+
+        function saveMapState() {
