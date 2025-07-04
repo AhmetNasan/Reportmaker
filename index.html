@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script defer src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     <script defer src='https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js'></script>
@@ -39,7 +39,7 @@
             color: var(--text-color); 
             min-height: 100vh;
         }
-        
+
         /* Page Visibility */
         .page { 
             display: none; 
@@ -96,7 +96,7 @@
         html[dir="rtl"] .form-card h1, html[dir="rtl"] .form-card p { 
             text-align: center; 
         }
-        
+
         input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="number"], input[type="file"] {
             width: 100%; 
             padding: 12px; 
@@ -106,7 +106,7 @@
             box-sizing: border-box;
             font-size: 16px;
         }
-        
+
         button {
             padding: 12px 20px; 
             border-radius: 8px; 
@@ -127,12 +127,12 @@
             cursor: not-allowed; 
             transform: none;
         }
-        
+
         .btn-success { background-color: var(--success-color); }
         .btn-success:hover { background-color: #218838; }
         .btn-danger { background-color: var(--danger-color); }
         .btn-danger:hover { background-color: #c82333; }
-        
+
         /* Header */
         .header { 
             display: flex; 
@@ -153,7 +153,7 @@
             align-items: center;
             flex-wrap: wrap;
         }
-        
+
         /* Contract Selection */
         .contract-selection-grid { 
             display: grid; 
@@ -188,7 +188,7 @@
         .app-page-content {
             min-height: 60vh;
         }
-        
+
         /* Map Container */
         #map-container {
             height: 600px;
@@ -347,7 +347,7 @@
                 <button class="btn-danger" onclick="signOut()" data-translate="sign_out">Sign Out</button>
             </div>
         </div>
-        
+
         <div id="app-content">
             <!-- Map Page -->
             <div id="map-page-content" class="app-page-content">
@@ -480,7 +480,7 @@
             </form>
         </div>
     </div>
-    
+
     <div class="footer">
         <p><strong>Developed by Eng. Ahmet Nasan</strong></p>
         <p>Civil Engineer & Software Developer</p>
@@ -657,12 +657,12 @@
         function loadSavedContracts() {
             // Use in-memory storage instead of localStorage
             contractsData = [...sampleContracts];
-            
+
             const container = document.getElementById('saved-contracts');
             if (!container) return;
-            
+
             container.innerHTML = '';
-            
+
             contractsData.forEach(contract => {
                 const card = document.createElement('div');
                 card.className = 'contract-select-card';
@@ -718,14 +718,14 @@
             if (mapInstance) {
                 mapInstance.remove();
             }
-            
+
             const mapContainer = document.getElementById('map-container');
             mapInstance = L.map(mapContainer).setView([25.2854, 51.5310], 10); // Doha coordinates
-            
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(mapInstance);
-            
+
             // Add drawing controls
             mapInstance.pm.addControls({
                 position: 'topleft',
@@ -746,3 +746,215 @@
         }
 
         function saveMapState() {
+            alert('Save map functionality will be implemented');
+        }
+
+        function loadMapState() {
+            alert('Load map functionality will be implemented');
+        }
+
+        // --- TABLE FUNCTIONS ---
+        function addTableRow() {
+            const tableBody = document.getElementById('table-body');
+            const newRow = tableBody.insertRow();
+            newRow.innerHTML = `
+                <td contenteditable="true">00${tableBody.rows.length + 1}</td>
+                <td contenteditable="true">New Item</td>
+                <td contenteditable="true">1</td>
+                <td contenteditable="true">unit</td>
+                <td contenteditable="true">0</td>
+                <td>0</td>
+                <td><button class="btn-danger" onclick="deleteRow(this)">❌</button></td>
+            `;
+
+            // Add calculation functionality
+            const quantityCell = newRow.cells[2];
+            const rateCell = newRow.cells[4];
+            const totalCell = newRow.cells[5];
+
+            function updateTotal() {
+                const quantity = parseFloat(quantityCell.innerText) || 0;
+                const rate = parseFloat(rateCell.innerText) || 0;
+                totalCell.innerText = (quantity * rate).toFixed(2);
+            }
+
+            quantityCell.addEventListener('input', updateTotal);
+            rateCell.addEventListener('input', updateTotal);
+        }
+
+        function deleteRow(button) {
+            if (confirm('Are you sure you want to delete this row?')) {
+                button.closest('tr').remove();
+            }
+        }
+
+        function exportTableToPDF() {
+            alert('Table PDF export functionality will be implemented');
+        }
+
+        function exportTableToExcel() {
+            const table = document.getElementById('main-table');
+            let csvContent = '';
+
+            // Get headers
+            const headers = Array.from(table.querySelectorAll('th')).slice(0, -1); // Exclude Actions column
+            csvContent += headers.map(th => th.innerText).join(',') + '\n';
+
+            // Get data rows
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = Array.from(row.cells).slice(0, -1); // Exclude Actions column
+                csvContent += cells.map(cell => cell.innerText).join(',') + '\n';
+            });
+
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'table_data.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function importFromCSV() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader```text
+= new FileReader();
+                    reader.onload = function(e) {
+                        const csv = e.target.result;
+                        const lines = csv.split('\n');
+                        const tableBody = document.getElementById('table-body');
+
+                        // Clear existing rows except the first one
+                        while (tableBody.rows.length > 1) {
+                            tableBody.deleteRow(1);
+                        }
+
+                        // Skip header row and add data
+                        for (let i = 1; i < lines.length; i++) {
+                            if (lines[i].trim()) {
+                                const values = lines[i].split(',');
+                                const row = tableBody.insertRow();
+                                row.innerHTML = `
+                                    <td contenteditable="true">${values[0] || ''}</td>
+                                    <td contenteditable="true">${values[1] || ''}</td>
+                                    <td contenteditable="true">${values[2] || ''}</td>
+                                    <td contenteditable="true">${values[3] || ''}</td>
+                                    <td contenteditable="true">${values[4] || ''}</td>
+                                    <td>${(parseFloat(values[2]) * parseFloat(values[4])) || 0}</td>
+                                    <td><button class="btn-danger" onclick="deleteRow(this)">❌</button></td>
+                                `;
+                            }
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+
+            input.click();
+        }
+
+        // --- REPORT FUNCTIONS ---
+        function generateReport() {
+            const reportDate = document.getElementById('report-date');
+            const reportProject = document.getElementById('report-project');
+
+            reportDate.innerText = new Date().toLocaleDateString();
+            reportProject.innerText = selectedContract ? selectedContract.title : 'No Contract Selected';
+
+            // Add table data to report
+            const reportSummary = document.getElementById('report-summary');
+            const table = document.getElementById('main-table');
+            const rows = table.querySelectorAll('tbody tr');
+
+            let totalValue = 0;
+            rows.forEach(row => {
+                const total = parseFloat(row.cells[5].innerText) || 0;
+                totalValue += total;
+            });
+
+            reportSummary.innerHTML = `
+                <h4>Summary</h4>
+                <p>This report contains the current status of the selected project including maps, tables, and analysis results.</p>
+                <p><strong>Total Project Value:</strong> $${totalValue.toLocaleString()}</p>
+                <p><strong>Number of Items:</strong> ${rows.length}</p>
+                <p><strong>Generated on:</strong> ${new Date().toLocaleDateString()}</p>
+            `;
+        }
+
+        function exportReportToPDF() {
+            alert('Report PDF export functionality will be implemented');
+        }
+
+        function saveReport() {
+            alert('Save report functionality will be implemented');
+        }
+
+        function updateRowTotal(cell) {
+            const row = cell.closest('tr');
+            const quantity = parseFloat(row.cells[2].innerText) || 0;
+            const rate = parseFloat(row.cells[4].innerText) || 0;
+            row.cells[5].innerText = (quantity * rate).toFixed(2);
+        }
+
+        // --- EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login form submission
+            document.getElementById('login-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                if (handleLogin(email, password)) {
+                    document.getElementById('login-form').reset();
+                } else {
+                    document.getElementById('login-error-message').innerText = 'Please enter valid credentials';
+                }
+            });
+
+            // Signup form submission
+            document.getElementById('signup-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('signup-name').value;
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+
+                if (handleSignup(name, email, password)) {
+                    document.getElementById('signup-form').reset();
+                }
+            });
+
+            // Contract form submission
+            document.getElementById('contract-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const contractData = {
+                    title: document.getElementById('contract-title').value,
+                    number: document.getElementById('contract-number').value,
+                    startDate: document.getElementById('contract-start').value,
+                    endDate: document.getElementById('contract-end').value,
+                    value: parseFloat(document.getElementById('contract-value').value),
+                    company: document.getElementById('contract-company').value,
+                    client: document.getElementById('contract-client').value
+                };
+
+                saveContract(contractData);
+                document.getElementById('contract-form').reset();
+            });
+
+            // Table body event delegation for input
+            document.getElementById('table-body').addEventListener('input', function(e) {
+                if (e.target.tagName === 'TD' && e.target.cellIndex >= 2 && e.target.cellIndex <= 4) {
+                    updateRowTotal(e.target);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
