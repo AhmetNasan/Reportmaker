@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/marzipano@6.1.1/dist/marzipano.css">
+
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
@@ -16,6 +18,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marzipano@6.1.1/dist/marzipano.min.js"></script>
+
 
     <style>
         :root {
@@ -29,6 +36,16 @@
             --success-color: #27ae60;
             --danger-color: #c0392b;
             --warning-color: #f39c12;
+
+            /* From extra pages code */
+            --primary-color-new: #007bff; /* Renamed to avoid clash if needed, but original primary is fine */
+            --primary-color-rgb: 0, 123, 255;
+            --background-color-new: #f0f4f8; /* Renamed */
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(200, 210, 220, 0.7);
+            --shadow-new: 0 4px 20px rgba(0, 0, 0, 0.12); /* Renamed */
+            --text-color-new: #2c3e50; /* Renamed */
+            --border-radius-new: 12px; /* Renamed */
         }
 
         /* Base */
@@ -191,6 +208,772 @@
             color: var(--secondary-color); text-decoration: none;
         }
 
+        /* --- New Styles from Extra Pages Code --- */
+        /* Body padding removed as it's handled by main-container */
+        /* body {
+            padding: 10px;
+            background-color: var(--background-color-new);
+            color: var(--text-color-new);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        } */
+
+        .main-container-report { /* Renamed to avoid conflict */
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .glass-card {
+            background-color: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-new);
+            box-shadow: var(--shadow-new);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px;
+        }
+
+        /* Header & Tabs */
+        .main-header-report { /* Renamed to avoid conflict */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 110;
+        }
+        .main-title-report { font-size: clamp(18px, 5vw, 24px); font-weight: bold; color: var(--text-color-new); }
+        .menu-button { background: none; border: none; font-size: 28px; cursor: pointer; position: relative; }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 40px;
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-radius: var(--border-radius-new); box-shadow: var(--shadow-new);
+            z-index: 2500;
+            width: 260px; overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        html[dir="ltr"] .dropdown-menu { right: 0; }
+        html[dir="rtl"] .dropdown-menu { left: 0; }
+        .dropdown-menu button {
+            display: flex; align-items: center; gap: 12px;
+            width: 100%; padding: 10px 15px;
+            background: none; border: none; font-size: 15px; cursor: pointer; color: var(--text-color-new);
+        }
+        html[dir="ltr"] .dropdown-menu button { text-align: left; }
+        html[dir="rtl"] .dropdown-menu button { text-align: right; }
+        .dropdown-menu button:hover { background-color: rgba(var(--primary-color-rgb), 0.1); }
+        .menu-button:focus-within .dropdown-menu { display: block; }
+        hr { border: none; border-top: 1px solid var(--glass-border); margin: 5px 0; }
+
+        /* Removed .tabs-report and .tab-button/content styles as they are now top-level */
+        /* .tabs-report { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: -1px; } */
+        /* .tab-button {
+            padding: 8px 15px; border: 1px solid var(--glass-border);
+            border-bottom: none; border-radius: 10px 10px 0 0;
+            cursor: pointer; background-color: rgba(255,255,255,0.3);
+            font-size: 15px; font-weight: 500;
+            color: var(--text-color-new);
+        }
+        .tab-button.active { background-color: var(--glass-bg); border-bottom: 1px solid transparent; font-weight: bold;}
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 15px; } */
+        
+        #projects-list { list-style: none; padding: 0; }
+        #projects-list li {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px; border-bottom: 1px solid var(--glass-border);
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+        }
+        #projects-list .project-name { cursor: pointer; font-weight: bold; }
+        #projects-list .project-name:hover { color: var(--primary-color-new); }
+        #projects-list button { background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; padding: 4px 8px; }
+
+        /* Forms & Inputs */
+        .info-card { display: flex; justify-content: space-between; align-items: center; }
+        
+        #display-date {
+            background: transparent;
+            border: none;
+            color: var(--text-color-new);
+            font-family: inherit;
+            font-size: inherit;
+            padding: 0;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        #display-date::-webkit-calendar-picker-indicator {
+            background: none;
+        }
+
+        #uploaded-logo { max-height: 60px; max-width: 120px; object-fit: contain; border-radius: 8px; cursor: pointer; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .card h3 {
+            margin: 0 0 10px 0; color: var(--primary-color-new);
+            border-bottom: 1px solid rgba(var(--primary-color-rgb), 0.2); padding-bottom: 8px; font-size: 18px;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 10px; }
+        .form-row { display: flex; gap: 10px; align-items: center; }
+        .form-row input { flex: 1; }
+        input[type="text"], input[type="number"], input[type="url"], .form-button, select {
+            width: 100%; padding: 10px; border-radius: 8px;
+            border: 1px solid var(--glass-border); background-color: rgba(255, 255, 255, 0.9);
+            box-sizing: border-box; font-size: 14px;
+            color: var(--text-color-new);
+        }
+        input::placeholder { color: #889; }
+        .primary-button {
+            border: none; background-color: var(--primary-color-new);
+            color: white; font-weight: bold; cursor: pointer; transition: background-color 0.3s; padding: 12px; border-radius: 8px; font-size: 15px;
+        }
+        
+        #drop-zone {
+            border: 2px dashed rgba(var(--primary-color-rgb), 0.5);
+            border-radius: var(--border-radius-new);
+            padding: 20px 15px;
+            text-align: center;
+            color: var(--primary-color-new);
+            font-weight: 500;
+            transition: all 0.3s;
+            cursor: pointer;
+            background-color: rgba(var(--primary-color-rgb), 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        #drop-zone:hover { background-color: rgba(var(--primary-color-rgb), 0.1); }
+        #drop-zone p { margin: 0; }
+        .drop-zone-buttons { display: flex; gap: 20px; }
+        .icon-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color-new);
+            background-color: #fff;
+            color: var(--primary-color-new);
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease-in-out;
+        }
+        .icon-button:hover {
+            background-color: var(--primary-color-new);
+            color: #fff;
+            transform: scale(1.1);
+        }
+        #photo-previews img { max-height: 70px; border-radius: 8px; }
+
+        /* GPS Section & Map */
+        #report-map { width: 100%; height: 120px; border-radius: 12px; background-color: #e9ecef; border: 1px solid var(--glass-border); overflow: hidden; margin-bottom: 10px; } /* Renamed */
+        .location-mode-switcher {
+            display: flex;
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 10px;
+        }
+        .location-mode-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background-color: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .location-mode-btn:not(:last-child) {
+            border-right: 1px solid var(--glass-border);
+        }
+        .location-mode-btn.active {
+            background-color: var(--primary-color-new);
+            color: white;
+            font-weight: bold;
+        }
+        .location-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .location-display-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        #insert-location-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            background-color: #28a745;
+        }
+
+        /* Table */
+        .table-controls { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; align-items: center; }
+        .table-controls button {
+            background-color: rgba(255,255,255,0.5); border: 1px solid var(--glass-border);
+            border-radius: 8px; padding: 6px 10px; font-size: 16px; cursor: pointer;
+        }
+        .table-controls button:hover { background-color: rgba(255,255,255,0.8); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background-color: rgba(var(--primary-color-rgb), 0.1); padding: 10px; text-align: center; }
+        td { border-top: 1px solid var(--glass-border); padding: 8px; text-align: center; vertical-align: middle; }
+        tbody tr:nth-child(even) { background-color: rgba(0,0,0,0.02); }
+        .photo-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            align-items: center;
+        }
+        .photo-wrapper img {
+            max-height: 100px;
+            border-radius: 5px;
+            cursor: pointer;
+            object-fit: cover;
+        }
+
+        /* Table Drag & Drop */
+        .draggable-row {
+            cursor: grab;
+        }
+        .draggable-row.dragging {
+            opacity: 0.5;
+            border: 2px dashed var(--primary-color-new);
+        }
+
+
+        /* --- Cost Estimation Tab Styles --- */
+        .estimation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .estimation-header #client-logo-est, .estimation-header #company-logo-est {
+            max-height: 60px;
+            max-width: 150px;
+            object-fit: contain;
+            cursor: pointer;
+        }
+        .estimation-header .estimation-title {
+            text-align: center;
+            flex-grow: 1;
+        }
+        .estimation-title h2, .estimation-title h3 {
+            margin: 0;
+            padding: 2px 5px;
+        }
+        .estimation-title h2:hover, .estimation-title h3:hover {
+            background-color: rgba(var(--primary-color-rgb), 0.1);
+        }
+        .estimation-details {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .estimation-details .form-row {
+            gap: 15px;
+        }
+        .estimation-details label {
+            font-weight: bold;
+            flex-basis: 150px;
+        }
+        .estimation-details input {
+            flex-grow: 1;
+        }
+        .boq-entry-card .form-grid-est {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            align-items: end;
+        }
+        .boq-ref-group {
+            display: flex;
+            gap: 5px;
+            align-items: end;
+        }
+        .boq-ref-group select {
+            flex-grow: 1;
+        }
+        .boq-entry-card .form-group-est {
+             display: flex; flex-direction: column;
+        }
+        .boq-entry-card label {
+            margin-bottom: 4px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .boq-entry-card .description-group {
+             grid-column: 1 / -1;
+        }
+        #cost-estimation-table {
+            border: 1px solid black;
+        }
+        #cost-estimation-table th {
+            background-color: transparent;
+            color: black;
+            font-weight: bold;
+            border: 1px solid black;
+        }
+        #cost-estimation-table td {
+            border: 1px solid black;
+            text-align: right;
+            padding: 4px 8px;
+        }
+        #cost-estimation-table td.description-cell {
+            text-align: left;
+        }
+        #cost-estimation-table tfoot td {
+            font-weight: bold;
+        }
+        
+        /* Vehicle Tracking / Integrated Map Tab */
+        .integrated-map-container {
+             height: 80vh; display: flex; flex-direction: column;
+        }
+        #vehicle-map {
+            flex-grow: 1;
+            width: 100%;
+            border-radius: var(--border-radius-new);
+            border: 1px solid var(--glass-border);
+        }
+        #vehicle-map-controls { 
+            display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; align-items: center;
+        }
+        #vehicle-map-controls button { 
+             padding: 8px 12px; font-size: 14px; 
+        }
+        .vehicle-popup-actions a {
+            margin-right: 10px;
+            text-decoration: none;
+            color: var(--primary-color-new);
+            font-weight: bold;
+        }
+
+
+        /* Modals */
+        .modal {
+            display: none; position: fixed; z-index: 2000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.5);
+            align-items: center; justify-content: center;
+        }
+        .modal-content-report { /* Renamed to avoid conflict */
+            padding: 20px; width: 90%; max-width: 450px; display: flex; flex-direction: column; gap: 10px;
+            background: white; border-radius: var(--border-radius-new); box-shadow: var(--shadow-new);
+        }
+        
+        /* FAB */
+        .fab-container { position: fixed; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
+        html[dir="ltr"] .fab-container { bottom: 20px; right: 20px; }
+        html[dir="rtl"] .fab-container { bottom: 20px; left: 20px; }
+        .fab {
+            width: 50px; height: 50px; border-radius: 50%;
+            color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-size: 22px; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            transition: transform 0.2s;
+        }
+        .fab:hover { transform: scale(1.1); }
+        #camera-fab { background-color: #28a745; }
+        #add-fab { background-color: var(--primary-color-new); }
+        
+        /* Other minor fixes for clarity */
+        .footer { padding: 10px; margin-top: 10px; text-align:center; font-size: 12px; }
+
+        /* Camera Modal Specific Styles */
+        #camera-modal-content {
+            background-color: black;
+            padding: 0;
+            width: 90vw;
+            height: 90vh;
+            max-width: 600px; /* Limit camera feed size */
+            max-height: 800px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* or 'cover' depending on preference */
+            transform: scaleX(-1); /* Mirror camera for selfie view */
+        }
+
+        #capture-btn {
+            position: absolute;
+            bottom: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border: 5px solid var(--primary-color-new);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 2010;
+            display: flex; /* Make it a flex container to center content */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            font-size: 30px; /* Size for the icon */
+            color: var(--primary-color-new); /* Color for the icon */
+        }
+
+        #close-camera-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 2010;
+        }
+        #preview-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        #preview-content {
+            background-color: white;
+            width: 90%;
+            height: 90%;
+            overflow: auto;
+            padding: 20px;
+            position: relative;
+            border-radius: var(--border-radius-new);
+        }
+        #preview-content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Hide print-specific elements by default */
+        .print-header-replacement, .print-date-footer {
+            display: none;
+        }
+    
+        /* CSS for printing */
+        @media print {
+            /* --- General Hiding Rules --- */
+            body > *:not(.main-container) {
+                display: none !important;
+            }
+            .main-container > *:not(.printable-area) {
+                 display: none !important;
+            }
+            .printable-area {
+                display: flex !important;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .main-container {
+                display: block !important;
+            }
+
+            .printable-area .menu-button,
+            .printable-area .boq-entry-card,
+            .printable-area .table-controls,
+            .printable-area .form-grid,
+            .printable-area #main-report > .primary-button,
+            .tabs-report, /* Renamed */
+            /* Hide all buttons during print preview or printing */
+            button, .fab-container {
+                 display: none !important;
+            }
+            /* Specific buttons to hide for vehicle-tracking-tab print */
+            #vehicle-map-controls button {
+                display: none !important;
+            }
+            
+            /* --- Page Setup --- */
+            @page {
+                size: A4 landscape;
+                margin: 15mm;
+            }
+
+            /* --- General Styling Resets for Print --- */
+            body {
+                background: #fff !important;
+                color: #000 !important;
+                margin: 0;
+                padding: 0;
+            }
+
+            .glass-card, .main-header-report, .estimation-header { /* Renamed */
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                padding: 0;
+                color: #000;
+            }
+            
+            .main-container-report, .printable-area { /* Renamed */
+                width: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+            }
+            
+            .main-title-report { /* Renamed */
+                color: #000;
+            }
+
+            /* --- NEW PRINT HEADER STYLES --- */
+            .info-card, .estimation-header {
+               position: relative;
+               border-bottom: 2px solid #000;
+               padding-bottom: 25px; /* Make space for the date below */
+               page-break-after: avoid;
+               display: block !important;
+            }
+            /* Hide all original direct children in print */
+            .info-card > *:not(.print-header-replacement):not(.print-date-footer),
+            .estimation-header > *:not(.print-header-replacement):not(.print-date-footer) {
+                display: none !important;
+            }
+
+            /* Show and style the replacement header */
+            .print-header-replacement {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+            }
+
+            .print-header-replacement .print-logo {
+                display: block !important;
+                max-height: 60px;
+                max-width: 120px;
+                object-fit: contain;
+            }
+
+            .print-header-replacement .print-title-container {
+                display: flex !important;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                font-size: 14pt;
+                flex-grow: 1;
+                padding: 0 10px;
+            }
+            .print-header-replacement .print-title-container b {
+                line-height: 1.2;
+            }
+
+            .print-date-footer {
+                display: block !important;
+                position: absolute;
+                bottom: 5px;
+                left: 0;
+                font-size: 8pt;
+            }
+            .print-date-footer .date-subtitle {
+                font-weight: bold;
+            }
+
+            /* --- Table Styling --- */
+            .table-container {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 9pt;
+                page-break-inside: auto;
+            }
+
+            thead {
+                display: table-header-group; 
+            }
+
+            tbody tr {
+               page-break-inside: avoid !important;
+               page-break-after: auto;
+            }
+
+            td, th {
+                border: 1px solid #999 !important;
+                padding: 5px;
+                text-align: center;
+                vertical-align: middle;
+            }
+            
+            #report-table td:nth-child(2),
+            #report-table th:nth-child(2),
+            #cost-estimation-table td:nth-child(2),
+            #cost-estimation-table th:nth-child(2) {
+                text-align: left !important;
+                vertical-align: middle !important;
+            }
+
+            #cost-estimation-table th, #cost-estimation-table td {
+                 border: 1px solid black !important;
+            }
+
+            th {
+                background-color: #e0e0e0 !important;
+                color: #000 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+             #cost-estimation-table th {
+                background-color: transparent !important;
+             }
+            
+            /* --- Image/QR Styling in Table --- */
+            .photo-wrapper {
+                display: block !important;
+                width: 100%;
+                padding: 0;
+                margin: 0;
+                line-height: 0;
+            }
+            .photo-wrapper img {
+                display: block !important;
+                width: 100% !important;
+                height: auto !important;
+                object-fit: contain !important;
+                border: none !important;
+                margin: 0;
+                padding: 0;
+            }
+            .photo-wrapper img:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        /* Marzipano Viewer */
+        .marzipano-viewer {
+            width: 100%;
+            height: 500px; /* Adjust as needed */
+            background-color: #000;
+            border-radius: var(--border-radius-new);
+            overflow: hidden;
+        }
+
+        /* Notebook Styles */
+        #notebook-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .note-entry {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+        }
+        .note-entry h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        .note-meta {
+            font-size: 0.8em;
+            color: #777;
+            margin-bottom: 10px;
+        }
+        .note-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        #note-tags-input {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .tag-pill {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        /* Drawing Canvas Styles */
+        #drawing-canvas-container {
+            position: relative;
+            width: 100%;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #drawing-canvas {
+            background-color: white;
+            cursor: crosshair;
+            display: block; /* Ensures no extra space below canvas */
+        }
+        #drawing-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+        #drawing-toolbar button, #drawing-toolbar input[type="color"], #drawing-toolbar input[type="number"] {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+        #drawing-toolbar button.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        #drawing-image-upload {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -210,8 +993,12 @@
             <aside class="sidebar">
                 <button id="nav-contracts" class="nav-btn active" onclick="showAppPage('contracts-page')"><i class="fa-solid fa-file-contract"></i> Contracts</button>
                 <button id="nav-map" class="nav-btn" onclick="showAppPage('map-page')"><i class="fa-solid fa-map-location-dot"></i> GIS Map</button>
-                <button id="nav-tables" class="nav-btn" onclick="showAppPage('tables-page')"><i class="fa-solid fa-table"></i> Data Tables</button>
+                <button id="nav-inspection-report" class="nav-btn" onclick="showAppPage('inspection-report-page')"><i class="fa-solid fa-file-lines"></i> Inspection Report</button>
+                <button id="nav-cost-estimation" class="nav-btn" onclick="showAppPage('cost-estimation-page')"><i class="fa-solid fa-calculator"></i> Cost Estimation</button>
                 <button id="nav-ai" class="nav-btn" onclick="showAppPage('ai-page')"><i class="fa-solid fa-robot"></i> AI Analysis</button>
+                <button id="nav-saved-projects" class="nav-btn" onclick="showAppPage('saved-projects-page')"><i class="fa-solid fa-folder-open"></i> Saved Projects</button>
+                <button id="nav-notebook" class="nav-btn" onclick="showAppPage('notebook-page')"><i class="fa-solid fa-book"></i> Notebook</button>
+                <button id="nav-drawing" class="nav-btn" onclick="showAppPage('drawing-page')"><i class="fa-solid fa-pencil-ruler"></i> Drawing</button>
                 <button id="nav-notifications" class="nav-btn" onclick="showAppPage('notifications-page')"><i class="fa-solid fa-bell"></i> Notifications</button>
             </aside>
 
@@ -231,14 +1018,28 @@
                 </div>
                 <div id="map-page" class="app-content" style="display:none; height:100%;">
                     <div id="map-container"></div>
+                    <div class="card" style="margin-top: 20px;">
+                        <h3>GIS Map Data</h3>
+                        <button class="btn" onclick="exportMapJson()">Export Map JSON</button>
+                        <input type="file" id="import-map-json" accept=".json" style="display:none;" onchange="importMapJson(event)">
+                        <button class="btn" onclick="document.getElementById('import-map-json').click()">Import Map JSON</button>
+                        <button class="btn" onclick="exportMapPdf()">Export Map PDF</button>
+                        <div id="map-overlays-section" style="margin-top: 20px;">
+                            <h4>Map Overlays (Simulated)</h4>
+                            <p>Real-time traffic, weather, and risk zone data would be integrated here from a backend service.</p>
+                            <button class="btn" onclick="addNotification('GIS', 'Simulated: Traffic congestion detected near project site.', 'warning')">Simulate Traffic Alert</button>
+                            <button class="btn" onclick="addNotification('GIS', 'Simulated: Severe weather warning for the region.', 'danger')">Simulate Weather Alert</button>
+                        </div>
+                    </div>
                 </div>
                 <div id="tables-page" class="app-content" style="display:none;">
                      <div class="card">
                         <h2><i class="fa-solid fa-table"></i> Bill of Quantities (BOQ)</h2>
                         <div style="display:flex; gap: 10px; margin-bottom: 20px;">
                              <button class="btn-success" onclick="addBoqRow()"><i class="fa-solid fa-plus"></i> Add Row</button>
-                             <button class="btn" onclick="exportTableToCsv('boq-table.csv')"><i class="fa-solid fa-file-csv"></i> Export to Excel</button>
+                             <button class="btn" onclick="exportTableToCsv('boq-table.csv')"><i class="fa-solid fa-file-csv"></i> Export to CSV</button>
                              <button class="btn" onclick="exportTableToPdf()"><i class="fa-solid fa-file-pdf"></i> Export to PDF</button>
+                             <button class="btn" onclick="alert('This feature requires a backend API for PDF to Excel conversion.')"><i class="fa-solid fa-file-excel"></i> PDF to Excel (Backend)</button>
                         </div>
                         <div class="table-container" id="boq-table-container">
                              <table id="boq-table">
@@ -270,6 +1071,10 @@
                         <h3>Analysis Result</h3>
                         <div id="ai-spinner" style="display:none; text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>Analyzing...</p></div>
                         <div id="ai-results-table" class="table-container"></div>
+                        <div style="display:flex; gap: 10px; margin-top: 20px;">
+                            <button class="btn" onclick="exportAiResultsToCsv()"><i class="fa-solid fa-file-csv"></i> Export to CSV</button>
+                            <button class="btn" onclick="exportAiResultsToPdf()"><i class="fa-solid fa-file-pdf"></i> Export to PDF</button>
+                        </div>
                     </div>
                 </div>
                 <div id="notifications-page" class="app-content" style="display:none;">
@@ -283,6 +1088,362 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Inspection Report Page Content (formerly main-report) -->
+                <div id="inspection-report-page" class="app-content" style="display:none;">
+                    <div class="main-container-report" id="main-content-wrapper-report">
+                        <header class="main-header-report glass-card">
+                            <h1 class="main-title-report" contenteditable="true"></h1>
+                            <div class="menu-button" tabindex="0">
+                                <span>⋮</span>
+                                <div class="dropdown-menu" id="inspection-report-menu">
+                                    <button onclick="saveProjectAs()"><i class="fa-solid fa-save"></i> Save As New Project</button>
+                                    <button onclick="createNewProject()"><i class="fa-solid fa-plus-circle"></i> New Project</button>
+                                </div>
+                            </div>
+                        </header>
+                        
+                        <div id="main-report-content">
+                            <div class="info-card glass-card">
+                                <div>
+                                    <input type="file" accept="image/*" onchange="loadClientLogoReport('inspection')" style="display:none;" id="client-logo-inspection-input">
+                                    <img id="client-logo-inspection" src="" alt="Client Logo" onclick="document.getElementById('client-logo-inspection-input').click();" style="max-height: 60px; max-width: 120px; object-fit: contain; border-radius: 8px; cursor: pointer;">
+                                </div>
+                                <div>
+                                    <label for="display-date">
+                                        <strong><span data-lang-key="date"></span>:</strong>
+                                        <input type="date" id="display-date" onchange="saveActiveProjectDataIntoForms()">
+                                    </label>
+                                    <div contenteditable="true" oninput="saveActiveProjectDataIntoForms()"></div>
+                                </div>
+                                <input type="file" accept="image/*" onchange="loadCompanyLogoReport('inspection')" style="display:none;" id="company-logo-inspection-input">
+                                <img id="company-logo-inspection" src="" alt="Company Logo" onclick="document.getElementById('company-logo-inspection-input').click();" style="max-height: 60px; max-width: 120px; object-fit: contain; border-radius: 8px; cursor: pointer;">
+                                
+                                <!-- START: ADDED FOR PRINTING -->
+                                <div class="print-header-replacement">
+                                    <img id="client-logo-print-src" src="" alt="Client Logo" class="print-logo">
+                                    <div class="print-title-container">
+                                        <b>Maintenance of Strategic Highways</b>
+                                        <b>Qatar North ZF_093</b>
+                                        <b>Inspection Report</b>
+                                    </div>
+                                    <img id="company-logo-print-src" src="" alt="Company Logo" class="print-logo">
+                                </div>
+                                <div class="print-date-footer">
+                                    <span class="date-subtitle">Report Date:</span>
+                                    <span id="inspection-print-date"></span>
+                                </div>
+                                <!-- END: ADDED FOR PRINTING -->
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="card glass-card">
+                                    <h3 data-lang-key="add_new_asset"></h3>
+                                    <div class="form-group">
+                                        <input type="text" id="asset" list="asset-options" data-lang-placeholder="asset_description_placeholder">
+                                        <datalist id="asset-options">
+                                            <option value="(B) Zonal Inspections"></option>
+                                            <option value="(C) Site Clearance"></option>
+                                            <option value="(D) Drainage and Service Ducts"></option>
+                                            <option value="(E) Earthworks"></option>
+                                            <option value="(F) Sub-Base and Road Base"></option>
+                                            <option value="(G) Flexible Surfacing"></option>
+                                            <option value="(H) Kerbs & Footways"></option>
+                                            <option value="(I) Road Markings"></option>
+                                            <option value="(J) Directional Signs"></option>
+                                            <option value="(K) Works by Statutory Undertakers"></option>
+                                            <option value="(L) Street Lighting Works"></option>
+                                            <option value="(M) Structures"></option>
+                                            <option value="(N) Traffic Management"></option>
+                                            <option value="(O) VRS"></option>
+                                            <option value="(P) Supply of Materials"></option>
+                                            <option value="(Q) Traffic Signs"></option>
+                                            <option value="(R) Time and Material Rates"></option>
+                                            <option value="(S) Plant and Equipment"></option>
+                                            <option value="(T) Street Furniture"></option>
+                                        </datalist>
+
+                                        <div id="drop-zone">
+                                            <p data-lang-key="drop_or_click_photos"></p>
+                                            <div class="drop-zone-buttons">
+                                                <button class="icon-button" onclick="event.stopPropagation(); document.querySelector('.photo-input').click()" title="Choose from Gallery">🖼️</button>
+                                                <button class="icon-button" onclick="event.stopPropagation(); openCameraReport()" title="Open Camera">📷</button>
+                                            </div>
+                                        </div>
+                                        <input type="file" class="photo-input" accept="image/*" multiple style="display: none;">
+                                        <div id="photo-previews" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px;"></div>
+                                    </div>
+                                </div>
+                                <div class="card glass-card">
+                                    <h3 data-lang-key="details_and_recommendations"></h3>
+                                    <div class="form-group">
+                                        <input type="text" id="status" data-lang-placeholder="status_placeholder">
+                                        <input type="text" id="recommendation" data-lang-placeholder="recommendation_placeholder">
+                                        <button class="form-button" onclick="showQuantityModal()" data-lang-key="calculate_quantity"></button>
+                                    </div>
+                                </div>
+                                <div class="card glass-card">
+                                    <h3 data-lang-key="gps_location"></h3>
+                                    <div id="report-map" style="display:none;"></div>
+                                    <div class="location-mode-switcher">
+                                        <button id="gps-auto-btn" class="location-mode-btn active" onclick="switchLocationModeReport('auto')" data-lang-key="location_mode_auto"></button>
+                                        <button id="gps-manual-btn" class="location-mode-btn" onclick="switchLocationModeReport('manual')" data-lang-key="location_mode_manual"></button>
+                                        </div>
+
+                                    <div id="location-auto-panel" class="location-panel">
+                                        <button class="primary-button" onclick="getLocationReport()" style="font-size: 14px;" data-lang-key="get_current_gps"></button>
+                                    </div>
+                                    <div id="location-manual-panel" class="location-panel" style="display: none;">
+                                        <input type="number" id="manual-lat" data-lang-placeholder="manual_lat_placeholder" step="any" oninput="updateLocationFromManualReport()">
+                                        <input type="number" id="manual-lng" data-lang-placeholder="manual_lng_placeholder" step="any" oninput="updateLocationFromManualReport()">
+                                    </div>
+                                    <div class="location-display-wrapper">
+                                        <div class="form-group">
+                                            <div><small><strong><span data-lang-key="latitude"></span>:</strong> <span id="lat-display">N/A</span></small></div>
+                                            <div><small><strong><span data-lang-key="longitude"></span>:</strong> <span id="lng-display">N/A</span></small></div>
+                                        </div>
+                                        <button id="insert-location-btn" class="primary-button" onclick="insertLocationToFormReport()" data-lang-key="insert_location_to_form"></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="addRowReport()" class="primary-button"><span data-lang-key="add_row_to_table"></span></button>
+
+                            <div class="glass-card">
+                                <div class="table-controls">
+                                    <button onclick="addColumnReport()" title="Add Column">➕</button>
+                                    <button onclick="removeColumnReport()" title="Remove Column">➖</button>
+                                    <button onclick="removeSelectedRowReport()" title="Remove Row">🗑️</button>
+                                    <button onclick="printReportContent()" data-lang-key="print_report"></button>
+                                    <button onclick="exportToPdfReport('inspection')" data-lang-key="export_pdf_report">Export PDF</button>
+                                </div>
+                                <div class="table-container" style="max-height: 50vh; overflow-y: auto;">
+                                    <table id="report-table"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cost Estimation Page Content (formerly cost-estimation-tab) -->
+                <div id="cost-estimation-page" class="app-content" style="display:none;">
+                    <div class="main-container-report">
+                        <header class="main-header-report glass-card">
+                            <h1 class="main-title-report" contenteditable="true"></h1>
+                            <div class="menu-button" tabindex="0">
+                                <span>⋮</span>
+                                <div class="dropdown-menu" id="cost-estimation-menu">
+                                    <button onclick="saveProjectAs()"><i class="fa-solid fa-save"></i> Save As New Project</button>
+                                    <button onclick="createNewProject()"><i class="fa-solid fa-plus-circle"></i> New Project</button>
+                                </div>
+                            </div>
+                        </header>
+                        <div id="cost-estimation-content">
+                            <div class="glass-card estimation-header">
+                                <input type="file" accept="image/*" onchange="loadClientLogoReport('estimation')" style="display:none;" id="client-logo-estimation-input">
+                                <img id="client-logo-estimation" src="" alt="Client Logo" title="Click to upload Client Logo" onclick="document.getElementById('client-logo-estimation-input').click()" style="max-height: 60px; max-width: 150px; object-fit: contain; cursor: pointer;">
+                                <div class="estimation-title">
+                                    <h2 id="estimation-project-title" contenteditable="true">Maintenance of Strategic Highways Qatar North ZF_093</h2>
+                                    <h3 id="estimation-subtitle" contenteditable="true">Estimation</h3>
+                                </div>
+                                <input type="file" accept="image/*" onchange="loadCompanyLogoReport('estimation')" style="display:none;" id="company-logo-estimation-input">
+                                <img id="company-logo-estimation" src="" alt="Company Logo" title="Click to upload Company Logo" onclick="document.getElementById('company-logo-estimation-input').click()" style="max-height: 60px; max-width: 150px; object-fit: contain; cursor: pointer;">
+
+                                <!-- START: ADDED FOR PRINTING -->
+                                <div class="print-header-replacement">
+                                    <img id="est-client-logo-print-src" src="" alt="Client Logo" class="print-logo">
+                                    <div class="print-title-container">
+                                        <b>Maintenance of Strategic Highways</b>
+                                        <b>Qatar North ZF_093</b>
+                                        <b>Cost Estimation</b>
+                                    </div>
+                                    <img id="est-company-logo-print-src" src="" alt="Company Logo" class="print-logo">
+                                </div>
+                                <div class="print-date-footer">
+                                    <span class="date-subtitle">Report Date:</span>
+                                    <span id="estimation-print-date"></span>
+                                </div>
+                                <!-- END: ADDED FOR PRINTING -->
+                            </div>
+                            <div class="glass-card estimation-details">
+                                <div class="form-row"><label for="work-order-no">Work Order No.</label><input type="text" id="work-order-no"></div>
+                                <div class="form-row"><label for="tpc-no">TPC No.</label><input type="text" id="tpc-no"></div>
+                                <div class="form-row"><label for="work-desc">Description of Work</label><input type="text" id="work-desc"></div>
+                            </div>
+                            <div class="card glass-card boq-entry-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3>BOQ Item Entry</h3>
+                                    <div class="menu-button" tabindex="0">
+                                        <span>⋮</span>
+                                        <div class="dropdown-menu" id="estimation-form-menu"></div>
+                                    </div>
+                                </div>
+                                <div class="form-grid-est">
+                                    <div class="form-group-est">
+                                        <label for="boq-ref-select">BOQ Ref.</label>
+                                        <div class="boq-ref-group">
+                                            <input type="search" id="boq-search" placeholder="Search Ref...">
+                                            <select id="boq-ref-select"></select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group-est description-group">
+                                        <label for="boq-desc">Description</label>
+                                        <input type="text" id="boq-desc" readonly>
+                                    </div>
+                                    <div class="form-group-est">
+                                        <label for="boq-unit">Unit</label>
+                                        <input type="text" id="boq-unit" readonly>
+                                    </div>
+                                    <div class="form-group-est">
+                                        <label for="boq-nr">NR</label>
+                                        <input type="number" id="boq-nr" placeholder="e.g., 1">
+                                    </div>
+                                    <div class="form-group-est">
+                                        <label for="boq-length">Length (m)</label>
+                                        <input type="number" id="boq-length" placeholder="e.g., 4.00">
+                                    </div>
+                                    <div class="form-group-est">
+                                        <label for="boq-width">Width (m)</label>
+                                        <input type="number" id="boq-width" placeholder="e.g., 2.00">
+                                    </div>
+                                    <div class="form-group-est">
+                                        <label for="boq-height">Height (m)</label>
+                                        <input type="number" id="boq-height" placeholder="e.g., 0.07">
+                                    </div>
+                                    <div class="form-group-est">
+                                        <label for="boq-total-qty">Total Qty.</label>
+                                        <input type="text" id="boq-total-qty" readonly>
+                                    </div>
+                                    <div class="form-group-est">
+                                        <label for="boq-rate">Rate</label>
+                                        <input type="text" id="boq-rate" readonly>
+                                    </div>
+                                    <div class="form-group-est">
+                                        <label for="boq-amount">Amount (QR)</label>
+                                        <input type="text" id="boq-amount" readonly>
+                                    </div>
+                                    <div class="form-group-est description-group">
+                                        <label for="boq-remarks">Remarks</label>
+                                        <input type="text" id="boq-remarks">
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
+                                    <button onclick="downloadBOQTemplate()" class="primary-button" style="flex: 1;">Download BOQ Template</button>
+                                    <button id="import-boq-csv-btn" class="primary-button" style="flex: 1;">Import BOQ from CSV</button>
+                                    <input type="file" id="boq-csv-input" style="display:none;" accept=".csv">
+                                    <button id="insert-boq-row-btn" class="primary-button" style="flex: 1; background-color:#28a745;">Insert Row</button>
+                                </div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="table-controls">
+                                    <h3>Cost Estimation</h3>
+                                    <div class="menu-button" tabindex="0">
+                                        <span>⋮</span>
+                                        <div class="dropdown-menu" id="estimation-table-menu"></div>
+                                    </div>
+                                    <button onclick="printCostEstimationReport()" data-lang-key="print_estimation">Print Estimation</button>
+                                    <button onclick="exportToPdfReport('estimation')" data-lang-key="export_pdf_estimation">Export PDF</button>
+                                </div>
+                                <div class="table-container">
+                                    <table id="cost-estimation-table">
+                                        <thead>
+                                            <tr>
+                                                <th>BOQ Ref.</th>
+                                                <th>Description</th>
+                                                <th>Unit</th>
+                                                <th>NR</th>
+                                                <th>Length (m)</th>
+                                                <th>Width (m)</th>
+                                                <th>Height (m)</th>
+                                                <th>Total Qty.</th>
+                                                <th>Rate</th>
+                                                <th>Amount</th>
+                                                <th>Remarks</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="9" style="text-align: right; font-weight: bold; border: 1px solid black;">TOTAL Amount</td>
+                                                <td id="total-amount-cell" style="font-weight: bold; border: 1px solid black;">QAR 0.00</td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Saved Projects Page Content -->
+                <div id="saved-projects-page" class="app-content" style="display:none;">
+                    <div class="card">
+                        <h2><i class="fa-solid fa-folder-open"></i> Saved Projects</h2>
+                        <p>Select a project to load or manage existing ones.</p>
+                        <button class="btn-success" onclick="createNewProject()"><i class="fa-solid fa-plus"></i> Create New Project</button>
+                        <input type="file" id="import-all-projects-json" accept=".json" style="display:none;" onchange="importAllProjects(event)">
+                        <button class="btn" onclick="document.getElementById('import-all-projects-json').click()">Import All Projects</button>
+                        <button class="btn" onclick="exportAllProjects()">Export All Projects</button>
+                    </div>
+                    <div class="card">
+                        <h3>Your Projects</h3>
+                        <ul id="projects-list">
+                            <p>No projects saved yet. Create a new one or save your current work.</p>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- New Notebook Page Content -->
+                <div id="notebook-page" class="app-content" style="display:none;">
+                    <div class="card">
+                        <h2><i class="fa-solid fa-book"></i> Notebook</h2>
+                        <div style="display:flex; gap: 10px; margin-bottom: 20px;">
+                            <button class="btn-success" onclick="showModal('note-modal')"><i class="fa-solid fa-plus"></i> Add New Note</button>
+                            <input type="text" id="note-filter-tags" placeholder="Filter by tags (comma-separated)" style="flex-grow: 1;">
+                            <button class="btn" onclick="filterNotes()">Apply Filter</button>
+                            <button class="btn" onclick="loadNotes()">Clear Filter</button>
+                        </div>
+                        <div id="notes-list">
+                            <p>No notes yet. Add one to get started.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Drawing Page Content -->
+                <div id="drawing-page" class="app-content" style="display:none;">
+                    <div class="card">
+                        <h2><i class="fa-solid fa-pencil-ruler"></i> Drawing & Annotation Tool</h2>
+                        <div id="drawing-toolbar">
+                            <button id="tool-pen" class="active" onclick="setDrawingTool('pen')">🖊️ Pen</button>
+                            <button id="tool-rect" onclick="setDrawingTool('rect')">⬛ Rectangle</button>
+                            <button id="tool-circle" onclick="setDrawingTool('circle')">🔵 Circle</button>
+                            <button id="tool-arrow" onclick="setDrawingTool('arrow')">↗️ Arrow</button>
+                            <button id="tool-text" onclick="setDrawingTool('text')">🅰️ Text</button>
+                            <button id="tool-eraser" onclick="setDrawingTool('eraser')">🧼 Eraser</button>
+                            <label for="stroke-color">Color:</label>
+                            <input type="color" id="stroke-color" value="#000000" onchange="setDrawingColor(this.value)">
+                            <label for="stroke-width">Width:</label>
+                            <input type="number" id="stroke-width" value="2" min="1" max="20" onchange="setDrawingWidth(this.value)">
+                            <button onclick="clearDrawingCanvas()">Clear Canvas</button>
+                            <input type="file" id="drawing-image-upload" accept="image/*" onchange="loadDrawingImage(event)">
+                            <button onclick="document.getElementById('drawing-image-upload').click()">Load Image</button>
+                            <button onclick="saveDrawing()">Save Drawing</button>
+                            <button onclick="loadDrawing()">Load Drawing</button>
+                            <button onclick="exportDrawing('png')">Export PNG</button>
+                            <button onclick="exportDrawing('json')">Export JSON</button>
+                        </div>
+                        <div id="drawing-canvas-container">
+                            <canvas id="drawing-canvas"></canvas>
+                        </div>
+                        <div id="saved-drawings-list" style="margin-top: 20px;">
+                            <h3>Saved Drawings</h3>
+                            <ul id="drawings-list"></ul>
+                        </div>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
@@ -298,9 +1459,15 @@
                 <input type="date" id="contract-start" required>
                 <label>End Date:</label>
                 <input type="date" id="contract-end" required>
+                <label>Project Value:</label>
+                <input type="number" id="contract-value" placeholder="Project Value" required>
+                <label>Company Name:</label>
+                <input type="text" id="company-name" placeholder="Company Name" required>
+                <label>Client Name:</label>
+                <input type="text" id="client-name" placeholder="Client Name" required>
                 <label>BOQ Upload (.csv):</label>
                 <input type="file" id="contract-boq" accept=".csv" required>
-                <small>Note: This BOQ will be used in the Data Tables page.</small>
+                <small>Note: This BOQ will be used in the Data Tables page. XLSX upload requires backend.</small>
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top:10px;">
                     <a href="#" onclick="downloadBoqTemplate()">Download BOQ Template</a>
                     <button type="submit" class="btn-success">Save Contract</button>
@@ -308,6 +1475,66 @@
             </form>
         </div>
     </div>
+
+    <!-- Modals from extra pages code -->
+    <div id="quantityModal" class="modal"><div class="modal-content-report glass-card"><h3 data-lang-key="enter_quantity_details"></h3><input type="number" id="length" data-lang-placeholder="length_m"><input type="number" id="width" data-lang-placeholder="width_m"><input type="number" id="depth" data-lang-placeholder="depth_m"><input type="number" id="repetitions" data-lang-placeholder="repetitions_nr"><div class="modal-buttons" style="display:flex; gap: 10px;"><button onclick="setQuantity()" class="primary-button" data-lang-key="set_quantity" style="flex: 1;"></button><button onclick="closeQuantityModal()" style="background-color: #dc3545; color:white; border:none; flex: 1; padding: 12px; border-radius: 8px; font-size: 15px;" data-lang-key="cancel"></button></div></div></div>
+
+    <div id="camera-modal" class="modal"><div id="camera-modal-content" class="glass-card"><video id="camera-feed" autoplay playsinline></video><button id="capture-btn" onclick="capturePhotoReport()">📸</button><button id="close-camera-btn" onclick="closeCameraReport()">X</button></div></div>
+    <canvas id="photo-canvas" style="display:none;"></canvas>
+
+    <div id="preview-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); z-index: 3000; justify-content: center; align-items: center;"><div id="preview-content" style="background-color: white; width: 90%; height: 90%; overflow: auto; padding: 20px; position: relative;"><button id="close-preview" onclick="hidePreviewReport()" style="position: absolute; top: 10px; right: 10px; font-size: 24px; background: none; border: none; cursor: pointer;">❌</button></div></div>
+
+    <!-- New Save Project Modal -->
+    <div id="save-project-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal('save-project-modal')">&times;</button>
+            <h2>Save Project</h2>
+            <form id="save-project-form">
+                <label for="project-name-input">Project Name:</label>
+                <input type="text" id="project-name-input" placeholder="Enter project name" required>
+                <button type="submit" class="btn-success">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- New Note Modal -->
+    <div id="note-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal('note-modal')">&times;</button>
+            <h2><span id="note-modal-title">Add New Note</span></h2>
+            <form id="note-form">
+                <label for="note-title">Title:</label>
+                <input type="text" id="note-title" placeholder="Note Title" required>
+                <label for="note-content">Content (Markdown/HTML):</label>
+                <textarea id="note-content" placeholder="Write your note here..."></textarea>
+                <label for="note-tags">Tags (comma-separated):</label>
+                <input type="text" id="note-tags" placeholder="e.g., road, inspection, defect">
+                <button type="submit" class="btn-success">Save Note</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Marzipano Viewer Modal -->
+    <div id="marzipano-viewer-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 90vw; max-height: 90vh; padding: 0;">
+            <button class="modal-close-btn" onclick="hideModal('marzipano-viewer-modal')">&times;</button>
+            <div id="marzipano-viewer" class="marzipano-viewer"></div>
+        </div>
+    </div>
+
+
+    <footer class="glass-card footer">
+        <p style="margin: 0;">All rights reserved © <span id="current-year"></span></p>
+        <p style="margin: 0;">Developed by Eng. Ahmet Nasan</p>
+        <p style="margin: 0;">Civil Engineer & Software Developer</p>
+        <p style="margin: 0;">“Blending engineering precision with modern tech.”</p>
+    </footer>
+
+    <div class="fab-container">
+        <button id="camera-fab" class="fab" onclick="openCameraReport()">📷</button>
+        <button id="add-fab" class="fab" onclick="document.querySelector('#asset').focus()">➕</button>
+    </div>
+
 
 <script>
 // ======== SCRIPT START ========
@@ -320,11 +1547,6 @@ const hide = (id) => getEl(id).style.display = 'none';
 const showModal = (id) => getEl(id).classList.add('active');
 const hideModal = (id) => getEl(id).classList.remove('active');
 
-const showPage = (pageId) => {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    getEl(pageId).classList.add('active');
-};
-
 const showAppPage = (pageId) => {
     document.querySelectorAll('.app-content').forEach(p => hide(p.id));
     getEl(pageId).style.display = 'block';
@@ -333,26 +1555,166 @@ const showAppPage = (pageId) => {
     const navButtonId = pageId.replace('-page', '');
     getEl(`nav-${navButtonId}`).classList.add('active');
 
-    // Special handler for map initialization
+    // Special handler for main GIS map initialization
     if (pageId === 'map-page' && !window.mapInitialized) {
         initializeMap();
+    }
+    // Special handler for Inspection Report page initialization
+    if (pageId === 'inspection-report-page') {
+        initializeReportMap(); // Ensure report map is initialized
+        loadActiveProjectDataIntoForms(); // Load data for the active project
+    }
+    // Special handler for Cost Estimation page initialization
+    if (pageId === 'cost-estimation-page') {
+        loadActiveProjectDataIntoForms(); // Load data for the active project
+    }
+    // Special handler for Saved Projects page
+    if (pageId === 'saved-projects-page') {
+        loadProjectsList();
+    }
+    // Special handler for Notebook page
+    if (pageId === 'notebook-page') {
+        loadNotes();
+    }
+    // Special handler for Drawing page
+    if (pageId === 'drawing-page') {
+        initializeDrawingCanvas();
+        loadDrawingsList();
     }
 };
 
 const displayMessage = (elementId, text, type) => {
+    // Check if the element exists before trying to access its properties
     const el = getEl(elementId);
-    el.textContent = text;
-    el.className = `message ${type}`;
-    el.style.display = 'block';
-    setTimeout(() => el.style.display = 'none', 5000);
+    if (el) {
+        el.textContent = text;
+        el.className = `message ${type}`;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 5000);
+    } else {
+        console.warn(`Attempted to display message on non-existent element: ${elementId}`);
+        // Fallback to console log if element not found
+        console.log(`Message (${type}): ${text}`);
+    }
 };
 
-const addNotification = (type, message) => {
+const addNotification = (type, message, severity = 'info', location = null, linkedImage = null) => {
     const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-    notifications.unshift({ date: new Date().toLocaleString(), type, message });
+    const newNotification = {
+        id: generateId(),
+        date: new Date().toLocaleString(),
+        type,
+        message,
+        severity,
+        location,
+        projectId: currentProjectId,
+        linkedImage
+    };
+    notifications.unshift(newNotification);
     localStorage.setItem('notifications', JSON.stringify(notifications));
     loadNotifications();
 };
+
+// --- DICTIONARY (for Report & Estimation Page) ---
+const langDict = {
+    en: {
+        report_title: "Asset Inspection Report",
+        tab_inspection_report: "Inspection Report",
+        tab_cost_estimation: "Cost Estimation",
+        date: "Date",
+        add_new_asset: "Add New Asset",
+        asset_description_placeholder: "Asset Description",
+        drop_or_click_photos: "Drag & Drop or Click to Add Photos",
+        details_and_recommendations: "Details & Recommendations",
+        status_placeholder: "Status (e.g., Good, Damaged)",
+        recommendation_placeholder: "Recommendation (e.g., Repair, Replace)",
+        calculate_quantity: "Calculate Quantity",
+        gps_location: "GPS Location",
+        location_mode_auto: "Automatic",
+        location_mode_manual: "Manual",
+        get_current_gps: "Get Current GPS",
+        manual_lat_placeholder: "Manual Latitude",
+        manual_lng_placeholder: "Manual Longitude",
+        latitude: "Latitude",
+        longitude: "Longitude",
+        insert_location_to_form: "Insert to Form",
+        add_row_to_table: "Add Row to Table",
+        print_report: "Print Report",
+        export_pdf_report: "Export PDF",
+        print_estimation: "Print Estimation",
+        export_pdf_estimation: "Export PDF",
+        enter_quantity_details: "Enter Quantity Details",
+        length_m: "Length (m)",
+        width_m: "Width (m)",
+        depth_m: "Depth (m)",
+        repetitions_nr: "Repetitions (NR)",
+        set_quantity: "Set Quantity",
+        cancel: "Cancel",
+        print_date: "Report Date" // Added for print footer
+    },
+    ar: {
+        report_title: "تقرير فحص الأصول",
+        tab_inspection_report: "تقرير الفحص",
+        tab_cost_estimation: "تقدير التكلفة",
+        date: "التاريخ",
+        add_new_asset: "إضافة أصل جديد",
+        asset_description_placeholder: "وصف الأصل",
+        drop_or_click_photos: "اسحب وأفلت أو انقر لإضافة صور",
+        details_and_recommendations: "التفاصيل والتوصيات",
+        status_placeholder: "الحالة (مثال: جيد، تالف)",
+        recommendation_placeholder: "التوصية (مثال: إصلاح، استبدال)",
+        calculate_quantity: "حساب الكمية",
+        gps_location: "موقع GPS",
+        location_mode_auto: "تلقائي",
+        location_mode_manual: "يدوي",
+        get_current_gps: "الحصول على GPS الحالي",
+        manual_lat_placeholder: "خط العرض يدويًا",
+        manual_lng_placeholder: "خط الطول يدويًا",
+        latitude: "خط العرض",
+        longitude: "خط الطول",
+        insert_location_to_form: "إدراج في النموذج",
+        add_row_to_table: "إضافة صف إلى الجدول",
+        print_report: "طباعة التقرير",
+        export_pdf_report: "تصدير PDF",
+        print_estimation: "طباعة التقدير",
+        export_pdf_estimation: "تصدير PDF",
+        enter_quantity_details: "أدخل تفاصيل الكمية",
+        length_m: "الطول (م)",
+        width_m: "العرض (م)",
+        depth_m: "العمق (م)",
+        repetitions_nr: "التكرارات (رقم)",
+        set_quantity: "تعيين الكمية",
+        cancel: "إلغاء",
+        print_date: "تاريخ التقرير" // Added for print footer
+    }
+};
+
+let currentLang = 'en'; // Default language for the entire application
+
+function switchLanguage(lang) {
+    currentLang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+
+    // Update main app titles/placeholders if any
+    // For now, only the report page has dynamic text based on langDict
+    setReportPageLanguage(lang);
+}
+
+function setReportPageLanguage(lang) {
+    document.querySelectorAll('#inspection-report-page [data-lang-key], #cost-estimation-page [data-lang-key]').forEach(element => {
+        const key = element.getAttribute('data-lang-key');
+        if (langDict[currentLang] && langDict[currentLang][key]) {
+            element.textContent = langDict[currentLang][key];
+        }
+    });
+    document.querySelectorAll('#inspection-report-page [data-lang-placeholder], #cost-estimation-page [data-lang-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-lang-placeholder');
+        if (langDict[currentLang] && langDict[currentLang][key]) {
+            element.placeholder = langDict[currentLang][key];
+        }
+    });
+}
+
 
 // ======== 1. DATABASE SIMULATION (localStorage) ========
 const DB = {
@@ -370,14 +1732,156 @@ const DB = {
 5. Recommended Action
 If no defects are found, return 'No visible defects detected'. Present result in structured table.`);
         }
+        // Initialize projects array if it doesn't exist
+        if (!localStorage.getItem('projects')) DB.set('projects', []);
+        // Initialize active project ID
+        if (!localStorage.getItem('currentProjectId')) localStorage.setItem('currentProjectId', 'default-project');
+        // Initialize notes
+        if (!localStorage.getItem('notes')) DB.set('notes', []);
+        // Initialize drawings
+        if (!localStorage.getItem('drawings')) DB.set('drawings', []);
+        // Initialize map data
+        if (!localStorage.getItem('mapData')) DB.set('mapData', { layers: [] });
     }
 };
 
 // ======== 2. APP INITIALIZATION ========
+let currentProjectId = localStorage.getItem('currentProjectId');
+
 const initializeApp = () => {
     loadContracts();
     loadNotifications();
     loadAIPrompt();
+    loadProjectsList(); // Load projects for the new page
+
+    // Initialize Report & Estimation page components
+    const today = new Date().toISOString().split('T')[0];
+    const displayDateEl = getEl('display-date');
+    if (displayDateEl) displayDateEl.value = today;
+    const currentYearEl = getEl('current-year');
+    if (currentYearEl) currentYearEl.textContent = new Date().getFullYear();
+
+    reportTable = getEl('report-table');
+    costEstimationTable = getEl('cost-estimation-table');
+
+    if (reportTable && !reportTable.tHead) {
+        reportTable.createTHead();
+        const headerRow = reportTable.tHead.insertRow();
+        const headers = ["ID", "Asset", "Status", "Recommendation", "Quantity", "Photos", "Latitude", "Longitude", "Action"];
+        headers.forEach(text => {
+            const th = document.createElement('th');
+            th.textContent = text;
+            headerRow.appendChild(th);
+        });
+        reportTable.createTBody();
+    }
+
+    if (costEstimationTable && !costEstimationTable.tHead) {
+        costEstimationTable.createTHead();
+        const headerRow = costEstimationTable.tHead.insertRow();
+        const headers = ["BOQ Ref.", "Description", "Unit", "NR", "Length (m)", "Width (m)", "Height (m)", "Total Qty.", "Rate", "Amount", "Remarks", "Action"];
+        headers.forEach(text => {
+            const th = document.createElement('th');
+            th.textContent = text;
+            headerRow.appendChild(th);
+        });
+        costEstimationTable.createTBody();
+    }
+
+    // Setup BOQ Select for Cost Estimation
+    const boqSelect = getEl('boq-ref-select');
+    if (boqSelect) {
+        boqData.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.ref;
+            option.textContent = item.ref + " - " + item.description;
+            boqSelect.appendChild(option);
+        });
+        boqSelect.addEventListener('change', updateBOQDetails);
+    }
+    const boqSearchEl = getEl('boq-search');
+    if (boqSearchEl) boqSearchEl.addEventListener('input', filterBOQOptions);
+    if (boqSelect) updateBOQDetails(); // Initialize details with first item
+
+    // Make tables editable
+    if (reportTable) makeTableEditableReport('report-table');
+    if (costEstimationTable) makeTableEditableReport('cost-estimation-table');
+
+    // Attach print/PDF export to main buttons for Report & Estimation
+    const printReportBtn = document.querySelector('#inspection-report-page .table-controls button[data-lang-key="print_report"]');
+    if (printReportBtn) printReportBtn.onclick = printReportContent;
+    const exportPdfReportBtn = document.querySelector('#inspection-report-page .table-controls button[data-lang-key="export_pdf_report"]');
+    if (exportPdfReportBtn) exportPdfReportBtn.onclick = () => exportToPdfReport('inspection');
+    const printEstimationBtn = document.querySelector('#cost-estimation-page .table-controls button[data-lang-key="print_estimation"]');
+    if (printEstimationBtn) printEstimationBtn.onclick = printCostEstimationReport;
+    const exportPdfEstimationBtn = document.querySelector('#cost-estimation-page .table-controls button[data-lang-key="export_pdf_estimation"]');
+    if (exportPdfEstimationBtn) exportPdfEstimationBtn.onclick = () => exportToPdfReport('estimation');
+
+    // Set default language for the report page
+    switchLanguage(getEl('language-switcher').value); // Set initial language for the whole app
+
+    // Load the active project when the app initializes
+    loadProject(currentProjectId);
+
+    // Event listener for saving project form
+    const saveProjectForm = getEl('save-project-form');
+    if (saveProjectForm) {
+        saveProjectForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const projectName = getEl('project-name-input').value;
+            if (projectName) {
+                saveProject(projectName);
+                hideModal('save-project-modal');
+                getEl('project-name-input').value = ''; // Clear input
+            } else {
+                displayMessage('save-project-modal-message', 'Project name cannot be empty.', 'error');
+            }
+        });
+    }
+
+    // Event listener for note form
+    const noteForm = getEl('note-form');
+    if (noteForm) {
+        noteForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveNote();
+        });
+    }
+
+    // Initialize drag-and-drop for report table
+    if (reportTable) {
+        let dragSrcRow = null;
+        reportTable.tBodies[0].addEventListener('dragstart', (e) => {
+            if (e.target.tagName === 'TR') {
+                dragSrcRow = e.target;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', e.target.outerHTML);
+                e.target.classList.add('dragging');
+            }
+        });
+
+        reportTable.tBodies[0].addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const target = e.target.closest('tr');
+            if (target && target !== dragSrcRow) {
+                const rect = target.getBoundingClientRect();
+                const offsetY = e.clientY - rect.top;
+                if (offsetY < rect.height / 2) {
+                    reportTable.tBodies[0].insertBefore(dragSrcRow, target);
+                } else {
+                    reportTable.tBodies[0].insertBefore(dragSrcRow, target.nextSibling);
+                }
+            }
+        });
+
+        reportTable.tBodies[0].addEventListener('dragend', (e) => {
+            e.target.classList.remove('dragging');
+            dragSrcRow = null;
+            updateRowNumbersReport(); // Re-number rows after sorting
+            saveActiveProjectDataIntoForms(); // Save new order
+        });
+    }
 };
 
 // ======== 3. CONTRACTS ========
@@ -387,10 +1891,12 @@ const handleSaveContract = (e) => {
     const number = getEl('contract-number').value;
     const start = getEl('contract-start').value;
     const end = getEl('contract-end').value;
+    const value = getEl('contract-value').value;
+    const company = getEl('company-name').value;
+    const client = getEl('client-name').value;
     const boqFile = getEl('contract-boq').files[0];
 
-    if (!title || !number || !start || !end || !boqFile) {
-        // Using a custom modal/message box instead of alert()
+    if (!title || !number || !start || !end || !value || !company || !client || !boqFile) {
         displayMessage('contract-form-modal-message', 'Please fill all fields and upload a BOQ file.', 'error');
         return;
     }
@@ -401,7 +1907,7 @@ const handleSaveContract = (e) => {
             const contracts = DB.get('contracts');
             const newContract = {
                 id: `C${Date.now()}`,
-                title, number, start, end,
+                title, number, start, end, value, company, client,
                 boq: results.data
             };
             contracts.push(newContract);
@@ -411,7 +1917,6 @@ const handleSaveContract = (e) => {
             addNotification('Contract', `New contract "${title}" added.`);
         },
         error: (err) => {
-            // Using a custom modal/message box instead of alert()
             displayMessage('contract-form-modal-message', `Error parsing CSV file: ${err.message}`, 'error');
         }
     });
@@ -431,7 +1936,11 @@ const loadContracts = () => {
         card.innerHTML = `
             <h3>${c.title}</h3>
             <p><strong>Ref:</strong> ${c.number}</p>
+            <p><strong>Value:</strong> ${c.value}</p>
+            <p><strong>Company:</strong> ${c.company}</p>
+            <p><strong>Client:</strong> ${c.client}</p>
             <p><strong>Dates:</strong> ${c.start} to ${c.end}</p>
+            <button class="btn-danger btn-sm" onclick="deleteContract('${c.id}')">Delete</button>
         `;
         card.onclick = () => openContract(c.id);
         container.appendChild(card);
@@ -448,6 +1957,16 @@ const openContract = (contractId) => {
     loadBoqTable(contract.boq);
     showAppPage('tables-page');
 };
+
+const deleteContract = (contractId) => {
+    if (!confirm('Are you sure you want to delete this contract?')) return;
+    let contracts = DB.get('contracts');
+    contracts = contracts.filter(c => c.id !== contractId);
+    DB.set('contracts', contracts);
+    loadContracts();
+    addNotification('Contract', 'Contract deleted.', 'danger');
+};
+
 
 const downloadBoqTemplate = () => {
     const header = "BOQ Ref.,Asset,Description,Dimensions (L x W x H),Unit,Rate\n";
@@ -561,8 +2080,8 @@ const exportTableToPdf = () => {
     });
 };
 
-// ======== 5. GIS MAP ========
-let map;
+// ======== 5. GIS MAP (Main App Map) ========
+let map; // Main GIS Map
 let drawnItems;
 window.mapInitialized = false;
 
@@ -590,21 +2109,33 @@ const initializeMap = () => {
         const layer = e.layer;
         drawnItems.addLayer(layer);
         calculateAndBindPopup(layer);
+        saveMapData(); // Save map data after creation
+    });
+
+    map.on('pm:remove', (e) => {
+        saveMapData(); // Save map data after removal
+    });
+
+    map.on('pm:edit', (e) => {
+        saveMapData(); // Save map data after edit
     });
 
     addCustomMapControls();
+    loadMapData(); // Load map data on initialization
     window.mapInitialized = true;
 };
 
 const calculateAndBindPopup = (layer) => {
     const geojson = layer.toGeoJSON();
     let content = '<h4>Shape Details</h4>';
+    let area = 0;
+    let length = 0;
 
     if (geojson.geometry.type === 'Polygon') {
-        const area = turf.area(geojson); // in square meters
+        area = turf.area(geojson); // in square meters
         content += `<p><strong>Area:</strong> ${area.toFixed(2)} m²</p>`;
     } else if (geojson.geometry.type === 'LineString') {
-        const length = turf.length(geojson, { units: 'meters' });
+        length = turf.length(geojson, { units: 'meters' });
         content += `<p><strong>Length:</strong> ${length.toFixed(2)} m</p>`;
     }
 
@@ -612,12 +2143,21 @@ const calculateAndBindPopup = (layer) => {
     content += `<p><strong>Center Coords:</strong> ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}</p>`;
     content += `<button class="btn-danger btn-sm" onclick="removeLayer(${layer._leaflet_id})">Delete</button>`;
     layer.bindPopup(content).openPopup();
+
+    // Store additional metadata
+    layer.feature = layer.feature || {};
+    layer.feature.properties = layer.feature.properties || {};
+    layer.feature.properties.area = area;
+    layer.feature.properties.length = length;
+    layer.feature.properties.centerLat = center.lat;
+    layer.feature.properties.centerLng = center.lng;
 };
 
 window.removeLayer = (id) => {
     drawnItems.eachLayer(layer => {
         if (layer._leaflet_id === id) {
             drawnItems.removeLayer(layer);
+            saveMapData(); // Save map data after removal
         }
     });
 };
@@ -633,7 +2173,7 @@ const addCustomMapControls = () => {
                 </a>
                 <div class="custom-menu" style="display:none; background:white; padding: 5px; box-shadow: var(--shadow);">
                     <button class="btn" style="width:100%; margin-bottom:5px;" onclick="getEl('kml-input').click()">Import KML</button>
-                    <button class="btn" style="width:100%;" onclick="getEl('csv-input').click()">Import CSV</button>
+                    <button class="btn" style="width:100%;;" onclick="getEl('csv-input').click()">Import CSV</button>
                 </div>
                 <input type="file" id="kml-input" style="display:none" accept=".kml" onchange="importKML(event)">
                 <input type="file" id="csv-input" style="display:none" accept=".csv" onchange="importCSV(event)">
@@ -656,8 +2196,12 @@ const importKML = (event) => {
     const reader = new FileReader();
     reader.onload = (e) => {
         const kmlLayer = omnivore.kml.parse(e.target.result);
-        drawnItems.addLayer(kmlLayer);
+        kmlLayer.eachLayer(layer => {
+            drawnItems.addLayer(layer);
+            calculateAndBindPopup(layer); // Ensure metadata is calculated for imported layers
+        });
         map.fitBounds(kmlLayer.getBounds());
+        saveMapData();
     };
     reader.readAsText(file);
 };
@@ -678,69 +2222,1187 @@ const importCSV = (event) => {
                     }
                     popupContent += '</ul>';
                     marker.bindPopup(popupContent);
+                    // Store metadata for imported markers
+                    marker.feature = marker.feature || {};
+                    marker.feature.properties = marker.feature.properties || {};
+                    marker.feature.properties.lat = point.lat;
+                    marker.feature.properties.lng = point.lng;
+                    marker.feature.properties.type = 'marker';
                 }
             });
+            saveMapData();
+        }
+    });
+};
+
+const saveMapData = () => {
+    const geoJsonData = drawnItems.toGeoJSON();
+    DB.set('mapData', { layers: geoJsonData.features });
+    saveActiveProjectDataIntoForms(); // Save map data as part of the current project
+};
+
+const loadMapData = () => {
+    const mapData = DB.get('mapData');
+    if (mapData && mapData.layers) {
+        drawnItems.clearLayers(); // Clear existing layers
+        L.geoJSON(mapData, {
+            onEachFeature: (feature, layer) => {
+                drawnItems.addLayer(layer);
+                // Re-bind popups and re-calculate properties if needed (though they should be saved)
+                calculateAndBindPopup(layer);
+            }
+        }).addTo(map);
+        if (drawnItems.getLayers().length > 0) {
+            map.fitBounds(drawnItems.getBounds());
+        }
+    }
+};
+
+const exportMapJson = () => {
+    const mapData = DB.get('mapData');
+    const blob = new Blob([JSON.stringify(mapData, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${getEl('app-main-title').textContent.trim() || 'map_data'}.json`;
+    link.click();
+    addNotification('Map', 'Map data exported as JSON.');
+};
+
+const importMapJson = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            DB.set('mapData', importedData);
+            loadMapData(); // Reload map with imported data
+            addNotification('Map', 'Map data imported from JSON.');
+        } catch (error) {
+            displayMessage('map-page', 'Error importing map JSON: Invalid file format.', 'error');
+            console.error('Error importing map JSON:', error);
+        }
+    };
+    reader.readAsText(file);
+};
+
+const exportMapPdf = async () => {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('landscape', 'mm', 'a4');
+
+    const mapContainer = getEl('map-container');
+    const originalDisplay = mapContainer.style.display;
+    mapContainer.style.display = 'block'; // Ensure map is visible for html2canvas
+
+    // Temporarily hide controls for screenshot
+    const controls = document.querySelectorAll('.leaflet-control-container, .leaflet-control-custom');
+    controls.forEach(c => c.style.display = 'none');
+
+    // Add a temporary title and date for the PDF
+    const tempHeader = document.createElement('div');
+    tempHeader.style.cssText = `
+        position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1000;
+        display: flex; justify-content: space-between; align-items: center;
+        background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    `;
+    tempHeader.innerHTML = `
+        <img src="${clientLogoInspection || ''}" style="height: 40px; object-fit: contain;">
+        <h2 style="margin:0; font-size: 16px;">${getEl('app-main-title').textContent} - GIS Map</h2>
+        <img src="${companyLogoInspection || ''}" style="height: 40px; object-fit: contain;">
+    `;
+    document.body.appendChild(tempHeader);
+
+    await html2canvas(document.body, {
+        useCORS: true,
+        scale: 1, // Lower scale for better performance on large maps
+        windowWidth: document.body.scrollWidth,
+        windowHeight: document.body.scrollHeight,
+        x: 0,
+        y: 0,
+        width: document.body.scrollWidth,
+        height: document.body.scrollHeight,
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = pdf.internal.pageSize.getWidth();
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save(`${getEl('app-main-title').textContent.trim() || 'gis_map'}.pdf`);
+        addNotification('Map', 'GIS map exported as PDF.');
+    }).finally(() => {
+        mapContainer.style.display = originalDisplay;
+        controls.forEach(c => c.style.display = ''); // Show controls again
+        if (tempHeader && tempHeader.parentNode) {
+            tempHeader.parentNode.removeChild(tempHeader);
         }
     });
 };
 
 
-// ======== 6. AI & NOTIFICATIONS ========
-const handleAIAnalysis = () => {
-    const file = getEl('ai-image-upload').files[0];
+// ======== 6. IMAGE HANDLING & METADATA ========
+// Image storage is part of project data, handled by saveActiveProjectDataIntoForms
+// EXIF.getData is async, so it will be called when a file is selected.
+
+function getImageMetadata(file) {
+    return new Promise((resolve) => {
+        EXIF.getData(file, function() {
+            const lat = EXIF.getTag(this, 'GPSLatitude');
+            const lng = EXIF.getTag(this, 'GPSLongitude');
+            const timestamp = EXIF.getTag(this, 'DateTimeOriginal');
+
+            let gpsLocation = null;
+            if (lat && lng) {
+                const latRef = EXIF.getTag(this, 'GPSLatitudeRef') || 'N';
+                const lngRef = EXIF.getTag(this, 'GPSLongitudeRef') || 'E';
+                const latitude = (lat[0] + lat[1] / 60 + lat[2] / 3600) * (latRef === 'N' ? 1 : -1);
+                const longitude = (lng[0] + lng[1] / 60 + lng[2] / 3600) * (lngRef === 'E' ? 1 : -1);
+                gpsLocation = { latitude, longitude };
+            }
+            resolve({ gpsLocation, timestamp });
+        });
+    });
+}
+
+// Marzipano related functions
+let marzipanoViewer = null;
+let marzipanoScene = null;
+
+function openMarzipanoViewer(imageUrl) {
+    showModal('marzipano-viewer-modal');
+    const viewerElement = getEl('marzipano-viewer');
+
+    if (!marzipanoViewer) {
+        marzipanoViewer = new Marzipano.Viewer(viewerElement);
+    } else {
+        marzipanoViewer.destroy(); // Destroy previous viewer instance
+        marzipanoViewer = new Marzipano.Viewer(viewerElement);
+    }
+
+    const source = Marzipano.ImageUrlSource.fromString(imageUrl);
+    const geometry = new Marzipano.EquirectangularGeometry([{ width: imageUrl.width }]); // width is a dummy value, Marzipano scales
+    const limiter = Marzipano.RectilinearView.limit.traditional(1024, 100 * Math.PI / 180);
+    const view = new Marzipano.RectilinearView(null, limiter);
+
+    marzipanoScene = marzipanoViewer.createScene({
+        source: source,
+        geometry: geometry,
+        view: view,
+        pinFirstLevel: true
+    });
+
+    marzipanoScene.switchTo();
+}
+
+
+// ======== 7. NOTIFICATIONS ENGINE ========
+// addNotification function is already enhanced to store more metadata.
+// Loading notifications is already implemented.
+
+// ======== 8. AI ROAD DEFECT DETECTION ========
+const handleAIAnalysis = async () => {
+    const fileInput = getEl('ai-image-upload');
+    const file = fileInput.files[0];
     if (!file) {
-        // Using a custom modal/message box instead of alert()
-        displayMessage('ai-results-card-message', "Please upload an image first.", 'error');
+        displayMessage('ai-results-card', "Please upload an image first.", 'error');
         return;
     }
     getEl('ai-results-card').style.display = 'block';
     getEl('ai-results-table').style.display = 'none';
     getEl('ai-spinner').style.display = 'block';
 
-    // Simulate AI processing
-    setTimeout(() => {
-        const exampleResult = `
-            <table>
-                <thead>
-                    <tr><th>Defect Type</th><th>Severity</th><th>Location</th><th>Description</th><th>Action</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Pothole</td><td>High</td><td>Lower-left</td><td>Surface collapse due to traffic and environmental factors.</td><td>Immediate Patching Required</td></tr>
-                    <tr><td>Longitudinal Crack</td><td>Medium</td><td>Center</td><td>Crack running parallel to the pavement's centerline, potential for water ingress.</td><td>Seal Crack</td></tr>
-                </tbody>
-            </table>
-        `;
-        getEl('ai-spinner').style.display = 'none';
-        getEl('ai-results-table').innerHTML = exampleResult;
-        getEl('ai-results-table').style.display = 'block';
-        addNotification('AI Analysis', `Analysis complete for image ${file.name}.`);
-    }, 2500);
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async (e) => {
+        const imageDataUrl = e.target.result;
+        const { gpsLocation, timestamp } = await getImageMetadata(file);
+
+        // Simulate AI processing
+        setTimeout(() => {
+            let aiResultHtml = '';
+            let defects = [];
+
+            // Simulate defect detection based on image name or random
+            if (file.name.includes('defect') || Math.random() > 0.5) {
+                defects = [
+                    {
+                        type: "Pothole",
+                        severity: "High",
+                        location: "Lower-left",
+                        description: "Surface collapse due to traffic and environmental factors.",
+                        action: "Immediate Patching Required"
+                    },
+                    {
+                        type: "Longitudinal Crack",
+                        severity: "Medium",
+                        location: "Center",
+                        description: "Crack running parallel to the pavement's centerline, potential for water ingress.",
+                        action: "Seal Crack"
+                    }
+                ];
+            } else {
+                defects = [{
+                    type: "—",
+                    severity: "—",
+                    location: "—",
+                    description: "No visible defects detected.",
+                    action: "—"
+                }];
+            }
+
+            aiResultHtml += `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image Preview</th>
+                            <th>GPS Location</th>
+                            <th>Timestamp</th>
+                            <th>Defect</th>
+                            <th>Severity</th>
+                            <th>Position in Image</th>
+                            <th>Description</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            defects.forEach((defect, index) => {
+                aiResultHtml += `
+                    <tr>
+                        ${index === 0 ? `<td rowspan="${defects.length}"><img src="${imageDataUrl}" style="max-width:150px; max-height:100px; object-fit:contain;"></td>` : ''}
+                        ${index === 0 ? `<td rowspan="${defects.length}">${gpsLocation ? `${gpsLocation.latitude.toFixed(6)}, ${gpsLocation.longitude.toFixed(6)}` : 'N/A'}</td>` : ''}
+                        ${index === 0 ? `<td rowspan="${defects.length}">${timestamp || 'N/A'}</td>` : ''}
+                        <td>${defect.type}</td>
+                        <td>${defect.severity}</td>
+                        <td>${defect.location}</td>
+                        <td>${defect.description}</td>
+                        <td>${defect.action}</td>
+                    </tr>
+                `;
+            });
+            aiResultHtml += `</tbody></table>`;
+
+            getEl('ai-spinner').style.display = 'none';
+            getEl('ai-results-table').innerHTML = aiResultHtml;
+            getEl('ai-results-table').style.display = 'block';
+            addNotification('AI Analysis', `Analysis complete for image ${file.name}.`, 'success', gpsLocation, imageDataUrl);
+
+            // Store AI results as part of the current project
+            const aiResults = {
+                imageId: generateId(),
+                fileName: file.name,
+                imageDataUrl: imageDataUrl,
+                gpsLocation: gpsLocation,
+                timestamp: timestamp,
+                defects: defects
+            };
+            const projects = DB.get('projects');
+            const currentProject = projects.find(p => p.id === currentProjectId);
+            if (currentProject) {
+                currentProject.data.aiResults = currentProject.data.aiResults || [];
+                currentProject.data.aiResults.push(aiResults);
+                DB.set('projects', projects);
+            }
+        }, 2500);
+    };
 };
+
 
 const loadAIPrompt = () => {
-    getEl('ai-prompt-textarea').value = localStorage.getItem('ai_prompt');
+    const aiPromptEl = getEl('ai-prompt-textarea');
+    if (aiPromptEl) aiPromptEl.value = localStorage.getItem('ai_prompt');
 };
 const saveAIPrompt = () => {
-    localStorage.setItem('ai_prompt', getEl('ai-prompt-textarea').value);
-    // Using a custom modal/message box instead of alert()
-    displayMessage('ai-prompt-card-message', 'AI prompt saved!', 'success');
+    const aiPromptEl = getEl('ai-prompt-textarea');
+    if (aiPromptEl) {
+        localStorage.setItem('ai_prompt', aiPromptEl.value);
+        displayMessage('ai-prompt-card-message', 'AI prompt saved!', 'success');
+    }
 };
 
-const loadNotifications = () => {
-    const notifications = DB.get('notifications');
-    const tableBody = getEl('notifications-table-body');
-    tableBody.innerHTML = '';
-    notifications.forEach(n => {
-        const row = tableBody.insertRow();
-        row.innerHTML = `<td>${n.date}</td><td>${n.type}</td><td>${n.message}</td>`;
+const exportAiResultsToCsv = () => {
+    const table = getEl('ai-results-table').querySelector('table');
+    if (!table) {
+        displayMessage('ai-results-card', 'No AI analysis results to export.', 'error');
+        return;
+    }
+
+    let csv = [];
+    const rows = table.querySelectorAll("tr");
+    for (const row of rows) {
+        let cols = row.querySelectorAll("td, th");
+        let csvrow = [];
+        for (const col of cols) {
+            // Skip image column for CSV export, or just get text content
+            if (col.querySelector('img')) {
+                csvrow.push(''); // Placeholder for image
+            } else {
+                let data = `"${col.innerText.replace(/"/g, '""')}"`;
+                csvrow.push(data);
+            }
+        }
+        csv.push(csvrow.join(","));
+    }
+    const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(csvFile);
+    link.download = `${getEl('app-main-title').textContent.trim() || 'ai_results'}.csv`;
+    link.click();
+    addNotification('AI Analysis', 'AI results exported to CSV.');
+};
+
+const exportAiResultsToPdf = async () => {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('landscape', 'mm', 'a4');
+    const table = getEl('ai-results-table').querySelector('table');
+
+    if (!table) {
+        displayMessage('ai-results-card', 'No AI analysis results to export.', 'error');
+        return;
+    }
+
+    // Clone the table for processing without modifying the live DOM
+    const clonedTable = table.cloneNode(true);
+    // Remove image previews for autoTable, we'll add them manually
+    clonedTable.querySelectorAll('img').forEach(img => img.remove());
+
+    const head = Array.from(clonedTable.querySelectorAll('thead th')).map(th => th.textContent);
+    const body = Array.from(clonedTable.querySelectorAll('tbody tr')).map(row => {
+        return Array.from(row.querySelectorAll('td')).map(td => td.textContent);
     });
+
+    // Get image data URLs separately
+    const imageDataUrls = Array.from(table.querySelectorAll('tbody tr td:first-child img')).map(img => img.src);
+
+    pdf.autoTable({
+        head: [head],
+        body: body,
+        startY: 20,
+        didDrawCell: (data) => {
+            // Check if it's the first column (Image Preview) and a body cell
+            if (data.column.index === 0 && data.cell.section === 'body' && imageDataUrls[data.row.index]) {
+                const img = imageDataUrls[data.row.index];
+                pdf.addImage(img, 'PNG', data.cell.x + 2, data.cell.y + 2, data.cell.width - 4, data.cell.height - 4);
+            }
+        },
+        columnStyles: {
+            0: { cellWidth: 30 } // Adjust width for image column
+        },
+        styles: {
+            cellPadding: 2,
+            fontSize: 8,
+            valign: 'middle',
+            halign: 'center'
+        },
+        headStyles: {
+            fillColor: [0, 123, 255],
+            textColor: 255
+        },
+        margin: { top: 10, left: 10, right: 10, bottom: 10 }
+    });
+
+    pdf.save(`${getEl('app-main-title').textContent.trim() || 'ai_results'}.pdf`);
+    addNotification('AI Analysis', 'AI results exported to PDF.');
 };
 
 
-// ======== 7. EVENT LISTENERS ========
+// ======== 9. NOTEBOOK SYSTEM ========
+let editingNoteId = null;
+
+function saveNote() {
+    const noteTitle = getEl('note-title').value;
+    const noteContent = getEl('note-content').value;
+    const noteTags = getEl('note-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+
+    if (!noteTitle || !noteContent) {
+        displayMessage('note-modal', 'Note title and content cannot be empty.', 'error');
+        return;
+    }
+
+    let notes = DB.get('notes');
+    const now = new Date().toISOString();
+
+    if (editingNoteId) {
+        // Update existing note
+        const noteIndex = notes.findIndex(n => n.note_id === editingNoteId);
+        if (noteIndex !== -1) {
+            notes[noteIndex] = {
+                ...notes[noteIndex],
+                title: noteTitle,
+                content: noteContent,
+                tags: noteTags,
+                updated_at: now,
+                projectId: currentProjectId // Ensure it's linked to current project
+            };
+            addNotification('Notebook', `Note "${noteTitle}" updated.`, 'info');
+        }
+    } else {
+        // Add new note
+        const newNote = {
+            note_id: generateId(),
+            project_id: currentProjectId,
+            title: noteTitle,
+            content: noteContent,
+            created_at: now,
+            updated_at: now,
+            tags: noteTags,
+            location: null, // Placeholder for linked map marker, image location
+            image_refs: [] // Placeholder for embedded images
+        };
+        notes.push(newNote);
+        addNotification('Notebook', `New note "${noteTitle}" created.`, 'success');
+    }
+
+    DB.set('notes', notes);
+    hideModal('note-modal');
+    loadNotes(); // Reload notes list
+    editingNoteId = null; // Reset editing state
+    getEl('note-form').reset(); // Clear form
+}
+
+function loadNotes() {
+    const notesListEl = getEl('notes-list');
+    notesListEl.innerHTML = '';
+    const notes = DB.get('notes').filter(note => note.project_id === currentProjectId); // Filter by current project
+
+    if (notes.length === 0) {
+        notesListEl.innerHTML = '<p>No notes yet. Add one to get started.</p>';
+        return;
+    }
+
+    notes.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)); // Sort by most recent
+
+    notes.forEach(note => {
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'note-entry';
+        noteDiv.innerHTML = `
+            <h3>${note.title}</h3>
+            <div class="note-meta">
+                Created: ${new Date(note.created_at).toLocaleString()} | Last Updated: ${new Date(note.updated_at).toLocaleString()}
+                ${note.tags && note.tags.length > 0 ? ` | Tags: ${note.tags.map(tag => `<span class="tag-pill">${tag}</span>`).join('')}` : ''}
+            </div>
+            <div class="note-content-display">${note.content}</div>
+            <div class="note-actions">
+                <button class="btn" onclick="editNote('${note.note_id}')">Edit</button>
+                <button class="btn-danger" onclick="deleteNote('${note.note_id}')">Delete</button>
+            </div>
+        `;
+        notesListEl.appendChild(noteDiv);
+    });
+}
+
+function editNote(noteId) {
+    const notes = DB.get('notes');
+    const noteToEdit = notes.find(n => n.note_id === noteId);
+    if (noteToEdit) {
+        editingNoteId = noteId;
+        getEl('note-modal-title').textContent = 'Edit Note';
+        getEl('note-title').value = noteToEdit.title;
+        getEl('note-content').value = noteToEdit.content;
+        getEl('note-tags').value = noteToEdit.tags.join(', ');
+        showModal('note-modal');
+    }
+}
+
+function deleteNote(noteId) {
+    if (!confirm('Are you sure you want to delete this note?')) return;
+    let notes = DB.get('notes');
+    notes = notes.filter(n => n.note_id !== noteId);
+    DB.set('notes', notes);
+    addNotification('Notebook', 'Note deleted.', 'danger');
+    loadNotes();
+}
+
+function filterNotes() {
+    const filterTags = getEl('note-filter-tags').value.toLowerCase().split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+    const notesListEl = getEl('notes-list');
+    notesListEl.innerHTML = '';
+    const allNotes = DB.get('notes').filter(note => note.project_id === currentProjectId);
+
+    const filteredNotes = allNotes.filter(note => {
+        if (filterTags.length === 0) return true; // No filter, show all
+        return filterTags.some(filterTag => note.tags.some(noteTag => noteTag.toLowerCase().includes(filterTag)));
+    });
+
+    if (filteredNotes.length === 0) {
+        notesListEl.innerHTML = '<p>No notes found matching your filter.</p>';
+        return;
+    }
+
+    filteredNotes.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+    filteredNotes.forEach(note => {
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'note-entry';
+        noteDiv.innerHTML = `
+            <h3>${note.title}</h3>
+            <div class="note-meta">
+                Created: ${new Date(note.created_at).toLocaleString()} | Last Updated: ${new Date(note.updated_at).toLocaleString()}
+                ${note.tags && note.tags.length > 0 ? ` | Tags: ${note.tags.map(tag => `<span class="tag-pill">${tag}</span>`).join('')}` : ''}
+            </div>
+            <div class="note-content-display">${note.content}</div>
+            <div class="note-actions">
+                <button class="btn" onclick="editNote('${note.note_id}')">Edit</button>
+                <button class="btn-danger" onclick="deleteNote('${note.note_id}')">Delete</button>
+            </div>
+        `;
+        notesListEl.appendChild(noteDiv);
+    });
+}
+
+
+// ======== 10. DRAWING & ANNOTATION TOOL ========
+let drawingCanvas, drawingCtx;
+let isDrawing = false;
+let currentTool = 'pen';
+let strokeColor = '#000000';
+let strokeWidth = 2;
+let startX, startY;
+let currentDrawingData = []; // Stores drawing commands for persistence
+let backgroundImage = null; // Stores the loaded image for the canvas
+
+function initializeDrawingCanvas() {
+    drawingCanvas = getEl('drawing-canvas');
+    drawingCtx = drawingCanvas.getContext('2d');
+
+    // Set canvas size to fill container, or a default if container is not ready
+    const container = getEl('drawing-canvas-container');
+    drawingCanvas.width = container.clientWidth;
+    drawingCanvas.height = 500; // Default height, can be adjusted
+
+    // Event Listeners
+    drawingCanvas.addEventListener('mousedown', startDrawing);
+    drawingCanvas.addEventListener('mousemove', draw);
+    drawingCanvas.addEventListener('mouseup', stopDrawing);
+    drawingCanvas.addEventListener('mouseout', stopDrawing);
+
+    // Responsive canvas
+    window.addEventListener('resize', resizeDrawingCanvas);
+    resizeDrawingCanvas(); // Initial resize
+
+    redrawCanvas(); // Draw existing data on init
+}
+
+function resizeDrawingCanvas() {
+    const container = getEl('drawing-canvas-container');
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = drawingCanvas.width;
+    tempCanvas.height = drawingCanvas.height;
+    tempCtx.drawImage(drawingCanvas, 0, 0); // Save current content
+
+    drawingCanvas.width = container.clientWidth;
+    // Maintain aspect ratio if an image is loaded, otherwise use default height
+    if (backgroundImage) {
+        drawingCanvas.height = (backgroundImage.height / backgroundImage.width) * drawingCanvas.width;
+    } else {
+        drawingCanvas.height = 500;
+    }
+    
+    redrawCanvas(); // Redraw content after resize
+}
+
+function redrawCanvas() {
+    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    if (backgroundImage) {
+        drawingCtx.drawImage(backgroundImage, 0, 0, drawingCanvas.width, drawingCanvas.height);
+    }
+    currentDrawingData.forEach(item => {
+        drawingCtx.strokeStyle = item.color;
+        drawingCtx.lineWidth = item.width;
+        drawingCtx.fillStyle = item.color;
+        drawingCtx.font = `${item.width * 5}px sans-serif`; // Adjust font size for text
+
+        if (item.tool === 'pen') {
+            drawingCtx.beginPath();
+            drawingCtx.moveTo(item.points[0].x, item.points[0].y);
+            for (let i = 1; i < item.points.length; i++) {
+                drawingCtx.lineTo(item.points[i].x, item.points[i].y);
+            }
+            drawingCtx.stroke();
+        } else if (item.tool === 'rect') {
+            drawingCtx.strokeRect(item.x, item.y, item.width, item.height);
+        } else if (item.tool === 'circle') {
+            drawingCtx.beginPath();
+            drawingCtx.arc(item.x, item.y, item.radius, 0, 2 * Math.PI);
+            drawingCtx.stroke();
+        } else if (item.tool === 'arrow') {
+            drawArrow(drawingCtx, item.startX, item.startY, item.endX, item.endY, item.width, item.color);
+        } else if (item.tool === 'text') {
+            drawingCtx.fillText(item.text, item.x, item.y);
+        }
+    });
+}
+
+function setDrawingTool(tool) {
+    currentTool = tool;
+    document.querySelectorAll('#drawing-toolbar button').forEach(btn => btn.classList.remove('active'));
+    getEl(`tool-${tool}`).classList.add('active');
+}
+
+function setDrawingColor(color) {
+    strokeColor = color;
+}
+
+function setDrawingWidth(width) {
+    strokeWidth = parseInt(width, 10);
+}
+
+function startDrawing(e) {
+    isDrawing = true;
+    startX = e.offsetX;
+    startY = e.offsetY;
+    if (currentTool === 'pen') {
+        currentDrawingData.push({ tool: 'pen', color: strokeColor, width: strokeWidth, points: [{ x: startX, y: startY }] });
+    } else if (currentTool === 'text') {
+        const text = prompt('Enter text:');
+        if (text) {
+            currentDrawingData.push({ tool: 'text', color: strokeColor, width: strokeWidth, text: text, x: startX, y: startY });
+            redrawCanvas();
+            saveDrawing();
+        }
+        isDrawing = false; // Stop drawing after text input
+    }
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+
+    const currentX = e.offsetX;
+    const currentY = e.offsetY;
+
+    if (currentTool === 'pen') {
+        currentDrawingData[currentDrawingData.length - 1].points.push({ x: currentX, y: currentY });
+        redrawCanvas();
+    } else if (currentTool === 'eraser') {
+        drawingCtx.clearRect(currentX - strokeWidth * 5, currentY - strokeWidth * 5, strokeWidth * 10, strokeWidth * 10);
+        // For eraser, we actually modify the canvas directly, not store commands.
+        // This is a simplification; for true vector eraser, it's more complex.
+        // For now, we'll just redraw everything *except* the erased area.
+        // A better eraser would modify `currentDrawingData` to remove overlapping elements.
+        // For this simulation, we'll just clear the area on the canvas.
+        // To make it persistent, one would need to re-render the whole canvas to a new image,
+        // or implement a more complex vector eraser that modifies existing shapes.
+        // For simplicity, we'll just redraw everything on mouseup/mouseout.
+    } else {
+        redrawCanvas(); // Clear and redraw to show preview
+        drawingCtx.strokeStyle = strokeColor;
+        drawingCtx.lineWidth = strokeWidth;
+        if (currentTool === 'rect') {
+            drawingCtx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+        } else if (currentTool === 'circle') {
+            const radius = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2)) / 2;
+            const centerX = startX + (currentX - startX) / 2;
+            const centerY = startY + (currentY - startY) / 2;
+            drawingCtx.beginPath();
+            drawingCtx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            drawingCtx.stroke();
+        } else if (currentTool === 'arrow') {
+            drawArrow(drawingCtx, startX, startY, currentX, currentY, strokeWidth, strokeColor);
+        }
+    }
+}
+
+function stopDrawing(e) {
+    if (!isDrawing) return;
+    isDrawing = false;
+
+    const endX = e.offsetX;
+    const endY = e.offsetY;
+
+    if (currentTool === 'rect') {
+        currentDrawingData.push({ tool: 'rect', color: strokeColor, width: strokeWidth, x: startX, y: startY, width: endX - startX, height: endY - startY });
+    } else if (currentTool === 'circle') {
+        const radius = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)) / 2;
+        const centerX = startX + (endX - startX) / 2;
+        const centerY = startY + (endY - startY) / 2;
+        currentDrawingData.push({ tool: 'circle', color: strokeColor, width: strokeWidth, x: centerX, y: centerY, radius: radius });
+    } else if (currentTool === 'arrow') {
+        currentDrawingData.push({ tool: 'arrow', color: strokeColor, width: strokeWidth, startX: startX, startY: startY, endX: endX, endY: endY });
+    }
+    redrawCanvas(); // Final redraw to ensure everything is rendered
+    saveDrawing(); // Save after each drawing action
+}
+
+function drawArrow(ctx, fromX, fromY, toX, toY, lineWidth, color) {
+    const headlen = 10; // length of head in pixels
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+    const angle = Math.atan2(dy, dx);
+
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY);
+    ctx.lineTo(toX, toY);
+    ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.moveTo(toX, toY);
+    ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+}
+
+
+function clearDrawingCanvas() {
+    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    currentDrawingData = [];
+    backgroundImage = null;
+    saveDrawing(); // Save cleared state
+    addNotification('Drawing', 'Canvas cleared.', 'info');
+}
+
+function loadDrawingImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            backgroundImage = img;
+            resizeDrawingCanvas(); // Adjust canvas size to image and redraw
+            saveDrawing(); // Save image as part of drawing data
+            addNotification('Drawing', `Image "${file.name}" loaded onto canvas.`, 'info');
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function saveDrawing(drawingId = null) {
+    let drawings = DB.get('drawings');
+    const now = new Date().toISOString();
+
+    const canvasDataUrl = drawingCanvas.toDataURL('image/png'); // Save current canvas state as image
+
+    const drawingToSave = {
+        drawing_id: drawingId || generateId(),
+        project_id: currentProjectId,
+        image_data_url: canvasDataUrl, // Full canvas image
+        vector_data: currentDrawingData, // Vector commands for re-editing
+        background_image: backgroundImage ? backgroundImage.src : null,
+        created_at: now,
+        updated_at: now,
+        title: drawingId ? drawings.find(d => d.drawing_id === drawingId)?.title : `Drawing ${new Date().toLocaleString()}` // Use existing title or generate
+    };
+
+    const existingIndex = drawings.findIndex(d => d.drawing_id === drawingToSave.drawing_id);
+    if (existingIndex !== -1) {
+        drawings[existingIndex] = drawingToSave;
+        addNotification('Drawing', `Drawing updated.`, 'info');
+    } else {
+        drawings.push(drawingToSave);
+        addNotification('Drawing', `New drawing saved.`, 'success');
+    }
+    DB.set('drawings', drawings);
+    loadDrawingsList(); // Refresh list
+    saveActiveProjectDataIntoForms(); // Save drawings as part of the current project
+}
+
+function loadDrawing(drawingId) {
+    const drawings = DB.get('drawings');
+    const drawingToLoad = drawings.find(d => d.drawing_id === drawingId);
+    if (drawingToLoad) {
+        clearDrawingCanvas(); // Clear current canvas
+        currentDrawingData = drawingToLoad.vector_data || [];
+
+        if (drawingToLoad.background_image) {
+            const img = new Image();
+            img.onload = () => {
+                backgroundImage = img;
+                resizeDrawingCanvas(); // Adjust canvas size to image and redraw
+            };
+            img.src = drawingToLoad.background_image;
+        } else {
+            redrawCanvas(); // Just redraw vector data
+        }
+        addNotification('Drawing', `Drawing "${drawingToLoad.title}" loaded.`, 'info');
+    }
+}
+
+function deleteDrawing(drawingId) {
+    if (!confirm('Are you sure you want to delete this drawing?')) return;
+    let drawings = DB.get('drawings');
+    drawings = drawings.filter(d => d.drawing_id !== drawingId);
+    DB.set('drawings', drawings);
+    addNotification('Drawing', 'Drawing deleted.', 'danger');
+    loadDrawingsList();
+    saveActiveProjectDataIntoForms(); // Update project data
+}
+
+function loadDrawingsList() {
+    const drawingsListEl = getEl('drawings-list');
+    drawingsListEl.innerHTML = '';
+    const drawings = DB.get('drawings').filter(drawing => drawing.project_id === currentProjectId);
+
+    if (drawings.length === 0) {
+        drawingsListEl.innerHTML = '<p>No drawings saved yet for this project.</p>';
+        return;
+    }
+
+    drawings.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+    drawings.forEach(drawing => {
+        const li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+        li.style.padding = '8px';
+        li.style.borderBottom = '1px solid var(--glass-border)';
+        li.innerHTML = `
+            <span style="font-weight: bold; cursor: pointer;" onclick="loadDrawing('${drawing.drawing_id}')">${drawing.title}</span>
+            <div>
+                <button class="btn" onclick="loadDrawing('${drawing.drawing_id}')">Load</button>
+                <button class="btn-danger" onclick="deleteDrawing('${drawing.drawing_id}')">Delete</button>
+            </div>
+        `;
+        drawingsListEl.appendChild(li);
+    });
+}
+
+function exportDrawing(format) {
+    const drawingTitle = `drawing_${new Date().toISOString().slice(0,10)}`;
+    if (format === 'png') {
+        const link = document.createElement('a');
+        link.download = `${drawingTitle}.png`;
+        link.href = drawingCanvas.toDataURL('image/png');
+        link.click();
+        addNotification('Drawing', 'Drawing exported as PNG.', 'info');
+    } else if (format === 'json') {
+        const data = {
+            backgroundImage: backgroundImage ? backgroundImage.src : null,
+            vectorData: currentDrawingData
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${drawingTitle}.json`;
+        link.click();
+        addNotification('Drawing', 'Drawing exported as JSON.', 'info');
+    }
+}
+
+
+// ======== 11. SAVE & LOAD PROJECTS (Enhanced) ========
+// currentProjectId is already global
+// saveProjectAs, saveProject, loadProject, createNewProject, deleteProject, loadProjectsList are already defined
+
+// Function to save the active project data
+// This is called whenever data changes in the forms/tables
+function saveActiveProjectDataIntoForms() {
+    // This function doesn't save to a named project directly,
+    // it updates the data in the currentProjectId's data object
+    // which will then be saved when `saveProject` is called.
+    // It's effectively an auto-save for the active session.
+
+    const projects = DB.get('projects');
+    let projectToUpdate = projects.find(p => p.id === currentProjectId);
+
+    if (!projectToUpdate) {
+        // If no project is active or it's a new session, create a default one
+        projectToUpdate = {
+            id: currentProjectId,
+            name: document.querySelector('.main-title-report').textContent || langDict[currentLang].report_title,
+            data: {}
+        };
+        projects.push(projectToUpdate);
+    }
+
+    // Capture data from Inspection Report page
+    const inspectionReportData = {
+        title: document.querySelector('.main-title-report').textContent,
+        date: getEl('display-date').value,
+        reportDetails: [],
+        clientLogoInspection: clientLogoInspection,
+        companyLogoInspection: companyLogoInspection,
+    };
+    if (reportTable && reportTable.tBodies[0]) {
+        const reportRows = reportTable.tBodies[0].querySelectorAll('tr');
+        reportRows.forEach(row => {
+            const rowData = {
+                id: row.dataset.id,
+                asset: row.cells[1].textContent,
+                status: row.cells[2].textContent,
+                recommendation: row.cells[3].textContent,
+                quantity: row.cells[4].textContent,
+                photos: Array.from(row.cells[5].querySelectorAll('img')).map(img => img.src),
+                latitude: row.cells[6].textContent,
+                longitude: row.cells[7].textContent
+            };
+            inspectionReportData.reportDetails.push(rowData);
+        });
+    }
+    projectToUpdate.data.inspection = inspectionReportData;
+
+
+    // Capture data from Cost Estimation page
+    const costEstimationData = {
+        workOrderNo: getEl('work-order-no') ? getEl('work-order-no').value : '',
+        tpcNo: getEl('tpc-no') ? getEl('tpc-no').value : '',
+        workDesc: getEl('work-desc') ? getEl('work-desc').value : '',
+        tableData: []
+    };
+    if (costEstimationTable && costEstimationTable.tBodies[0]) {
+        const costRows = costEstimationTable.tBodies[0].querySelectorAll('tr');
+        costRows.forEach(row => {
+            const rowData = {
+                boqRef: row.cells[0].textContent,
+                description: row.cells[1].textContent,
+                unit: row.cells[2].textContent,
+                nr: row.cells[3].textContent,
+                length: row.cells[4].textContent,
+                width: row.cells[5].textContent,
+                height: row.cells[6].textContent,
+                totalQty: row.cells[7].textContent,
+                rate: row.cells[8].textContent,
+                amount: row.cells[9].textContent,
+                remarks: row.cells[10].textContent,
+            };
+            costEstimationData.tableData.push(rowData);
+        });
+    }
+    projectToUpdate.data.estimation = costEstimationData;
+
+    // Capture GIS Map data
+    projectToUpdate.data.map = DB.get('mapData');
+
+    // Capture AI Results
+    const aiResultsElement = getEl('ai-results-table');
+    if (aiResultsElement && aiResultsElement.style.display !== 'none') {
+        const aiResultTable = aiResultsElement.querySelector('table');
+        if (aiResultTable) {
+            const aiData = [];
+            Array.from(aiResultTable.querySelectorAll('tbody tr')).forEach(row => {
+                const rowCells = Array.from(row.cells);
+                const rowObj = {
+                    imagePreview: rowCells[0].querySelector('img') ? rowCells[0].querySelector('img').src : null,
+                    gpsLocation: rowCells[1].textContent,
+                    timestamp: rowCells[2].textContent,
+                    defect: rowCells[3].textContent,
+                    severity: rowCells[4].textContent,
+                    positionInImage: rowCells[5].textContent,
+                    description: rowCells[6].textContent,
+                    action: rowCells[7].textContent
+                };
+                aiData.push(rowObj);
+            });
+            projectToUpdate.data.aiResults = aiData;
+        }
+    } else {
+        projectToUpdate.data.aiResults = []; // Clear if AI results not displayed
+    }
+
+    // Capture Notes (filtered by currentProjectId)
+    projectToUpdate.data.notes = DB.get('notes').filter(n => n.project_id === currentProjectId);
+
+    // Capture Drawings (filtered by currentProjectId)
+    projectToUpdate.data.drawings = DB.get('drawings').filter(d => d.project_id === currentProjectId);
+
+
+    DB.set('projects', projects);
+}
+
+
+// Function to load the active project data into forms/tables
+function loadActiveProjectDataIntoForms() {
+    const projects = DB.get('projects');
+    const project = projects.find(p => p.id === currentProjectId);
+
+    if (project && project.data) {
+        const projectData = project.data;
+
+        // Load Inspection Report data
+        if (projectData.inspection) {
+            const mainTitleReportEl = document.querySelector('.main-title-report');
+            if (mainTitleReportEl) mainTitleReportEl.textContent = projectData.inspection.title || project.name || langDict[currentLang].report_title;
+            getEl('app-main-title').textContent = project.name; // Update main app title
+
+            const displayDateEl = document.getElementById('display-date');
+            if (displayDateEl) displayDateEl.value = projectData.inspection.date || new Date().toISOString().split('T')[0];
+
+            if (reportTable && reportTable.tBodies[0]) {
+                const tbody = reportTable.tBodies[0];
+                tbody.innerHTML = ''; // Clear existing rows
+                projectData.inspection.reportDetails.forEach(rowData => {
+                    addRowReport(rowData); // Re-add rows with saved data
+                });
+            }
+            clientLogoInspection = projectData.inspection.clientLogoInspection || null;
+            const clientLogoInspectionEl = getEl('client-logo-inspection');
+            if (clientLogoInspectionEl) clientLogoInspectionEl.src = clientLogoInspection || '';
+            companyLogoInspection = projectData.inspection.companyLogoInspection || null;
+            const companyLogoInspectionEl = getEl('company-logo-inspection');
+            if (companyLogoInspectionEl) companyLogoInspectionEl.src = companyLogoInspection || '';
+        } else {
+            // If no inspection data, clear relevant fields/tables
+            const mainTitleReportEl = document.querySelector('.main-title-report');
+            if (mainTitleReportEl) mainTitleReportEl.textContent = project.name || langDict[currentLang].report_title;
+            getEl('app-main-title').textContent = project.name;
+            const displayDateEl = document.getElementById('display-date');
+            if (displayDateEl) displayDateEl.value = new Date().toISOString().split('T')[0];
+            if (reportTable && reportTable.tBodies[0]) reportTable.tBodies[0].innerHTML = '';
+            if (getEl('client-logo-inspection')) getEl('client-logo-inspection').src = '';
+            clientLogoInspection = null;
+            if (getEl('company-logo-inspection')) getEl('company-logo-inspection').src = '';
+            companyLogoInspection = null;
+        }
+
+        // Load Cost Estimation data
+        if (projectData.estimation) {
+            if (getEl('work-order-no')) getEl('work-order-no').value = projectData.estimation.workOrderNo || '';
+            if (getEl('tpc-no')) getEl('tpc-no').value = projectData.estimation.tpcNo || '';
+            if (getEl('work-desc')) getEl('work-desc').value = projectData.estimation.workDesc || '';
+
+            if (costEstimationTable && costEstimationTable.tBodies[0]) {
+                const costTbody = costEstimationTable.tBodies[0];
+                costTbody.innerHTML = ''; // Clear existing rows
+                projectData.estimation.tableData.forEach(rowData => {
+                    insertBOQRow(rowData); // Re-add rows with saved data
+                });
+                calculateCostEstimationTotal();
+            }
+            clientLogoEstimation = projectData.estimation.clientLogoEstimation || null;
+            const clientLogoEstimationEl = getEl('client-logo-estimation');
+            if (clientLogoEstimationEl) clientLogoEstimationEl.src = clientLogoEstimation || '';
+            companyLogoEstimation = projectData.estimation.companyLogoEstimation || null;
+            const companyLogoEstimationEl = getEl('company-logo-estimation');
+            if (companyLogoEstimationEl) companyLogoEstimationEl.src = companyLogoEstimation || '';
+        } else {
+            // If no estimation data, clear relevant fields/tables
+            if (getEl('work-order-no')) getEl('work-order-no').value = '';
+            if (getEl('tpc-no')) getEl('tpc-no').value = '';
+            if (getEl('work-desc')) getEl('work-desc').value = '';
+            if (costEstimationTable && costEstimationTable.tBodies[0]) costEstimationTable.tBodies[0].innerHTML = '';
+            calculateCostEstimationTotal();
+            if (getEl('client-logo-estimation')) getEl('client-logo-estimation').src = '';
+            clientLogoEstimation = null;
+            if (getEl('company-logo-estimation')) getEl('company-logo-estimation').src = '';
+            companyLogoEstimation = null;
+        }
+
+        // Load GIS Map data
+        if (projectData.map) {
+            DB.set('mapData', projectData.map);
+            if (window.mapInitialized) { // Only load if map is already initialized
+                loadMapData();
+            }
+        } else {
+            DB.set('mapData', { layers: [] }); // Clear map data
+            if (window.mapInitialized) {
+                drawnItems.clearLayers();
+            }
+        }
+
+        // Load AI Results
+        if (projectData.aiResults && projectData.aiResults.length > 0) {
+            getEl('ai-results-card').style.display = 'block';
+            getEl('ai-spinner').style.display = 'none';
+            let aiResultHtml = `<table><thead><tr><th>Image Preview</th><th>GPS Location</th><th>Timestamp</th><th>Defect</th><th>Severity</th><th>Position in Image</th><th>Description</th><th>Action</th></tr></thead><tbody>`;
+            projectData.aiResults.forEach(result => {
+                aiResultHtml += `
+                    <tr>
+                        <td><img src="${result.imageDataUrl}" style="max-width:150px; max-height:100px; object-fit:contain;"></td>
+                        <td>${result.gpsLocation ? `${result.gpsLocation.latitude.toFixed(6)}, ${result.gpsLocation.longitude.toFixed(6)}` : 'N/A'}</td>
+                        <td>${result.timestamp || 'N/A'}</td>
+                        <td>${result.defects[0].type}</td>
+                        <td>${result.defects[0].severity}</td>
+                        <td>${result.defects[0].location}</td>
+                        <td>${result.defects[0].description}</td>
+                        <td>${result.defects[0].action}</td>
+                    </tr>
+                `;
+            });
+            aiResultHtml += `</tbody></table>`;
+            getEl('ai-results-table').innerHTML = aiResultHtml;
+            getEl('ai-results-table').style.display = 'block';
+        } else {
+            getEl('ai-results-card').style.display = 'none';
+            getEl('ai-results-table').innerHTML = '';
+        }
+
+        // Load Notes (will be filtered by currentProjectId when loadNotes() is called)
+        // No direct loading here, loadNotes() will handle it when notebook page is activated.
+
+        // Load Drawings (will be filtered by currentProjectId when loadDrawingsList() is called)
+        // No direct loading here, loadDrawingsList() will handle it when drawing page is activated.
+
+        // Reset current form inputs for new entries
+        if (getEl('asset')) getEl('asset').value = '';
+        if (getEl('status')) getEl('status').value = '';
+        if (getEl('recommendation')) getEl('recommendation').value = '';
+        if (getEl('photo-previews')) getEl('photo-previews').innerHTML = '';
+        if (getEl('lat-display')) getEl('lat-display').textContent = 'N/A';
+        if (getEl('lng-display')) getEl('lng-display').textContent = 'N/A';
+        if (reportCurrentMarker) {
+            reportMap.removeLayer(reportCurrentMarker);
+            reportCurrentMarker = null;
+        }
+        if (getEl('boq-nr')) getEl('boq-nr').value = '';
+        if (getEl('boq-length')) getEl('boq-length').value = '';
+        if (getEl('boq-width')) getEl('boq-width').value = '';
+        if (getEl('boq-height')) getEl('boq-height').value = '';
+        if (getEl('boq-total-qty')) getEl('boq-total-qty').value = '';
+        if (getEl('boq-amount')) getEl('boq-amount').value = '';
+        if (getEl('boq-remarks')) getEl('boq-remarks').value = '';
+        if (getEl('boq-ref-select')) getEl('boq-ref-select').selectedIndex = 0;
+        updateBOQDetails(); // Update related fields
+    } else {
+        // If no project or no data, initialize with a blank slate
+        createNewProject();
+    }
+}
+
+function updateMainTitle(projectName) {
+    const mainTitleReportEl = document.querySelector('.main-title-report');
+    if (mainTitleReportEl) mainTitleReportEl.textContent = projectName;
+    getEl('app-main-title').textContent = projectName;
+}
+
+// Export/Import All Projects
+function exportAllProjects() {
+    const allProjects = DB.get('projects');
+    const blob = new Blob([JSON.stringify(allProjects, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'all_engineering_projects.json';
+    link.click();
+    addNotification('Projects', 'All projects exported as JSON.', 'info');
+}
+
+function importAllProjects(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!confirm('Importing projects will overwrite existing saved projects. Are you sure?')) {
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const importedProjects = JSON.parse(e.target.result);
+            DB.set('projects', importedProjects);
+            localStorage.setItem('currentProjectId', importedProjects[0] ? importedProjects[0].id : 'default-project');
+            currentProjectId = localStorage.getItem('currentProjectId');
+            loadProjectsList();
+            loadProject(currentProjectId); // Load the first project from the imported list
+            addNotification('Projects', 'All projects imported successfully.', 'success');
+        } catch (error) {
+            displayMessage('saved-projects-page', 'Error importing projects: Invalid file format.', 'error');
+            console.error('Error importing projects:', error);
+        }
+    };
+    reader.readAsText(file);
+}
+
+
+// ======== 12. DEVELOPER CREDIT ========
+// Added to the footer in HTML.
+
+
+// ======== 13. EVENT LISTENERS ========
 document.addEventListener('DOMContentLoaded', () => {
     DB.init();
     initializeApp(); // Directly initialize the app
+    // The initial language is set in initializeApp now
 });
 
 </script>
