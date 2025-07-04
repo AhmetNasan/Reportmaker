@@ -1,176 +1,209 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Project Dashboard</title>
+    <title>Engineering Project Platform</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script defer src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     <script defer src='https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js'></script>
-    <script defer src="https://unpkg.com/leaflet-geometryutil"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.js"></script>
-    <script defer src="https://unpkg.com/tokml@0.4.0/tokml.js"></script>
+    <script defer src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script defer src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
 
     <style>
         :root {
-            --primary-color: #007bff; --primary-color-rgb: 0, 123, 255; --background-color: #f0f4f8;
-            --glass-bg: rgba(255, 255, 255, 0.8); --glass-border: rgba(200, 210, 220, 0.6);
-            --shadow: 0 8px 30px rgba(0,0,0,0.12); --text-color: #2c3e50; --border-radius: 12px;
+            --primary-color: #007bff; --background-color: #f0f4f8;
+            --glass-bg: rgba(255, 255, 255, 0.7); --glass-border: rgba(200, 210, 220, 0.5);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1); --text-color: #2c3e50; --border-radius: 12px;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--background-color); margin: 0; color: var(--text-color); }
-        .page { display: none; }
-        .page.active { display: block; }
-        .centered-container { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-        .form-card { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); padding: 40px; border-radius: var(--border-radius); box-shadow: var(--shadow); text-align: center; width: 100%; max-width: 450px; }
-        .form-card h1 { margin-top: 0; }
-        .form-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        .form-card button, .card button { width: 100%; padding: 12px; border-radius: 8px; border: none; background-color: var(--primary-color); color: white; font-size: 16px; cursor: pointer; transition: background-color 0.3s; margin-top: 10px; }
-        .form-card button:hover, .card button:hover { background-color: #0056b3; }
-        .form-card button:disabled { background-color: #aaa; cursor: not-allowed; }
-        .toggle-link { color: var(--primary-color); cursor: pointer; text-decoration: none; margin-top: 15px; display: inline-block; }
-        .error-message { color: red; margin-top: 10px; min-height: 1em; }
-        
-        /* Modal Styles */
-        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: #fff; border-radius: 12px; padding: 20px; width: 90%; max-width: 450px; text-align: center; }
-        .modal-content h2 { margin-top: 0; }
 
-        /* Main App Layout */
-        .main-container { max-width: 1600px; margin: 0 auto; padding: 10px; }
-        .glass-card { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); padding: 20px; border-radius: var(--border-radius); box-shadow: var(--shadow); margin-bottom: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 10px; }
-        .header button, .card button { width: auto; padding: 10px 15px; }
-        .btn-logout { background-color: #dc3545; }
-        .btn-logout:hover { background-color: #c82333; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-        .list-item:hover { background-color: #f8f9fa; }
-        .list-item > span { cursor: pointer; font-weight: 500; }
-        .admin-section { border-top: 2px solid var(--primary-color); margin-top: 20px; padding-top: 20px; }
-        .tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: -1px; }
-        .tab-button { padding: 10px 20px; border: 1px solid var(--glass-border); border-bottom: none; border-radius: 10px 10px 0 0; cursor: pointer; background-color: rgba(255,255,255,0.3); font-weight: 500; }
-        .tab-button.active { background-color: var(--glass-bg); border-bottom: 1px solid transparent; font-weight: 700; }
-        .tab-content { display: none; }
-        .tab-content.active { display: flex; flex-direction: column; gap: 15px; }
+        /* Base & Bilingual Support */
+        html[dir="rtl"] { font-family: 'Tahoma', sans-serif; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--background-color); margin: 0; color: var(--text-color); transition: background-color 0.3s; }
         
-        /* Map Page Layout Fix */
-        #map-tab-content { position: relative; height: 85vh; overflow: hidden; }
-        #map-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .leaflet-top.leaflet-left { margin-left: 370px; transition: margin-left 0.3s ease; }
-        @media (max-width: 768px) { .leaflet-top.leaflet-left { margin-left: 10px; } }
+        /* Page Visibility */
+        .page { display: none; animation: fadeIn 0.5s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Layouts */
+        .main-container { max-width: 1800px; margin: 0 auto; padding: 20px; }
+        .centered-container { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+
+        /* Glass Card Style */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            padding: 25px; border-radius: var(--border-radius);
+            box-shadow: var(--shadow); margin-bottom: 20px;
+        }
+        html[dir="rtl"] .glass-card { text-align: right; }
+
+        /* Forms & Buttons */
+        .form-card { max-width: 480px; width: 100%; }
+        .form-card h1, .form-card p { text-align: center; }
+        html[dir="rtl"] .form-card h1, html[dir="rtl"] .form-card p { text-align: center; }
+        
+        input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="number"], input[type="file"] {
+            width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;
+        }
+        
+        button {
+            padding: 10px 20px; border-radius: 8px; border: none; background-color: var(--primary-color);
+            color: white; font-size: 16px; cursor: pointer; transition: background-color 0.3s;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #aaa; cursor: not-allowed; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #218838; }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 20px; }
+        .header h1 { margin: 0; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .notification-bell { position: relative; cursor: pointer; }
+        .notification-count { position: absolute; top: -5px; right: -8px; background: red; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 12px; display: flex; justify-content: center; align-items: center; }
+        
+        /* Contracts Page */
+        .contracts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .contract-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+        .contract-item:hover { background-color: #f8f9fa; }
+        .contract-actions button { margin-inline-start: 8px; }
+
+        /* Admin Panel */
+        .admin-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        .user-request-item { display: flex; justify-content: space-between; align-items: center; }
+
+        /* Footer */
+        .footer { text-align: center; margin-top: 30px; padding: 20px; }
+        html[dir="rtl"] .footer { text-align: center; }
+
     </style>
 </head>
 <body>
 
-    <div id="request-access-modal" class="modal">
-        <div class="modal-content">
-            <h2>Request Access</h2>
-            <p>Your request will be sent to the administrator for approval.</p>
-            <form id="request-access-form">
-                <input type="email" id="request-email" placeholder="Enter your email" required>
-                <button type="submit">Submit Request</button>
-                <p class="error-message" id="request-error-message"></p>
-                <a href="#" class="toggle-link" onclick="document.getElementById('request-access-modal').classList.remove('active')">Cancel</a>
+    <div id="login-page" class="page centered-container">
+        <div class="form-card glass-card">
+            <h1 data-translate="welcome_title">Welcome to the Engineering Project Platform 👷‍♂️</h1>
+            <p data-translate="welcome_subtitle">Smart tools for managing maps, data, inspections, and reports for engineers and managers.</p>
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit" data-translate="sign_in">Sign In</button>
+                <p class="error-message" id="login-error-message"></p>
+                <a href="#" class="toggle-link" onclick="window.showPage('signup-page')" data-translate="need_account">Need an account? Sign Up</a>
             </form>
         </div>
     </div>
 
-    <div id="login-page" class="page centered-container">
-        <div class="form-card">
-            <h1>Welcome to the Engineering Project Platform 👷‍♂️</h1>
-            <p>Smart tools for managing maps, data, inspections, and reports for engineers and managers.</p>
-            <form id="login-form">
-                <input type="email" id="login-email" placeholder="Email" required>
-                <input type="password" id="login-password" placeholder="Password" required>
-                <button type="submit">Sign In</button>
-                <p class="error-message" id="login-error-message"></p>
-                <a href="#" class="toggle-link" onclick="document.getElementById('request-access-modal').classList.add('active')">Need an account? Request Access</a>
+    <div id="signup-page" class="page centered-container">
+        <div class="form-card glass-card">
+            <h1 data-translate="create_account">Create Your Account</h1>
+            <form id="signup-form">
+                <input type="text" id="signup-name" placeholder="Full Name" required>
+                <input type="email" id="signup-email" placeholder="Email" required>
+                <input type="password" id="signup-password" placeholder="Password" required>
+                <button type="submit" data-translate="sign_up">Sign Up</button>
+                <p id="signup-message" class="error-message"></p>
+                <a href="#" class="toggle-link" onclick="window.showPage('login-page')" data-translate="have_account">Already have an account? Sign In</a>
             </form>
         </div>
     </div>
     
-    <div id="contracts-page" class="page main-container">
-        <div class="header">
-            <h1>Contracts Dashboard</h1>
-            <button class="btn-logout" onclick="window.signOutUser()">Sign Out</button>
-        </div>
-        <div id="admin-panel" class="glass-card" style="display:none;">
-            <h2 class="admin-section">Pending User Requests</h2>
-            <div id="pending-requests-list"><p>Loading requests...</p></div>
-        </div>
-        <div class="glass-card">
-            <h2>Choose a Saved Contract</h2>
-            <div id="contracts-list"><p>Loading contracts...</p></div>
-        </div>
-        <div class="glass-card">
-            <h2>Add New Contract</h2>
-            <form id="add-contract-form">
-                <label>Title:</label><input type="text" id="contract-title" required>
-                <label>Contract Number:</label><input type="text" id="contract-number">
-                <label>Start Date:</label><input type="date" id="contract-start-date">
-                <label>End Date:</label><input type="date" id="contract-end-date">
-                <h4>BOQ Upload</h4>
-                <p>Note: This BOQ will be used in the Cost Estimation page.</p>
-                <input type="file" id="boq-file-input" accept=".csv" required>
-                <button type="submit">Save & Add Contract</button>
-            </form>
+    <div id="pending-approval-page" class="page centered-container">
+        <div class="form-card glass-card">
+            <h1 data-translate="pending_title">Request Received</h1>
+            <p data-translate="pending_message">Your access request has been sent to the administrator for approval. You will be notified via email once your account is activated.</p>
+            <button onclick="window.signOutUser()" data-translate="sign_out">Sign Out</button>
         </div>
     </div>
 
-    <div id="app-page" class="page main-container">
-        <div class="header">
+    <div id="app-container" class="page main-container">
+        <div class="header glass-card">
             <h1 id="app-main-title">Project Dashboard</h1>
-            <div>
-                <button onclick="window.showPage('contracts-page')">Back to Contracts</button>
-                <button class="btn-logout" onclick="window.signOutUser()">Sign Out</button>
+            <div class="header-actions">
+                <div id="notification-bell-container" class="notification-bell" style="display:none;" onclick="window.showPage('admin-page')">
+                    <i class="fas fa-bell fa-lg"></i>
+                    <span id="notification-count" class="notification-count" style="display:none;">0</span>
+                </div>
+                <select id="language-switcher" onchange="window.switchLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                </select>
+                <button onclick="window.showPage('contracts-page')" data-translate="contracts_dashboard">Contracts</button>
+                <button onclick="window.showPage('admin-page')" data-translate="admin_panel" id="admin-panel-button" style="display:none;">Admin Panel</button>
+                <button class="btn-danger" onclick="window.signOutUser()" data-translate="sign_out">Sign Out</button>
             </div>
         </div>
-        <div class="tabs">
-            <button class="tab-button active" onclick="window.openTab(event, 'inspection-report-content')">Inspection Report</button>
-            <button class="tab-button" onclick="window.openTab(event, 'cost-estimation-content')">Cost Estimation</button>
-            <button class="tab-button" onclick="window.openTab(event, 'map-tab-content')">Map</button>
-            <button class="tab-button" onclick="window.openTab(event, 'saved-projects-content')">Saved Projects</button>
-            <button class="tab-button" onclick="window.openTab(event, 'ai-analysis-content')">AI Analysis</button>
-        </div>
-
-        <div id="inspection-report-content" class="tab-content active glass-card">
-            <h2>Inspection Report</h2>
-            <p>Content for Inspection Report...</p>
-        </div>
-        <div id="cost-estimation-content" class="tab-content glass-card">
-             <h2>Cost Estimation</h2>
-             <p>Content for Cost Estimation...</p>
-        </div>
-        <div id="map-tab-content" class="tab-content">
-             <div id="map-container"></div>
-        </div>
-        <div id="saved-projects-content" class="tab-content glass-card">
-            <h2>Saved Projects</h2>
-            <p>Content for Saved Projects...</p>
-        </div>
-        <div id="ai-analysis-content" class="tab-content glass-card">
-            <h2>AI Road Defect Analysis</h2>
-            <p>Upload an image to analyze for defects.</p>
-            <input type="file" id="ai-image-upload" accept="image/*" />
-            <button id="ai-analyze-btn">Analyze with AI</button>
-            <div id="ai-results"></div>
-        </div>
         
-        <footer class="glass-card" style="text-align: center; margin-top: 20px;">
-            <p>Developed by Eng. Ahmet Nasan</p>
-            <p>Civil Engineer & Software Developer</p>
-            <em>“Blending engineering precision with modern tech.”</em>
-        </footer>
+        <div id="app-content"></div>
+    </div>
+    
+    <div id="contracts-page-content" class="app-page-content" style="display: none;">
+        <div class="contracts-grid">
+            <div class="glass-card">
+                <h2 data-translate="add_contract">Add New Contract</h2>
+                <form id="add-contract-form">
+                    <label data-translate="title">Title:</label><input type="text" id="contract-title" required>
+                    <label data-translate="subtitles">Subtitles:</label><input type="text" id="contract-subtitles">
+                    <label data-translate="contract_number">Contract Number:</label><input type="text" id="contract-number">
+                    <label data-translate="start_date">Start Date:</label><input type="date" id="contract-start-date">
+                    <label data-translate="end_date">End Date:</label><input type="date" id="contract-end-date">
+                    <label data-translate="project_value">Project Value:</label><input type="number" id="project-value">
+                    <label data-translate="company_logo">Company Logo:</label><input type="file" id="company-logo" accept="image/*">
+                    <label data-translate="client_logo">Client Logo:</label><input type="file" id="client-logo" accept="image/*">
+                    
+                    <h4>BOQ Upload</h4>
+                    <p data-translate="boq_note">Note: This BOQ will be used in the Cost Estimation page.</p>
+                    <div style="display:flex; gap: 10px;">
+                        <input type="file" id="boq-file-input" accept=".csv" required style="width: 100%;">
+                        <button type="button" class="btn-secondary" onclick="window.downloadBoqTemplate()" data-translate="download_template">Template</button>
+                    </div>
+                    <button type="submit" data-translate="save_contract" style="margin-top: 20px;">Save Contract</button>
+                </form>
+            </div>
+            <div class="glass-card">
+                <h2 data-translate="saved_contracts">Saved Contracts</h2>
+                <div id="contracts-list"><p data-translate="loading_contracts">Loading contracts...</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-page-content" class="app-page-content" style="display: none;">
+        <div class="glass-card">
+            <h2 data-translate="admin_panel">Admin Panel</h2>
+            <div class="admin-grid">
+                <div>
+                    <h3 data-translate="user_requests">New User Requests</h3>
+                    <div id="pending-requests-list"><p>Loading...</p></div>
+                </div>
+                <div>
+                    <h3 data-translate="api_keys">API Key Manager</h3>
+                    <p>Feature coming soon.</p>
+                    <h3 data-translate="ai_prompt">Editable AI Prompt</h3>
+                    <p>Feature coming soon.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Developed by Eng. Ahmet Nasan</p>
+        <p>Civil Engineer & Software Developer</p>
+        <em>“Blending engineering precision with modern tech.”</em>
     </div>
 
     <script type="module">
@@ -184,208 +217,236 @@
         // --- GLOBAL STATE & CONSTANTS ---
         const ADMIN_EMAIL = "ahmetnasan1993@gmail.com";
         let currentUser;
-        let map; // Global map instance
+
+        // --- BILINGUAL & RTL DICTIONARY ---
+        const translations = {
+            en: {
+                // Add all your keys here
+                welcome_title: "Welcome to the Engineering Project Platform 👷‍♂️",
+                sign_in: "Sign In",
+                need_account: "Need an account? Sign Up",
+                create_account: "Create Your Account",
+                sign_up: "Sign Up",
+                have_account: "Already have an account? Sign In",
+                pending_title: "Request Received",
+                pending_message: "Your access request has been sent to the administrator for approval. You will be notified via email once your account is activated.",
+                sign_out: "Sign Out",
+                contracts_dashboard: "Contracts",
+                admin_panel: "Admin Panel",
+                add_contract: "Add New Contract",
+                title: "Title",
+                subtitles: "Subtitles",
+                contract_number: "Contract Number",
+                start_date: "Start Date",
+                end_date: "End Date",
+                project_value: "Project Value",
+                company_logo: "Company Logo",
+                client_logo: "Client Logo",
+                boq_note: "Note: This BOQ will be used in the Cost Estimation page.",
+                download_template: "Template",
+                save_contract: "Save Contract",
+                saved_contracts: "Saved Contracts",
+                loading_contracts: "Loading contracts...",
+                user_requests: "New User Requests",
+                api_keys: "API Key Manager",
+                ai_prompt: "Editable AI Prompt"
+            },
+            ar: {
+                // Add all your keys here
+                welcome_title: "مرحبًا بك في منصة المشاريع الهندسية 👷‍♂️",
+                sign_in: "تسجيل الدخول",
+                need_account: "تحتاج حساب؟ اشتراك",
+                create_account: "أنشئ حسابك",
+                sign_up: "اشتراك",
+                have_account: "لديك حساب بالفعل؟ تسجيل الدخول",
+                pending_title: "تم استلام الطلب",
+                pending_message: "تم إرسال طلب الوصول الخاص بك إلى المسؤول للموافقة عليه. سيتم إعلامك عبر البريد الإلكتر الإلكتروني بمجرد تفعيل حسابك.",
+                sign_out: "تسجيل الخروج",
+                contracts_dashboard: "لوحة العقود",
+                admin_panel: "لوحة الإدارة",
+                add_contract: "إضافة عقد جديد",
+                title: "العنوان",
+                subtitles: "عناوين فرعية",
+                contract_number: "رقم العقد",
+                start_date: "تاريخ البدء",
+                end_date: "تاريخ الانتهاء",
+                project_value: "قيمة المشروع",
+                company_logo: "شعار الشركة",
+                client_logo: "شعار العميل",
+                boq_note: "ملاحظة: سيتم استخدام جدول الكميات هذا في صفحة تقدير التكلفة.",
+                download_template: "نموذج",
+                save_contract: "حفظ العقد",
+                saved_contracts: "العقود المحفوظة",
+                loading_contracts: "جاري تحميل العقود...",
+                user_requests: "طلبات المستخدمين الجدد",
+                api_keys: "إدارة مفاتيح API",
+                ai_prompt: "تعديل موجه الذكاء الاصطناعي"
+            }
+        };
 
         // --- GLOBAL FUNCTIONS ATTACHED TO WINDOW ---
         window.showPage = (pageId) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            const page = document.getElementById(pageId);
+            if(page) page.classList.add('active');
+
+            if (pageId.endsWith('-page-content')) {
+                document.querySelectorAll('.app-page-content').forEach(p => p.style.display = 'none');
+                document.getElementById(pageId).style.display = 'block';
+                document.getElementById('app-container').classList.add('active');
+            }
         };
-        window.signOutUser = async () => await supabase.auth.signOut();
-        window.openTab = (evt, tabName) => {
-             document.querySelectorAll('#app-page .tab-content').forEach(tc => tc.classList.remove('active'));
-             document.querySelectorAll('#app-page .tab-button').forEach(tb => tb.classList.remove('active'));
-             document.getElementById(tabName).classList.add('active');
-             evt.currentTarget.classList.add('active');
-             
-             if (tabName === 'map-tab-content' && !map) {
-                 initializeVehicleMap();
-             }
+        
+        window.signOutUser = async () => {
+            await supabase.auth.signOut();
+            // The onAuthStateChange listener will handle the redirect
+        };
+        
+        window.switchLanguage = (lang) => {
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                el.innerText = translations[lang][key] || el.innerText;
+            });
+        };
+
+        window.downloadBoqTemplate = () => {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "BOQ Ref.,Asset,Description,Unit,Rate\n";
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "BOQ_Template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         };
 
         // --- AUTH STATE LOGIC ---
-        supabase.auth.onAuthStateChange((event, session) => {
+        supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_OUT' || !session) {
                 currentUser = null;
-                sessionStorage.removeItem('selectedContractId');
                 showPage('login-page');
             } else if (session) {
                 currentUser = session.user;
-                const selectedContractId = sessionStorage.getItem('selectedContractId');
-                if (selectedContractId) {
-                    loadContractAndShowApp(selectedContractId);
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('status, is_admin')
+                    .eq('id', currentUser.id)
+                    .single();
+
+                if(error || !profile) {
+                    // This case can happen for a brand new user
+                     showPage('pending-approval-page');
+                     return;
+                }
+
+                if (profile.is_admin) {
+                    document.getElementById('admin-panel-button').style.display = 'block';
+                    document.getElementById('notification-bell-container').style.display = 'block';
+                    loadPendingRequests();
                 } else {
-                    showPage('contracts-page');
+                    document.getElementById('admin-panel-button').style.display = 'none';
+                    document.getElementById('notification-bell-container').style.display = 'none';
+                }
+
+                if (profile.status === 'approved') {
+                    showPage('contracts-page-content');
                     loadContracts();
-                    if (currentUser.email === ADMIN_EMAIL) {
-                        document.getElementById('admin-panel').style.display = 'block';
-                        loadPendingRequests();
-                    }
+                } else {
+                    showPage('pending-approval-page');
                 }
             }
         });
-        
+
         // --- AUTH FORM HANDLERS ---
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const loginButton = e.target.querySelector('button');
-            const errorMessage = document.getElementById('login-error-message');
-            
-            // CORRECTED: Get values directly by their ID
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            
-            loginButton.disabled = true;
-            errorMessage.innerText = '';
-
             const { error } = await supabase.auth.signInWithPassword({ email, password });
-            
-            if (error) {
-                errorMessage.innerText = error.message;
-            }
-            loginButton.disabled = false;
+            if (error) document.getElementById('login-error-message').innerText = error.message;
         });
 
-        document.getElementById('request-access-form').addEventListener('submit', async (e) => {
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const requestButton = e.target.querySelector('button');
-            const errorMessage = document.getElementById('request-error-message');
-            const email = document.getElementById('request-email').value;
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const messageEl = document.getElementById('signup-message');
 
-            requestButton.disabled = true;
-            errorMessage.innerText = '';
-            
-            const { error } = await supabase.from('user_requests').insert({ email: email, status: 'pending' });
+            const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
             
             if (error) {
-                errorMessage.innerText = error.message;
+                messageEl.innerText = error.message;
+                messageEl.style.color = 'red';
             } else {
-                alert("Request submitted successfully! The admin has been notified.");
-                document.getElementById('request-access-modal').classList.remove('active');
-                e.target.reset();
+                messageEl.innerText = "Success! Please check your email to verify your account. After verification, an admin must approve your access.";
+                messageEl.style.color = 'green';
             }
-            requestButton.disabled = false;
         });
 
         // --- ADMIN PANEL LOGIC ---
         async function loadPendingRequests() {
             const listContainer = document.getElementById('pending-requests-list');
-            const { data: requests, error } = await supabase.from('user_requests').select('*').eq('status', 'pending');
+            const notifCountEl = document.getElementById('notification-count');
 
-            if (error) return listContainer.innerHTML = `<p>Error loading requests: ${error.message}</p>`;
+            const { data: requests, error } = await supabase
+                .from('profiles')
+                .select('id, full_name, email')
+                .eq('status', 'pending');
+
+            if (error) return listContainer.innerHTML = `<p>Error loading requests.</p>`;
+            
+            if (requests.length > 0) {
+                notifCountEl.innerText = requests.length;
+                notifCountEl.style.display = 'flex';
+            } else {
+                notifCountEl.style.display = 'none';
+            }
+
             if (requests.length === 0) return listContainer.innerHTML = '<p>No pending requests.</p>';
 
             listContainer.innerHTML = '';
             requests.forEach(req => {
                 const item = document.createElement('div');
-                item.className = 'list-item';
-                item.innerHTML = `<span>${req.email}</span>`;
-                const approveBtn = document.createElement('button');
-                approveBtn.textContent = 'Approve';
-                approveBtn.onclick = (e) => approveUser(req, e.currentTarget);
-                item.appendChild(approveBtn);
+                item.className = 'user-request-item';
+                item.innerHTML = `<span>${req.full_name} (${req.email})</span>
+                                  <div>
+                                    <button class="btn-success" onclick="window.handleRequest('${req.id}', 'approved')">Approve</button>
+                                    <button class="btn-danger" onclick="window.handleRequest('${req.id}', 'rejected')">Reject</button>
+                                  </div>`;
                 listContainer.appendChild(item);
             });
         }
         
-        async function approveUser(request, button) {
-            if (!confirm(`Are you sure you want to approve user: ${request.email}?`)) return;
-            button.disabled = true;
-            button.textContent = 'Approving...';
+        window.handleRequest = async (profileId, newStatus) => {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ status: newStatus })
+                .eq('id', profileId);
             
-            try {
-                const { error } = await supabase.functions.invoke('handle-user-request', {
-                    body: { requestId: request.id, action: 'approve' }
-                });
-                if (error) throw error;
-                alert(`User ${request.email} approved. They will receive an invitation email.`);
-                loadPendingRequests(); // Refresh the list
-            } catch (error) {
-                alert(`Failed to approve user: ${error.message}`);
-                button.disabled = false;
-                button.textContent = 'Approve';
+            if(error) {
+                alert(`Error updating status: ${error.message}`);
+            } else {
+                alert(`User has been ${newStatus}.`);
+                loadPendingRequests(); // Refresh list
             }
-        }
+        };
 
         // --- CONTRACTS PAGE LOGIC ---
         async function loadContracts() {
-            if (!currentUser) return;
-            const listContainer = document.getElementById('contracts-list');
-            listContainer.innerHTML = '<p>Loading contracts...</p>';
-            const { data: contracts, error } = await supabase.from('contracts').select('*').eq('user_id', currentUser.id);
-            if (error) return listContainer.innerHTML = `<p>Error loading contracts.</p>`;
-            if (!contracts || contracts.length === 0) return listContainer.innerHTML = '<p>No contracts found. Please add one.</p>';
-            
-            listContainer.innerHTML = '';
-            contracts.forEach(contract => {
-                const item = document.createElement('div');
-                item.className = 'list-item';
-                item.innerHTML = `<span>${contract.title}</span>`;
-                item.onclick = () => {
-                    sessionStorage.setItem('selectedContractId', contract.id);
-                    loadContractAndShowApp(contract.id);
-                };
-                listContainer.appendChild(item);
-            });
+            // Placeholder for loading contracts
         }
-        
-        document.getElementById('add-contract-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const boqFile = document.getElementById('boq-file-input').files[0];
-            if (!boqFile) return alert("Please select a BOQ CSV file.");
 
-            Papa.parse(boqFile, {
-                header: true, skipEmptyLines: true,
-                complete: async (results) => {
-                    const newContract = {
-                        user_id: currentUser.id,
-                        title: document.getElementById('contract-title').value,
-                        contract_number: document.getElementById('contract-number').value,
-                        start_date: document.getElementById('contract-start-date').value,
-                        end_date: document.getElementById('contract-end-date').value,
-                        boq: results.data,
-                    };
-                    const { error } = await supabase.from('contracts').insert(newContract);
-                    if (error) alert(error.message);
-                    else {
-                        alert("Contract saved!");
-                        loadContracts();
-                        e.target.reset();
-                    }
-                }
-            });
-        });
-
-        // --- MAIN APP LOGIC ---
-        async function loadContractAndShowApp(contractId) {
-            const { data, error } = await supabase.from('contracts').select('*').eq('id', contractId).single();
-            if (error || !data) {
-                alert("Contract not found! Redirecting.");
-                sessionStorage.removeItem('selectedContractId');
-                showPage('contracts-page');
-                return;
+        // Initially check auth state to show the correct page on load
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!session) {
+                showPage('login-page');
             }
-            let currentContractData = data;
-            let boqData = data.boq || [];
-            document.getElementById('app-main-title').textContent = currentContractData.title;
-            showPage('app-page');
-            initializeAppLogic();
-        }
-
-        function initializeAppLogic() {
-            // This function is the entry point for the main app page.
-            // All event listeners and initializations for the dashboard tabs should go here.
-            openTab({ currentTarget: document.querySelector('#app-page .tab-button') }, 'inspection-report-content');
-        }
-        
-        function initializeVehicleMap() {
-            if (map) map.remove(); 
-            map = L.map('map-container').setView([25.2861, 51.5348], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-            // Add other map logic like Leaflet.Draw/Geoman here.
-        }
+            // onAuthStateChange will handle the rest
+        });
 
     </script>
 </body>
