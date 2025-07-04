@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -926,7 +925,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Attach form submit listeners
     getEl('login-form').addEventListener('submit', Auth.handleLogin);
-    getEl('signup-form').addEventListener('submit', Auth.handleSignup);
+    getEl('s-- Create contracts table
+CREATE TABLE contracts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id),
+    title TEXT NOT NULL,
+    number TEXT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    boq_data JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create notifications table
+CREATE TABLE notifications (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id),
+    type TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Row Level Security
+ALTER TABLE contracts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for contracts
+CREATE POLICY "Users can view their own contracts" ON contracts
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own contracts" ON contracts
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Create policies for notifications
+CREATE POLICY "Users can view their own notifications" ON notifications
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own notifications" ON notifications
+    FOR INSERT WITH CHECK (auth.uid() = user_id);ignup-form').addEventListener('submit', Auth.handleSignup);
     getEl('contract-form').addEventListener('submit', handleSaveContract);
 
     // *FIX:* Attach click listener for signup link safely
