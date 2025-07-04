@@ -7,7 +7,6 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -49,7 +48,7 @@
         html[dir="rtl"] .glass-card { text-align: right; }
 
         /* Forms & Buttons */
-        .form-card { max-width: 480px; width: 100%; }
+        .form-card { max-width: 480px; width: 100%; position: relative; }
         .form-card h1, .form-card p { text-align: center; }
         html[dir="rtl"] .form-card h1, html[dir="rtl"] .form-card p { text-align: center; }
         
@@ -63,38 +62,36 @@
         }
         button:hover { background-color: #0056b3; }
         button:disabled { background-color: #aaa; cursor: not-allowed; }
-        .btn-secondary { background-color: #6c757d; }
-        .btn-secondary:hover { background-color: #5a6268; }
-        .btn-danger { background-color: #dc3545; }
-        .btn-danger:hover { background-color: #c82333; }
-        .btn-success { background-color: #28a745; }
-        .btn-success:hover { background-color: #218838; }
-
+        
         /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 20px; }
-        .header h1 { margin: 0; }
-        .header-actions { display: flex; gap: 10px; align-items: center; }
-        .notification-bell { position: relative; cursor: pointer; }
-        .notification-count { position: absolute; top: -5px; right: -8px; background: red; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 12px; display: flex; justify-content: center; align-items: center; }
+        .header h1 { margin: 0; font-size: 1.5em; }
         
-        /* Contracts Page */
-        .contracts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
-        .contract-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-        .contract-item:hover { background-color: #f8f9fa; }
-        .contract-actions button { margin-inline-start: 8px; }
+        /* Contract Selection */
+        .contract-selection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+        .contract-select-card { background-color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .contract-select-card:hover { transform: translateY(-5px); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .contract-select-card h3 { margin-top: 0; }
 
-        /* Admin Panel */
-        .admin-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        .user-request-item { display: flex; justify-content: space-between; align-items: center; }
+        /* NEW: Popup Styles */
+        .popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none; /* Hidden by default */
+            justify-content: center; align-items: center;
+            z-index: 1000; animation: fadeIn 0.3s;
+        }
+        .popup-close-btn {
+            position: absolute; top: 10px; right: 20px; font-size: 30px;
+            color: #555; cursor: pointer; border: none; background: none;
+        }
 
         /* Footer */
         .footer { text-align: center; margin-top: 30px; padding: 20px; }
         html[dir="rtl"] .footer { text-align: center; }
-
     </style>
 </head>
 <body>
-
     <div id="login-page" class="page centered-container">
         <div class="form-card glass-card">
             <h1 data-translate="welcome_title">Welcome to the Engineering Project Platform 👷‍♂️</h1>
@@ -104,30 +101,16 @@
                 <input type="password" id="login-password" placeholder="Password" required>
                 <button type="submit" data-translate="sign_in">Sign In</button>
                 <p class="error-message" id="login-error-message"></p>
-                <a href="#" class="toggle-link" onclick="window.showPage('signup-page')" data-translate="need_account">Need an account? Sign Up</a>
+                <a href="#" class="toggle-link" onclick="window.showPopup('signup-popup')" data-translate="need_account">Need an account? Sign Up</a>
             </form>
         </div>
     </div>
 
-    <div id="signup-page" class="page centered-container">
-        <div class="form-card glass-card">
-            <h1 data-translate="create_account">Create Your Account</h1>
-            <form id="signup-form">
-                <input type="text" id="signup-name" placeholder="Full Name" required>
-                <input type="email" id="signup-email" placeholder="Email" required>
-                <input type="password" id="signup-password" placeholder="Password" required>
-                <button type="submit" data-translate="sign_up">Sign Up</button>
-                <p id="signup-message" class="error-message"></p>
-                <a href="#" class="toggle-link" onclick="window.showPage('login-page')" data-translate="have_account">Already have an account? Sign In</a>
-            </form>
-        </div>
-    </div>
-    
-    <div id="pending-approval-page" class="page centered-container">
-        <div class="form-card glass-card">
-            <h1 data-translate="pending_title">Request Received</h1>
-            <p data-translate="pending_message">Your access request has been sent to the administrator for approval. You will be notified via email once your account is activated.</p>
-            <button onclick="window.signOutUser()" data-translate="sign_out">Sign Out</button>
+    <div id="contract-selection-page" class="page main-container">
+        <div class="glass-card">
+            <h1 data-translate="select_contract_title">Select a Contract</h1>
+            <p data-translate="select_contract_subtitle">Choose a contract to access the project dashboard.</p>
+            <div id="contract-selection-list" class="contract-selection-grid"></div>
         </div>
     </div>
 
@@ -135,68 +118,44 @@
         <div class="header glass-card">
             <h1 id="app-main-title">Project Dashboard</h1>
             <div class="header-actions">
-                <div id="notification-bell-container" class="notification-bell" style="display:none;" onclick="window.showPage('admin-page')">
-                    <i class="fas fa-bell fa-lg"></i>
-                    <span id="notification-count" class="notification-count" style="display:none;">0</span>
-                </div>
+                <button id="map-nav-btn" onclick="window.showPage('map-page-content')" disabled>🗺️ Map</button>
+                <button id="tables-nav-btn" onclick="window.showPage('tables-page-content')" disabled>📊 Tables</button>
+                <button id="reports-nav-btn" onclick="window.showPage('reports-page-content')" disabled>📄 Reports</button>
+                <span style="border-left: 1px solid #ccc; height: 30px; margin: 0 10px;"></span>
                 <select id="language-switcher" onchange="window.switchLanguage(this.value)">
                     <option value="en">English</option>
                     <option value="ar">العربية</option>
                 </select>
-                <button onclick="window.showPage('contracts-page')" data-translate="contracts_dashboard">Contracts</button>
-                <button onclick="window.showPage('admin-page')" data-translate="admin_panel" id="admin-panel-button" style="display:none;">Admin Panel</button>
                 <button class="btn-danger" onclick="window.signOutUser()" data-translate="sign_out">Sign Out</button>
             </div>
         </div>
-        
-        <div id="app-content"></div>
-    </div>
-    
-    <div id="contracts-page-content" class="app-page-content" style="display: none;">
-        <div class="contracts-grid">
-            <div class="glass-card">
-                <h2 data-translate="add_contract">Add New Contract</h2>
-                <form id="add-contract-form">
-                    <label data-translate="title">Title:</label><input type="text" id="contract-title" required>
-                    <label data-translate="subtitles">Subtitles:</label><input type="text" id="contract-subtitles">
-                    <label data-translate="contract_number">Contract Number:</label><input type="text" id="contract-number">
-                    <label data-translate="start_date">Start Date:</label><input type="date" id="contract-start-date">
-                    <label data-translate="end_date">End Date:</label><input type="date" id="contract-end-date">
-                    <label data-translate="project_value">Project Value:</label><input type="number" id="project-value">
-                    <label data-translate="company_logo">Company Logo:</label><input type="file" id="company-logo" accept="image/*">
-                    <label data-translate="client_logo">Client Logo:</label><input type="file" id="client-logo" accept="image/*">
-                    
-                    <h4>BOQ Upload</h4>
-                    <p data-translate="boq_note">Note: This BOQ will be used in the Cost Estimation page.</p>
-                    <div style="display:flex; gap: 10px;">
-                        <input type="file" id="boq-file-input" accept=".csv" required style="width: 100%;">
-                        <button type="button" class="btn-secondary" onclick="window.downloadBoqTemplate()" data-translate="download_template">Template</button>
-                    </div>
-                    <button type="submit" data-translate="save_contract" style="margin-top: 20px;">Save Contract</button>
-                </form>
-            </div>
-            <div class="glass-card">
-                <h2 data-translate="saved_contracts">Saved Contracts</h2>
-                <div id="contracts-list"><p data-translate="loading_contracts">Loading contracts...</p></div>
-            </div>
+        <div id="app-content">
+            <div id="map-page-content" class="app-page-content" style="display: none;"><div class="glass-card"><h2>Map View</h2><p>Map functionality will be displayed here.</p></div></div>
+            <div id="tables-page-content" class="app-page-content" style="display: none;"><div class="glass-card"><h2>Tables View</h2><p>Data tables will be displayed here.</p></div></div>
+            <div id="reports-page-content" class="app-page-content" style="display: none;"><div class="glass-card"><h2>Reports View</h2><p>Report generation tools will be displayed here.</p></div></div>
         </div>
     </div>
 
-    <div id="admin-page-content" class="app-page-content" style="display: none;">
-        <div class="glass-card">
-            <h2 data-translate="admin_panel">Admin Panel</h2>
-            <div class="admin-grid">
-                <div>
-                    <h3 data-translate="user_requests">New User Requests</h3>
-                    <div id="pending-requests-list"><p>Loading...</p></div>
-                </div>
-                <div>
-                    <h3 data-translate="api_keys">API Key Manager</h3>
-                    <p>Feature coming soon.</p>
-                    <h3 data-translate="ai_prompt">Editable AI Prompt</h3>
-                    <p>Feature coming soon.</p>
-                </div>
-            </div>
+    <div id="signup-popup" class="popup-overlay">
+        <div class="form-card glass-card">
+            <button class="popup-close-btn" onclick="window.hidePopup('signup-popup')">&times;</button>
+            <h1 data-translate="create_account">Create Your Account</h1>
+            <form id="signup-form">
+                <input type="text" id="signup-name" placeholder="Full Name" required>
+                <input type="email" id="signup-email" placeholder="Email" required>
+                <input type="password" id="signup-password" placeholder="Password" required>
+                <button type="submit" data-translate="sign_up">Sign Up</button>
+                <p id="signup-message" class="error-message"></p>
+                <a href="#" class="toggle-link" onclick="window.hidePopup('signup-popup')" data-translate="have_account">Already have an account? Sign In</a>
+            </form>
+        </div>
+    </div>
+
+    <div id="pending-popup" class="popup-overlay">
+        <div class="form-card glass-card">
+            <h1 data-translate="pending_title">Request Received</h1>
+            <p data-translate="pending_message">Your access request has been sent to the administrator for approval. You will be notified via email once your account is activated.</p>
+            <button onclick="window.signOutUser()" data-translate="sign_out">Sign Out</button>
         </div>
     </div>
     
@@ -214,14 +173,13 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5a2pqcnJleGFxbXNxd3JnbnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MjUyMDksImV4cCI6MjA2NzIwMTIwOX0.Fx6f23TWCQQMCIkc5hcx8LqHyskVMm6WAhJl1UFZpMA';
         const supabase = createClient(supabaseUrl, supabaseKey);
 
-        // --- GLOBAL STATE & CONSTANTS ---
-        const ADMIN_EMAIL = "ahmetnasan1993@gmail.com";
+        // --- GLOBAL STATE ---
         let currentUser;
+        let selectedContract = null;
 
-        // --- BILINGUAL & RTL DICTIONARY ---
+        // --- BILINGUAL DICTIONARY ---
         const translations = {
             en: {
-                // Add all your keys here
                 welcome_title: "Welcome to the Engineering Project Platform 👷‍♂️",
                 sign_in: "Sign In",
                 need_account: "Need an account? Sign Up",
@@ -231,28 +189,10 @@
                 pending_title: "Request Received",
                 pending_message: "Your access request has been sent to the administrator for approval. You will be notified via email once your account is activated.",
                 sign_out: "Sign Out",
-                contracts_dashboard: "Contracts",
-                admin_panel: "Admin Panel",
-                add_contract: "Add New Contract",
-                title: "Title",
-                subtitles: "Subtitles",
-                contract_number: "Contract Number",
-                start_date: "Start Date",
-                end_date: "End Date",
-                project_value: "Project Value",
-                company_logo: "Company Logo",
-                client_logo: "Client Logo",
-                boq_note: "Note: This BOQ will be used in the Cost Estimation page.",
-                download_template: "Template",
-                save_contract: "Save Contract",
-                saved_contracts: "Saved Contracts",
-                loading_contracts: "Loading contracts...",
-                user_requests: "New User Requests",
-                api_keys: "API Key Manager",
-                ai_prompt: "Editable AI Prompt"
+                select_contract_title: "Select a Contract",
+                select_contract_subtitle: "Choose a contract to access the project dashboard."
             },
             ar: {
-                // Add all your keys here
                 welcome_title: "مرحبًا بك في منصة المشاريع الهندسية 👷‍♂️",
                 sign_in: "تسجيل الدخول",
                 need_account: "تحتاج حساب؟ اشتراك",
@@ -262,44 +202,39 @@
                 pending_title: "تم استلام الطلب",
                 pending_message: "تم إرسال طلب الوصول الخاص بك إلى المسؤول للموافقة عليه. سيتم إعلامك عبر البريد الإلكتر الإلكتروني بمجرد تفعيل حسابك.",
                 sign_out: "تسجيل الخروج",
-                contracts_dashboard: "لوحة العقود",
-                admin_panel: "لوحة الإدارة",
-                add_contract: "إضافة عقد جديد",
-                title: "العنوان",
-                subtitles: "عناوين فرعية",
-                contract_number: "رقم العقد",
-                start_date: "تاريخ البدء",
-                end_date: "تاريخ الانتهاء",
-                project_value: "قيمة المشروع",
-                company_logo: "شعار الشركة",
-                client_logo: "شعار العميل",
-                boq_note: "ملاحظة: سيتم استخدام جدول الكميات هذا في صفحة تقدير التكلفة.",
-                download_template: "نموذج",
-                save_contract: "حفظ العقد",
-                saved_contracts: "العقود المحفوظة",
-                loading_contracts: "جاري تحميل العقود...",
-                user_requests: "طلبات المستخدمين الجدد",
-                api_keys: "إدارة مفاتيح API",
-                ai_prompt: "تعديل موجه الذكاء الاصطناعي"
+                select_contract_title: "اختر عقدًا",
+                select_contract_subtitle: "اختر عقدًا للوصول إلى لوحة تحكم المشروع."
             }
         };
 
-        // --- GLOBAL FUNCTIONS ATTACHED TO WINDOW ---
+        // --- UI & NAVIGATION FUNCTIONS ---
+        window.showPopup = (popupId) => {
+            const popup = document.getElementById(popupId);
+            if(popup) popup.style.display = 'flex';
+        };
+
+        window.hidePopup = (popupId) => {
+            const popup = document.getElementById(popupId);
+            if(popup) popup.style.display = 'none';
+        };
+
         window.showPage = (pageId) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             const page = document.getElementById(pageId);
-            if(page) page.classList.add('active');
+            if (page) page.classList.add('active');
 
-            if (pageId.endsWith('-page-content')) {
-                document.querySelectorAll('.app-page-content').forEach(p => p.style.display = 'none');
-                document.getElementById(pageId).style.display = 'block';
+            document.querySelectorAll('.app-page-content').forEach(p => p.style.display = 'none');
+            const appContentPage = document.getElementById(pageId);
+            if (appContentPage && appContentPage.classList.contains('app-page-content')) {
                 document.getElementById('app-container').classList.add('active');
+                appContentPage.style.display = 'block';
             }
         };
         
         window.signOutUser = async () => {
             await supabase.auth.signOut();
-            // The onAuthStateChange listener will handle the redirect
+            selectedContract = null; 
+            hidePopup('pending-popup');
         };
         
         window.switchLanguage = (lang) => {
@@ -311,19 +246,7 @@
             });
         };
 
-        window.downloadBoqTemplate = () => {
-            const csvContent = "data:text/csv;charset=utf-8," 
-                + "BOQ Ref.,Asset,Description,Unit,Rate\n";
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "BOQ_Template.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-
-        // --- AUTH STATE LOGIC ---
+        // --- AUTH STATE & ROUTING ---
         supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_OUT' || !session) {
                 currentUser = null;
@@ -336,31 +259,21 @@
                     .eq('id', currentUser.id)
                     .single();
 
-                if(error || !profile) {
-                    // This case can happen for a brand new user
-                     showPage('pending-approval-page');
-                     return;
-                }
-
-                if (profile.is_admin) {
-                    document.getElementById('admin-panel-button').style.display = 'block';
-                    document.getElementById('notification-bell-container').style.display = 'block';
-                    loadPendingRequests();
-                } else {
-                    document.getElementById('admin-panel-button').style.display = 'none';
-                    document.getElementById('notification-bell-container').style.display = 'none';
+                if (error || !profile) {
+                    showPopup('pending-popup'); // Show pending popup if profile not found
+                    return;
                 }
 
                 if (profile.status === 'approved') {
-                    showPage('contracts-page-content');
-                    loadContracts();
+                    showPage('contract-selection-page');
+                    loadContractsForSelection();
                 } else {
-                    showPage('pending-approval-page');
+                    showPopup('pending-popup'); // Or if status is 'pending'
                 }
             }
         });
 
-        // --- AUTH FORM HANDLERS ---
+        // --- FORM HANDLERS ---
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -382,70 +295,47 @@
                 messageEl.innerText = error.message;
                 messageEl.style.color = 'red';
             } else {
-                messageEl.innerText = "Success! Please check your email to verify your account. After verification, an admin must approve your access.";
-                messageEl.style.color = 'green';
+                hidePopup('signup-popup');
+                showPopup('pending-popup'); // Show request received popup on success
             }
         });
 
-        // --- ADMIN PANEL LOGIC ---
-        async function loadPendingRequests() {
-            const listContainer = document.getElementById('pending-requests-list');
-            const notifCountEl = document.getElementById('notification-count');
+        // --- CONTRACT SELECTION ---
+        async function loadContractsForSelection() {
+            const listContainer = document.getElementById('contract-selection-list');
+            listContainer.innerHTML = '<p>Loading contracts...</p>';
 
-            const { data: requests, error } = await supabase
-                .from('profiles')
-                .select('id, full_name, email')
-                .eq('status', 'pending');
+            const { data: contracts, error } = await supabase.from('contracts').select('*');
 
-            if (error) return listContainer.innerHTML = `<p>Error loading requests.</p>`;
-            
-            if (requests.length > 0) {
-                notifCountEl.innerText = requests.length;
-                notifCountEl.style.display = 'flex';
-            } else {
-                notifCountEl.style.display = 'none';
+            if (error || !contracts || contracts.length === 0) {
+                listContainer.innerHTML = '<p>No contracts available. Please contact an administrator.</p>';
+                return;
             }
 
-            if (requests.length === 0) return listContainer.innerHTML = '<p>No pending requests.</p>';
-
             listContainer.innerHTML = '';
-            requests.forEach(req => {
-                const item = document.createElement('div');
-                item.className = 'user-request-item';
-                item.innerHTML = `<span>${req.full_name} (${req.email})</span>
-                                  <div>
-                                    <button class="btn-success" onclick="window.handleRequest('${req.id}', 'approved')">Approve</button>
-                                    <button class="btn-danger" onclick="window.handleRequest('${req.id}', 'rejected')">Reject</button>
-                                  </div>`;
-                listContainer.appendChild(item);
+            contracts.forEach(contract => {
+                const card = document.createElement('div');
+                card.className = 'contract-select-card';
+                card.innerHTML = `<h3>${contract.title}</h3><p>${contract.contract_number || ''}</p>`;
+                card.onclick = () => selectContract(contract);
+                listContainer.appendChild(card);
             });
         }
         
-        window.handleRequest = async (profileId, newStatus) => {
-            const { error } = await supabase
-                .from('profiles')
-                .update({ status: newStatus })
-                .eq('id', profileId);
-            
-            if(error) {
-                alert(`Error updating status: ${error.message}`);
-            } else {
-                alert(`User has been ${newStatus}.`);
-                loadPendingRequests(); // Refresh list
-            }
+        window.selectContract = (contract) => {
+            selectedContract = contract;
+            document.getElementById('app-main-title').innerText = `Contract: ${contract.title}`;
+            document.getElementById('map-nav-btn').disabled = false;
+            document.getElementById('tables-nav-btn').disabled = false;
+            document.getElementById('reports-nav-btn').disabled = false;
+            showPage('map-page-content');
         };
 
-        // --- CONTRACTS PAGE LOGIC ---
-        async function loadContracts() {
-            // Placeholder for loading contracts
-        }
-
-        // Initially check auth state to show the correct page on load
+        // --- INITIAL LOAD ---
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (!session) {
                 showPage('login-page');
             }
-            // onAuthStateChange will handle the rest
         });
 
     </script>
