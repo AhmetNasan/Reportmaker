@@ -1,4 +1,11 @@
 
+// --- SUPABASE CONFIGURATION ---
+const SUPABASE_URL = 'https://cykjjrrexaqmsqwrgnzp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5a2pqcnJleGFxbXNxd3JnbnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MjUyMDksImV4cCI6MjA2NzIwMTIwOX0.Fx6f23TWCQQMCIkc5hcx8LqHyskVMm6WAhJl1UFZpMA';
+
+// Initialize Supabase client
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // --- GLOBAL STATE ---
 let currentUser = null;
 let selectedContract = null;
@@ -102,40 +109,113 @@ function switchLanguage(lang) {
     });
 }
 
-function signOut() {
-    currentUser = null;
-    selectedContract = null;
-    showPage('login-page');
+async function signOut() {
+    try {
+        await supabase.auth.signOut();
+        currentUser = null;
+        selectedContract = null;
+        showPage('login-page');
+    } catch (error) {
+        console.error('Error signing out:', error);
+    }
 }
 
 // --- AUTH FUNCTIONS ---
-function handleLogin(email, password) {
-    // Simulate login - replace with actual authentication
-    if (email && password) {
-        currentUser = { email: email, name: email.split('@')[0] };
-        showPage('contract-selection-page');
-        loadContractsForSelection();
-        document.getElementById('login-error-message').innerText = '';
-        return true;
+async function handleLogin(email, password) {
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+            document.getElementById('login-error-message').innerText = error.message;
+            return false;
+        }
+
+        if (data.user) {
+            currentUser = {
+                id: data.user.id,
+                email: data.user.email,
+                name: data.user.user_metadata?.name || data.user.email.split('@')[0]
+            };
+            showPage('contract-selection-page');
+            loadContractsForSelection();
+            document.getElementById('login-error-message').innerText = '';
+            return true;
+        }
+    } catch (err) {
+        document.getElementById('login-error-message').innerText = 'Login failed. Please try again.';
+        return false;
     }
     return false;
 }
 
-function handleSignup(name, email, password) {
-    // Simulate signup - replace with actual registration
-    if (name && email && password) {
+async function handleSignup(name, email, password) {
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    name: name
+                }
+            }
+        });
+
+        if (error) {
+            document.getElementById('signup-message').innerText = error.message;
+            document.getElementById('signup-message').className = 'error-message';
+            return false;
+        }
+
         const messageEl = document.getElementById('signup-message');
-        messageEl.innerText = 'Account created successfully! Please sign in.';
+        messageEl.innerText = 'Account created successfully! Please check your email to verify your account, then sign in.';
         messageEl.className = 'success-message';
         setTimeout(() => {
             hidePopup('signup-popup');
             messageEl.innerText = '';
             messageEl.className = 'error-message';
-        }, 2000);
+        }, 3000);
         return true;
+    } catch (err) {
+        document.getElementById('signup-message').innerText = 'Signup failed. Please try again.';
+        document.getElementById('signup-message').className = 'error-message';
+        return false;
     }
-    return false;
 }
+
+// Check for existing session on page load
+async function checkAuthSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session && session.user) {
+        currentUser = {
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata?.name || session.user.email.split('@')[0]
+        };
+        showPage('contract-selection-page');
+        loadContractsForSelection();
+    }
+}
+
+// Listen for auth changes
+supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+        currentUser = {
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata?.name || session.user.email.split('@')[0]
+        };
+        showPage('contract-selection-page');
+        loadContractsForSelection();
+    } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        selectedContract = null;
+        showPage('login-page');
+    }
+});
 
 // --- CONTRACT FUNCTIONS ---
 function loadContractsForSelection() {
@@ -416,27 +496,28 @@ function updateRowTotal(cell) {
 
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', function() {
+    // Check for existing auth session
+    checkAuthSession();
+
     // Login form submission
-    document.getElementById('login-form').addEventListener('submit', function(e) {
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
 
-        if (handleLogin(email, password)) {
+        if (await handleLogin(email, password)) {
             document.getElementById('login-form').reset();
-        } else {
-            document.getElementById('login-error-message').innerText = 'Please enter valid credentials';
         }
     });
 
     // Signup form submission
-    document.getElementById('signup-form').addEventListener('submit', function(e) {
+    document.getElementById('signup-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const name = document.getElementById('signup-name').value;
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
 
-        if (handleSignup(name, email, password)) {
+        if (await handleSignup(name, email, password)) {
             document.getElementById('signup-form').reset();
         }
     });
