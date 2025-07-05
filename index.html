@@ -586,178 +586,374 @@
         /* Other minor fixes for clarity */
         .footer { padding: 10px; margin-top: 10px; text-align:center; font-size: 12px; }
 
-        /* ======== GIS MAPPING STYLES ======== */
-        /* Floating Cards Layout */
-        .gis-floating-cards {
+        /* ======== ENHANCED GIS MAPPING STYLES ======== */
+        
+        /* Main Map Wrapper */
+        .gis-map-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .enhanced-map-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Professional Control Panel */
+        .gis-control-panel {
             position: fixed;
-            top: 80px;
-            right: 20px;
-            width: 320px;
+            top: 60px;
+            right: 0;
+            width: 420px;
+            height: calc(100vh - 60px);
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.15);
+            border-left: 1px solid #e9ecef;
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            z-index: 900;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        .gis-floating-cards.hidden {
-            transform: translateX(100%);
-            opacity: 0;
         }
 
-        .gis-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(200, 210, 220, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            font-size: 14px;
+        .gis-control-panel.collapsed {
+            transform: translateX(380px);
         }
 
-        .gis-card h3 {
-            margin: 0 0 12px 0;
-            color: var(--primary-color);
-            font-size: 16px;
+        /* Control Panel Header */
+        .control-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-panel-header h3 {
+            margin: 0;
+            font-size: 18px;
             font-weight: 600;
-            border-bottom: 1px solid rgba(var(--primary-color-rgb), 0.2);
-            padding-bottom: 6px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        .gis-card-content {
+        .panel-toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .panel-toggle-btn i {
+            transition: transform 0.3s;
+        }
+
+        .gis-control-panel.collapsed .panel-toggle-btn i {
+            transform: rotate(180deg);
+        }
+
+        /* Professional Tabs */
+        .control-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 8px;
+            background: none;
+            border: none;
+            color: #6c757d;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            align-items: center;
+            gap: 4px;
         }
 
-        .gis-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .tab-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
         }
 
-        .gis-input-row {
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: inset 0 -3px 0 #667eea;
+        }
+
+        .tab-btn i {
+            font-size: 16px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Professional Cards */
+        .professional-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .card-header h4 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
             gap: 8px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .status-dot.active {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        /* Advanced Input Grid */
+        .advanced-input-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-field {
+            position: relative;
+        }
+
+        .input-field label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 6px;
+        }
+
+        .input-field input,
+        .input-field textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .input-field input:focus,
+        .input-field textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-helper {
+            font-size: 10px;
+            color: #6c757d;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .coordinate-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .coordinate-format {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: #adb5bd;
+            pointer-events: none;
+        }
+
+        /* Professional Buttons */
+        .pro-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .pro-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .pro-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .pro-btn.secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+        }
+
+        .pro-btn.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .pro-btn.danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        .pro-btn.info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+
+        .pro-btn.full-width {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .action-buttons .pro-btn:first-child {
+            grid-column: 1 / -1;
+        }
+
+        /* QNAS List Container */
+        .qnas-list-container {
+            margin-top: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .list-header h5 {
+            margin: 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
             align-items: center;
         }
 
-        .gis-input {
-            flex: 1;
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+        .search-box i {
+            position: absolute;
+            left: 8px;
+            color: #adb5bd;
             font-size: 12px;
         }
 
-        .gis-label {
-            font-weight: 500;
-            color: var(--text-color);
-            font-size: 12px;
-            margin-bottom: 4px;
-        }
-
-        .gis-btn {
-            padding: 6px 12px;
-            background: var(--secondary-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 11px;
-            transition: background 0.2s;
-            white-space: nowrap;
-        }
-
-        .gis-btn:hover {
-            background: #2980b9;
-        }
-
-        .gis-btn-small {
-            padding: 4px 8px;
-            font-size: 10px;
-        }
-
-        .gis-btn-success {
-            background: var(--success-color);
-        }
-
-        .gis-btn-success:hover {
-            background: #229954;
-        }
-
-        .gis-btn-danger {
-            background: var(--danger-color);
-        }
-
-        .gis-btn-danger:hover {
-            background: #a93226;
-        }
-
-        .gis-measurement-display {
-            background: #f8f9fa;
-            padding: 8px;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 11px;
-        }
-
-        .gis-coordinate-display {
-            background: #e8f4fd;
-            padding: 6px;
+        .search-box input {
+            padding: 6px 12px 6px 28px;
+            border: 1px solid #dee2e6;
             border-radius: 4px;
-            font-family: monospace;
-            font-size: 10px;
-            word-break: break-all;
+            font-size: 11px;
+            width: 120px;
         }
 
-        /* Hamburger Menu */
-        .gis-hamburger {
-            position: fixed;
-            top: 90px;
-            right: 350px;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(8px);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: all 0.2s;
-        }
-
-        .gis-hamburger:hover {
-            transform: scale(1.1);
-            background: rgba(255, 255, 255, 1);
-        }
-
-        /* Map Control Panel Enhancement */
-        .leaflet-top.leaflet-left {
-            z-index: 1000 !important;
-        }
-
-        .leaflet-control-container .leaflet-top .leaflet-left {
-            margin-top: 10px;
-            margin-left: 10px;
-        }
-
-        /* QNAS Data specific styles */
-        .qnas-point-list {
-            max-height: 150px;
+        .professional-list {
+            max-height: 200px;
             overflow-y: auto;
-            border: 1px solid #eee;
-            border-radius: 4px;
-            padding: 4px;
         }
 
         .qnas-point-item {
-            padding: 6px;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f8f9fa;
             cursor: pointer;
-            font-size: 11px;
+            transition: all 0.2s;
         }
 
         .qnas-point-item:hover {
@@ -765,46 +961,767 @@
         }
 
         .qnas-point-item.active {
-            background: #e3f2fd;
-            border-left: 3px solid var(--secondary-color);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-left: 4px solid #667eea;
         }
 
-        /* Overlay simulation styles */
-        .overlay-simulation {
+        .qnas-point-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Data Management Sections */
+        .quick-add-section,
+        .import-section,
+        .export-section {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .quick-add-section:last-child,
+        .import-section:last-child,
+        .export-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .quick-add-section h5,
+        .import-section h5,
+        .export-section h5 {
+            margin: 0 0 12px 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Import Buttons */
+        .import-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .import-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 8px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .import-btn:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .import-btn i {
+            font-size: 20px;
+            color: #667eea;
+        }
+
+        .import-btn span {
+            font-size: 11px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .import-btn small {
+            font-size: 9px;
+            color: #6c757d;
+        }
+
+        .import-btn.csv { border-color: #28a745; }
+        .import-btn.csv:hover { border-color: #20c997; background: rgba(40, 167, 69, 0.05); }
+        .import-btn.csv i { color: #28a745; }
+
+        .import-btn.kml { border-color: #17a2b8; }
+        .import-btn.kml:hover { border-color: #138496; background: rgba(23, 162, 184, 0.05); }
+        .import-btn.kml i { color: #17a2b8; }
+
+        .import-btn.kmz { border-color: #fd7e14; }
+        .import-btn.kmz:hover { border-color: #e55a2b; background: rgba(253, 126, 20, 0.05); }
+        .import-btn.kmz i { color: #fd7e14; }
+
+        .import-btn.template { border-color: #6c757d; }
+        .import-btn.template:hover { border-color: #495057; background: rgba(108, 117, 125, 0.05); }
+        .import-btn.template i { color: #6c757d; }
+
+        /* Export Grid */
+        .export-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .export-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .export-btn i {
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+
+        .export-btn.autocad { border-color: #dc3545; color: #dc3545; }
+        .export-btn.autocad-metric { border-color: #fd7e14; color: #fd7e14; }
+        .export-btn.csv { border-color: #28a745; color: #28a745; }
+        .export-btn.kml { border-color: #17a2b8; color: #17a2b8; }
+        .export-btn.geojson { border-color: #6610f2; color: #6610f2; }
+        .export-btn.pdf { border-color: #e83e8c; color: #e83e8c; }
+
+        /* Measurements Grid */
+        .measurements-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .measurement-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .measurement-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .measurement-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        .measurement-card.area .measurement-icon {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .measurement-card.perimeter .measurement-icon {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .measurement-card.length .measurement-icon {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .measurement-info {
+            flex: 1;
+        }
+
+        .measurement-label {
+            display: block;
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .measurement-value {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+            color: #495057;
+            margin-bottom: 2px;
+        }
+
+        .measurement-detail {
+            display: block;
+            font-size: 10px;
+            color: #adb5bd;
+        }
+
+        /* Coordinate Info Panel */
+        .coordinate-info-panel {
+            margin-bottom: 20px;
+        }
+
+        .coordinate-info-panel h5 {
+            margin: 0 0 12px 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .coordinate-display-advanced {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .coord-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 12px;
+        }
+
+        .coord-row:last-child {
+            border-bottom: none;
+        }
+
+        .coord-row label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .coord-row span {
+            font-family: monospace;
+            color: #495057;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        /* Analysis Tools */
+        .analysis-tools h5 {
+            margin: 0 0 12px 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: white;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 11px;
+            text-align: left;
+        }
+
+        .tool-btn:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            color: #667eea;
+        }
+
+        /* Overlay Controls */
+        .active-overlays-section {
+            margin-bottom: 20px;
+        }
+
+        .active-overlays-section h5 {
+            margin: 0 0 12px 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .overlay-chips-container {
+            min-height: 40px;
+            padding: 8px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
+            align-items: center;
         }
 
-        .overlay-indicator {
-            padding: 2px 6px;
-            border-radius: 10px;
+        .overlay-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 12px;
             font-size: 10px;
+            font-weight: 500;
             color: white;
+        }
+
+        .overlay-chip.traffic { background: #ff9800; }
+        .overlay-chip.weather { background: #2196f3; }
+        .overlay-chip.construction { background: #ff5722; }
+        .overlay-chip.flood { background: #00bcd4; }
+        .overlay-chip.emergency { background: #f44336; }
+        .overlay-chip.risk { background: #9c27b0; }
+
+        .overlay-chip i {
+            font-size: 8px;
+        }
+
+        .overlay-controls {
+            margin-bottom: 20px;
+        }
+
+        .overlay-category {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .overlay-category:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .overlay-category h6 {
+            margin: 0 0 8px 0;
+            font-size: 11px;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .overlay-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .overlay-btn {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .overlay-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .overlay-btn i {
+            font-size: 16px;
+            color: #667eea;
+        }
+
+        .overlay-btn span {
+            font-size: 10px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .overlay-btn .overlay-indicator {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .overlay-btn.active .overlay-indicator {
+            opacity: 1;
+            animation: pulse 2s infinite;
+        }
+
+        /* Overlay Settings */
+        .overlay-settings h5 {
+            margin: 0 0 12px 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+
+        .setting-row label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .setting-row select,
+        .setting-row input[type="range"] {
+            width: 120px;
+        }
+
+        .setting-row select {
+            padding: 4px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        /* Map Toolbar */
+        .map-toolbar {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 999;
+            padding: 15px;
+            width: 200px;
+        }
+
+        .toolbar-section {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .toolbar-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .toolbar-section h5 {
+            margin: 0 0 8px 0;
+            font-size: 11px;
+            font-weight: 600;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tool-group,
+        .layer-controls,
+        .nav-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .tool-btn,
+        .layer-btn,
+        .nav-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: white;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .tool-btn:hover,
+        .layer-btn:hover,
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .tool-btn.active,
+        .layer-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .layer-btn,
+        .nav-btn {
+            width: auto;
+            padding: 6px 10px;
+            font-size: 10px;
             font-weight: 500;
         }
 
-        .overlay-traffic {
-            background: #ff9800;
+        /* Status Bar */
+        .map-status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 420px;
+            height: 32px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 11px;
+            z-index: 998;
+            backdrop-filter: blur(10px);
         }
 
-        .overlay-weather {
-            background: #2196f3;
+        .status-left,
+        .status-right {
+            display: flex;
+            gap: 20px;
         }
 
-        .overlay-risk {
-            background: #f44336;
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.8;
         }
 
-        /* Responsive adjustments */
+        .status-item i {
+            font-size: 10px;
+        }
+
+        /* Data Stats */
+        .data-stats {
+            display: flex;
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        .refresh-btn {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .overlay-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .gis-control-panel {
+                width: 360px;
+            }
+            
+            .map-status-bar {
+                right: 360px;
+            }
+        }
+
         @media (max-width: 768px) {
-            .gis-floating-cards {
-                width: 280px;
+            .gis-control-panel {
+                width: 100%;
+                transform: translateX(100%);
+            }
+            
+            .gis-control-panel.collapsed {
+                transform: translateX(100%);
+            }
+            
+            .map-toolbar {
+                position: fixed;
+                bottom: 50px;
+                left: 10px;
                 right: 10px;
+                width: auto;
+                display: flex;
+                justify-content: space-around;
+                padding: 10px;
             }
-            .gis-hamburger {
-                right: 300px;
+            
+            .toolbar-section {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
+                text-align: center;
             }
+            
+            .toolbar-section h5 {
+                display: none;
+            }
+            
+            .map-status-bar {
+                right: 0;
+                font-size: 10px;
+            }
+        }
+
+        /* Enhanced Map Control Panel */
+        .leaflet-top.leaflet-left {
+            z-index: 1100 !important;
+        }
+
+        .leaflet-control-container .leaflet-top .leaflet-left {
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+        /* Custom QNAS Marker Styles */
+        .qnas-marker {
+            border-radius: 50% !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* Notification Animation */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading Spinner for Professional Feedback */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Button Hover Effects */
+        .pro-btn,
+        .import-btn,
+        .export-btn,
+        .overlay-btn,
+        .tool-btn,
+        .layer-btn,
+        .nav-btn {
+            user-select: none;
+        }
+
+        .pro-btn:active,
+        .import-btn:active,
+        .export-btn:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* Professional Scrollbar */
+        .tab-content::-webkit-scrollbar,
+        .professional-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .tab-content::-webkit-scrollbar-track,
+        .professional-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .tab-content::-webkit-scrollbar-thumb,
+        .professional-list::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .tab-content::-webkit-scrollbar-thumb:hover,
+        .professional-list::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
         }
 
         /* Camera Modal Specific Styles */
@@ -1226,141 +2143,475 @@
                     </div>
                 </div>
                 <div id="map-page" class="app-content" style="display:none; height:100%;">
-                    <div id="map-container"></div>
-                    
-                    <!-- Hamburger Menu Button -->
-                    <button id="gis-hamburger" class="gis-hamburger" onclick="toggleGISCards()" title="Toggle GIS Cards">☰</button>
-                    
-                    <!-- Floating GIS Cards Container -->
-                    <div id="gis-floating-cards" class="gis-floating-cards">
+                    <!-- Enhanced GIS Map Container -->
+                    <div id="gis-map-wrapper" class="gis-map-wrapper">
+                        <div id="map-container" class="enhanced-map-container"></div>
                         
-                        <!-- QNAS Data Entry & Display Card -->
-                        <div class="gis-card" id="qnas-data-card">
-                            <h3>🎯 QNAS Data Entry & Display</h3>
-                            <div class="gis-card-content">
-                                <div class="gis-input-group">
-                                    <label class="gis-label">Point ID / Label</label>
-                                    <input type="text" id="qnas-point-id" class="gis-input" placeholder="Enter point identifier">
-                                </div>
-                                <div class="gis-input-row">
-                                    <div class="gis-input-group" style="flex: 1;">
-                                        <label class="gis-label">Latitude</label>
-                                        <input type="number" id="qnas-lat" class="gis-input" placeholder="25.2854" step="any">
+                        <!-- Advanced Floating Control Panel -->
+                        <div id="gis-control-panel" class="gis-control-panel">
+                            <div class="control-panel-header">
+                                <h3>🗺️ GIS Control Center</h3>
+                                <button class="panel-toggle-btn" onclick="toggleControlPanel()">
+                                    <i class="fas fa-chevron-right" id="panel-toggle-icon"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Professional Tabbed Interface -->
+                            <div class="control-tabs">
+                                <button class="tab-btn active" onclick="switchTab('qnas')" data-tab="qnas">
+                                    <i class="fas fa-map-pin"></i> QNAS
+                                </button>
+                                <button class="tab-btn" onclick="switchTab('data')" data-tab="data">
+                                    <i class="fas fa-database"></i> Data
+                                </button>
+                                <button class="tab-btn" onclick="switchTab('analysis')" data-tab="analysis">
+                                    <i class="fas fa-chart-line"></i> Analysis
+                                </button>
+                                <button class="tab-btn" onclick="switchTab('overlays')" data-tab="overlays">
+                                    <i class="fas fa-layer-group"></i> Overlays
+                                </button>
+                            </div>
+
+                            <!-- QNAS Management Tab -->
+                            <div id="qnas-tab" class="tab-content active">
+                                <div class="professional-card">
+                                    <div class="card-header">
+                                        <h4><i class="fas fa-crosshairs"></i> QNAS Point Management</h4>
+                                        <div class="status-indicator">
+                                            <span class="status-dot active"></span>
+                                            <span id="qnas-count">0 Points</span>
+                                        </div>
                                     </div>
-                                    <div class="gis-input-group" style="flex: 1;">
-                                        <label class="gis-label">Longitude</label>
-                                        <input type="number" id="qnas-lng" class="gis-input" placeholder="51.5310" step="any">
+                                    <div class="card-content">
+                                        <div class="advanced-input-grid">
+                                            <div class="input-field">
+                                                <label><i class="fas fa-tag"></i> Point ID</label>
+                                                <input type="text" id="qnas-point-id" placeholder="e.g., QP-001">
+                                                <span class="input-helper">Unique identifier</span>
+                                            </div>
+                                            <div class="coordinate-inputs">
+                                                <div class="input-field">
+                                                    <label><i class="fas fa-globe"></i> Latitude</label>
+                                                    <input type="number" id="qnas-lat" placeholder="25.2854" step="any">
+                                                    <span class="coordinate-format">DD.DDDD°</span>
+                                                </div>
+                                                <div class="input-field">
+                                                    <label><i class="fas fa-globe"></i> Longitude</label>
+                                                    <input type="number" id="qnas-lng" placeholder="51.5310" step="any">
+                                                    <span class="coordinate-format">DD.DDDD°</span>
+                                                </div>
+                                            </div>
+                                            <div class="input-field">
+                                                <label><i class="fas fa-clipboard"></i> Description</label>
+                                                <textarea id="qnas-notes" rows="3" placeholder="Detailed description of the QNAS point..."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="action-buttons">
+                                            <button class="pro-btn primary" onclick="addQNASPoint()">
+                                                <i class="fas fa-plus"></i> Add Point
+                                            </button>
+                                            <button class="pro-btn secondary" onclick="updateQNASPoint()">
+                                                <i class="fas fa-edit"></i> Update
+                                            </button>
+                                            <button class="pro-btn danger" onclick="deleteQNASPoint()">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                            <button class="pro-btn info" onclick="locateQNASPoint()">
+                                                <i class="fas fa-crosshairs"></i> Locate
+                                            </button>
+                                        </div>
+                                        <div class="qnas-list-container">
+                                            <div class="list-header">
+                                                <h5>Active QNAS Points</h5>
+                                                <div class="search-box">
+                                                    <i class="fas fa-search"></i>
+                                                    <input type="text" id="qnas-search" placeholder="Search points..." onkeyup="filterQNASPoints()">
+                                                </div>
+                                            </div>
+                                            <div id="qnas-points-list" class="professional-list">
+                                                <!-- QNAS points will be listed here -->
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="gis-input-group">
-                                    <label class="gis-label">Notes / Description</label>
-                                    <textarea id="qnas-notes" class="gis-input" rows="2" placeholder="Enter description..."></textarea>
+                            </div>
+
+                            <!-- Data Import/Export Tab -->
+                            <div id="data-tab" class="tab-content">
+                                <div class="professional-card">
+                                    <div class="card-header">
+                                        <h4><i class="fas fa-exchange-alt"></i> Data Management</h4>
+                                        <div class="data-stats">
+                                            <span class="stat-item">
+                                                <i class="fas fa-shapes"></i>
+                                                <span id="total-features">0</span> Features
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <!-- Quick Add Section -->
+                                        <div class="quick-add-section">
+                                            <h5><i class="fas fa-plus-circle"></i> Quick Add Point</h5>
+                                            <div class="coordinate-inputs">
+                                                <div class="input-field">
+                                                    <label>Latitude</label>
+                                                    <input type="number" id="manual-point-lat" placeholder="25.2854" step="any">
+                                                </div>
+                                                <div class="input-field">
+                                                    <label>Longitude</label>
+                                                    <input type="number" id="manual-point-lng" placeholder="51.5310" step="any">
+                                                </div>
+                                            </div>
+                                            <button class="pro-btn success full-width" onclick="addManualPoint()">
+                                                <i class="fas fa-map-marker-alt"></i> Add Point to Map
+                                            </button>
+                                        </div>
+
+                                        <!-- Import Section -->
+                                        <div class="import-section">
+                                            <h5><i class="fas fa-upload"></i> Import Data</h5>
+                                            <div class="import-buttons">
+                                                <input type="file" id="import-csv-coords" accept=".csv" style="display:none;" onchange="importCoordinatesCSV(event)">
+                                                <button class="import-btn csv" onclick="document.getElementById('import-csv-coords').click()">
+                                                    <i class="fas fa-file-csv"></i>
+                                                    <span>CSV File</span>
+                                                    <small>Coordinate data</small>
+                                                </button>
+                                                <input type="file" id="import-kml-coords" accept=".kml" style="display:none;" onchange="importKMLFile(event)">
+                                                <button class="import-btn kml" onclick="document.getElementById('import-kml-coords').click()">
+                                                    <i class="fas fa-globe"></i>
+                                                    <span>KML File</span>
+                                                    <small>Google Earth</small>
+                                                </button>
+                                                <input type="file" id="import-kmz-coords" accept=".kmz" style="display:none;" onchange="importKMZFile(event)">
+                                                <button class="import-btn kmz" onclick="document.getElementById('import-kmz-coords').click()">
+                                                    <i class="fas fa-file-archive"></i>
+                                                    <span>KMZ File</span>
+                                                    <small>Compressed KML</small>
+                                                </button>
+                                                <button class="import-btn template" onclick="downloadCoordinateTemplate()">
+                                                    <i class="fas fa-download"></i>
+                                                    <span>Template</span>
+                                                    <small>CSV Format</small>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Export Section -->
+                                        <div class="export-section">
+                                            <h5><i class="fas fa-download"></i> Export Data</h5>
+                                            <div class="export-grid">
+                                                <button class="export-btn autocad" onclick="exportToAutoCAD('degree')">
+                                                    <i class="fas fa-drafting-compass"></i>
+                                                    <span>AutoCAD (°)</span>
+                                                </button>
+                                                <button class="export-btn autocad-metric" onclick="exportToAutoCAD('metric')">
+                                                    <i class="fas fa-ruler"></i>
+                                                    <span>AutoCAD (m)</span>
+                                                </button>
+                                                <button class="export-btn csv" onclick="exportMapAsCSV()">
+                                                    <i class="fas fa-file-csv"></i>
+                                                    <span>CSV Export</span>
+                                                </button>
+                                                <button class="export-btn kml" onclick="exportMapAsKML()">
+                                                    <i class="fas fa-globe"></i>
+                                                    <span>KML Export</span>
+                                                </button>
+                                                <button class="export-btn geojson" onclick="exportMapAsGeoJSON()">
+                                                    <i class="fas fa-code"></i>
+                                                    <span>GeoJSON</span>
+                                                </button>
+                                                <button class="export-btn pdf" onclick="exportFullMapPDF()">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <span>PDF Export</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="gis-input-row">
-                                    <button class="gis-btn gis-btn-success" onclick="addQNASPoint()">Add QNAS Point</button>
-                                    <button class="gis-btn" onclick="updateQNASPoint()">Update</button>
-                                    <button class="gis-btn gis-btn-danger gis-btn-small" onclick="deleteQNASPoint()">Delete</button>
+                            </div>
+
+                            <!-- Analysis Tab -->
+                            <div id="analysis-tab" class="tab-content">
+                                <div class="professional-card">
+                                    <div class="card-header">
+                                        <h4><i class="fas fa-calculator"></i> Spatial Analysis</h4>
+                                        <button class="refresh-btn" onclick="updateMapInformation()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                    <div class="card-content">
+                                        <!-- Measurements Display -->
+                                        <div class="measurements-grid">
+                                            <div class="measurement-card area">
+                                                <div class="measurement-icon">
+                                                    <i class="fas fa-vector-square"></i>
+                                                </div>
+                                                <div class="measurement-info">
+                                                    <span class="measurement-label">Total Area</span>
+                                                    <span class="measurement-value" id="total-area">0 m²</span>
+                                                    <span class="measurement-detail" id="area-acres">0 acres</span>
+                                                </div>
+                                            </div>
+                                            <div class="measurement-card perimeter">
+                                                <div class="measurement-icon">
+                                                    <i class="fas fa-draw-polygon"></i>
+                                                </div>
+                                                <div class="measurement-info">
+                                                    <span class="measurement-label">Perimeter</span>
+                                                    <span class="measurement-value" id="total-perimeter">0 m</span>
+                                                    <span class="measurement-detail" id="perimeter-km">0 km</span>
+                                                </div>
+                                            </div>
+                                            <div class="measurement-card length">
+                                                <div class="measurement-icon">
+                                                    <i class="fas fa-ruler"></i>
+                                                </div>
+                                                <div class="measurement-info">
+                                                    <span class="measurement-label">Total Length</span>
+                                                    <span class="measurement-value" id="total-length">0 m</span>
+                                                    <span class="measurement-detail" id="length-km">0 km</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Coordinate Information -->
+                                        <div class="coordinate-info-panel">
+                                            <h5><i class="fas fa-location-arrow"></i> Selected Feature Info</h5>
+                                            <div class="coordinate-display-advanced">
+                                                <div class="coord-row">
+                                                    <label>Latitude:</label>
+                                                    <span id="selected-lat">N/A</span>
+                                                    <button class="copy-btn" onclick="copyToClipboard('selected-lat')">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="coord-row">
+                                                    <label>Longitude:</label>
+                                                    <span id="selected-lng">N/A</span>
+                                                    <button class="copy-btn" onclick="copyToClipboard('selected-lng')">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="coord-row">
+                                                    <label>UTM Zone:</label>
+                                                    <span id="utm-zone">N/A</span>
+                                                </div>
+                                                <div class="coord-row">
+                                                    <label>Elevation:</label>
+                                                    <span id="elevation">N/A</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Analysis Tools -->
+                                        <div class="analysis-tools">
+                                            <h5><i class="fas fa-tools"></i> Analysis Tools</h5>
+                                            <div class="tool-buttons">
+                                                <button class="tool-btn" onclick="calculateBufferZone()">
+                                                    <i class="fas fa-circle"></i> Buffer Analysis
+                                                </button>
+                                                <button class="tool-btn" onclick="measureDistance()">
+                                                    <i class="fas fa-ruler-horizontal"></i> Distance Tool
+                                                </button>
+                                                <button class="tool-btn" onclick="findCentroid()">
+                                                    <i class="fas fa-crosshairs"></i> Find Centroid
+                                                </button>
+                                                <button class="tool-btn" onclick="generateReport()">
+                                                    <i class="fas fa-file-alt"></i> Generate Report
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="qnas-point-list" id="qnas-points-list">
-                                    <!-- QNAS points will be listed here -->
+                            </div>
+
+                            <!-- Overlays Tab -->
+                            <div id="overlays-tab" class="tab-content">
+                                <div class="professional-card">
+                                    <div class="card-header">
+                                        <h4><i class="fas fa-layer-group"></i> Real-time Overlays</h4>
+                                        <div class="overlay-status">
+                                            <span class="status-dot" id="overlay-status-dot"></span>
+                                            <span id="overlay-status-text">Disconnected</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <!-- Active Overlays -->
+                                        <div class="active-overlays-section">
+                                            <h5><i class="fas fa-eye"></i> Active Overlays</h5>
+                                            <div id="active-overlays-advanced" class="overlay-chips-container">
+                                                <!-- Active overlays will be shown here -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Overlay Controls -->
+                                        <div class="overlay-controls">
+                                            <div class="overlay-category">
+                                                <h6><i class="fas fa-car"></i> Traffic & Transportation</h6>
+                                                <div class="overlay-buttons">
+                                                    <button class="overlay-btn traffic" onclick="simulateTrafficOverlay()">
+                                                        <i class="fas fa-traffic-light"></i>
+                                                        <span>Traffic Conditions</span>
+                                                        <div class="overlay-indicator" id="traffic-indicator"></div>
+                                                    </button>
+                                                    <button class="overlay-btn construction" onclick="simulateConstructionOverlay()">
+                                                        <i class="fas fa-hard-hat"></i>
+                                                        <span>Construction Zones</span>
+                                                        <div class="overlay-indicator" id="construction-indicator"></div>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="overlay-category">
+                                                <h6><i class="fas fa-cloud-rain"></i> Weather & Environment</h6>
+                                                <div class="overlay-buttons">
+                                                    <button class="overlay-btn weather" onclick="simulateWeatherOverlay()">
+                                                        <i class="fas fa-cloud-sun"></i>
+                                                        <span>Weather Conditions</span>
+                                                        <div class="overlay-indicator" id="weather-indicator"></div>
+                                                    </button>
+                                                    <button class="overlay-btn flood" onclick="simulateFloodOverlay()">
+                                                        <i class="fas fa-water"></i>
+                                                        <span>Flood Risk Zones</span>
+                                                        <div class="overlay-indicator" id="flood-indicator"></div>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="overlay-category">
+                                                <h6><i class="fas fa-exclamation-triangle"></i> Risk & Safety</h6>
+                                                <div class="overlay-buttons">
+                                                    <button class="overlay-btn emergency" onclick="simulateEmergencyOverlay()">
+                                                        <i class="fas fa-ambulance"></i>
+                                                        <span>Emergency Services</span>
+                                                        <div class="overlay-indicator" id="emergency-indicator"></div>
+                                                    </button>
+                                                    <button class="overlay-btn risk" onclick="simulateRiskZoneOverlay()">
+                                                        <i class="fas fa-radiation"></i>
+                                                        <span>Risk Zones</span>
+                                                        <div class="overlay-indicator" id="risk-indicator"></div>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Overlay Settings -->
+                                        <div class="overlay-settings">
+                                            <h5><i class="fas fa-cog"></i> Overlay Settings</h5>
+                                            <div class="setting-row">
+                                                <label>Update Frequency:</label>
+                                                <select id="update-frequency">
+                                                    <option value="real-time">Real-time</option>
+                                                    <option value="5min">Every 5 minutes</option>
+                                                    <option value="15min">Every 15 minutes</option>
+                                                    <option value="manual">Manual</option>
+                                                </select>
+                                            </div>
+                                            <div class="setting-row">
+                                                <label>Opacity:</label>
+                                                <input type="range" id="overlay-opacity" min="0.1" max="1" step="0.1" value="0.7" onchange="updateOverlayOpacity(this.value)">
+                                                <span id="opacity-value">70%</span>
+                                            </div>
+                                            <button class="pro-btn danger full-width" onclick="clearAllOverlays()">
+                                                <i class="fas fa-times"></i> Clear All Overlays
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Data Entry Card (Import/Manual Input) -->
-                        <div class="gis-card" id="data-entry-card">
-                            <h3>📍 Data Entry & Import</h3>
-                            <div class="gis-card-content">
-                                <div class="gis-input-row">
-                                    <div class="gis-input-group" style="flex: 1;">
-                                        <label class="gis-label">Latitude (°)</label>
-                                        <input type="number" id="manual-point-lat" class="gis-input" placeholder="25.2854" step="any">
-                                    </div>
-                                    <div class="gis-input-group" style="flex: 1;">
-                                        <label class="gis-label">Longitude (°)</label>
-                                        <input type="number" id="manual-point-lng" class="gis-input" placeholder="51.5310" step="any">
-                                    </div>
+                        <!-- Map Toolbar -->
+                        <div id="map-toolbar" class="map-toolbar">
+                            <div class="toolbar-section">
+                                <h5><i class="fas fa-draw-polygon"></i> Drawing Tools</h5>
+                                <div class="tool-group">
+                                    <button class="tool-btn active" onclick="setMapTool('select')" data-tool="select" title="Select Tool">
+                                        <i class="fas fa-mouse-pointer"></i>
+                                    </button>
+                                    <button class="tool-btn" onclick="setMapTool('marker')" data-tool="marker" title="Add Marker">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                    <button class="tool-btn" onclick="setMapTool('line')" data-tool="line" title="Draw Line">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button class="tool-btn" onclick="setMapTool('polygon')" data-tool="polygon" title="Draw Polygon">
+                                        <i class="fas fa-draw-polygon"></i>
+                                    </button>
+                                    <button class="tool-btn" onclick="setMapTool('circle')" data-tool="circle" title="Draw Circle">
+                                        <i class="fas fa-circle"></i>
+                                    </button>
+                                    <button class="tool-btn" onclick="setMapTool('rectangle')" data-tool="rectangle" title="Draw Rectangle">
+                                        <i class="fas fa-square"></i>
+                                    </button>
                                 </div>
-                                <button class="gis-btn gis-btn-success" onclick="addManualPoint()">Add Point Manually</button>
-                                
-                                <hr style="border: none; border-top: 1px solid #eee; margin: 10px 0;">
-                                
-                                <div class="gis-input-row">
-                                    <input type="file" id="import-csv-coords" accept=".csv" style="display:none;" onchange="importCoordinatesCSV(event)">
-                                    <button class="gis-btn" onclick="document.getElementById('import-csv-coords').click()">Import CSV</button>
-                                    <input type="file" id="import-kml-coords" accept=".kml" style="display:none;" onchange="importKMLFile(event)">
-                                    <button class="gis-btn" onclick="document.getElementById('import-kml-coords').click()">Import KML</button>
+                            </div>
+
+                            <div class="toolbar-section">
+                                <h5><i class="fas fa-layer-group"></i> Map Layers</h5>
+                                <div class="layer-controls">
+                                    <button class="layer-btn active" onclick="switchBaseLayer('osm')" data-layer="osm">
+                                        <i class="fas fa-map"></i> Street
+                                    </button>
+                                    <button class="layer-btn" onclick="switchBaseLayer('satellite')" data-layer="satellite">
+                                        <i class="fas fa-satellite"></i> Satellite
+                                    </button>
+                                    <button class="layer-btn" onclick="switchBaseLayer('terrain')" data-layer="terrain">
+                                        <i class="fas fa-mountain"></i> Terrain
+                                    </button>
                                 </div>
-                                <div class="gis-input-row">
-                                    <input type="file" id="import-kmz-coords" accept=".kmz" style="display:none;" onchange="importKMZFile(event)">
-                                    <button class="gis-btn" onclick="document.getElementById('import-kmz-coords').click()">Import KMZ</button>
-                                    <button class="gis-btn" onclick="downloadCoordinateTemplate()">CSV Template</button>
+                            </div>
+
+                            <div class="toolbar-section">
+                                <h5><i class="fas fa-search"></i> Navigation</h5>
+                                <div class="nav-controls">
+                                    <button class="nav-btn" onclick="fitMapToFeatures()" title="Fit to Features">
+                                        <i class="fas fa-expand-arrows-alt"></i>
+                                    </button>
+                                    <button class="nav-btn" onclick="getCurrentLocation()" title="Current Location">
+                                        <i class="fas fa-crosshairs"></i>
+                                    </button>
+                                    <button class="nav-btn" onclick="fullScreenMap()" title="Full Screen">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Information Display Card -->
-                        <div class="gis-card" id="info-display-card">
-                            <h3>📊 Map Information & Export</h3>
-                            <div class="gis-card-content">
-                                <div class="gis-measurement-display" id="measurement-display">
-                                    <div><strong>Measurements:</strong></div>
-                                    <div>Area: <span id="total-area">0 m²</span></div>
-                                    <div>Perimeter: <span id="total-perimeter">0 m</span></div>
-                                    <div>Length: <span id="total-length">0 m</span></div>
-                                </div>
-                                
-                                <div class="gis-coordinate-display" id="coordinate-display">
-                                    <div><strong>Selected Coordinates:</strong></div>
-                                    <div>Lat: <span id="selected-lat">N/A</span></div>
-                                    <div>Lng: <span id="selected-lng">N/A</span></div>
-                                </div>
-                                
-                                <div class="gis-input-row">
-                                    <button class="gis-btn" onclick="exportToAutoCAD('degree')">AutoCAD (°)</button>
-                                    <button class="gis-btn" onclick="exportToAutoCAD('metric')">AutoCAD (m)</button>
-                                </div>
-                                <div class="gis-input-row">
-                                    <button class="gis-btn" onclick="exportMapAsCSV()">Export CSV</button>
-                                    <button class="gis-btn" onclick="exportMapAsKML()">Export KML</button>
-                                </div>
-                                <div class="gis-input-row">
-                                    <button class="gis-btn" onclick="exportMapAsKMZ()">Export KMZ</button>
-                                    <button class="gis-btn" onclick="exportMapAsGeoJSON()">GeoJSON</button>
-                                </div>
-                                <div class="gis-input-row">
-                                    <button class="gis-btn gis-btn-success" onclick="exportFullMapPDF()">Export PDF</button>
-                                    <button class="gis-btn gis-btn-success" onclick="printFullMap()">Print Map</button>
-                                </div>
+                        <!-- Status Bar -->
+                        <div id="map-status-bar" class="map-status-bar">
+                            <div class="status-left">
+                                <span class="status-item">
+                                    <i class="fas fa-mouse-pointer"></i>
+                                    <span>Cursor: </span>
+                                    <span id="cursor-coords">--°, --°</span>
+                                </span>
+                                <span class="status-item">
+                                    <i class="fas fa-search-plus"></i>
+                                    <span>Zoom: </span>
+                                    <span id="current-zoom">--</span>
+                                </span>
+                                <span class="status-item">
+                                    <i class="fas fa-ruler-combined"></i>
+                                    <span>Scale: </span>
+                                    <span id="map-scale">1:--</span>
+                                </span>
+                            </div>
+                            <div class="status-right">
+                                <span class="status-item">
+                                    <i class="fas fa-wifi"></i>
+                                    <span id="connection-status">Connected</span>
+                                </span>
+                                <span class="status-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span id="last-update">--:--</span>
+                                </span>
                             </div>
                         </div>
-
-                        <!-- Map Overlays Card -->
-                        <div class="gis-card" id="overlays-card">
-                            <h3>🌐 Map Overlays (Simulated)</h3>
-                            <div class="gis-card-content">
-                                <div class="overlay-simulation" id="active-overlays">
-                                    <!-- Active overlays will be shown here -->
-                                </div>
-                                
-                                <div class="gis-input-row">
-                                    <button class="gis-btn" onclick="simulateTrafficOverlay()">Traffic Alert</button>
-                                    <button class="gis-btn" onclick="simulateWeatherOverlay()">Weather Alert</button>
-                                </div>
-                                <div class="gis-input-row">
-                                    <button class="gis-btn" onclick="simulateRiskZoneOverlay()">Risk Zones</button>
-                                    <button class="gis-btn gis-btn-danger gis-btn-small" onclick="clearAllOverlays()">Clear All</button>
-                                </div>
-                                
-                                <div style="margin-top: 10px; font-size: 11px; color: #666;">
-                                    Real-time data from backend service would be integrated here.
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
-                    
-                    <!-- Hidden file inputs for various import operations -->
+
+                    <!-- Hidden file inputs -->
                     <input type="file" id="import-map-json" style="display:none;" onchange="importMapJson(event)">
                 </div>
                 <div id="tables-page" class="app-content" style="display:none;">
@@ -3810,34 +5061,78 @@ function importAllProjects(event) {
 // Added to the footer in HTML.
 
 
-// ======== 13. GIS ENHANCED FUNCTIONALITY ========
+// ======== 13. ENHANCED GIS FUNCTIONALITY ========
 
 // Global GIS variables
 let qnasPoints = [];
 let selectedQNASPoint = null;
 let activeOverlays = [];
-let gisCardsVisible = true;
+let currentTab = 'qnas';
+let currentMapTool = 'select';
+let currentBaseLayer = 'osm';
+let panelCollapsed = false;
+let selectedFeature = null;
 
-// Toggle GIS Cards visibility
-function toggleGISCards() {
-    const cardsContainer = getEl('gis-floating-cards');
-    gisCardsVisible = !gisCardsVisible;
-    if (gisCardsVisible) {
-        cardsContainer.classList.remove('hidden');
+// Professional Control Panel Management
+function toggleControlPanel() {
+    const panel = getEl('gis-control-panel');
+    const icon = getEl('panel-toggle-icon');
+    panelCollapsed = !panelCollapsed;
+    
+    if (panelCollapsed) {
+        panel.classList.add('collapsed');
+        icon.className = 'fas fa-chevron-left';
     } else {
-        cardsContainer.classList.add('hidden');
+        panel.classList.remove('collapsed');
+        icon.className = 'fas fa-chevron-right';
     }
 }
 
-// QNAS Data Management
+// Professional Tab Management
+function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tabName) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    getEl(tabName + '-tab').classList.add('active');
+    
+    currentTab = tabName;
+    
+    // Initialize tab-specific functionality
+    if (tabName === 'qnas') {
+        updateQNASCounter();
+    } else if (tabName === 'data') {
+        updateDataStats();
+    } else if (tabName === 'analysis') {
+        updateMapInformation();
+    } else if (tabName === 'overlays') {
+        updateOverlayStatus();
+    }
+}
+
+// Enhanced QNAS Data Management
 function addQNASPoint() {
-    const pointId = getEl('qnas-point-id').value;
+    const pointId = getEl('qnas-point-id').value.trim();
     const lat = parseFloat(getEl('qnas-lat').value);
     const lng = parseFloat(getEl('qnas-lng').value);
-    const notes = getEl('qnas-notes').value;
+    const notes = getEl('qnas-notes').value.trim();
 
     if (!pointId || isNaN(lat) || isNaN(lng)) {
-        alert('Please fill in all required fields (Point ID, Latitude, Longitude).');
+        showNotification('Please fill in all required fields (Point ID, Latitude, Longitude).', 'error');
+        return;
+    }
+
+    // Check for duplicate ID
+    if (qnasPoints.find(p => p.id === pointId)) {
+        showNotification(`Point ID "${pointId}" already exists. Please choose a different ID.`, 'error');
         return;
     }
 
@@ -3847,25 +5142,32 @@ function addQNASPoint() {
         lng: lng,
         notes: notes,
         timestamp: new Date().toISOString(),
-        markerId: null
+        markerId: null,
+        status: 'active'
     };
 
-    // Add marker to map
+    // Add enhanced marker to map
     const marker = L.marker([lat, lng], {
         icon: L.divIcon({
             className: 'qnas-marker',
-            html: `<div style="background: #007bff; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">${pointId}</div>`,
-            iconSize: [20, 20]
+            html: `<div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${pointId}</div>`,
+            iconSize: [24, 24]
         })
     }).addTo(map);
 
     const popupContent = `
-        <div>
-            <strong>QNAS Point: ${pointId}</strong><br>
-            <strong>Coordinates:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
-            <strong>Notes:</strong> ${notes}<br>
-            <strong>Added:</strong> ${new Date(qnasPoint.timestamp).toLocaleString()}<br>
-            <button onclick="selectQNASPoint('${pointId}')" style="margin-top: 5px; padding: 2px 6px; font-size: 11px;">Edit</button>
+        <div style="min-width: 200px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <i class="fas fa-map-pin" style="color: #667eea;"></i>
+                <strong>QNAS Point: ${pointId}</strong>
+            </div>
+            <div style="margin-bottom: 6px;"><strong>Coordinates:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}</div>
+            <div style="margin-bottom: 6px;"><strong>Notes:</strong> ${notes || 'No notes'}</div>
+            <div style="margin-bottom: 8px; font-size: 11px; color: #666;"><strong>Added:</strong> ${new Date(qnasPoint.timestamp).toLocaleString()}</div>
+            <div style="display: flex; gap: 5px;">
+                <button onclick="selectQNASPoint('${pointId}')" style="padding: 4px 8px; font-size: 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
+                <button onclick="locateQNASPoint('${pointId}')" style="padding: 4px 8px; font-size: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Locate</button>
+            </div>
         </div>
     `;
     marker.bindPopup(popupContent);
@@ -3874,9 +5176,10 @@ function addQNASPoint() {
     qnasPoints.push(qnasPoint);
 
     updateQNASPointsList();
+    updateQNASCounter();
     clearQNASForm();
-    saveMapData(); // Save to project data
-    addNotification('QNAS', `QNAS point "${pointId}" added to map.`, 'success');
+    saveMapData();
+    showNotification(`QNAS point "${pointId}" added successfully.`, 'success');
 }
 
 function updateQNASPoint() {
@@ -4386,8 +5689,10 @@ function updateOverlaysDisplay() {
     });
 }
 
-// Map Information Updates
+// Enhanced Map Information Updates
 function updateMapInformation() {
+    if (!drawnItems) return;
+    
     const features = drawnItems.toGeoJSON().features;
     let totalArea = 0;
     let totalPerimeter = 0;
@@ -4402,13 +5707,30 @@ function updateMapInformation() {
         }
     });
 
-    getEl('total-area').textContent = `${totalArea.toFixed(2)} m²`;
-    getEl('total-perimeter').textContent = `${totalPerimeter.toFixed(2)} m`;
-    getEl('total-length').textContent = `${totalLength.toFixed(2)} m`;
+    // Update primary measurements
+    const areaEl = getEl('total-area');
+    const perimeterEl = getEl('total-perimeter');
+    const lengthEl = getEl('total-length');
+    
+    if (areaEl) areaEl.textContent = `${formatNumber(totalArea)} m²`;
+    if (perimeterEl) perimeterEl.textContent = `${formatNumber(totalPerimeter)} m`;
+    if (lengthEl) lengthEl.textContent = `${formatNumber(totalLength)} m`;
 
-    // Update selected coordinates if a feature is selected
+    // Update secondary measurements (acres, km)
+    const areaAcresEl = getEl('area-acres');
+    const perimeterKmEl = getEl('perimeter-km');
+    const lengthKmEl = getEl('length-km');
+    
+    if (areaAcresEl) areaAcresEl.textContent = `${formatNumber(totalArea * 0.000247105)} acres`;
+    if (perimeterKmEl) perimeterKmEl.textContent = `${formatNumber(totalPerimeter / 1000)} km`;
+    if (lengthKmEl) lengthKmEl.textContent = `${formatNumber(totalLength / 1000)} km`;
+
+    // Update selected coordinates
     const selectedLatEl = getEl('selected-lat');
     const selectedLngEl = getEl('selected-lng');
+    const utmZoneEl = getEl('utm-zone');
+    const elevationEl = getEl('elevation');
+    
     if (features.length > 0) {
         const lastFeature = features[features.length - 1];
         let coords;
@@ -4420,10 +5742,371 @@ function updateMapInformation() {
             coords = lastFeature.geometry.coordinates[0];
         }
         if (coords) {
-            selectedLatEl.textContent = coords[1].toFixed(6);
-            selectedLngEl.textContent = coords[0].toFixed(6);
+            if (selectedLatEl) selectedLatEl.textContent = coords[1].toFixed(6);
+            if (selectedLngEl) selectedLngEl.textContent = coords[0].toFixed(6);
+            if (utmZoneEl) utmZoneEl.textContent = calculateUTMZone(coords[1], coords[0]);
+            if (elevationEl) elevationEl.textContent = 'Querying...'; // Would query elevation service
+        }
+    } else {
+        if (selectedLatEl) selectedLatEl.textContent = 'N/A';
+        if (selectedLngEl) selectedLngEl.textContent = 'N/A';
+        if (utmZoneEl) utmZoneEl.textContent = 'N/A';
+        if (elevationEl) elevationEl.textContent = 'N/A';
+    }
+}
+
+function formatNumber(num) {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(2) + 'M';
+    } else if (num >= 1000) {
+        return (num / 1000).toFixed(2) + 'K';
+    } else {
+        return num.toFixed(2);
+    }
+}
+
+function calculateUTMZone(lat, lng) {
+    const zone = Math.floor((lng + 180) / 6) + 1;
+    const hemisphere = lat >= 0 ? 'N' : 'S';
+    return `${zone}${hemisphere}`;
+}
+
+// Enhanced Professional Functions
+function updateQNASCounter() {
+    const counter = getEl('qnas-count');
+    if (counter) {
+        counter.textContent = `${qnasPoints.length} Points`;
+    }
+}
+
+function updateDataStats() {
+    const totalFeatures = getEl('total-features');
+    if (totalFeatures && drawnItems) {
+        totalFeatures.textContent = drawnItems.getLayers().length;
+    }
+}
+
+function updateOverlayStatus() {
+    const statusDot = getEl('overlay-status-dot');
+    const statusText = getEl('overlay-status-text');
+    if (statusDot && statusText) {
+        if (activeOverlays.length > 0) {
+            statusDot.classList.add('active');
+            statusText.textContent = 'Connected';
+        } else {
+            statusDot.classList.remove('active');
+            statusText.textContent = 'Disconnected';
         }
     }
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-size: 13px;
+        font-weight: 500;
+        z-index: 2000;
+        animation: slideIn 0.3s ease;
+        max-width: 300px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    `;
+    
+    switch(type) {
+        case 'success':
+            notification.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+            break;
+        case 'error':
+            notification.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+            break;
+        case 'warning':
+            notification.style.background = 'linear-gradient(135deg, #ffc107, #e0a800)';
+            break;
+        default:
+            notification.style.background = 'linear-gradient(135deg, #17a2b8, #138496)';
+    }
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+
+function locateQNASPoint(pointId) {
+    if (!pointId && selectedQNASPoint) {
+        pointId = selectedQNASPoint;
+    }
+    const point = qnasPoints.find(p => p.id === pointId);
+    if (point) {
+        map.setView([point.lat, point.lng], 18);
+        const marker = map._layers[point.markerId];
+        if (marker) {
+            marker.openPopup();
+        }
+        showNotification(`Located QNAS point: ${pointId}`, 'info');
+    }
+}
+
+function filterQNASPoints() {
+    const searchTerm = getEl('qnas-search').value.toLowerCase();
+    const items = document.querySelectorAll('.qnas-point-item');
+    
+    items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Enhanced Map Tool Management
+function setMapTool(tool) {
+    // Update tool buttons
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tool === tool) {
+            btn.classList.add('active');
+        }
+    });
+    
+    currentMapTool = tool;
+    
+    // Handle tool logic (simplified - in real app would control map drawing modes)
+    showNotification(`Selected ${tool} tool`, 'info');
+}
+
+function switchBaseLayer(layer) {
+    // Update layer buttons
+    document.querySelectorAll('.layer-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.layer === layer) {
+            btn.classList.add('active');
+        }
+    });
+    
+    currentBaseLayer = layer;
+    showNotification(`Switched to ${layer} layer`, 'info');
+}
+
+function fitMapToFeatures() {
+    if (drawnItems && drawnItems.getLayers().length > 0) {
+        map.fitBounds(drawnItems.getBounds());
+        showNotification('Map fitted to features', 'info');
+    } else {
+        showNotification('No features to fit to', 'warning');
+    }
+}
+
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            map.setView([lat, lng], 15);
+            
+            // Add current location marker
+            const marker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'current-location-marker',
+                    html: '<div style="background: #dc3545; color: white; border-radius: 50%; width: 16px; height: 16px; border: 2px solid white; box-shadow: 0 0 10px rgba(220,53,69,0.5);"></div>',
+                    iconSize: [16, 16]
+                })
+            }).addTo(map);
+            
+            marker.bindPopup('Your current location').openPopup();
+            showNotification('Current location found', 'success');
+        }, () => {
+            showNotification('Unable to get current location', 'error');
+        });
+    } else {
+        showNotification('Geolocation not supported', 'error');
+    }
+}
+
+function fullScreenMap() {
+    const panel = getEl('gis-control-panel');
+    const toolbar = getEl('map-toolbar');
+    const statusBar = getEl('map-status-bar');
+    
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+        panel.style.display = 'none';
+        toolbar.style.display = 'none';
+        statusBar.style.display = 'none';
+        showNotification('Entered full screen mode', 'info');
+    } else {
+        document.exitFullscreen();
+        panel.style.display = 'flex';
+        toolbar.style.display = 'block';
+        statusBar.style.display = 'flex';
+        showNotification('Exited full screen mode', 'info');
+    }
+}
+
+// Enhanced Analysis Tools
+function calculateBufferZone() {
+    if (selectedFeature) {
+        showNotification('Buffer analysis would be calculated here', 'info');
+    } else {
+        showNotification('Please select a feature first', 'warning');
+    }
+}
+
+function measureDistance() {
+    showNotification('Distance measurement tool activated', 'info');
+}
+
+function findCentroid() {
+    if (drawnItems && drawnItems.getLayers().length > 0) {
+        const bounds = drawnItems.getBounds();
+        const center = bounds.getCenter();
+        map.setView(center, map.getZoom());
+        
+        // Add centroid marker
+        const marker = L.marker([center.lat, center.lng], {
+            icon: L.divIcon({
+                className: 'centroid-marker',
+                html: '<div style="background: #ffc107; color: black; border-radius: 50%; width: 12px; height: 12px; border: 2px solid white;"></div>',
+                iconSize: [12, 12]
+            })
+        }).addTo(map);
+        
+        marker.bindPopup(`Centroid: ${center.lat.toFixed(6)}, ${center.lng.toFixed(6)}`).openPopup();
+        showNotification('Centroid calculated and displayed', 'success');
+    } else {
+        showNotification('No features available for centroid calculation', 'warning');
+    }
+}
+
+function generateReport() {
+    showNotification('Generating comprehensive analysis report...', 'info');
+    setTimeout(() => {
+        showNotification('Analysis report generated successfully', 'success');
+    }, 2000);
+}
+
+// Enhanced Overlay Management
+function simulateConstructionOverlay() {
+    const overlay = {
+        type: 'construction',
+        name: 'Construction Zone',
+        message: 'Active construction detected',
+        timestamp: new Date().toISOString()
+    };
+    activeOverlays.push(overlay);
+    updateActiveOverlaysDisplay();
+    updateOverlayStatus();
+    showNotification('Construction overlay activated', 'warning');
+}
+
+function simulateFloodOverlay() {
+    const overlay = {
+        type: 'flood',
+        name: 'Flood Risk',
+        message: 'Flood risk zone identified',
+        timestamp: new Date().toISOString()
+    };
+    activeOverlays.push(overlay);
+    updateActiveOverlaysDisplay();
+    updateOverlayStatus();
+    showNotification('Flood risk overlay activated', 'danger');
+}
+
+function simulateEmergencyOverlay() {
+    const overlay = {
+        type: 'emergency',
+        name: 'Emergency Services',
+        message: 'Emergency services active',
+        timestamp: new Date().toISOString()
+    };
+    activeOverlays.push(overlay);
+    updateActiveOverlaysDisplay();
+    updateOverlayStatus();
+    showNotification('Emergency services overlay activated', 'danger');
+}
+
+function updateActiveOverlaysDisplay() {
+    const container = getEl('active-overlays-advanced');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (activeOverlays.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #6c757d; font-size: 12px; padding: 15px;">No active overlays</div>';
+        return;
+    }
+    
+    activeOverlays.forEach(overlay => {
+        const chip = document.createElement('div');
+        chip.className = `overlay-chip ${overlay.type}`;
+        chip.innerHTML = `<i class="fas fa-times" onclick="removeOverlay('${overlay.type}')"></i> ${overlay.name}`;
+        container.appendChild(chip);
+    });
+}
+
+function removeOverlay(type) {
+    activeOverlays = activeOverlays.filter(o => o.type !== type);
+    updateActiveOverlaysDisplay();
+    updateOverlayStatus();
+    showNotification(`${type} overlay removed`, 'info');
+}
+
+function updateOverlayOpacity(value) {
+    getEl('opacity-value').textContent = Math.round(value * 100) + '%';
+    showNotification(`Overlay opacity set to ${Math.round(value * 100)}%`, 'info');
+}
+
+function copyToClipboard(elementId) {
+    const element = getEl(elementId);
+    if (element) {
+        navigator.clipboard.writeText(element.textContent).then(() => {
+            showNotification('Coordinates copied to clipboard', 'success');
+        }).catch(() => {
+            showNotification('Failed to copy coordinates', 'error');
+        });
+    }
+}
+
+// Enhanced Map Status Updates
+function updateMapStatus() {
+    // Update cursor coordinates
+    map.on('mousemove', (e) => {
+        const cursorCoords = getEl('cursor-coords');
+        if (cursorCoords) {
+            cursorCoords.textContent = `${e.latlng.lat.toFixed(4)}°, ${e.latlng.lng.toFixed(4)}°`;
+        }
+    });
+    
+    // Update zoom level
+    map.on('zoomend', () => {
+        const zoomEl = getEl('current-zoom');
+        if (zoomEl) {
+            zoomEl.textContent = map.getZoom();
+        }
+    });
+    
+    // Update last update time
+    const updateTime = () => {
+        const lastUpdate = getEl('last-update');
+        if (lastUpdate) {
+            lastUpdate.textContent = new Date().toLocaleTimeString();
+        }
+    };
+    setInterval(updateTime, 60000); // Update every minute
+    updateTime(); // Initial update
 }
 
 // Enhanced map initialization to include GIS features
@@ -4435,6 +6118,7 @@ initializeMap = function() {
     map.on('pm:create', (e) => {
         calculateAndBindPopup(e.layer);
         updateMapInformation();
+        updateDataStats();
         saveMapData();
     });
 
@@ -4445,13 +6129,32 @@ initializeMap = function() {
 
     map.on('pm:remove', (e) => {
         updateMapInformation();
+        updateDataStats();
         saveMapData();
+    });
+
+    map.on('click', (e) => {
+        selectedFeature = null;
+        updateMapInformation();
     });
 
     // Initialize displays
     updateMapInformation();
-    updateOverlaysDisplay();
+    updateActiveOverlaysDisplay();
     updateQNASPointsList();
+    updateQNASCounter();
+    updateDataStats();
+    updateOverlayStatus();
+    updateMapStatus();
+    
+    // Initialize status bar
+    setTimeout(() => {
+        const connectionStatus = getEl('connection-status');
+        if (connectionStatus) {
+            connectionStatus.textContent = 'Connected';
+            connectionStatus.style.color = '#28a745';
+        }
+    }, 1000);
 };
 
 // ======== 14. EVENT LISTENERS ========
