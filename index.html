@@ -2102,9 +2102,8 @@
         }
 
         /* ===== PROFESSIONAL CONTRACT MANAGEMENT STYLES ===== */
-        /* TEST: If you can see this red border, the CSS is loading */
-        .contract-header {
-            border: 2px solid red !important; /* REMOVE THIS AFTER TESTING */
+        /* Namespace all contract styles to avoid conflicts */
+        #contracts-page .contract-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             border-radius: 20px !important;
             padding: 30px !important;
@@ -2114,151 +2113,151 @@
             display: block !important;
         }
 
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 30px;
+        #contracts-page .header-content {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: flex-start !important;
+            margin-bottom: 30px !important;
         }
 
-        .header-info h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0 0 10px 0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        #contracts-page .header-info h1 {
+            font-size: 2.5rem !important;
+            font-weight: 700 !important;
+            margin: 0 0 10px 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 15px !important;
         }
 
-        .header-info h1 i {
-            font-size: 2.2rem;
+        #contracts-page .header-info h1 i {
+            font-size: 2.2rem !important;
         }
 
-        .header-subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin: 0;
+        #contracts-page .header-subtitle {
+            font-size: 1.1rem !important;
+            opacity: 0.9 !important;
+            margin: 0 !important;
         }
 
-        .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
+        #contracts-page .header-actions {
+            display: flex !important;
+            gap: 15px !important;
+            align-items: center !important;
         }
 
         /* Professional Button Styles */
-        .professional-btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            font-size: 14px;
-            white-space: nowrap;
+        #contracts-page .professional-btn {
+            padding: 12px 20px !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+            font-size: 14px !important;
+            white-space: nowrap !important;
         }
 
-        .professional-btn.primary {
-            background: white;
-            color: #667eea;
-            box-shadow: 0 4px 15px rgba(255,255,255,0.3);
+        #contracts-page .professional-btn.primary {
+            background: white !important;
+            color: #667eea !important;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.3) !important;
         }
 
-        .professional-btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255,255,255,0.4);
+        #contracts-page .professional-btn.primary:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 25px rgba(255,255,255,0.4) !important;
         }
 
-        .professional-btn.secondary {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
+        #contracts-page .professional-btn.secondary {
+            background: rgba(255,255,255,0.2) !important;
+            color: white !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
         }
 
-        .professional-btn.secondary:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
+        #contracts-page .professional-btn.secondary:hover {
+            background: rgba(255,255,255,0.3) !important;
+            transform: translateY(-2px) !important;
         }
 
-        .professional-btn.info {
-            background: rgba(0,123,255,0.2);
-            color: white;
-            border: 1px solid rgba(0,123,255,0.3);
+        #contracts-page .professional-btn.info {
+            background: rgba(0,123,255,0.2) !important;
+            color: white !important;
+            border: 1px solid rgba(0,123,255,0.3) !important;
         }
 
-        .professional-btn.info:hover {
-            background: rgba(0,123,255,0.3);
-            transform: translateY(-2px);
+        #contracts-page .professional-btn.info:hover {
+            background: rgba(0,123,255,0.3) !important;
+            transform: translateY(-2px) !important;
         }
 
         /* Contract Stats Cards */
-        .contract-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+        #contracts-page .contract-stats {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+            gap: 20px !important;
         }
 
-        .stat-card {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 25px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: all 0.3s ease;
+        #contracts-page .stat-card {
+            background: rgba(255,255,255,0.15) !important;
+            backdrop-filter: blur(10px) !important;
+            border-radius: 16px !important;
+            padding: 25px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 20px !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            transition: all 0.3s ease !important;
         }
 
-        .stat-card:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-3px);
+        #contracts-page .stat-card:hover {
+            background: rgba(255,255,255,0.2) !important;
+            transform: translateY(-3px) !important;
         }
 
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
+        #contracts-page .stat-icon {
+            width: 60px !important;
+            height: 60px !important;
+            background: rgba(255,255,255,0.2) !important;
+            border-radius: 16px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 1.5rem !important;
         }
 
-        .stat-info {
-            flex: 1;
+        #contracts-page .stat-info {
+            flex: 1 !important;
         }
 
-        .stat-number {
-            display: block;
-            font-size: 2rem;
-            font-weight: 700;
-            line-height: 1;
+        #contracts-page .stat-number {
+            display: block !important;
+            font-size: 2rem !important;
+            font-weight: 700 !important;
+            line-height: 1 !important;
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        #contracts-page .stat-label {
+            font-size: 0.9rem !important;
+            opacity: 0.8 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
         }
 
         /* Contract Controls */
-        .contract-controls {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 30px;
+        #contracts-page .contract-controls {
+            background: white !important;
+            border-radius: 16px !important;
+            padding: 25px !important;
+            margin-bottom: 30px !important;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1) !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 30px !important;
         }
 
         .search-section {
@@ -2351,59 +2350,59 @@
             position: relative;
         }
 
-        .contracts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
+        #contracts-page .contracts-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important;
+            gap: 25px !important;
+            margin-bottom: 30px !important;
         }
 
-        .contract-card {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-            border: 1px solid #e8ecf4;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
+        #contracts-page .contract-card {
+            background: white !important;
+            border-radius: 16px !important;
+            padding: 25px !important;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important;
+            border: 1px solid #e8ecf4 !important;
+            transition: all 0.3s ease !important;
+            cursor: pointer !important;
+            position: relative !important;
+            overflow: hidden !important;
         }
 
-        .contract-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        #contracts-page .contract-card::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            height: 4px !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         }
 
-        .contract-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        #contracts-page .contract-card:hover {
+            transform: translateY(-8px) !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
         }
 
-        .contract-card h3 {
-            margin: 0 0 15px 0;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #1e293b;
-            line-height: 1.4;
+        #contracts-page .contract-card h3 {
+            margin: 0 0 15px 0 !important;
+            font-size: 1.3rem !important;
+            font-weight: 700 !important;
+            color: #1e293b !important;
+            line-height: 1.4 !important;
         }
 
-        .contract-info {
-            display: grid;
-            gap: 12px;
-            margin-bottom: 20px;
+        #contracts-page .contract-info {
+            display: grid !important;
+            gap: 12px !important;
+            margin-bottom: 20px !important;
         }
 
-        .contract-info-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
+        #contracts-page .contract-info-item {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            font-size: 0.9rem !important;
         }
 
         .contract-info-item i {
@@ -2463,29 +2462,29 @@
         }
 
         /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            color: #64748b;
+        #contracts-page .empty-state {
+            text-align: center !important;
+            padding: 80px 20px !important;
+            color: #64748b !important;
         }
 
-        .empty-icon {
-            font-size: 4rem;
-            color: #cbd5e1;
-            margin-bottom: 20px;
+        #contracts-page .empty-icon {
+            font-size: 4rem !important;
+            color: #cbd5e1 !important;
+            margin-bottom: 20px !important;
         }
 
-        .empty-state h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 0 0 10px 0;
-            color: #475569;
+        #contracts-page .empty-state h3 {
+            font-size: 1.5rem !important;
+            font-weight: 600 !important;
+            margin: 0 0 10px 0 !important;
+            color: #475569 !important;
         }
 
-        .empty-state p {
-            font-size: 1rem;
-            margin: 0 0 30px 0;
-            color: #64748b;
+        #contracts-page .empty-state p {
+            font-size: 1rem !important;
+            margin: 0 0 30px 0 !important;
+            color: #64748b !important;
         }
 
         /* Professional Modal Styles */
@@ -2886,6 +2885,99 @@
                 transform: translateX(0);
                 opacity: 1;
             }
+        }
+
+        /* ===== EMERGENCY FORCE STYLES - HIGHEST PRIORITY ===== */
+        /* These styles force the contract interface to work regardless of conflicts */
+        #contracts-page {
+            display: block !important;
+            padding: 20px !important;
+            background: #f8fafc !important;
+        }
+
+        #contracts-page .contract-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border-radius: 20px !important;
+            padding: 30px !important;
+            margin-bottom: 30px !important;
+            color: white !important;
+            display: block !important;
+        }
+
+        #contracts-page .contract-stats {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+            gap: 20px !important;
+            margin-bottom: 30px !important;
+        }
+
+        #contracts-page .stat-card {
+            background: rgba(255,255,255,0.15) !important;
+            border-radius: 16px !important;
+            padding: 25px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 20px !important;
+        }
+
+        #contracts-page .contracts-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important;
+            gap: 25px !important;
+        }
+
+        #contracts-page .contract-card {
+            background: white !important;
+            border-radius: 16px !important;
+            padding: 25px !important;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important;
+            border-top: 4px solid #667eea !important;
+            margin-bottom: 0 !important;
+        }
+
+        #contracts-page .professional-btn {
+            padding: 12px 20px !important;
+            border: none !important;
+            border-radius: 12px !important;
+            background: #667eea !important;
+            color: white !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            text-decoration: none !important;
+        }
+
+        #contracts-page .professional-btn:hover {
+            background: #5a67d8 !important;
+            transform: translateY(-2px) !important;
+        }
+
+        #contracts-page .professional-btn.secondary {
+            background: rgba(255,255,255,0.2) !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+        }
+
+        /* Force visibility of key elements */
+        #contracts-page .header-content,
+        #contracts-page .header-info,
+        #contracts-page .header-actions,
+        #contracts-page .contract-controls,
+        #contracts-page .contracts-container {
+            display: flex !important;
+        }
+
+        #contracts-page .header-content {
+            justify-content: space-between !important;
+            align-items: flex-start !important;
+            margin-bottom: 30px !important;
+        }
+
+        #contracts-page .header-info h1 {
+            font-size: 2.5rem !important;
+            font-weight: 700 !important;
+            margin: 0 0 10px 0 !important;
+            color: white !important;
         }
     </style>
 </head>
@@ -4371,11 +4463,19 @@ const initializeApp = () => {
     console.log('✅ Functions check:', {
         updateContractStats: typeof updateContractStats,
         filterContracts: typeof filterContracts,
-        showNotification: typeof showNotification
+        showNotification: typeof showNotification,
+        loadContracts: typeof loadContracts
     });
     
-    loadContracts();
-    updateContractStats(); // Update contract statistics on startup
+    // Initialize contracts page specifically
+    if (document.getElementById('contracts-page')) {
+        console.log('✅ Contracts page found, loading contracts...');
+        loadContracts();
+        updateContractStats(); // Update contract statistics on startup
+    } else {
+        console.log('❌ Contracts page not found');
+    }
+    
     loadNotifications();
     loadAIPrompt();
     loadProjectsList(); // Load projects for the new page
@@ -4578,121 +4678,153 @@ const saveContract = () => {
     }
 };
 
-// Professional contract loading with enhanced UI
+// Professional contract loading with enhanced UI and safety checks
 const loadContracts = () => {
-    const contracts = DB.get('contracts');
-    const container = getEl('saved-contracts-list');
-    const emptyState = getEl('contracts-empty-state');
-    
-    container.innerHTML = '';
-    
-    if (contracts.length === 0) {
-        container.style.display = 'none';
-        emptyState.style.display = 'block';
-        return;
-    }
-    
-    container.style.display = 'grid';
-    emptyState.style.display = 'none';
-    
-    contracts.forEach(c => {
-        const card = document.createElement('div');
-        card.className = 'contract-card';
+    try {
+        console.log('🔄 Loading contracts...');
+        const contracts = DB.get('contracts');
+        const container = getEl('saved-contracts-list');
+        const emptyState = getEl('contracts-empty-state');
         
-        // Calculate status and progress
-        const startDate = new Date(c.start);
-        const endDate = new Date(c.end);
-        const currentDate = new Date();
-        const daysLeft = Math.ceil((endDate - currentDate) / (1000 * 60 * 60 * 24));
+        console.log('📦 Container elements found:', {
+            container: !!container,
+            emptyState: !!emptyState,
+            contractsCount: contracts.length
+        });
         
-        card.innerHTML = `
-            <h3>${c.title}</h3>
-            <div class="contract-info">
-                <div class="contract-info-item">
-                    <i class="fas fa-hashtag"></i>
-                    <strong>Number:</strong> ${c.number}
-                </div>
-                <div class="contract-info-item">
-                    <i class="fas fa-building"></i>
-                    <strong>Company:</strong> ${c.company}
-                </div>
-                <div class="contract-info-item">
-                    <i class="fas fa-user"></i>
-                    <strong>Client:</strong> ${c.client}
-                </div>
-                <div class="contract-info-item">
-                    <i class="fas fa-dollar-sign"></i>
-                    <strong>Value:</strong> $${parseFloat(c.value).toLocaleString()}
-                </div>
-                <div class="contract-info-item">
-                    <i class="fas fa-calendar"></i>
-                    <strong>Duration:</strong> ${formatDateRange(c.start, c.end)}
-                </div>
-                <div class="contract-info-item">
-                    <i class="fas fa-flag"></i>
-                    <strong>Status:</strong> 
-                    <span class="contract-status ${c.status || 'active'}">${(c.status || 'active').toUpperCase()}</span>
-                </div>
-                ${daysLeft > 0 ? `
-                <div class="contract-info-item">
-                    <i class="fas fa-clock"></i>
-                    <strong>Days Left:</strong> ${daysLeft} days
-                </div>` : ''}
-                ${c.category ? `
-                <div class="contract-info-item">
-                    <i class="fas fa-tag"></i>
-                    <strong>Category:</strong> ${c.category}
-                </div>` : ''}
-            </div>
-            <div class="contract-actions">
-                <button class="professional-btn primary" onclick="viewContract('${c.id}')">
-                    <i class="fas fa-eye"></i> View
-                </button>
-                <button class="professional-btn secondary" onclick="editContract('${c.id}')">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="professional-btn secondary" onclick="duplicateContract('${c.id}')">
-                    <i class="fas fa-copy"></i> Copy
-                </button>
-                <button class="professional-btn secondary" onclick="deleteContract('${c.id}')">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </div>
-        `;
+        if (!container) {
+            console.error('❌ Container #saved-contracts-list not found');
+            return;
+        }
         
-        container.appendChild(card);
-    });
-    
-    updateContractStats();
-};
+        container.innerHTML = '';
+        
+        if (contracts.length === 0) {
+            if (container) container.style.display = 'none';
+            if (emptyState) emptyState.style.display = 'block';
+            console.log('📝 Showing empty state');
+            return;
+        }
+        
+                 if (container) container.style.display = 'grid';
+         if (emptyState) emptyState.style.display = 'none';
+      
+         contracts.forEach(c => {
+             const card = document.createElement('div');
+             card.className = 'contract-card';
+             
+             // Calculate status and progress
+             const startDate = new Date(c.start);
+             const endDate = new Date(c.end);
+             const currentDate = new Date();
+             const daysLeft = Math.ceil((endDate - currentDate) / (1000 * 60 * 60 * 24));
+             
+             card.innerHTML = `
+                 <h3>${c.title}</h3>
+                 <div class="contract-info">
+                     <div class="contract-info-item">
+                         <i class="fas fa-hashtag"></i>
+                         <strong>Number:</strong> ${c.number}
+                     </div>
+                     <div class="contract-info-item">
+                         <i class="fas fa-building"></i>
+                         <strong>Company:</strong> ${c.company}
+                     </div>
+                     <div class="contract-info-item">
+                         <i class="fas fa-user"></i>
+                         <strong>Client:</strong> ${c.client}
+                     </div>
+                     <div class="contract-info-item">
+                         <i class="fas fa-dollar-sign"></i>
+                         <strong>Value:</strong> $${parseFloat(c.value).toLocaleString()}
+                     </div>
+                     <div class="contract-info-item">
+                         <i class="fas fa-calendar"></i>
+                         <strong>Duration:</strong> ${formatDateRange(c.start, c.end)}
+                     </div>
+                     <div class="contract-info-item">
+                         <i class="fas fa-flag"></i>
+                         <strong>Status:</strong> 
+                         <span class="contract-status ${c.status || 'active'}">${(c.status || 'active').toUpperCase()}</span>
+                     </div>
+                     ${daysLeft > 0 ? `
+                     <div class="contract-info-item">
+                         <i class="fas fa-clock"></i>
+                         <strong>Days Left:</strong> ${daysLeft} days
+                     </div>` : ''}
+                     ${c.category ? `
+                     <div class="contract-info-item">
+                         <i class="fas fa-tag"></i>
+                         <strong>Category:</strong> ${c.category}
+                     </div>` : ''}
+                 </div>
+                 <div class="contract-actions">
+                     <button class="professional-btn primary" onclick="viewContract('${c.id}')">
+                         <i class="fas fa-eye"></i> View
+                     </button>
+                     <button class="professional-btn secondary" onclick="editContract('${c.id}')">
+                         <i class="fas fa-edit"></i> Edit
+                     </button>
+                     <button class="professional-btn secondary" onclick="duplicateContract('${c.id}')">
+                         <i class="fas fa-copy"></i> Copy
+                     </button>
+                     <button class="professional-btn secondary" onclick="deleteContract('${c.id}')">
+                         <i class="fas fa-trash"></i> Delete
+                     </button>
+                 </div>
+             `;
+             
+             container.appendChild(card);
+         });
+         
+         updateContractStats();
+         console.log('✅ Contracts loaded successfully');
+     } catch (error) {
+         console.error('❌ Error loading contracts:', error);
+     }
+ };
 
 // Professional Contract Management Functions
 
-// Update contract statistics
+// Update contract statistics with safety checks
 const updateContractStats = () => {
-    const contracts = DB.get('contracts');
-    const totalContracts = contracts.length;
-    const activeContracts = contracts.filter(c => (c.status || 'active') === 'active').length;
-    const totalValue = contracts.reduce((sum, c) => sum + parseFloat(c.value || 0), 0);
-    
-    // Calculate upcoming deadlines (within 30 days)
-    const currentDate = new Date();
-    const thirtyDaysFromNow = new Date(currentDate.getTime() + (30 * 24 * 60 * 60 * 1000));
-    const upcomingDeadlines = contracts.filter(c => {
-        const endDate = new Date(c.end);
-        return endDate >= currentDate && endDate <= thirtyDaysFromNow;
-    }).length;
-    
-    // Update UI elements
-    const totalEl = getEl('total-contracts');
-    const activeEl = getEl('active-contracts');
-    const valueEl = getEl('total-value');
-    const deadlinesEl = getEl('upcoming-deadlines');
-    
-    if (totalEl) totalEl.textContent = totalContracts;
-    if (activeEl) activeEl.textContent = activeContracts;
-    if (valueEl) valueEl.textContent = `$${totalValue.toLocaleString()}`;
-    if (deadlinesEl) deadlinesEl.textContent = upcomingDeadlines;
+    try {
+        console.log('📊 Updating contract statistics...');
+        const contracts = DB.get('contracts');
+        const totalContracts = contracts.length;
+        const activeContracts = contracts.filter(c => (c.status || 'active') === 'active').length;
+        const totalValue = contracts.reduce((sum, c) => sum + parseFloat(c.value || 0), 0);
+        
+        // Calculate upcoming deadlines (within 30 days)
+        const currentDate = new Date();
+        const thirtyDaysFromNow = new Date(currentDate.getTime() + (30 * 24 * 60 * 60 * 1000));
+        const upcomingDeadlines = contracts.filter(c => {
+            const endDate = new Date(c.end);
+            return endDate >= currentDate && endDate <= thirtyDaysFromNow;
+        }).length;
+        
+        // Update UI elements with safety checks
+        const totalEl = getEl('total-contracts');
+        const activeEl = getEl('active-contracts');
+        const valueEl = getEl('total-value');
+        const deadlinesEl = getEl('upcoming-deadlines');
+        
+        console.log('📊 Stats elements found:', {
+            totalEl: !!totalEl,
+            activeEl: !!activeEl,
+            valueEl: !!valueEl,
+            deadlinesEl: !!deadlinesEl
+        });
+        
+        if (totalEl) totalEl.textContent = totalContracts;
+        if (activeEl) activeEl.textContent = activeContracts;
+        if (valueEl) valueEl.textContent = `$${totalValue.toLocaleString()}`;
+        if (deadlinesEl) deadlinesEl.textContent = upcomingDeadlines;
+        
+        console.log('✅ Contract stats updated successfully');
+    } catch (error) {
+        console.error('❌ Error updating contract stats:', error);
+    }
 };
 
 // Format date range for display
