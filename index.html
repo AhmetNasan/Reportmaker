@@ -5224,16 +5224,6 @@ const showNotification = (type, message) => {
     }, 5000);
 };
 
-const getNotificationIcon = (type) => {
-    switch (type) {
-        case 'success': return 'fa-check-circle';
-        case 'error': return 'fa-exclamation-circle';
-        case 'warning': return 'fa-exclamation-triangle';
-        case 'info': return 'fa-info-circle';
-        default: return 'fa-bell';
-    }
-};
-
 const getNotificationColor = (type) => {
     switch (type) {
         case 'success': return '#10b981';
@@ -7497,6 +7487,430 @@ function showNotification(message, type = 'info') {
         font-weight: 500;
         z-index: 2000;
         animation: slideIn 0.3s ease;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    `;
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas ${getNotificationIcon(type)}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 4000);
+}
+
+// Professional Notification Icon Helper
+const getNotificationIcon = (type) => {
+    switch (type) {
+        case 'success': return 'fa-check-circle';
+        case 'error': return 'fa-exclamation-circle';
+        case 'warning': return 'fa-exclamation-triangle';
+        case 'info': return 'fa-info-circle';
+        default: return 'fa-bell';
+    }
+};
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM Content Loaded - Initializing App...');
+    initializeApp();
+});
+
+// ======== END OF SCRIPT ========
+</script>
+</head>
+<body>
+
+    <div id="app-container" class="page active">
+        <header class="header">
+            <h1 id="app-main-title">Project Dashboard</h1>
+            <div class="header-actions">
+                <select id="language-switcher" onchange="switchLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="main-container app-grid">
+            <aside class="sidebar">
+                <button id="nav-contracts" class="nav-btn active" onclick="showAppPage('contracts-page')"><i class="fa-solid fa-file-contract"></i> Contracts</button>
+                <button id="nav-map" class="nav-btn" onclick="showAppPage('map-page')"><i class="fa-solid fa-map-location-dot"></i> GIS Map</button>
+                <button id="nav-inspection-report" class="nav-btn" onclick="showAppPage('inspection-report-page')"><i class="fa-solid fa-file-lines"></i> Inspection Report</button>
+                <button id="nav-cost-estimation" class="nav-btn" onclick="showAppPage('cost-estimation-page')"><i class="fa-solid fa-calculator"></i> Cost Estimation</button>
+                <button id="nav-ai" class="nav-btn" onclick="showAppPage('ai-page')"><i class="fa-solid fa-robot"></i> AI Analysis</button>
+                <button id="nav-saved-projects" class="nav-btn" onclick="showAppPage('saved-projects-page')"><i class="fa-solid fa-folder-open"></i> Saved Projects</button>
+                <button id="nav-notebook" class="nav-btn" onclick="showAppPage('notebook-page')"><i class="fa-solid fa-book"></i> Notebook</button>
+                <button id="nav-drawing" class="nav-btn" onclick="showAppPage('drawing-page')"><i class="fa-solid fa-pencil-ruler"></i> Drawing</button>
+                <button id="nav-notifications" class="nav-btn" onclick="showAppPage('notifications-page')"><i class="fa-solid fa-bell"></i> Notifications</button>
+            </aside>
+
+            <main id="app-content-area">
+                <div id="contracts-page" class="app-content active">
+                    <!-- Professional Contract Management Header -->
+                    <div class="contract-header">
+                        <div class="header-content">
+                            <div class="header-info">
+                                <h1><i class="fas fa-file-contract"></i> Contract Management</h1>
+                                <p class="header-subtitle">Manage your engineering contracts and project agreements</p>
+                            </div>
+                            <div class="header-actions">
+                                <button class="professional-btn primary" onclick="showModal('contract-form-modal')">
+                                    <i class="fas fa-plus"></i> New Contract
+                                </button>
+                                <button class="professional-btn secondary" onclick="exportAllContracts()">
+                                    <i class="fas fa-download"></i> Export All
+                                </button>
+                                <button class="professional-btn info" onclick="importContracts()">
+                                    <i class="fas fa-upload"></i> Import
+                                </button>
+                            </div>
+                        </div>
+                        <div class="contract-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-file-contract"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="total-contracts">0</span>
+                                    <span class="stat-label">Total Contracts</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="active-contracts">0</span>
+                                    <span class="stat-label">Active</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="total-value">$0</span>
+                                    <span class="stat-label">Total Value</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="upcoming-deadlines">0</span>
+                                    <span class="stat-label">Due Soon</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Contract Search & Filter -->
+                    <div class="contract-controls">
+                        <div class="search-section">
+                            <div class="search-box-advanced">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="contract-search" placeholder="Search contracts by title, number, or company..." onkeyup="filterContracts()">
+                            </div>
+                            <div class="filter-controls">
+                                <select id="status-filter" onchange="filterContracts()">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                                <select id="sort-contracts" onchange="sortContracts()">
+                                    <option value="date-desc">Newest First</option>
+                                    <option value="date-asc">Oldest First</option>
+                                    <option value="value-desc">Highest Value</option>
+                                    <option value="value-asc">Lowest Value</option>
+                                    <option value="title-asc">Title A-Z</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="view-toggle">
+                            <button class="view-btn active" onclick="switchView('grid')" data-view="grid">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="view-btn" onclick="switchView('list')" data-view="list">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Professional Contracts Grid -->
+                    <div class="contracts-container">
+                        <div id="saved-contracts-list" class="contracts-grid">
+                            <!-- Contracts will be loaded here -->
+                        </div>
+                        
+                        <!-- Empty State -->
+                        <div id="contracts-empty-state" class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-file-contract"></i>
+                            </div>
+                            <h3>No Contracts Found</h3>
+                            <p>Get started by creating your first engineering contract</p>
+                            <button class="professional-btn primary" onclick="showModal('contract-form-modal')">
+                                <i class="fas fa-plus"></i> Create First Contract
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other pages content would go here -->
+                <div id="map-page" class="app-content" style="display:none;">
+                    <div style="padding: 40px; text-align: center;">
+                        <h2>GIS Map</h2>
+                        <p>GIS map interface would be here</p>
+                    </div>
+                </div>
+
+                <div id="inspection-report-page" class="app-content" style="display:none;">
+                    <div style="padding: 40px; text-align: center;">
+                        <h2>Inspection Report</h2>
+                        <p>Inspection report interface would be here</p>
+                    </div>
+                </div>
+
+                <div id="cost-estimation-page" class="app-content" style="display:none;">
+                    <div style="padding: 40px; text-align: center;">
+                        <h2>Cost Estimation</h2>
+                        <p>Cost estimation interface would be here</p>
+                    </div>
+                </div>
+
+                <div id="ai-page" class="app-content" style="display:none;">
+                    <div style="padding: 40px; text-align: center;">
+                        <h2>AI Analysis</h2>
+                        <p>AI analysis interface would be here</p>
+                    </div>
+                </div>
+
+                <div id="saved-projects-page" class="app-content" style="display:none;">
+                    <div style="padding: 40px; text-align: center;">
+                        <h2>Saved Projects</h2>
+                        <p>Saved projects interface would be here</p>
+                    </div>
+                </div>
+
+                <div id="notebook-page" class="app-content" style="display:none;">
+                    <div style="padding: 40px; text-align: center;">
+                        <h2>Notebook</h2>
+                        <p>Notebook interface would be here</p>
+                    </div>
+                </div>
+
+                <div id="drawing-page" class="app-content" style="display:none;">
+                    <div style="padding: 40px; text-align: center;">
+                        <h2>Drawing</h2>
+                        <p>Drawing interface would be here</p>
+                    </div>
+                </div>
+
+                <div id="notifications-page" class="app-content" style="display:none;">
+                    <div style="padding: 40px; text-align: center;">
+                        <h2>Notifications</h2>
+                        <p>Notifications interface would be here</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Enhanced Contract Form Modal -->
+    <div id="contract-form-modal" class="modal-overlay">
+        <div class="modal-content professional">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-file-contract"></i>
+                    <span id="modal-title-text">Create New Contract</span>
+                </div>
+                <button class="modal-close" onclick="hideModal('contract-form-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="contract-form" class="professional-form">
+                    <!-- Basic Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            Basic Information
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contract-title">Contract Title *</label>
+                                <input type="text" id="contract-title" placeholder="Enter contract title" required>
+                                <span class="field-helper">Descriptive name for the contract</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="contract-number">Contract Number *</label>
+                                <input type="text" id="contract-number" placeholder="e.g., ENG-2024-001" required>
+                                <span class="field-helper">Unique contract identifier</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="company-name">Company Name *</label>
+                                <input type="text" id="company-name" placeholder="Enter company name" required>
+                                <span class="field-helper">Contracting company</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="client-name">Client Name *</label>
+                                <input type="text" id="client-name" placeholder="Enter client name" required>
+                                <span class="field-helper">Project client contact</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Details Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            Project Timeline & Value
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contract-start">Start Date *</label>
+                                <input type="date" id="contract-start" required>
+                                <span class="field-helper">Project commencement date</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="contract-end">End Date *</label>
+                                <input type="date" id="contract-end" required>
+                                <span class="field-helper">Project completion deadline</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contract-value">Project Value *</label>
+                                <div class="input-with-addon">
+                                    <span class="input-addon">$</span>
+                                    <input type="number" id="contract-value" placeholder="0.00" step="0.01" required>
+                                </div>
+                                <span class="field-helper">Total contract value in USD</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="contract-status">Status</label>
+                                <select id="contract-status">
+                                    <option value="pending">Pending</option>
+                                    <option value="active" selected>Active</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="on-hold">On Hold</option>
+                                </select>
+                                <span class="field-helper">Current contract status</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documentation Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-file-upload"></i>
+                            Documentation & BOQ
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="contract-description">Project Description</label>
+                                <textarea id="contract-description" rows="3" placeholder="Enter project description..."></textarea>
+                                <span class="field-helper">Brief description of the project scope</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contract-boq">BOQ Upload (CSV/Excel)</label>
+                                <div class="file-upload-area" onclick="document.getElementById('contract-boq').click()">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span class="upload-text">Click to upload BOQ file</span>
+                                    <span class="upload-helper">Supports CSV, XLS, XLSX files</span>
+                                    <input type="file" id="contract-boq" accept=".csv,.xls,.xlsx" style="display: none;" onchange="handleFileUpload(this)">
+                                </div>
+                                <div id="file-preview" class="file-preview" style="display: none;">
+                                    <i class="fas fa-file-excel"></i>
+                                    <span class="file-name"></span>
+                                    <button type="button" class="remove-file" onclick="removeFile()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>BOQ Template</label>
+                                <div class="template-actions">
+                                    <button type="button" class="template-btn" onclick="downloadBoqTemplate()">
+                                        <i class="fas fa-download"></i>
+                                        Download Template
+                                    </button>
+                                    <span class="field-helper">Download our standardized BOQ template</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-cog"></i>
+                            Additional Information
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="project-manager">Project Manager</label>
+                                <input type="text" id="project-manager" placeholder="Enter project manager name">
+                                <span class="field-helper">Assigned project manager</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="contract-category">Category</label>
+                                <select id="contract-category">
+                                    <option value="">Select category</option>
+                                    <option value="construction">Construction</option>
+                                    <option value="design">Design</option>
+                                    <option value="consulting">Consulting</option>
+                                    <option value="maintenance">Maintenance</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <span class="field-helper">Project category type</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="contract-notes">Notes</label>
+                                <textarea id="contract-notes" rows="2" placeholder="Additional notes or comments..."></textarea>
+                                <span class="field-helper">Any additional information or special requirements</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div id="contract-form-modal-message" class="message" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="professional-btn secondary" onclick="hideModal('contract-form-modal')">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="professional-btn primary" onclick="saveContract()">
+                    <i class="fas fa-save"></i> <span id="save-btn-text">Save Contract</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align: center; padding: 20px; color: #666; font-size: 0.9rem; border-top: 1px solid #e8ecf4; margin-top: 40px;">
+        <p>&copy; 2024 Engineering Project Platform. All rights reserved.</p>
+        <p>Developed by Professional Engineering Team</p>
+    </footer>
+
+</body>
+</html>
         max-width: 300px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     `;
