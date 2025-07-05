@@ -2102,15 +2102,16 @@
         }
 
         /* ===== PROFESSIONAL CONTRACT MANAGEMENT STYLES ===== */
-
-        /* Contract Header Styles */
+        /* TEST: If you can see this red border, the CSS is loading */
         .contract-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            color: white;
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+            border: 2px solid red !important; /* REMOVE THIS AFTER TESTING */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border-radius: 20px !important;
+            padding: 30px !important;
+            margin-bottom: 30px !important;
+            color: white !important;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3) !important;
+            display: block !important;
         }
 
         .header-content {
@@ -4363,12 +4364,23 @@ If no defects are found, return 'No visible defects detected'. Present result in
 let currentProjectId = localStorage.getItem('currentProjectId');
 
 const initializeApp = () => {
+    console.log('🚀 Initializing Professional Contract App...');
     DB.init(); // Initialize database
+    
+    // Debug: Check if new functions exist
+    console.log('✅ Functions check:', {
+        updateContractStats: typeof updateContractStats,
+        filterContracts: typeof filterContracts,
+        showNotification: typeof showNotification
+    });
+    
     loadContracts();
     updateContractStats(); // Update contract statistics on startup
     loadNotifications();
     loadAIPrompt();
     loadProjectsList(); // Load projects for the new page
+    
+    console.log('✅ App initialized successfully!');
 
     // Initialize Report & Estimation page components
     const today = new Date().toISOString().split('T')[0];
