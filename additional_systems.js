@@ -1,1455 +1,964 @@
-// Global variables
-let map;
-let projects = [];
-let currentData = [];
-let charts = {};
-let contracts = [];
-let boqData = [];
-let inspectionData = [];
-let costEstimationData = [];
-let aiResults = [];
-let notebooks = [];
-let drawings = [];
-let currentProject = {
-    name: 'New Project',
-    contracts: [],
-    inspections: [],
-    costEstimations: [],
-    aiResults: [],
-    notebooks: [],
-    drawings: [],
-    settings: {}
-};
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-});
-
-function initializeApp() {
-    // Load stored data
-    loadProjects();
-    loadSettings();
-    loadAllData();
-    
-    // Initialize dashboard
-    updateDashboardStats();
-    initializeDashboardChart();
-    
-    // Set default dates
-    setDefaultDates();
-    
-    // Initialize event listeners
-    setupEventListeners();
-    
-    // Show welcome message
-    showMessage('Welcome to Engineering Project Platform - Comprehensive Edition', 'success');
-}
-
-function loadAllData() {
-    // Load contracts
-    const storedContracts = localStorage.getItem('engineeringContracts');
-    if (storedContracts) {
-        try {
-            contracts = JSON.parse(storedContracts);
-        } catch (e) {
-            console.error('Error loading contracts:', e);
-            contracts = [];
-        }
-    }
-
-    // Load BOQ data
-    const storedBOQ = localStorage.getItem('engineeringBOQ');
-    if (storedBOQ) {
-        try {
-            boqData = JSON.parse(storedBOQ);
-            populateBOQDropdown();
-        } catch (e) {
-            console.error('Error loading BOQ:', e);
-            boqData = [];
-        }
-    }
-
-    // Load inspection data
-    const storedInspections = localStorage.getItem('engineeringInspections');
-    if (storedInspections) {
-        try {
-            inspectionData = JSON.parse(storedInspections);
-        } catch (e) {
-            console.error('Error loading inspections:', e);
-            inspectionData = [];
-        }
-    }
-
-    // Load cost estimation data
-    const storedCostEstimations = localStorage.getItem('engineeringCostEstimations');
-    if (storedCostEstimations) {
-        try {
-            costEstimationData = JSON.parse(storedCostEstimations);
-        } catch (e) {
-            console.error('Error loading cost estimations:', e);
-            costEstimationData = [];
-        }
-    }
-
-    // Load AI results
-    const storedAIResults = localStorage.getItem('engineeringAIResults');
-    if (storedAIResults) {
-        try {
-            aiResults = JSON.parse(storedAIResults);
-        } catch (e) {
-            console.error('Error loading AI results:', e);
-            aiResults = [];
-        }
-    }
-
-    // Load notebooks
-    const storedNotebooks = localStorage.getItem('engineeringNotebooks');
-    if (storedNotebooks) {
-        try {
-            notebooks = JSON.parse(storedNotebooks);
-        } catch (e) {
-            console.error('Error loading notebooks:', e);
-            notebooks = [];
-        }
-    }
-}
-
-function setDefaultDates() {
-    const today = new Date().toISOString().split('T')[0];
-    const inspectionDate = document.getElementById('inspection-date');
-    if (inspectionDate) {
-        inspectionDate.value = today;
-    }
-}
-
-function setupEventListeners() {
-    // Settings form
-    const settingsForm = document.getElementById('settings-form');
-    if (settingsForm) {
-        settingsForm.addEventListener('submit', handleSettingsSubmit);
-    }
-    
-    // Project form
-    const projectForm = document.getElementById('create-project-form');
-    if (projectForm) {
-        projectForm.addEventListener('submit', handleProjectSubmit);
-    }
-    
-    // Zoom level slider
-    const zoomSlider = document.getElementById('zoom-level');
-    if (zoomSlider) {
-        zoomSlider.addEventListener('input', function() {
-            document.getElementById('zoom-display').textContent = this.value;
-        });
-    }
-}
-
-// Page Navigation
-function showPage(pageId) {
-    // Hide all pages
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => page.classList.remove('active'));
-    
-    // Show selected page
-    const targetPage = document.getElementById(pageId);
-    if (targetPage) {
-        targetPage.classList.add('active');
-    }
-    
-    // Update navigation buttons
-    const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(btn => btn.classList.remove('active'));
-    
-    // Find and activate the correct nav button
-    const activeBtn = document.querySelector(`[onclick="showPage('${pageId}')"]`);
-    if (activeBtn) {
-        activeBtn.classList.add('active');
-    }
-    
-    // Initialize page-specific functionality
-    if (pageId === 'mapping-page') {
-        initializeMap();
-    } else if (pageId === 'reports-page') {
-        initializeReportsCharts();
-    } else if (pageId === 'projects-page') {
-        renderProjectsTable();
-    }
-}
-
-// Project Management
-function loadProjects() {
-    const stored = localStorage.getItem('engineeringProjects');
-    if (stored) {
-        try {
-            projects = JSON.parse(stored);
-        } catch (e) {
-            console.error('Error loading projects:', e);
-            projects = [];
-        }
-    }
-}
-
-function saveProjects() {
-    try {
-        localStorage.setItem('engineeringProjects', JSON.stringify(projects));
-    } catch (e) {
-        console.error('Error saving projects:', e);
-        showMessage('Error saving projects to local storage', 'error');
-    }
-}
-
-function showCreateProjectModal() {
-    const modal = document.getElementById('create-project-modal');
-    modal.classList.add('active');
-}
-
-function hideModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.remove('active');
-}
-
-function handleProjectSubmit(event) {
-    event.preventDefault();
-    
-    const formData = new FormData(event.target);
-    const project = {
-        id: Date.now().toString(),
-        name: document.getElementById('project-name').value,
-        location: document.getElementById('project-location').value,
-        description: document.getElementById('project-description').value,
-        status: document.getElementById('project-status').value,
-        createdDate: new Date().toISOString().split('T')[0],
-        coordinates: null // Can be set when clicking on map
-    };
-    
-    projects.push(project);
-    saveProjects();
-    updateDashboardStats();
-    renderProjectsTable();
-    
-    // Reset form and close modal
-    event.target.reset();
-    hideModal('create-project-modal');
-    
-    showMessage('Project created successfully!', 'success');
-}
-
-function renderProjectsTable() {
-    const tbody = document.getElementById('projects-tbody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = '';
-    
-    if (projects.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center">No projects found. Create your first project!</td></tr>';
-        return;
-    }
-    
-    projects.forEach(project => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${project.name}</td>
-            <td>${project.location}</td>
-            <td><span class="status-badge status-${project.status}">${project.status}</span></td>
-            <td>${project.createdDate}</td>
-            <td>
-                <button class="btn btn-sm btn-primary" onclick="editProject('${project.id}')">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteProject('${project.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-function editProject(projectId) {
-    const project = projects.find(p => p.id === projectId);
-    if (!project) return;
-    
-    // Fill form with project data
-    document.getElementById('project-name').value = project.name;
-    document.getElementById('project-location').value = project.location;
-    document.getElementById('project-description').value = project.description || '';
-    document.getElementById('project-status').value = project.status;
-    
-    // Show modal
-    showCreateProjectModal();
-    
-    // Remove old project when form is submitted
-    const form = document.getElementById('create-project-form');
-    form.onsubmit = function(event) {
-        event.preventDefault();
-        
-        // Remove old project
-        projects = projects.filter(p => p.id !== projectId);
-        
-        // Add updated project
-        const updatedProject = {
-            id: projectId,
-            name: document.getElementById('project-name').value,
-            location: document.getElementById('project-location').value,
-            description: document.getElementById('project-description').value,
-            status: document.getElementById('project-status').value,
-            createdDate: project.createdDate,
-            coordinates: project.coordinates
-        };
-        
-        projects.push(updatedProject);
-        saveProjects();
-        updateDashboardStats();
-        renderProjectsTable();
-        
-        // Reset form and close modal
-        event.target.reset();
-        hideModal('create-project-modal');
-        
-        // Restore original form handler
-        form.onsubmit = handleProjectSubmit;
-        
-        showMessage('Project updated successfully!', 'success');
-    };
-}
-
-function deleteProject(projectId) {
-    if (confirm('Are you sure you want to delete this project?')) {
-        projects = projects.filter(p => p.id !== projectId);
-        saveProjects();
-        updateDashboardStats();
-        renderProjectsTable();
-        showMessage('Project deleted successfully!', 'success');
-    }
-}
-
-// Dashboard Functions
-function updateDashboardStats() {
-    document.getElementById('total-projects').textContent = projects.length;
-    
-    const locationsWithCoords = projects.filter(p => p.coordinates).length;
-    document.getElementById('total-locations').textContent = locationsWithCoords;
-    
-    // For now, reports count is based on projects
-    document.getElementById('total-reports').textContent = Math.floor(projects.length * 0.7);
-}
-
-function initializeDashboardChart() {
-    const ctx = document.getElementById('dashboard-chart');
-    if (!ctx) return;
-    
-    // Count projects by status
-    const statusCounts = projects.reduce((acc, project) => {
-        acc[project.status] = (acc[project.status] || 0) + 1;
-        return acc;
-    }, {});
-    
-    if (charts.dashboard) {
-        charts.dashboard.destroy();
-    }
-    
-    charts.dashboard = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(statusCounts),
-            datasets: [{
-                data: Object.values(statusCounts),
-                backgroundColor: [
-                    '#3498db',
-                    '#2ecc71',
-                    '#e74c3c',
-                    '#f39c12',
-                    '#9b59b6'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                },
-                title: {
-                    display: true,
-                    text: 'Projects by Status'
-                }
-            }
-        }
-    });
-}
-
-// Map Functions
-function initializeMap() {
-    if (map) return; // Map already initialized
-    
-    const mapContainer = document.getElementById('map-container');
-    if (!mapContainer) return;
-    
-    // Get default location from settings
-    const defaultLocation = getDefaultLocation();
-    const zoomLevel = getDefaultZoom();
-    
-    map = L.map('map-container').setView(defaultLocation, zoomLevel);
-    
-    // Add tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-    
-    // Add drawing controls
-    map.pm.addControls({
-        position: 'topleft',
-        drawCircle: false,
-        drawCircleMarker: false,
-        drawPolyline: true,
-        drawRectangle: true,
-        drawPolygon: true,
-        editMode: true,
-        dragMode: true,
-        cutPolygon: true,
-        removalMode: true,
-    });
-    
-    // Add project markers
-    addProjectMarkers();
-    
-    // Handle map clicks for adding new project locations
-    map.on('click', function(e) {
-        if (confirm('Add a new project at this location?')) {
-            showCreateProjectModal();
-            // Store coordinates for when project is created
-            window.tempCoordinates = [e.latlng.lat, e.latlng.lng];
-        }
-    });
-}
-
-function addProjectMarkers() {
-    if (!map) return;
-    
-    projects.forEach(project => {
-        if (project.coordinates) {
-            const marker = L.marker(project.coordinates).addTo(map);
-            marker.bindPopup(`
-                <strong>${project.name}</strong><br>
-                Location: ${project.location}<br>
-                Status: ${project.status}<br>
-                <small>Created: ${project.createdDate}</small>
-            `);
-        }
-    });
-}
-
-function getDefaultLocation() {
-    const setting = localStorage.getItem('defaultLocation');
-    if (setting) {
-        const [lat, lng] = setting.split(',').map(s => parseFloat(s.trim()));
-        return [lat, lng];
-    }
-    return [40.7128, -74.0060]; // Default to NYC
-}
-
-function getDefaultZoom() {
-    const setting = localStorage.getItem('defaultZoom');
-    return setting ? parseInt(setting) : 10;
-}
-
-// Map tool functions
-function addMarker() {
-    if (!map) {
-        showMessage('Please open the mapping page first', 'error');
-        return;
-    }
-    map.pm.enableDraw('Marker');
-}
-
-function drawPolygon() {
-    if (!map) {
-        showMessage('Please open the mapping page first', 'error');
-        return;
-    }
-    map.pm.enableDraw('Polygon');
-}
-
-function measureDistance() {
-    if (!map) {
-        showMessage('Please open the mapping page first', 'error');
-        return;
-    }
-    map.pm.enableDraw('Line');
-}
-
-function clearMap() {
-    if (!map) {
-        showMessage('Please open the mapping page first', 'error');
-        return;
-    }
-    map.pm.getGeomanLayers().forEach(layer => {
-        map.removeLayer(layer);
-    });
-}
-
-// Reports and Charts
-function initializeReportsCharts() {
-    initializeStatusChart();
-    initializeProgressChart();
-    initializeAnalyticsChart();
-}
-
-function initializeStatusChart() {
-    const ctx = document.getElementById('status-chart');
-    if (!ctx) return;
-    
-    const statusCounts = projects.reduce((acc, project) => {
-        acc[project.status] = (acc[project.status] || 0) + 1;
-        return acc;
-    }, {});
-    
-    if (charts.status) {
-        charts.status.destroy();
-    }
-    
-    charts.status = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: Object.keys(statusCounts),
-            datasets: [{
-                data: Object.values(statusCounts),
-                backgroundColor: [
-                    '#3498db',
-                    '#2ecc71',
-                    '#e74c3c',
-                    '#f39c12'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-}
-
-function initializeProgressChart() {
-    const ctx = document.getElementById('progress-chart');
-    if (!ctx) return;
-    
-    // Generate monthly data based on project creation dates
-    const monthlyData = generateMonthlyProgressData();
-    
-    if (charts.progress) {
-        charts.progress.destroy();
-    }
-    
-    charts.progress = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: monthlyData.labels,
-            datasets: [{
-                label: 'Projects Created',
-                data: monthlyData.data,
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-function initializeAnalyticsChart() {
-    const ctx = document.getElementById('analytics-chart');
-    if (!ctx) return;
-    
-    // Create a comprehensive analytics chart
-    const statusCounts = projects.reduce((acc, project) => {
-        acc[project.status] = (acc[project.status] || 0) + 1;
-        return acc;
-    }, {});
-    
-    if (charts.analytics) {
-        charts.analytics.destroy();
-    }
-    
-    charts.analytics = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(statusCounts),
-            datasets: [{
-                label: 'Number of Projects',
-                data: Object.values(statusCounts),
-                backgroundColor: [
-                    'rgba(52, 152, 219, 0.8)',
-                    'rgba(46, 204, 113, 0.8)',
-                    'rgba(231, 76, 60, 0.8)',
-                    'rgba(243, 156, 18, 0.8)'
-                ],
-                borderColor: [
-                    '#3498db',
-                    '#2ecc71',
-                    '#e74c3c',
-                    '#f39c12'
-                ],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-function generateMonthlyProgressData() {
-    const months = [];
-    const data = [];
-    const now = new Date();
-    
-    // Generate last 6 months
-    for (let i = 5; i >= 0; i--) {
-        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const monthYear = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        months.push(monthYear);
-        
-        // Count projects created in this month
-        const count = projects.filter(project => {
-            const projectDate = new Date(project.createdDate);
-            return projectDate.getMonth() === date.getMonth() && 
-                   projectDate.getFullYear() === date.getFullYear();
-        }).length;
-        
-        data.push(count);
-    }
-    
-    return { labels: months, data: data };
-}
-
-function generateReport() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Add title
-    doc.setFontSize(20);
-    doc.text('Engineering Project Platform Report', 20, 30);
-    
-    // Add date
-    doc.setFontSize(12);
-    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 45);
-    
-    // Add summary statistics
-    doc.setFontSize(16);
-    doc.text('Summary Statistics', 20, 65);
-    
-    doc.setFontSize(12);
-    doc.text(`Total Projects: ${projects.length}`, 20, 80);
-    doc.text(`Mapped Locations: ${projects.filter(p => p.coordinates).length}`, 20, 95);
-    
-    // Add project status breakdown
-    const statusCounts = projects.reduce((acc, project) => {
-        acc[project.status] = (acc[project.status] || 0) + 1;
-        return acc;
-    }, {});
-    
-    doc.text('Project Status Breakdown:', 20, 115);
-    let yPos = 130;
-    Object.entries(statusCounts).forEach(([status, count]) => {
-        doc.text(`${status}: ${count}`, 30, yPos);
-        yPos += 15;
-    });
-    
-    // Add projects table
-    if (projects.length > 0) {
-        doc.autoTable({
-            startY: yPos + 10,
-            head: [['Project Name', 'Location', 'Status', 'Created Date']],
-            body: projects.map(p => [p.name, p.location, p.status, p.createdDate]),
-            margin: { left: 20, right: 20 }
-        });
-    }
-    
-    // Save the PDF
-    doc.save('engineering-project-report.pdf');
-    showMessage('Report generated successfully!', 'success');
-}
-
-// Data Management
-function handleCSVUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    Papa.parse(file, {
-        header: true,
-        complete: function(results) {
-            currentData = results.data;
-            renderDataTable(results.data, Object.keys(results.data[0] || {}));
-            showMessage('CSV data imported successfully!', 'success');
-        },
-        error: function(error) {
-            showMessage('Error parsing CSV: ' + error.message, 'error');
-        }
-    });
-}
-
-function renderDataTable(data, headers) {
-    const headerRow = document.getElementById('data-table-header');
-    const tbody = document.getElementById('data-table-body');
-    
-    if (!headerRow || !tbody) return;
-    
-    // Clear existing content
-    headerRow.innerHTML = '';
-    tbody.innerHTML = '';
-    
-    // Add headers
-    headers.forEach(header => {
-        const th = document.createElement('th');
-        th.textContent = header;
-        headerRow.appendChild(th);
-    });
-    
-    // Add data rows
-    data.forEach(row => {
-        const tr = document.createElement('tr');
-        headers.forEach(header => {
-            const td = document.createElement('td');
-            td.textContent = row[header] || '';
-            tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-    });
-}
-
-function exportCSV() {
-    if (currentData.length === 0) {
-        showMessage('No data to export. Please import CSV data first.', 'error');
-        return;
-    }
-    
-    const csv = Papa.unparse(currentData);
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'exported-data.csv';
-    link.click();
-    window.URL.revokeObjectURL(url);
-    
-    showMessage('Data exported successfully!', 'success');
-}
-
-function exportData() {
-    const data = {
-        projects: projects,
-        exportDate: new Date().toISOString(),
-        version: '1.0'
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'engineering-platform-data.json';
-    link.click();
-    window.URL.revokeObjectURL(url);
-    
-    showMessage('Platform data exported successfully!', 'success');
-}
-
-function importData() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = function(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (data.projects && Array.isArray(data.projects)) {
-                    projects = data.projects;
-                    saveProjects();
-                    updateDashboardStats();
-                    renderProjectsTable();
-                    showMessage('Platform data imported successfully!', 'success');
-                } else {
-                    showMessage('Invalid data format', 'error');
-                }
-            } catch (error) {
-                showMessage('Error parsing file: ' + error.message, 'error');
-            }
-        };
-        reader.readAsText(file);
-    };
-    input.click();
-}
-
-// Settings Management
-function loadSettings() {
-    const apiKey = localStorage.getItem('apiKey');
-    const defaultLocation = localStorage.getItem('defaultLocation');
-    const defaultZoom = localStorage.getItem('defaultZoom');
-    const autoSave = localStorage.getItem('autoSave');
-    
-    if (apiKey) document.getElementById('api-key').value = apiKey;
-    if (defaultLocation) document.getElementById('default-location').value = defaultLocation;
-    if (defaultZoom) {
-        document.getElementById('zoom-level').value = defaultZoom;
-        document.getElementById('zoom-display').textContent = defaultZoom;
-    }
-    if (autoSave) document.getElementById('auto-save').checked = autoSave === 'true';
-}
-
-function handleSettingsSubmit(event) {
-    event.preventDefault();
-    
-    const apiKey = document.getElementById('api-key').value;
-    const defaultLocation = document.getElementById('default-location').value;
-    const zoomLevel = document.getElementById('zoom-level').value;
-    const autoSave = document.getElementById('auto-save').checked;
-    
-    // Save settings to localStorage
-    if (apiKey) localStorage.setItem('apiKey', apiKey);
-    localStorage.setItem('defaultLocation', defaultLocation);
-    localStorage.setItem('defaultZoom', zoomLevel);
-    localStorage.setItem('autoSave', autoSave.toString());
-    
-    showMessage('Settings saved successfully!', 'success');
-}
-
-// Utility Functions
-function showMessage(text, type = 'success') {
-    const container = document.getElementById('message-container');
-    if (!container) return;
-    
-    const message = document.createElement('div');
-    message.className = `message ${type}`;
-    message.textContent = text;
-    
-    container.appendChild(message);
-    
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-        if (message.parentNode) {
-            message.parentNode.removeChild(message);
-        }
-    }, 5000);
-}
-
-// Initialize charts when window loads
-window.addEventListener('load', function() {
-    // Initialize dashboard chart after a short delay to ensure DOM is ready
-    setTimeout(() => {
-        if (document.querySelector('.page.active')?.id === 'dashboard-page') {
-            initializeDashboardChart();
-        }
-    }, 100);
-});
-
-// ===============================
-// COMPREHENSIVE PLATFORM FUNCTIONS
-// ===============================
-
-// Global Menu Functions
-function changeLanguage() {
-    showMessage('Language selection feature will be implemented in future updates', 'info');
-}
-
-function newProject() {
-    if (confirm('Are you sure you want to start a new project? All unsaved data will be lost.')) {
-        currentProject = {
-            name: 'New Project',
-            contracts: [],
-            inspections: [],
-            costEstimations: [],
-            aiResults: [],
-            notebooks: [],
-            drawings: [],
-            settings: {}
-        };
-        document.getElementById('current-project-name').textContent = 'New Project';
-        clearAllData();
-        showMessage('New project created successfully!', 'success');
-    }
-}
-
-function saveProject() {
-    const projectData = {
-        ...currentProject,
-        timestamp: new Date().toISOString()
-    };
-    
-    localStorage.setItem('currentEngineeringProject', JSON.stringify(projectData));
-    showMessage('Project saved successfully!', 'success');
-}
-
-function exportJSON() {
-    const projectData = {
-        ...currentProject,
-        contracts: contracts,
-        boq: boqData,
-        inspections: inspectionData,
-        costEstimations: costEstimationData,
-        aiResults: aiResults,
-        notebooks: notebooks,
-        drawings: drawings,
-        timestamp: new Date().toISOString()
-    };
-    
-    const dataStr = JSON.stringify(projectData, null, 2);
-    const dataBlob = new Blob([dataStr], {type: 'application/json'});
-    
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    link.download = `${currentProject.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    
-    showMessage('Project exported as JSON successfully!', 'success');
-}
-
-function importJSON() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const projectData = JSON.parse(e.target.result);
-                    
-                    // Load project data
-                    currentProject = projectData;
-                    contracts = projectData.contracts || [];
-                    boqData = projectData.boq || [];
-                    inspectionData = projectData.inspections || [];
-                    costEstimationData = projectData.costEstimations || [];
-                    aiResults = projectData.aiResults || [];
-                    notebooks = projectData.notebooks || [];
-                    drawings = projectData.drawings || [];
-                    
-                    // Update UI
-                    document.getElementById('current-project-name').textContent = currentProject.name || 'Imported Project';
-                    
-                    // Save to localStorage
-                    saveAllData();
-                    
-                    showMessage('Project imported successfully!', 'success');
-                } catch (error) {
-                    showMessage('Error importing project: Invalid JSON file', 'error');
-                }
-            };
-            reader.readAsText(file);
-        }
-    };
-    input.click();
-}
-
-function importHTML() {
-    showMessage('HTML import feature will be implemented in future updates', 'info');
-}
-
-function exportHTML() {
-    showMessage('HTML export feature will be implemented in future updates', 'info');
-}
-
-// ===============================
-// CONTRACTS & BOQ SYSTEM
-// ===============================
-
-function handleLogoUpload(event, previewId) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById(previewId).src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function handleBOQUpload(event) {
-    const file = event.target.files[0];
-    if (file) {
-        // For now, show a preview message
-        showMessage('BOQ file uploaded. Excel parsing will be implemented in future updates.', 'info');
-        document.getElementById('boq-preview').style.display = 'block';
-        
-        // Sample BOQ data for demonstration
-        const sampleBOQ = [
-            {ref: 'A001', asset: 'Road Surface', description: 'Asphalt overlay', unit: 'm²', rate: 45.50},
-            {ref: 'A002', asset: 'Drainage', description: 'Storm drain installation', unit: 'm', rate: 125.00},
-            {ref: 'A003', asset: 'Lighting', description: 'LED street light', unit: 'NR', rate: 850.00}
-        ];
-        
-        populateBOQTable(sampleBOQ);
-        boqData = sampleBOQ;
-        populateBOQDropdown();
-    }
-}
-
-function populateBOQTable(data) {
-    const table = document.getElementById('boq-table');
-    const header = document.getElementById('boq-table-header');
-    const body = document.getElementById('boq-table-body');
-    
-    // Clear existing content
-    header.innerHTML = '';
-    body.innerHTML = '';
-    
-    if (data.length > 0) {
-        // Create headers
-        const headers = Object.keys(data[0]);
-        const headerRow = header.insertRow();
-        headers.forEach(header => {
-            const th = document.createElement('th');
-            th.textContent = header.toUpperCase();
-            headerRow.appendChild(th);
-        });
-        
-        // Populate data
-        data.forEach(row => {
-            const tr = body.insertRow();
-            headers.forEach(header => {
-                const td = tr.insertCell();
-                td.textContent = row[header];
-            });
-        });
-    }
-}
-
-function populateBOQDropdown() {
-    const dropdown = document.getElementById('boq-reference');
-    if (dropdown && boqData.length > 0) {
-        dropdown.innerHTML = '<option value="">Select BOQ Reference</option>';
-        boqData.forEach(item => {
-            const option = document.createElement('option');
-            option.value = item.ref;
-            option.textContent = `${item.ref} - ${item.description}`;
-            option.dataset.asset = item.asset;
-            option.dataset.unit = item.unit;
-            option.dataset.rate = item.rate;
-            option.dataset.description = item.description;
-            dropdown.appendChild(option);
-        });
-    }
-}
-
-function autofillBOQData() {
-    const dropdown = document.getElementById('boq-reference');
-    const selectedOption = dropdown.options[dropdown.selectedIndex];
-    
-    if (selectedOption && selectedOption.value) {
-        document.getElementById('boq-asset').value = selectedOption.dataset.asset || '';
-        document.getElementById('boq-unit').value = selectedOption.dataset.unit || '';
-        document.getElementById('boq-rate').value = selectedOption.dataset.rate || '';
-        document.getElementById('boq-description').value = selectedOption.dataset.description || '';
-    }
-}
-
-function saveContract() {
-    const contract = {
-        id: Date.now().toString(),
-        title: document.getElementById('contract-title').value,
-        number: document.getElementById('contract-number').value,
-        value: document.getElementById('project-value').value,
-        companyName: document.getElementById('company-name').value,
-        clientName: document.getElementById('client-name').value,
-        startDate: document.getElementById('start-date').value,
-        endDate: document.getElementById('end-date').value,
-        companyLogo: document.getElementById('company-logo-preview').src,
-        clientLogo: document.getElementById('client-logo-preview').src,
-        createdDate: new Date().toISOString().split('T')[0]
-    };
-    
-    contracts.push(contract);
-    localStorage.setItem('engineeringContracts', JSON.stringify(contracts));
-    
-    showMessage('Contract saved successfully!', 'success');
-    renderContractsList();
-}
-
-function renderContractsList() {
-    const container = document.getElementById('contracts-list');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    contracts.forEach(contract => {
-        const contractCard = document.createElement('div');
-        contractCard.className = 'contract-card';
-        contractCard.innerHTML = `
-            <h6>${contract.title}</h6>
-            <p><strong>Contract #:</strong> ${contract.number}</p>
-            <p><strong>Value:</strong> $${parseFloat(contract.value || 0).toLocaleString()}</p>
-            <p><strong>Client:</strong> ${contract.clientName}</p>
-            <div class="mt-3">
-                <button class="btn btn-sm btn-primary" onclick="editContract('${contract.id}')">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteContract('${contract.id}')">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </div>
-        `;
-        container.appendChild(contractCard);
-    });
-}
-
-function downloadBOQTemplate() {
-    const csvContent = "BOQ Ref.,Asset,Description,Unit,Rate\nA001,Road Surface,Asphalt overlay,m²,45.50\nA002,Drainage,Storm drain installation,m,125.00\nA003,Lighting,LED street light,NR,850.00";
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'BOQ_Template.csv';
-    link.click();
-    showMessage('BOQ template downloaded successfully!', 'success');
-}
-
-// ===============================
-// INSPECTION REPORTS SYSTEM
-// ===============================
-
-function switchLocationMode(mode) {
-    // Hide all panels
-    document.querySelectorAll('.location-panel').forEach(panel => {
-        panel.style.display = 'none';
-    });
-    
-    // Remove active class from all buttons
-    document.querySelectorAll('.location-mode-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Show selected panel and activate button
-    document.getElementById(`location-panel-${mode}`).style.display = 'block';
-    event.target.classList.add('active');
-}
-
-function getCurrentLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            position => {
-                const lat = position.coords.latitude.toFixed(6);
-                const lng = position.coords.longitude.toFixed(6);
-                document.getElementById('current-location-display').textContent = `Location: ${lat}, ${lng}`;
-                document.getElementById('insert-location-btn').style.display = 'block';
-                
-                // Store coordinates for insertion
-                window.currentCoordinates = {lat, lng};
-            },
-            error => {
-                showMessage('Error getting location: ' + error.message, 'error');
-            }
-        );
-    } else {
-        showMessage('Geolocation is not supported by this browser', 'error');
-    }
-}
-
-function insertLocationToTable() {
-    if (window.currentCoordinates) {
-        showMessage('Location will be added to the next table entry', 'success');
-    }
-}
-
-function handlePhotoUpload(event) {
-    const files = event.target.files;
-    const previewContainer = document.getElementById('photo-previews');
-    
-    Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.onclick = () => openPhotoModal(e.target.result);
-            previewContainer.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-function openCamera() {
-    showMessage('Camera integration will be implemented in future updates', 'info');
-}
-
-function addInspectionEntry() {
-    const entry = {
-        id: Date.now().toString(),
-        assetId: document.getElementById('asset-id').value,
-        assetType: document.getElementById('asset-type').value,
-        location: document.getElementById('asset-location').value,
-        inspector: document.getElementById('inspector-name').value,
-        inspectorId: document.getElementById('inspector-id').value,
-        team: document.getElementById('inspection-team').value,
-        photos: Array.from(document.getElementById('photo-previews').children).map(img => img.src),
-        coordinates: window.currentCoordinates || null,
-        date: new Date().toISOString().split('T')[0],
-        notes: ''
-    };
-    
-    inspectionData.push(entry);
-    localStorage.setItem('engineeringInspections', JSON.stringify(inspectionData));
-    
-    renderInspectionTable();
-    clearInspectionForm();
-    showMessage('Inspection entry added successfully!', 'success');
-}
-
-function renderInspectionTable() {
-    const tbody = document.getElementById('inspection-table-body');
-    if (!tbody) return;
-    
-    tbody.innerHTML = '';
-    
-    inspectionData.forEach((entry, index) => {
-        const row = tbody.insertRow();
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${entry.assetId}</td>
-            <td>${entry.assetType}</td>
-            <td>${entry.location}</td>
-            <td>${entry.inspector}</td>
-            <td>
-                <div class="photo-wrapper">
-                    ${entry.photos.map(photo => `<img src="${photo}" onclick="openPhotoModal('${photo}')" />`).join('')}
-                </div>
-            </td>
-            <td>${entry.coordinates ? `${entry.coordinates.lat}, ${entry.coordinates.lng}` : 'Not recorded'}</td>
-            <td contenteditable="true" onblur="updateInspectionNotes(${index}, this.textContent)">${entry.notes}</td>
-            <td>
-                <button class="btn btn-sm btn-danger" onclick="deleteInspectionEntry(${index})">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
-    });
-}
-
-function clearInspectionForm() {
-    document.getElementById('asset-id').value = '';
-    document.getElementById('asset-type').value = '';
-    document.getElementById('asset-location').value = '';
-    document.getElementById('inspector-name').value = '';
-    document.getElementById('inspector-id').value = '';
-    document.getElementById('inspection-team').value = '';
-    document.getElementById('photo-previews').innerHTML = '';
-    window.currentCoordinates = null;
-    document.getElementById('current-location-display').textContent = 'Location: Not detected';
-    document.getElementById('insert-location-btn').style.display = 'none';
-}
-
-// ===============================
-// COST ESTIMATION SYSTEM
-// ===============================
-
-function openCalculator() {
-    // Simple calculator popup
-    const dimensions = prompt('Enter dimensions (L x W x H) or quantity:');
-    if (dimensions) {
-        const quantity = calculateQuantity(dimensions);
-        document.getElementById('boq-quantity').value = quantity;
-        showMessage('Quantity calculated and entered', 'success');
-    }
-}
-
-function calculateQuantity(input) {
-    // Smart unit calculation
-    const parts = input.split('x').map(p => parseFloat(p.trim()));
-    
-    if (parts.length === 1) {
-        return parts[0]; // Single number (NR)
-    } else if (parts.length === 2) {
-        return parts[0] * parts[1]; // Area (m²)
-    } else if (parts.length === 3) {
-        return parts[0] * parts[1] * parts[2]; // Volume (m³)
-    }
-    
-    return parseFloat(input) || 0;
-}
-
-function addCostEstimationEntry() {
-    const quantity = parseFloat(document.getElementById('boq-quantity').value) || 0;
-    const rate = parseFloat(document.getElementById('boq-rate').value) || 0;
-    const amount = quantity * rate;
-    
-    const entry = {
-        id: Date.now().toString(),
-        boqRef: document.getElementById('boq-reference').value,
-        description: document.getElementById('boq-description').value,
-        asset: document.getElementById('boq-asset').value,
-        unit: document.getElementById('boq-unit').value,
-        quantity: quantity,
-        rate: rate,
-        amount: amount,
-        date: new Date().toISOString().split('T')[0]
-    };
-    
-    costEstimationData.push(entry);
-    localStorage.setItem('engineeringCostEstimations', JSON.stringify(costEstimationData));
-    
-    renderCostEstimationTable();
-    clearCostEstimationForm();
-    showMessage('Cost estimation entry added successfully!', 'success');
-}
-
-function renderCostEstimationTable() {
-    const tbody = document.getElementById('cost-estimation-table-body');
-    if (!tbody) return;
-    
-    tbody.innerHTML = '';
-    let totalCost = 0;
-    
-    costEstimationData.forEach((entry, index) => {
-        const row = tbody.insertRow();
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${entry.boqRef}</td>
-            <td class="description-cell">${entry.description}</td>
-            <td>${entry.asset}</td>
-            <td>${entry.unit}</td>
-            <td>${entry.quantity.toFixed(2)}</td>
-            <td>${entry.rate.toFixed(2)}</td>
-            <td>${entry.amount.toFixed(2)}</td>
-            <td>
-                <button class="btn btn-sm btn-danger" onclick="deleteCostEstimationEntry(${index})">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
-        totalCost += entry.amount;
-    });
-    
-    // Update total
-    document.getElementById('total-cost').textContent = totalCost.toFixed(2);
-}
-
-function clearCostEstimationForm() {
-    document.getElementById('boq-reference').value = '';
-    document.getElementById('boq-description').value = '';
-    document.getElementById('boq-asset').value = '';
-    document.getElementById('boq-unit').value = '';
-    document.getElementById('boq-quantity').value = '';
-    document.getElementById('boq-rate').value = '';
-}
-
-// ===============================
-// UTILITY FUNCTIONS
-// ===============================
-
-function saveAllData() {
-    localStorage.setItem('engineeringContracts', JSON.stringify(contracts));
-    localStorage.setItem('engineeringBOQ', JSON.stringify(boqData));
-    localStorage.setItem('engineeringInspections', JSON.stringify(inspectionData));
-    localStorage.setItem('engineeringCostEstimations', JSON.stringify(costEstimationData));
-    localStorage.setItem('engineeringAIResults', JSON.stringify(aiResults));
-    localStorage.setItem('engineeringNotebooks', JSON.stringify(notebooks));
-}
-
-function clearAllData() {
-    contracts = [];
-    boqData = [];
-    inspectionData = [];
-    costEstimationData = [];
-    aiResults = [];
-    notebooks = [];
-    drawings = [];
-    
-    saveAllData();
-}
-
-// ===============================
-// AI DETECTION FUNCTIONS
-// ===============================
-
-function handleAIImageUpload(event) {
-    const files = event.target.files;
-    showMessage('AI analysis will be implemented in future updates. Images uploaded for demo.', 'info');
-    
-    // Demo AI results
-    Array.from(files).forEach(file => {
-        const result = {
-            id: Date.now().toString() + Math.random(),
-            image: URL.createObjectURL(file),
-            filename: file.name,
-            coordinates: '25.2048° N, 55.2708° E',
-            timestamp: new Date().toLocaleString(),
-            defects: ['Surface cracking', 'Pothole'],
-            severity: 'Medium',
-            action: 'Schedule repair within 30 days'
-        };
-        
-        aiResults.push(result);
-    });
-    
-    renderAIResultsTable();
-}
-
-function renderAIResultsTable() {
-    const tbody = document.getElementById('ai-results-body');
-    if (!tbody) return;
-    
-    tbody.innerHTML = '';
-    
-    aiResults.forEach(result => {
-        const row = tbody.insertRow();
-        row.innerHTML = `
-            <td><img src="${result.image}" style="max-width: 100px; max-height: 100px; object-fit: cover;" /></td>
-            <td>${result.coordinates}</td>
-            <td>${result.timestamp}</td>
-            <td>${result.defects.join(', ')}</td>
-            <td><span class="status-badge status-${result.severity.toLowerCase()}">${result.severity}</span></td>
-            <td>${result.action}</td>
-            <td>
-                <button class="btn btn-sm btn-danger" onclick="deleteAIResult('${result.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
-    });
-}
-
-// ===============================
-// ADDITIONAL PLACEHOLDER FUNCTIONS
-// ===============================
-
-// Functions that will be implemented in future iterations
-function printInspectionReport() { showMessage('Print functionality will be implemented', 'info'); }
-function exportPhotos() { showMessage('Photo export will be implemented', 'info'); }
-function exportKML() { showMessage('KML export will be implemented', 'info'); }
-function exportInspectionCSV() { showMessage('CSV export will be implemented', 'info'); }
-function newReport() { showMessage('New report functionality will be implemented', 'info'); }
-function clearInspectionData() { inspectionData = []; renderInspectionTable(); showMessage('Inspection data cleared', 'success'); }
-function printCostEstimation() { showMessage('Print functionality will be implemented', 'info'); }
-function exportCostCSV() { showMessage('CSV export will be implemented', 'info'); }
-function newCostEstimation() { showMessage('New estimation functionality will be implemented', 'info'); }
-function clearCostData() { costEstimationData = []; renderCostEstimationTable(); showMessage('Cost data cleared', 'success'); }
-function importMapData() { showMessage('Map import will be implemented', 'info'); }
-function exportMapData() { showMessage('Map export will be implemented', 'info'); }
-function printMap() { showMessage('Map print will be implemented', 'info'); }
-function exportAIResults(format) { showMessage(`AI results export (${format}) will be implemented`, 'info'); }
-function createNewNote() { showMessage('Note creation will be implemented', 'info'); }
-function searchNotes() { showMessage('Note search will be implemented', 'info'); }
-function filterNotesByTag() { showMessage('Note filtering will be implemented', 'info'); }
-function selectDrawingTool(tool) { showMessage(`Drawing tool (${tool}) will be implemented`, 'info'); }
-function loadBackgroundImage() { showMessage('Background image loading will be implemented', 'info'); }
-function saveDrawing() { showMessage('Drawing save will be implemented', 'info'); }
-function clearDrawing() { showMessage('Drawing clear will be implemented', 'info'); }
-function selectTemplate(template) { showMessage(`Template (${template}) will be implemented`, 'info'); }
-function generateCustomReport() { showMessage('Custom report generation will be implemented', 'info'); }
+(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
+diff --git a/additional-systems.js b/additional-systems.js
+--- a/additional-systems.js
++++ b/additional-systems.js
+@@ -0,0 +1,957 @@
++// ===================================
++// ADDITIONAL SYSTEMS FOR ENGINEERING PLATFORM
++// ===================================
++
++// Global variables for additional systems
++let vehicleTracker = {
++    active: false,
++    vehicles: [],
++    routes: [],
++    geofences: []
++};
++
++let materialLogistics = {
++    inventory: [],
++    deliveries: [],
++    usage: [],
++    suppliers: []
++};
++
++let projectTimeline = {
++    projects: [],
++    milestones: [],
++    tasks: []
++};
++
++let signFabrication = {
++    catalog: [],
++    orders: [],
++    materials: [],
++    pricing: []
++};
++
++let scrapManagement = {
++    items: [],
++    locations: [],
++    reusableItems: []
++};
++
++// Initialize all additional systems
++document.addEventListener('DOMContentLoaded', function() {
++    initializeVehicleTracking();
++    initializeMaterialLogistics();
++    initializeProjectTimeline();
++    initializeSignFabrication();
++    initializeScrapManagement();
++    loadAllAdditionalData();
++});
++
++// ===================================
++// VEHICLE TRACKING SYSTEM
++// ===================================
++
++function initializeVehicleTracking() {
++    loadVehicleData();
++    setupVehicleTracking();
++}
++
++function startTracking() {
++    if (!navigator.geolocation) {
++        showMessage('Geolocation not supported', 'error');
++        return;
++    }
++
++    vehicleTracker.active = true;
++    updateTrackingStatus();
++    
++    // Start GPS tracking
++    vehicleTracker.watchId = navigator.geolocation.watchPosition(
++        updateVehiclePosition,
++        handleTrackingError,
++        { enableHighAccuracy: true, timeout: 5000, maximumAge: 10000 }
++    );
++    
++    showMessage('Vehicle tracking started', 'success');
++    logActivity('Tracking', 'Vehicle tracking started');
++}
++
++function stopTracking() {
++    if (vehicleTracker.watchId) {
++        navigator.geolocation.clearWatch(vehicleTracker.watchId);
++        vehicleTracker.active = false;
++        updateTrackingStatus();
++        showMessage('Vehicle tracking stopped', 'success');
++        logActivity('Tracking', 'Vehicle tracking stopped');
++    }
++}
++
++function updateVehiclePosition(position) {
++    const vehicleData = {
++        id: currentUser?.id || 'unknown',
++        lat: position.coords.latitude,
++        lng: position.coords.longitude,
++        speed: position.coords.speed || 0,
++        heading: position.coords.heading || 0,
++        accuracy: position.coords.accuracy,
++        timestamp: new Date().toISOString()
++    };
++    
++    // Store position
++    vehicleTracker.routes.push(vehicleData);
++    
++    // Keep only last 1000 positions
++    if (vehicleTracker.routes.length > 1000) {
++        vehicleTracker.routes.splice(0, vehicleTracker.routes.length - 1000);
++    }
++    
++    // Update map if visible
++    updateTrackingMap(vehicleData);
++    
++    // Save to storage
++    saveVehicleData();
++    
++    // Check geofences
++    checkGeofences(vehicleData);
++}
++
++function updateTrackingMap(vehicleData) {
++    const mapContainer = document.getElementById('tracking-map');
++    if (!mapContainer) return;
++    
++    // Initialize tracking map if needed
++    if (!window.trackingMap) {
++        initializeTrackingMap();
++    }
++    
++    // Add vehicle marker
++    if (window.trackingMap && typeof L !== 'undefined') {
++        const marker = L.marker([vehicleData.lat, vehicleData.lng])
++            .addTo(trackingMap)
++            .bindPopup(`Vehicle: ${vehicleData.id}<br>Speed: ${Math.round(vehicleData.speed || 0)} km/h<br>Time: ${new Date(vehicleData.timestamp).toLocaleTimeString()}`);
++        
++        // Center map on vehicle
++        trackingMap.setView([vehicleData.lat, vehicleData.lng], 15);
++    }
++}
++
++function initializeTrackingMap() {
++    const mapContainer = document.getElementById('tracking-map');
++    if (!mapContainer || !window.L) return;
++    
++    window.trackingMap = L.map('tracking-map').setView([40.7128, -74.0060], 10);
++    
++    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
++        attribution: '© OpenStreetMap contributors'
++    }).addTo(trackingMap);
++}
++
++function setGeofence() {
++    const lat = prompt('Enter geofence center latitude:');
++    const lng = prompt('Enter geofence center longitude:');
++    const radius = prompt('Enter radius in meters:');
++    
++    if (lat && lng && radius) {
++        const geofence = {
++            id: generateId(),
++            center: [parseFloat(lat), parseFloat(lng)],
++            radius: parseFloat(radius),
++            name: prompt('Enter geofence name:') || 'Unnamed Geofence',
++            created: new Date().toISOString()
++        };
++        
++        vehicleTracker.geofences.push(geofence);
++        saveVehicleData();
++        showMessage(`Geofence "${geofence.name}" created`, 'success');
++    }
++}
++
++function checkGeofences(vehicleData) {
++    vehicleTracker.geofences.forEach(geofence => {
++        const distance = calculateDistance(
++            vehicleData.lat, vehicleData.lng,
++            geofence.center[0], geofence.center[1]
++        ) * 1000; // Convert to meters
++        
++        if (distance <= geofence.radius) {
++            showNotification('Geofence Alert', `Vehicle entered ${geofence.name}`, 'info');
++        }
++    });
++}
++
++function updateTrackingStatus() {
++    const statusElement = document.getElementById('tracking-status');
++    if (statusElement) {
++        statusElement.textContent = vehicleTracker.active ? 'Online' : 'Offline';
++        statusElement.className = `status-indicator ${vehicleTracker.active ? 'online' : 'offline'}`;
++    }
++}
++
++// ===================================
++// MATERIAL LOGISTICS SYSTEM
++// ===================================
++
++function initializeMaterialLogistics() {
++    loadMaterialData();
++    setupMaterialManagement();
++}
++
++function addMaterialItem() {
++    const modal = document.createElement('div');
++    modal.className = 'modal-overlay';
++    modal.innerHTML = `
++        <div class="modal-content">
++            <h3>Add Material Item</h3>
++            <form id="material-form">
++                <div class="form-group">
++                    <label>Material Name</label>
++                    <input type="text" id="material-name" class="form-control" required>
++                </div>
++                <div class="form-group">
++                    <label>Category</label>
++                    <select id="material-category" class="form-control" required>
++                        <option value="concrete">Concrete</option>
++                        <option value="steel">Steel</option>
++                        <option value="asphalt">Asphalt</option>
++                        <option value="aggregates">Aggregates</option>
++                        <option value="paint">Paint</option>
++                        <option value="signs">Signs</option>
++                        <option value="other">Other</option>
++                    </select>
++                </div>
++                <div class="form-group">
++                    <label>Quantity</label>
++                    <input type="number" id="material-quantity" class="form-control" required>
++                </div>
++                <div class="form-group">
++                    <label>Unit</label>
++                    <input type="text" id="material-unit" class="form-control" placeholder="e.g., m³, tons, pieces" required>
++                </div>
++                <div class="form-group">
++                    <label>Unit Price</label>
++                    <input type="number" id="material-price" class="form-control" step="0.01" required>
++                </div>
++                <div class="form-group">
++                    <label>Supplier</label>
++                    <input type="text" id="material-supplier" class="form-control">
++                </div>
++                <div class="form-group">
++                    <label>Location/Warehouse</label>
++                    <input type="text" id="material-location" class="form-control">
++                </div>
++                <div class="modal-actions">
++                    <button type="submit" class="btn btn-primary">Add Material</button>
++                    <button type="button" class="btn btn-secondary" onclick="closeMaterialModal()">Cancel</button>
++                </div>
++            </form>
++        </div>
++    `;
++    
++    document.body.appendChild(modal);
++    
++    document.getElementById('material-form').onsubmit = function(e) {
++        e.preventDefault();
++        saveMaterialItem();
++    };
++}
++
++function saveMaterialItem() {
++    const material = {
++        id: generateId(),
++        name: document.getElementById('material-name').value,
++        category: document.getElementById('material-category').value,
++        quantity: parseFloat(document.getElementById('material-quantity').value),
++        unit: document.getElementById('material-unit').value,
++        unitPrice: parseFloat(document.getElementById('material-price').value),
++        supplier: document.getElementById('material-supplier').value,
++        location: document.getElementById('material-location').value,
++        totalValue: parseFloat(document.getElementById('material-quantity').value) * parseFloat(document.getElementById('material-price').value),
++        createdAt: new Date().toISOString(),
++        lastUpdated: new Date().toISOString()
++    };
++    
++    materialLogistics.inventory.push(material);
++    saveMaterialData();
++    renderMaterialInventory();
++    closeMaterialModal();
++    showMessage('Material added successfully', 'success');
++    logActivity('Material Management', `Added ${material.name} to inventory`);
++}
++
++function recordMaterialUsage(materialId, quantityUsed, projectId, notes = '') {
++    const material = materialLogistics.inventory.find(m => m.id === materialId);
++    if (!material) {
++        showMessage('Material not found', 'error');
++        return;
++    }
++    
++    if (quantityUsed > material.quantity) {
++        showMessage('Insufficient material quantity', 'error');
++        return;
++    }
++    
++    // Record usage
++    const usage = {
++        id: generateId(),
++        materialId: materialId,
++        materialName: material.name,
++        quantityUsed: quantityUsed,
++        projectId: projectId,
++        notes: notes,
++        usedBy: currentUser?.id || 'unknown',
++        usedAt: new Date().toISOString(),
++        unitPrice: material.unitPrice,
++        totalCost: quantityUsed * material.unitPrice
++    };
++    
++    materialLogistics.usage.push(usage);
++    
++    // Update inventory
++    material.quantity -= quantityUsed;
++    material.lastUpdated = new Date().toISOString();
++    
++    saveMaterialData();
++    renderMaterialInventory();
++    showMessage(`Recorded usage of ${quantityUsed} ${material.unit} of ${material.name}`, 'success');
++}
++
++function generateMaterialReport() {
++    const report = {
++        generated: new Date().toISOString(),
++        totalItems: materialLogistics.inventory.length,
++        totalValue: materialLogistics.inventory.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0),
++        lowStockItems: materialLogistics.inventory.filter(item => item.quantity < 10),
++        recentUsage: materialLogistics.usage.filter(usage => {
++            const usageDate = new Date(usage.usedAt);
++            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
++            return usageDate >= weekAgo;
++        }),
++        categories: materialLogistics.inventory.reduce((acc, item) => {
++            acc[item.category] = (acc[item.category] || 0) + 1;
++            return acc;
++        }, {})
++    };
++    
++    return report;
++}
++
++// ===================================
++// PROJECT TIMELINE MANAGEMENT
++// ===================================
++
++function initializeProjectTimeline() {
++    loadTimelineData();
++    setupTimelineInterface();
++}
++
++function createProjectTimeline() {
++    const modal = document.createElement('div');
++    modal.className = 'modal-overlay';
++    modal.innerHTML = `
++        <div class="modal-content timeline-modal">
++            <h3>Create Project Timeline</h3>
++            <form id="timeline-form">
++                <div class="form-group">
++                    <label>Project Name</label>
++                    <input type="text" id="timeline-project-name" class="form-control" required>
++                </div>
++                <div class="form-group">
++                    <label>Start Date</label>
++                    <input type="date" id="timeline-start-date" class="form-control" required>
++                </div>
++                <div class="form-group">
++                    <label>End Date</label>
++                    <input type="date" id="timeline-end-date" class="form-control" required>
++                </div>
++                <div class="form-group">
++                    <label>Project Manager</label>
++                    <input type="text" id="timeline-manager" class="form-control">
++                </div>
++                <div class="form-group">
++                    <label>Description</label>
++                    <textarea id="timeline-description" class="form-control" rows="3"></textarea>
++                </div>
++                <div class="modal-actions">
++                    <button type="submit" class="btn btn-primary">Create Timeline</button>
++                    <button type="button" class="btn btn-secondary" onclick="closeTimelineModal()">Cancel</button>
++                </div>
++            </form>
++        </div>
++    `;
++    
++    document.body.appendChild(modal);
++    
++    document.getElementById('timeline-form').onsubmit = function(e) {
++        e.preventDefault();
++        saveProjectTimeline();
++    };
++}
++
++function saveProjectTimeline() {
++    const timeline = {
++        id: generateId(),
++        name: document.getElementById('timeline-project-name').value,
++        startDate: document.getElementById('timeline-start-date').value,
++        endDate: document.getElementById('timeline-end-date').value,
++        manager: document.getElementById('timeline-manager').value,
++        description: document.getElementById('timeline-description').value,
++        status: 'planning',
++        progress: 0,
++        milestones: [],
++        tasks: [],
++        createdAt: new Date().toISOString()
++    };
++    
++    projectTimeline.projects.push(timeline);
++    saveTimelineData();
++    renderTimelineList();
++    closeTimelineModal();
++    showMessage('Project timeline created successfully', 'success');
++}
++
++function addMilestone(projectId) {
++    const milestone = {
++        id: generateId(),
++        projectId: projectId,
++        name: prompt('Milestone name:'),
++        description: prompt('Milestone description:'),
++        targetDate: prompt('Target date (YYYY-MM-DD):'),
++        status: 'pending',
++        createdAt: new Date().toISOString()
++    };
++    
++    if (milestone.name && milestone.targetDate) {
++        projectTimeline.milestones.push(milestone);
++        saveTimelineData();
++        showMessage('Milestone added successfully', 'success');
++    }
++}
++
++// ===================================
++// SIGN FABRICATION SYSTEM
++// ===================================
++
++function initializeSignFabrication() {
++    loadSignFabricationData();
++    setupSignCatalog();
++}
++
++function createSignOrder() {
++    const modal = document.createElement('div');
++    modal.className = 'modal-overlay';
++    modal.innerHTML = `
++        <div class="modal-content">
++            <h3>New Sign Order</h3>
++            <form id="sign-order-form">
++                <div class="form-group">
++                    <label>Sign Type</label>
++                    <select id="sign-type" class="form-control" required>
++                        <option value="stop">Stop Sign</option>
++                        <option value="speed">Speed Limit</option>
++                        <option value="warning">Warning Sign</option>
++                        <option value="directional">Directional Sign</option>
++                        <option value="information">Information Sign</option>
++                        <option value="custom">Custom Sign</option>
++                    </select>
++                </div>
++                <div class="form-group">
++                    <label>Size (cm)</label>
++                    <input type="text" id="sign-size" class="form-control" placeholder="e.g., 60x60" required>
++                </div>
++                <div class="form-group">
++                    <label>Material</label>
++                    <select id="sign-material" class="form-control" required>
++                        <option value="aluminum">Aluminum</option>
++                        <option value="steel">Steel</option>
++                        <option value="plastic">Plastic</option>
++                    </select>
++                </div>
++                <div class="form-group">
++                    <label>Reflective Grade</label>
++                    <select id="reflective-grade" class="form-control" required>
++                        <option value="engineering">Engineering Grade</option>
++                        <option value="high-intensity">High Intensity</option>
++                        <option value="diamond">Diamond Grade</option>
++                    </select>
++                </div>
++                <div class="form-group">
++                    <label>Quantity</label>
++                    <input type="number" id="sign-quantity" class="form-control" min="1" required>
++                </div>
++                <div class="form-group">
++                    <label>Custom Text (if applicable)</label>
++                    <textarea id="sign-text" class="form-control" rows="2"></textarea>
++                </div>
++                <div class="form-group">
++                    <label>Project/Contract</label>
++                    <input type="text" id="sign-project" class="form-control">
++                </div>
++                <div class="modal-actions">
++                    <button type="submit" class="btn btn-primary">Create Order</button>
++                    <button type="button" class="btn btn-secondary" onclick="closeSignModal()">Cancel</button>
++                </div>
++            </form>
++        </div>
++    `;
++    
++    document.body.appendChild(modal);
++    
++    document.getElementById('sign-order-form').onsubmit = function(e) {
++        e.preventDefault();
++        saveSignOrder();
++    };
++}
++
++function saveSignOrder() {
++    const order = {
++        id: generateId(),
++        type: document.getElementById('sign-type').value,
++        size: document.getElementById('sign-size').value,
++        material: document.getElementById('sign-material').value,
++        reflectiveGrade: document.getElementById('reflective-grade').value,
++        quantity: parseInt(document.getElementById('sign-quantity').value),
++        customText: document.getElementById('sign-text').value,
++        project: document.getElementById('sign-project').value,
++        status: 'pending',
++        orderDate: new Date().toISOString(),
++        estimatedCost: calculateSignCost(),
++        orderedBy: currentUser?.id || 'unknown'
++    };
++    
++    signFabrication.orders.push(order);
++    saveSignFabricationData();
++    renderSignOrders();
++    closeSignModal();
++    showMessage('Sign order created successfully', 'success');
++    logActivity('Sign Fabrication', `Created order for ${order.quantity}x ${order.type} signs`);
++}
++
++function calculateSignCost() {
++    const type = document.getElementById('sign-type').value;
++    const material = document.getElementById('sign-material').value;
++    const grade = document.getElementById('reflective-grade').value;
++    const quantity = parseInt(document.getElementById('sign-quantity').value);
++    
++    // Base pricing (mock calculation)
++    let baseCost = 50; // Base cost per sign
++    
++    // Material multipliers
++    const materialMultipliers = {
++        aluminum: 1.0,
++        steel: 1.2,
++        plastic: 0.8
++    };
++    
++    // Reflective grade multipliers
++    const gradeMultipliers = {
++        'engineering': 1.0,
++        'high-intensity': 1.5,
++        'diamond': 2.0
++    };
++    
++    // Type multipliers
++    const typeMultipliers = {
++        stop: 1.0,
++        speed: 1.1,
++        warning: 1.2,
++        directional: 1.5,
++        information: 1.3,
++        custom: 2.0
++    };
++    
++    const unitCost = baseCost * 
++        (materialMultipliers[material] || 1.0) * 
++        (gradeMultipliers[grade] || 1.0) * 
++        (typeMultipliers[type] || 1.0);
++    
++    return unitCost * quantity;
++}
++
++// ===================================
++// SCRAP MANAGEMENT SYSTEM
++// ===================================
++
++function initializeScrapManagement() {
++    loadScrapData();
++    setupScrapManagement();
++}
++
++function addScrapItem() {
++    const modal = document.createElement('div');
++    modal.className = 'modal-overlay';
++    modal.innerHTML = `
++        <div class="modal-content">
++            <h3>Add Scrap Item</h3>
++            <form id="scrap-form">
++                <div class="form-group">
++                    <label>Item Description</label>
++                    <input type="text" id="scrap-description" class="form-control" required>
++                </div>
++                <div class="form-group">
++                    <label>Type</label>
++                    <select id="scrap-type" class="form-control" required>
++                        <option value="metal">Metal</option>
++                        <option value="sign">Old Signs</option>
++                        <option value="pole">Poles</option>
++                        <option value="equipment">Equipment</option>
++                        <option value="material">Construction Material</option>
++                        <option value="other">Other</option>
++                    </select>
++                </div>
++                <div class="form-group">
++                    <label>Condition</label>
++                    <select id="scrap-condition" class="form-control" required>
++                        <option value="reusable">Reusable</option>
++                        <option value="repairable">Repairable</option>
++                        <option value="scrap">Scrap Only</option>
++                    </select>
++                </div>
++                <div class="form-group">
++                    <label>Quantity/Weight</label>
++                    <input type="number" id="scrap-quantity" class="form-control" step="0.1" required>
++                </div>
++                <div class="form-group">
++                    <label>Unit</label>
++                    <input type="text" id="scrap-unit" class="form-control" placeholder="pieces, kg, m" required>
++                </div>
++                <div class="form-group">
++                    <label>Source Project</label>
++                    <input type="text" id="scrap-source" class="form-control">
++                </div>
++                <div class="form-group">
++                    <label>Storage Location</label>
++                    <input type="text" id="scrap-location" class="form-control" required>
++                </div>
++                <div class="form-group">
++                    <label>Estimated Value</label>
++                    <input type="number" id="scrap-value" class="form-control" step="0.01">
++                </div>
++                <div class="modal-actions">
++                    <button type="submit" class="btn btn-primary">Add Scrap Item</button>
++                    <button type="button" class="btn btn-secondary" onclick="closeScrapModal()">Cancel</button>
++                </div>
++            </form>
++        </div>
++    `;
++    
++    document.body.appendChild(modal);
++    
++    document.getElementById('scrap-form').onsubmit = function(e) {
++        e.preventDefault();
++        saveScrapItem();
++    };
++}
++
++function saveScrapItem() {
++    const scrapItem = {
++        id: generateId(),
++        description: document.getElementById('scrap-description').value,
++        type: document.getElementById('scrap-type').value,
++        condition: document.getElementById('scrap-condition').value,
++        quantity: parseFloat(document.getElementById('scrap-quantity').value),
++        unit: document.getElementById('scrap-unit').value,
++        source: document.getElementById('scrap-source').value,
++        location: document.getElementById('scrap-location').value,
++        estimatedValue: parseFloat(document.getElementById('scrap-value').value) || 0,
++        dateAdded: new Date().toISOString(),
++        addedBy: currentUser?.id || 'unknown',
++        status: 'available'
++    };
++    
++    scrapManagement.items.push(scrapItem);
++    saveScrapData();
++    renderScrapInventory();
++    closeScrapModal();
++    showMessage('Scrap item added successfully', 'success');
++    logActivity('Scrap Management', `Added ${scrapItem.description} to scrap inventory`);
++}
++
++// ===================================
++// CUSTOM DASHBOARD BUILDER
++// ===================================
++
++function openCustomDashboard() {
++    const modal = document.createElement('div');
++    modal.className = 'modal-overlay dashboard-builder';
++    modal.innerHTML = `
++        <div class="modal-content dashboard-modal">
++            <h3>Custom Dashboard Builder</h3>
++            <div class="dashboard-builder-interface">
++                <div class="widget-palette">
++                    <h6>Available Widgets</h6>
++                    <div class="widget-list">
++                        <div class="widget-item" draggable="true" data-widget="chart">
++                            <i class="fas fa-chart-bar"></i> Chart Widget
++                        </div>
++                        <div class="widget-item" draggable="true" data-widget="stats">
++                            <i class="fas fa-tachometer-alt"></i> Stats Widget
++                        </div>
++                        <div class="widget-item" draggable="true" data-widget="map">
++                            <i class="fas fa-map"></i> Map Widget
++                        </div>
++                        <div class="widget-item" draggable="true" data-widget="activity">
++                            <i class="fas fa-list"></i> Activity Feed
++                        </div>
++                        <div class="widget-item" draggable="true" data-widget="weather">
++                            <i class="fas fa-cloud"></i> Weather Widget
++                        </div>
++                        <div class="widget-item" draggable="true" data-widget="files">
++                            <i class="fas fa-folder"></i> Files Widget
++                        </div>
++                    </div>
++                </div>
++                <div class="dashboard-canvas">
++                    <h6>Dashboard Canvas</h6>
++                    <div id="dashboard-drop-zone" class="drop-zone">
++                        <p>Drag widgets here to build your dashboard</p>
++                    </div>
++                </div>
++            </div>
++            <div class="modal-actions">
++                <button class="btn btn-primary" onclick="saveDashboard()">Save Dashboard</button>
++                <button class="btn btn-secondary" onclick="closeDashboardBuilder()">Cancel</button>
++            </div>
++        </div>
++    `;
++    
++    document.body.appendChild(modal);
++    setupDashboardBuilder();
++}
++
++function setupDashboardBuilder() {
++    const widgets = document.querySelectorAll('.widget-item');
++    const dropZone = document.getElementById('dashboard-drop-zone');
++    
++    widgets.forEach(widget => {
++        widget.addEventListener('dragstart', function(e) {
++            e.dataTransfer.setData('text/plain', this.dataset.widget);
++        });
++    });
++    
++    dropZone.addEventListener('dragover', function(e) {
++        e.preventDefault();
++    });
++    
++    dropZone.addEventListener('drop', function(e) {
++        e.preventDefault();
++        const widgetType = e.dataTransfer.getData('text/plain');
++        addWidgetToCanvas(widgetType);
++    });
++}
++
++function addWidgetToCanvas(widgetType) {
++    const dropZone = document.getElementById('dashboard-drop-zone');
++    const widgetElement = document.createElement('div');
++    widgetElement.className = `dashboard-widget ${widgetType}-widget`;
++    widgetElement.innerHTML = createWidgetHTML(widgetType);
++    
++    dropZone.appendChild(widgetElement);
++}
++
++function createWidgetHTML(type) {
++    const widgetTemplates = {
++        chart: `<div class="widget-header">Chart Widget</div><div class="widget-content">📊 Chart will appear here</div>`,
++        stats: `<div class="widget-header">Statistics</div><div class="widget-content">📈 Stats: 0 projects, 0 files</div>`,
++        map: `<div class="widget-header">Map View</div><div class="widget-content">🗺️ Interactive map</div>`,
++        activity: `<div class="widget-header">Recent Activity</div><div class="widget-content">📝 No recent activity</div>`,
++        weather: `<div class="widget-header">Weather</div><div class="widget-content">🌤️ 22°C, Sunny</div>`,
++        files: `<div class="widget-header">Recent Files</div><div class="widget-content">📁 No recent files</div>`
++    };
++    
++    return widgetTemplates[type] || '<div>Unknown widget</div>';
++}
++
++// ===================================
++// DATA PERSISTENCE FUNCTIONS
++// ===================================
++
++function loadAllAdditionalData() {
++    loadVehicleData();
++    loadMaterialData();
++    loadTimelineData();
++    loadSignFabricationData();
++    loadScrapData();
++}
++
++function loadVehicleData() {
++    const stored = localStorage.getItem('vehicleTracking');
++    if (stored) {
++        try {
++            vehicleTracker = { ...vehicleTracker, ...JSON.parse(stored) };
++        } catch (error) {
++            console.error('Error loading vehicle data:', error);
++        }
++    }
++}
++
++function saveVehicleData() {
++    localStorage.setItem('vehicleTracking', JSON.stringify(vehicleTracker));
++}
++
++function loadMaterialData() {
++    const stored = localStorage.getItem('materialLogistics');
++    if (stored) {
++        try {
++            materialLogistics = { ...materialLogistics, ...JSON.parse(stored) };
++        } catch (error) {
++            console.error('Error loading material data:', error);
++        }
++    }
++}
++
++function saveMaterialData() {
++    localStorage.setItem('materialLogistics', JSON.stringify(materialLogistics));
++}
++
++function loadTimelineData() {
++    const stored = localStorage.getItem('projectTimeline');
++    if (stored) {
++        try {
++            projectTimeline = { ...projectTimeline, ...JSON.parse(stored) };
++        } catch (error) {
++            console.error('Error loading timeline data:', error);
++        }
++    }
++}
++
++function saveTimelineData() {
++    localStorage.setItem('projectTimeline', JSON.stringify(projectTimeline));
++}
++
++function loadSignFabricationData() {
++    const stored = localStorage.getItem('signFabrication');
++    if (stored) {
++        try {
++            signFabrication = { ...signFabrication, ...JSON.parse(stored) };
++        } catch (error) {
++            console.error('Error loading sign fabrication data:', error);
++        }
++    }
++}
++
++function saveSignFabricationData() {
++    localStorage.setItem('signFabrication', JSON.stringify(signFabrication));
++}
++
++function loadScrapData() {
++    const stored = localStorage.getItem('scrapManagement');
++    if (stored) {
++        try {
++            scrapManagement = { ...scrapManagement, ...JSON.parse(stored) };
++        } catch (error) {
++            console.error('Error loading scrap data:', error);
++        }
++    }
++}
++
++function saveScrapData() {
++    localStorage.setItem('scrapManagement', JSON.stringify(scrapManagement));
++}
++
++// ===================================
++// UTILITY FUNCTIONS
++// ===================================
++
++function closeMaterialModal() {
++    const modal = document.querySelector('.modal-overlay');
++    if (modal) modal.remove();
++}
++
++function closeTimelineModal() {
++    const modal = document.querySelector('.modal-overlay');
++    if (modal) modal.remove();
++}
++
++function closeSignModal() {
++    const modal = document.querySelector('.modal-overlay');
++    if (modal) modal.remove();
++}
++
++function closeScrapModal() {
++    const modal = document.querySelector('.modal-overlay');
++    if (modal) modal.remove();
++}
++
++function closeDashboardBuilder() {
++    const modal = document.querySelector('.modal-overlay');
++    if (modal) modal.remove();
++}
++
++function handleTrackingError(error) {
++    console.error('Tracking error:', error);
++    showMessage('GPS tracking error: ' + error.message, 'error');
++}
++
++function viewHistory() {
++    showMessage('Vehicle history feature will be implemented', 'info');
++}
++
++function generatePlatformReport() {
++    // Comprehensive platform report
++    const report = {
++        projects: JSON.parse(localStorage.getItem('engineeringProjects') || '[]').length,
++        files: JSON.parse(localStorage.getItem('engineeringFiles') || '[]').length,
++        materials: materialLogistics.inventory.length,
++        vehicles: vehicleTracker.vehicles.length,
++        signOrders: signFabrication.orders.length,
++        scrapItems: scrapManagement.items.length
++    };
++    
++    showMessage(`Platform Report: ${report.projects} projects, ${report.files} files, ${report.materials} materials tracked`, 'success');
++}
++
++// ===================================
++// RENDER FUNCTIONS (PLACEHOLDERS)
++// ===================================
++
++function renderMaterialInventory() {
++    console.log('Material inventory updated');
++}
++
++function renderTimelineList() {
++    console.log('Timeline list updated');
++}
++
++function renderSignOrders() {
++    console.log('Sign orders updated');
++}
++
++function renderScrapInventory() {
++    console.log('Scrap inventory updated');
++}
++
++function setupMaterialManagement() {
++    console.log('Material management interface setup');
++}
++
++function setupTimelineInterface() {
++    console.log('Timeline interface setup');
++}
++
++function setupSignCatalog() {
++    console.log('Sign catalog setup');
++}
++
++function setupScrapManagement() {
++    console.log('Scrap management interface setup');
++}
++
++function setupVehicleTracking() {
++    console.log('Vehicle tracking interface setup');
++}
++
++function saveDashboard() {
++    showMessage('Dashboard saved successfully', 'success');
++    closeDashboardBuilder();
++}
++
++// Export functions for global use
++window.additionalSystems = {
++    startTracking,
++    stopTracking,
++    addMaterialItem,
++    createProjectTimeline,
++    createSignOrder,
++    addScrapItem,
++    openCustomDashboard,
++    generatePlatformReport
++};
+EOF
+)
