@@ -1,5559 +1,977 @@
+
 <!DOCTYPE html>
-
 <html lang="en" dir="ltr">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Enhanced Asset & Cost Report</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.min.js"></script>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-
-
-
-<style>
-
-:root {
-
---primary-color: #007bff;
-
---primary-color-rgb: 0, 123, 255;
-
---background-color: #f0f4f8;
-
---glass-bg: rgba(255, 255, 255, 0.85);
-
---glass-border: rgba(200, 210, 220, 0.7);
-
---shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-
---text-color: #2c3e50;
-
---border-radius: 12px;
-
-}
-
-
-
-body {
-
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-margin: 0;
-
-padding: 10px;
-
-background-color: var(--background-color);
-
-color: var(--text-color);
-
-display: flex;
-
-flex-direction: column;
-
-align-items: center;
-
--webkit-font-smoothing: antialiased;
-
--moz-osx-font-smoothing: grayscale;
-
-}
-
-
-
-.main-container {
-
-width: 100%;
-
-max-width: 1200px;
-
-display: flex;
-
-flex-direction: column;
-
-gap: 15px;
-
-}
-
-
-
-.glass-card {
-
-background-color: var(--glass-bg);
-
-border: 1px solid var(--glass-border);
-
-border-radius: var(--border-radius);
-
-box-shadow: var(--shadow);
-
-backdrop-filter: blur(10px);
-
--webkit-backdrop-filter: blur(10px);
-
-padding: 15px;
-
-}
-
-
-
-/* Header & Tabs */
-
-.main-header {
-
-display: flex;
-
-justify-content: space-between;
-
-align-items: center;
-
-position: relative;
-
-z-index: 110;
-
-}
-
-.main-title { font-size: clamp(18px, 5vw, 24px); font-weight: bold; color: var(--text-color); }
-
-.menu-button { background: none; border: none; font-size: 28px; cursor: pointer; position: relative; }
-
-.dropdown-menu {
-
-display: none;
-
-position: absolute;
-
-top: 40px;
-
-background-color: var(--glass-bg);
-
-backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-
-border-radius: var(--border-radius); box-shadow: var(--shadow);
-
-z-index: 2500;
-
-width: 260px; overflow: hidden;
-
-border: 1px solid var(--glass-border);
-
-}
-
-html[dir="ltr"] .dropdown-menu { right: 0; }
-
-html[dir="rtl"] .dropdown-menu { left: 0; }
-
-.dropdown-menu button {
-
-display: flex; align-items: center; gap: 12px;
-
-width: 100%; padding: 10px 15px;
-
-background: none; border: none; font-size: 15px; cursor: pointer; color: var(--text-color);
-
-}
-
-html[dir="ltr"] .dropdown-menu button { text-align: left; }
-
-html[dir="rtl"] .dropdown-menu button { text-align: right; }
-
-.dropdown-menu button:hover { background-color: rgba(var(--primary-color-rgb), 0.1); }
-
-.menu-button:focus-within .dropdown-menu { display: block; }
-
-hr { border: none; border-top: 1px solid var(--glass-border); margin: 5px 0; }
-
-
-
-.tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: -1px; }
-
-.tab-button {
-
-padding: 8px 15px; border: 1px solid var(--glass-border);
-
-border-bottom: none; border-radius: 10px 10px 0 0;
-
-cursor: pointer; background-color: rgba(255,255,255,0.3);
-
-font-size: 15px; font-weight: 500;
-
-color: var(--text-color);
-
-}
-
-.tab-button.active { background-color: var(--glass-bg); border-bottom: 1px solid transparent; font-weight: bold;}
-
-.tab-content { display: none; }
-
-.tab-content.active { display: flex; flex-direction: column; gap: 15px; }
-
-
-#projects-list { list-style: none; padding: 0; }
-
-#projects-list li {
-
-display: flex; justify-content: space-between; align-items: center;
-
-padding: 8px; border-bottom: 1px solid var(--glass-border);
-
-}
-
-#projects-list .project-name { cursor: pointer; font-weight: bold; }
-
-#projects-list .project-name:hover { color: var(--primary-color); }
-
-#projects-list button { background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; padding: 4px 8px; }
-
-
-
-/* Forms & Inputs */
-
-.info-card {
-
-display: flex;
-
-justify-content: space-between;
-
-align-items: flex-start; /* Align items to the top */
-
-gap: 15px;
-
-}
-
-.logo-container {
-
-flex-basis: 150px; /* Give logos a base width */
-
-flex-shrink: 0;
-
-display: flex;
-
-justify-content: center;
-
-}
-
-.logo-container img {
-
-max-height: 80px;
-
-max-width: 150px;
-
-object-fit: contain;
-
-border-radius: 8px;
-
-cursor: pointer;
-
-border: 1px solid var(--glass-border);
-
-}
-
-.title-container {
-
-flex-grow: 1;
-
-display: flex;
-
-flex-direction: column;
-
-align-items: center;
-
-text-align: center;
-
-}
-
-.title-container .report-title-row {
-
-font-size: clamp(1.5em, 4vw, 2.5em); /* Responsive font size */
-
-font-weight: 900;
-
-color: #000;
-
-line-height: 1.1;
-
-margin: 0;
-
-padding: 2px 5px;
-
-}
-
-.title-container .report-date-label {
-
-margin-top: 15px;
-
-font-size: 1.1em;
-
-color: #333;
-
-}
-
-.title-container .small-title {
-
-margin-top: 15px;
-
-background-color: #5a7b9c; /* Blue-grey color from photo */
-
-color: white;
-
-padding: 8px 20px;
-
-border-radius: 5px;
-
-font-size: 1em;
-
-font-weight: bold;
-
-display: inline-block;
-
-}
-
-
-#display-date, #estimation-date {
-
-background: transparent;
-
-border: none;
-
-color: var(--text-color);
-
-font-family: inherit;
-
-font-size: inherit;
-
-padding: 0;
-
-margin: 0 5px;
-
-cursor: pointer;
-
-color: #333;
-
-}
-
-#display-date::-webkit-calendar-picker-indicator,
-
-#estimation-date::-webkit-calendar-picker-indicator {
-
-background: none;
-
-}
-
-
-/* Merged Data Entry Card */
-
-.data-entry-card .form-grid {
-
-display: grid;
-
-grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-
-gap: 15px;
-
-}
-
-.data-entry-card h3 {
-
-margin: 0 0 10px 0; color: var(--primary-color);
-
-border-bottom: 1px solid rgba(var(--primary-color-rgb), 0.2); padding-bottom: 8px; font-size: 18px;
-
-}
-
-
-
-.form-group { display: flex; flex-direction: column; gap: 10px; }
-
-.form-row { display: flex; gap: 10px; align-items: center; }
-
-.form-row input { flex: 1; }
-
-input[type="text"], input[type="number"], input[type="url"], input[type="search"], .form-button, select {
-
-width: 100%; padding: 10px; border-radius: 8px;
-
-border: 1px solid var(--glass-border); background-color: rgba(255, 255, 255, 0.9);
-
-box-sizing: border-box; font-size: 14px;
-
-color: var(--text-color);
-
-}
-
-input::placeholder { color: #889; }
-
-.primary-button {
-
-border: none; background-color: var(--primary-color);
-
-color: white; font-weight: bold; cursor: pointer; transition: background-color 0.3s; padding: 12px; border-radius: 8px; font-size: 15px;
-
-}
-
-
-#drop-zone {
-
-border: 2px dashed rgba(var(--primary-color-rgb), 0.5);
-
-border-radius: var(--border-radius);
-
-padding: 20px 15px;
-
-text-align: center;
-
-color: var(--primary-color);
-
-font-weight: 500;
-
-transition: all 0.3s;
-
-cursor: pointer;
-
-background-color: rgba(var(--primary-color-rgb), 0.05);
-
-display: flex;
-
-flex-direction: column;
-
-justify-content: center;
-
-align-items: center;
-
-gap: 15px;
-
-}
-
-#drop-zone:hover { background-color: rgba(var(--primary-color-rgb), 0.1); }
-
-#drop-zone p { margin: 0; }
-
-.drop-zone-buttons { display: flex; gap: 20px; }
-
-.icon-button {
-
-width: 50px;
-
-height: 50px;
-
-border-radius: 50%;
-
-border: 2px solid var(--primary-color);
-
-background-color: #fff;
-
-color: var(--primary-color);
-
-font-size: 24px;
-
-cursor: pointer;
-
-display: flex;
-
-justify-content: center;
-
-align-items: center;
-
-transition: all 0.2s ease-in-out;
-
-}
-
-.icon-button:hover {
-
-background-color: var(--primary-color);
-
-color: #fff;
-
-transform: scale(1.1);
-
-}
-
-#photo-previews img { max-height: 70px; border-radius: 8px; }
-
-
-
-/* GPS Section & Map */
-
-#map { width: 100%; height: 120px; border-radius: 12px; background-color: #e9ecef; border: 1px solid var(--glass-border); overflow: hidden; margin-bottom: 10px; }
-
-.location-mode-switcher {
-
-display: flex;
-
-width: 100%;
-
-border-radius: 8px;
-
-overflow: hidden;
-
-border: 1px solid var(--glass-border);
-
-margin-bottom: 10px;
-
-}
-
-.location-mode-btn {
-
-flex: 1;
-
-padding: 8px;
-
-border: none;
-
-background-color: rgba(255,255,255,0.5);
-
-cursor: pointer;
-
-transition: background-color 0.3s;
-
-font-size: 14px;
-
-font-weight: 500;
-
-}
-
-.location-mode-btn:not(:last-child) {
-
-border-right: 1px solid var(--glass-border);
-
-}
-
-.location-mode-btn.active {
-
-background-color: var(--primary-color);
-
-color: white;
-
-font-weight: bold;
-
-}
-
-.location-panel {
-
-display: flex;
-
-flex-direction: column;
-
-gap: 10px;
-
-margin-bottom: 10px;
-
-}
-
-.location-display-wrapper {
-
-display: flex;
-
-justify-content: space-between;
-
-align-items: center;
-
-gap: 10px;
-
-margin-top: 10px;
-
-}
-
-#insert-location-btn {
-
-padding: 6px 10px;
-
-font-size: 12px;
-
-border-radius: 6px;
-
-background-color: #28a745;
-
-}
-
-
-
-/* Table */
-
-.table-controls { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; align-items: center; }
-
-.table-controls button {
-
-background-color: rgba(255,255,255,0.5); border: 1px solid var(--glass-border);
-
-border-radius: 8px; padding: 6px 10px; font-size: 16px; cursor: pointer;
-
-}
-
-.table-controls button:hover { background-color: rgba(255,255,255,0.8); }
-
-.table-controls-title { margin-right: auto; font-size: 1.2em; font-weight: bold; }
-
-
-
-table { width: 100%; border-collapse: collapse; }
-
-th { background-color: rgba(var(--primary-color-rgb), 0.1); padding: 10px; text-align: center; }
-
-td { border-top: 1px solid var(--glass-border); padding: 8px; text-align: center; vertical-align: middle; }
-
-tbody tr:nth-child(even) { background-color: rgba(0,0,0,0.02); }
-
-.photo-wrapper {
-
-display: flex;
-
-flex-wrap: wrap;
-
-gap: 5px;
-
-justify-content: center;
-
-align-items: center;
-
-}
-
-.photo-wrapper img {
-
-max-height: 100px;
-
-max-width: 150px;
-
-border-radius: 5px;
-
-cursor: pointer;
-
-object-fit: cover;
-
-}
-
-
-
-/* --- Cost Estimation Tab Styles --- */
-
-.estimation-details {
-
-display: flex;
-
-flex-direction: column;
-
-gap: 5px;
-
-margin: 10px 0;
-
-}
-
-.estimation-details .form-row {
-
-gap: 15px;
-
-}
-
-.estimation-details label {
-
-font-weight: bold;
-
-flex-basis: 150px;
-
-}
-
-.estimation-details input {
-
-flex-grow: 1;
-
-}
-
-.boq-entry-card .form-grid-est {
-
-display: grid;
-
-grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-
-gap: 10px;
-
-align-items: end;
-
-}
-
-.boq-ref-group {
-
-display: flex;
-
-gap: 5px;
-
-align-items: end;
-
-}
-
-.boq-ref-group select {
-
-flex-grow: 1;
-
-}
-
-.boq-entry-card .form-group-est {
-
-display: flex; flex-direction: column;
-
-}
-
-.boq-entry-card label {
-
-margin-bottom: 4px;
-
-font-size: 13px;
-
-font-weight: 500;
-
-}
-
-.boq-entry-card .description-group {
-
-grid-column: 1 / -1;
-
-}
-
-
-/* Most Used BOQ styles */
-
-#most-used-boq-container {
-
-margin-top: 15px;
-
-padding: 10px;
-
-border: 1px solid var(--glass-border);
-
-border-radius: var(--border-radius);
-
-}
-
-#most-used-boq-container h4 {
-
-margin: 0 0 8px 0;
-
-color: var(--primary-color);
-
-}
-
-#most-used-boq-list {
-
-list-style: none;
-
-padding: 0;
-
-margin: 0;
-
-display: flex;
-
-flex-wrap: wrap;
-
-gap: 8px;
-
-}
-
-#most-used-boq-list li {
-
-padding: 5px 10px;
-
-background-color: rgba(var(--primary-color-rgb), 0.1);
-
-border-radius: 15px;
-
-font-size: 13px;
-
-cursor: pointer;
-
-transition: background-color 0.2s;
-
-}
-
-#most-used-boq-list li:hover {
-
-background-color: rgba(var(--primary-color-rgb), 0.2);
-
-font-weight: bold;
-
-}
-
-
-#cost-estimation-table {
-
-border: 1px solid black;
-
-}
-
-#cost-estimation-table th {
-
-background-color: transparent;
-
-color: black;
-
-font-weight: bold;
-
-border: 1px solid black;
-
-}
-
-#cost-estimation-table td {
-
-border: 1px solid black;
-
-text-align: right;
-
-padding: 4px 8px;
-
-}
-
-#cost-estimation-table td.description-cell {
-
-text-align: left;
-
-}
-
-#cost-estimation-table tfoot td {
-
-font-weight: bold;
-
-}
-
-
-/* Map Tab (formerly Vehicle Tracking) */
-
-.integrated-map-container {
-
-height: 80vh; display: flex; flex-direction: column;
-
-}
-
-#vehicle-map {
-
-flex-grow: 1;
-
-width: 100%;
-
-border-radius: var(--border-radius);
-
-border: 1px solid var(--glass-border);
-
-}
-
-#vehicle-map-controls {
-
-display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; align-items: center;
-
-}
-
-#vehicle-map-controls button {
-
-padding: 8px 12px; font-size: 14px;
-
-}
-
-.vehicle-popup-actions a {
-
-margin-right: 10px;
-
-text-decoration: none;
-
-color: var(--primary-color);
-
-font-weight: bold;
-
-}
-
-
-
-
-
-/* Modals */
-
-.modal {
-
-display: none; position: fixed; z-index: 2000;
-
-left: 0; top: 0; width: 100%; height: 100%;
-
-overflow: auto; background-color: rgba(0,0,0,0.5);
-
-align-items: center; justify-content: center;
-
-}
-
-.modal-content { padding: 20px; width: 90%; max-width: 450px; display: flex; flex-direction: column; gap: 10px; }
-
-
-/* FAB */
-
-.fab-container { position: fixed; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
-
-html[dir="ltr"] .fab-container { bottom: 20px; right: 20px; }
-
-html[dir="rtl"] .fab-container { bottom: 20px; left: 20px; }
-
-.fab {
-
-width: 50px; height: 50px; border-radius: 50%;
-
-color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-
-font-size: 22px; cursor: pointer; display: flex; justify-content: center; align-items: center;
-
-transition: transform 0.2s;
-
-}
-
-.fab:hover { transform: scale(1.1); }
-
-#camera-fab { background-color: #28a745; }
-
-#add-fab { background-color: var(--primary-color); }
-
-
-/* Other minor fixes for clarity */
-
-.footer { padding: 10px; margin-top: 10px; text-align:center; font-size: 12px; }
-
-
-
-/* Camera Modal Specific Styles */
-
-#camera-modal-content {
-
-background-color: black;
-
-padding: 0;
-
-width: 90vw;
-
-height: 90vh;
-
-max-width: 600px; /* Limit camera feed size */
-
-max-height: 800px;
-
-display: flex;
-
-flex-direction: column;
-
-justify-content: center;
-
-align-items: center;
-
-position: relative;
-
-overflow: hidden;
-
-}
-
-
-
-#camera-feed {
-
-width: 100%;
-
-height: 100%;
-
-object-fit: contain; /* or 'cover' depending on preference */
-
-transform: scaleX(-1); /* Mirror camera for selfie view */
-
-}
-
-
-
-#capture-btn {
-
-position: absolute;
-
-bottom: 20px;
-
-width: 60px;
-
-height: 60px;
-
-background-color: white;
-
-border: 5px solid var(--primary-color);
-
-border-radius: 50%;
-
-cursor: pointer;
-
-z-index: 2010;
-
-display: flex; /* Make it a flex container to center content */
-
-justify-content: center; /* Center horizontally */
-
-align-items: center; /* Center vertically */
-
-font-size: 30px; /* Size for the icon */
-
-color: var(--primary-color); /* Color for the icon */
-
-}
-
-
-
-#close-camera-btn {
-
-position: absolute;
-
-top: 10px;
-
-right: 10px;
-
-background: rgba(255, 255, 255, 0.5);
-
-border: none;
-
-border-radius: 50%;
-
-width: 30px;
-
-height: 30px;
-
-font-size: 18px;
-
-cursor: pointer;
-
-z-index: 2010;
-
-}
-
-#preview-overlay {
-
-display: none;
-
-position: fixed;
-
-top: 0;
-
-left: 0;
-
-width: 100vw;
-
-height: 100vh;
-
-background-color: rgba(0,0,0,0.7);
-
-z-index: 3000;
-
-justify-content: center;
-
-align-items: center;
-
-}
-
-#preview-content {
-
-background-color: white;
-
-width: 90%;
-
-height: 90%;
-
-overflow: auto;
-
-padding: 20px;
-
-position: relative;
-
-border-radius: var(--border-radius);
-
-}
-
-#preview-content img {
-
-max-width: 100%;
-
-height: auto;
-
-display: block;
-
-margin-bottom: 10px;
-
-}
-
-
-
-/* Hide print-specific elements by default */
-
-.print-header-replacement, .print-date-footer {
-
-display: none;
-
-}
-
-</style>
-
-
-<style>
-
-/* CSS for printing */
-
-@media print {
-
-/* --- General Hiding Rules --- */
-
-body > *:not(#main-content-wrapper) {
-
-display: none !important;
-
-}
-
-.main-container > *:not(.tab-content.active) {
-
-display: none !important;
-
-}
-
-.tab-content.active > *:not(.printable-area){
-
-display: none !important;
-
-}
-
-
-
-.printable-area {
-
-display: flex !important;
-
-flex-direction: column;
-
-gap: 15px;
-
-}
-
-
-.main-container {
-
-display: block !important;
-
-box-shadow: none !important;
-
-}
-
-
-/* --- Hide elements inside the printable area --- */
-
-.printable-area .menu-button,
-
-.printable-area .boq-entry-card,
-
-.printable-area .data-entry-card, /* Hide new data entry card */
-
-.printable-area .primary-button, /* Hides add row button */
-
-.tabs,
-
-.fab-container,
-
-button,
-
-input[type="file"] {
-
-display: none !important;
-
-}
-
-
-/* Hide action columns in tables */
-
-#report-table th:last-child, #report-table td:last-child,
-
-#cost-estimation-table th:last-child, #cost-estimation-table td:last-child {
-
-display: none !important;
-
-}
-
-
-
-/* --- Page Setup --- */
-
-@page {
-
-size: A4 landscape;
-
-margin: 15mm;
-
-}
-
-
-
-/* --- General Styling Resets for Print --- */
-
-body {
-
-background: #fff !important;
-
-color: #000 !important;
-
-margin: 0;
-
-padding: 0;
-
-}
-
-
-
-.glass-card, .main-header, .info-card {
-
-background: transparent !important;
-
-border: none !important;
-
-box-shadow: none !important;
-
-backdrop-filter: none !important;
-
--webkit-backdrop-filter: none !important;
-
-padding: 0 !important;
-
-color: #000;
-
-}
-
-
-.main-container, .printable-area {
-
-width: 100% !important;
-
-max-width: 100% !important;
-
-}
-
-
-.estimation-details {
-
-color: #000;
-
-display: block !important;
-
-}
-
-.estimation-details .form-row {
-
-display: flex !important;
-
-border-bottom: 1px solid #ccc;
-
-padding-bottom: 4px;
-
-margin-bottom: 4px;
-
-}
-
-.estimation-details .form-row label, .estimation-details .form-row input {
-
-display: block !important;
-
-}
-
-
-
-/* --- NEW PRINT HEADER STYLES --- */
-
-.info-card {
-
-position: relative;
-
-border-bottom: 2px solid #000;
-
-padding-bottom: 25px !important;
-
-margin-bottom: 15px;
-
-page-break-after: avoid;
-
-display: block !important;
-
-}
-
-/* Hide all original direct children in print */
-
-.info-card > *:not(.print-header-replacement) {
-
-display: none !important;
-
-}
-
-
-
-/* Show and style the replacement header */
-
-.print-header-replacement {
-
-display: flex !important;
-
-justify-content: space-between;
-
-align-items: center;
-
-width: 100%;
-
-position: relative;
-
-}
-
-.print-header-replacement .print-logo {
-
-display: block !important;
-
-max-height: 60px;
-
-max-width: 120px;
-
-object-fit: contain;
-
-}
-
-.print-header-replacement .print-title-container {
-
-display: flex !important;
-
-flex-direction: column;
-
-justify-content: center;
-
-align-items: center;
-
-text-align: center;
-
-font-size: 14pt;
-
-flex-grow: 1;
-
-padding: 0 10px;
-
-}
-
-.print-header-replacement .print-title-container b {
-
-line-height: 1.2;
-
-}
-
-
-
-.print-date-footer {
-
-display: block !important;
-
-position: absolute;
-
-bottom: 5px;
-
-left: 50%;
-
-transform: translateX(-50%);
-
-font-size: 10pt;
-
-white-space: nowrap;
-
-}
-
-
-
-/* --- Table Styling --- */
-
-.table-container {
-
-max-height: none !important;
-
-overflow: visible !important;
-
-}
-
-
-table {
-
-width: 100%;
-
-border-collapse: collapse;
-
-font-size: 11pt !important; /* Adjusted font size */
-
-page-break-inside: auto;
-
-}
-
-
-thead {
-
-display: table-header-group;
-
-}
-
-
-
-tbody tr {
-
-page-break-inside: avoid !important;
-
-page-break-after: auto;
-
-}
-
-
-
-td, th {
-
-border: 1px solid #999 !important;
-
-padding: 4px !important;
-
-text-align: center;
-
-vertical-align: middle;
-
-}
-
-
-/* Ensure all columns in cost estimation table are visible */
-
-#cost-estimation-table th, #cost-estimation-table td {
-
-display: table-cell !important;
-
-border: 1px solid black !important;
-
-}
-
-
-#report-table td:nth-child(2),
-
-#cost-estimation-table td:nth-child(2) {
-
-text-align: left !important;
-
-vertical-align: middle !important;
-
-}
-
-
-th {
-
-background-color: #e0e0e0 !important;
-
-color: #000 !important;
-
--webkit-print-color-adjust: exact;
-
-color-adjust: exact;
-
-}
-
-#cost-estimation-table th {
-
-background-color: transparent !important;
-
-}
-
-
-/* --- Image/QR Styling in Table --- */
-
-.photo-wrapper {
-
-display: block !important;
-
-width: 100%;
-
-padding: 0;
-
-margin: 0;
-
-line-height: 0;
-
-}
-
-/* Set image width to 6cm and maintain aspect ratio */
-
-.photo-wrapper img {
-
-display: block !important;
-
-width: 6cm !important;
-
-height: auto !important;
-
-object-fit: contain !important;
-
-border: none !important;
-
-margin: 0;
-
-padding: 0;
-
-}
-
-.photo-wrapper img:last-child {
-
-margin-bottom: 0;
-
-}
-
-}
-
-</style>
-
-
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Project Platform</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+    <script src='https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js'></script>
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background-color: #ecf0f1;
+            --card-bg: #ffffff;
+            --text-color: #34495e;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --success-color: #27ae60;
+            --danger-color: #c0392b;
+            --warning-color: #f39c12;
+        }
+
+        /* Base & Bilingual Support */
+        html[dir="rtl"] { font-family: 'Tahoma', sans-serif; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Page Visibility */
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+            flex-grow: 1;
+        }
+        .page.active {
+            display: flex;
+            flex-direction: column;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Layouts */
+        .main-container {
+            width: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .centered-container {
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+
+        /* Card Style */
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        html[dir="rtl"] .card { text-align: right; }
+
+        /* Forms & Buttons */
+        .form-card { max-width: 450px; width: 100%; }
+        h1, h2, h3 { color: var(--primary-color); }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        textarea { min-height: 120px; resize: vertical; }
+
+        button, .btn {
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            border: none;
+            background-color: var(--secondary-color);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        button:hover, .btn:hover { background-color: #2980b9; }
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-primary:hover { background-color: #1a252f; }
+        .btn-success { background-color: var(--success-color); }
+        .btn-success:hover { background-color: #229954; }
+        .btn-danger { background-color: var(--danger-color); }
+        .btn-danger:hover { background-color: #a93226; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: var(--card-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 { margin: 0; font-size: 1.5em; }
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+
+        /* Sidebar Navigation */
+        .sidebar { padding: 20px; background: var(--card-bg); border-radius: var(--border-radius); }
+        .sidebar .nav-btn {
+            display: block; width: 100%; text-align: left;
+            margin-bottom: 10px; background: none; color: var(--text-color);
+            font-weight: 500; padding: 15px;
+        }
+        .sidebar .nav-btn.active, .sidebar .nav-btn:hover { background-color: #ecf0f1; color: var(--primary-color); }
+
+        /* Map Container */
+        #map-container { height: 100%; width: 100%; border-radius: var(--border-radius); }
+        .leaflet-popup-content-wrapper { padding: 10px; }
+
+        /* Tables */
+        .table-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ecf0f1; }
+        th { background-color: var(--primary-color); color: white; font-weight: 600; }
+        tr:hover { background-color: #f8f9fa; }
+        td[contenteditable="true"] { background-color: #fdfde2; }
+
+        /* Popups / Modals */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: white; padding: 30px; border-radius: var(--border-radius);
+            width: 90%; max-width: 600px; position: relative;
+        }
+        .modal-close-btn {
+            position: absolute; top: 15px; right: 20px;
+            font-size: 30px; cursor: pointer; border: none; background: none; color: #7f8c8d;
+        }
+
+        /* Specific Component Styles */
+        #contract-selection-list, #saved-contracts-list {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+        }
+        .contract-card { border: 1px solid #ecf0f1; padding: 20px; border-radius: var(--border-radius); cursor: pointer; transition: all 0.3s; }
+        .contract-card:hover { border-color: var(--secondary-color); box-shadow: var(--shadow); }
+
+        .message {
+            padding: 15px; border-radius: var(--border-radius); margin-top: 15px;
+            text-align: center;
+        }
+        .message.error { background-color: #fbeae5; color: var(--danger-color); }
+        .message.success { background-color: #eaf7eb; color: var(--success-color); }
+        .message.pending { background-color: #fef9e7; color: var(--warning-color); }
+
+        .toggle-link {
+            display: block; text-align: center; margin-top: 20px;
+            color: var(--secondary-color); text-decoration: none;
+        }
+
+        /* Footer */
+        .footer { text-align: center; padding: 20px; color: #7f8c8d; }
+
+    </style>
 </head>
-
 <body>
 
-<input type="file" id="project-import-input" accept=".json" style="display:none;">
-
-
-
-<div class="main-container" id="main-content-wrapper">
-
-<header class="main-header glass-card">
-
-<h1 class="main-title" contenteditable="true">Project Dashboard</h1>
-
-<div class="menu-button" tabindex="0">
-
-<span>⋮</span>
-
-<div class="dropdown-menu"></div>
-
-</div>
-
-</header>
-
-
-
-<div class="tabs">
-
-<button class="tab-button active" onclick="openTab(event, 'main-report')" data-lang-key="tab_inspection_report"></button>
-
-<button class="tab-button" onclick="openTab(event, 'cost-estimation-tab')" data-lang-key="tab_cost_estimation"></button>
-
-<button class="tab-button" onclick="openTab(event, 'map-tab')" data-lang-key="tab_map"></button>
-
-<button class="tab-button" onclick="openTab(event, 'saved-projects')" data-lang-key="tab_saved_projects"></button>
-
-</div>
-
-
-<div id="main-report" class="tab-content active">
-
-<div class="card glass-card data-entry-card">
-
-<h3>Data Entry</h3>
-
-<div class="form-grid">
-
-<div class="form-group">
-
-<input type="text" id="asset" list="asset-options" data-lang-placeholder="asset_description_placeholder">
-
-<datalist id="asset-options">
-
-<option value="(B) Zonal Inspections"></option>
-
-<option value="(C) Site Clearance"></option>
-
-<option value="(D) Drainage and Service Ducts"></option>
-
-<option value="(E) Earthworks"></option>
-
-<option value="(F) Sub-Base and Road Base"></option>
-
-<option value="(G) Flexible Surfacing"></option>
-
-<option value="(H) Kerbs & Footways"></option>
-
-<option value="(I) Road Markings"></option>
-
-<option value="(J) Directional Signs"></option>
-
-<option value="(K) Works by Statutory Undertakers"></option>
-
-<option value="(L) Street Lighting Works"></option>
-
-<option value="(M) Structures"></option>
-
-<option value="(N) Traffic Management"></option>
-
-<option value="(O) VRS"></option>
-
-<option value="(P) Supply of Materials"></option>
-
-<option value="(Q) Traffic Signs"></option>
-
-<option value="(R) Time and Material Rates"></option>
-
-<option value="(S) Plant and Equipment"></option>
-
-<option value="(T) Street Furniture"></option>
-
-</datalist>
-
-
-
-<div id="drop-zone">
-
-<p data-lang-key="drop_or_click_photos"></p>
-
-<div class="drop-zone-buttons">
-
-<button class="icon-button" onclick="event.stopPropagation(); document.querySelector('.photo-input').click()" title="Choose from Gallery">🖼️</button>
-
-<button class="icon-button" onclick="event.stopPropagation(); openCamera()" title="Open Camera">📷</button>
-
-</div>
-
-</div>
-
-<input type="file" class="photo-input" accept="image/*" multiple style="display: none;">
-
-<div id="photo-previews" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px;"></div>
-
-</div>
-
-<div class="form-group">
-
-<input type="text" id="status" data-lang-placeholder="status_placeholder">
-
-<input type="text" id="recommendation" data-lang-placeholder="recommendation_placeholder">
-
-<button class="form-button" onclick="showQuantityModalForInspection()" data-lang-key="calculate_quantity"></button>
-
-</div>
-
-<div class="form-group">
-
-<div id="map" style="display:none;"></div>
-
-<div class="location-mode-switcher">
-
-<button id="gps-auto-btn" class="location-mode-btn active" onclick="switchLocationMode('auto')" data-lang-key="location_mode_auto"></button>
-
-<button id="gps-manual-btn" class="location-mode-btn" onclick="switchLocationMode('manual')" data-lang-key="location_mode_manual"></button>
-
-</div>
-
-<div id="location-auto-panel" class="location-panel">
-
-<button class="primary-button" onclick="getLocation()" style="font-size: 14px;" data-lang-key="get_current_gps"></button>
-
-</div>
-
-<div id="location-manual-panel" class="location-panel" style="display: none;">
-
-<input type="number" id="manual-lat" data-lang-placeholder="manual_lat_placeholder" step="any" oninput="updateLocationFromManual()">
-
-<input type="number" id="manual-lng" data-lang-placeholder="manual_lng_placeholder" step="any" oninput="updateLocationFromManual()">
-
-</div>
-
-<div class="location-display-wrapper">
-
-<div class="form-group">
-
-<div><small><strong><span data-lang-key="latitude"></span>:</strong> <span id="lat-display">N/A</span></small></div>
-
-<div><small><strong><span data-lang-key="longitude"></span>:</strong> <span id="lng-display">N/A</span></small></div>
-
-</div>
-
-<button id="insert-location-btn" class="primary-button" onclick="insertLocationToForm()" data-lang-key="insert_location_to_form"></button>
-
-</div>
-
-</div>
-
-</div>
-
-<button onclick="addRow()" class="primary-button" style="margin-top: 15px;"><span data-lang-key="add_row_to_table"></span></button>
-
-</div>
-
-
-<div class="printable-area">
-
-<div class="info-card glass-card">
-
-<div class="logo-container">
-
-<input type="file" accept="image/*" onchange="loadClientLogo('inspection')" style="display:none;" id="client-logo-inspection-input">
-
-<img id="client-logo-inspection" src="https://i.imgur.com/W1f3q2y.png" alt="Client Logo" onclick="document.getElementById('client-logo-inspection-input').click();">
-
-</div>
-
-<div class="title-container">
-
-<div id="inspection-title-1" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">Maintenance of Strategic</div>
-
-<div id="inspection-title-2" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">Highways Qatar North</div>
-
-<div id="inspection-title-3" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">ZF_093</div>
-
-<label class="report-date-label">
-
-<input type="date" id="display-date" onchange="saveActiveReport()">
-
-</label>
-
-<div id="inspection-small-title" class="small-title" contenteditable="true" oninput="saveActiveReport()">Inspection Report</div>
-
-</div>
-
-<div class="logo-container">
-
-<input type="file" accept="image/*" onchange="loadCompanyLogo('inspection')" style="display:none;" id="company-logo-inspection-input">
-
-<img id="company-logo-inspection" src="https://i.imgur.com/1s3a1H4.png" alt="Company Logo" onclick="document.getElementById('company-logo-inspection-input').click();">
-
-</div>
-
-
-<div class="print-header-replacement">
-
-<img id="client-logo-print-src" src="" alt="Client Logo" class="print-logo">
-
-<div class="print-title-container" id="inspection-print-title">
-
-</div>
-
-<img id="company-logo-print-src" src="" alt="Company Logo" class="print-logo">
-
-<div class="print-date-footer">
-
-<span id="inspection-print-date"></span>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<div class="glass-card">
-
-<div class="table-controls">
-
-<h3 class="table-controls-title">Inspection Report</h3>
-
-<button onclick="addColumn()" title="Add Column">➕</button>
-
-<button onclick="removeColumn()" title="Remove Column">➖</button>
-
-<button onclick="removeSelectedRow()" title="Remove Row">🗑️</button>
-
-<div class="menu-button" tabindex="0">
-
-<span>⋮</span>
-
-<div class="dropdown-menu" id="inspection-table-menu"></div>
-
-</div>
-
-</div>
-
-<div class="table-container" style="max-height: 50vh; overflow-y: auto;">
-
-<table id="report-table"></table>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div id="cost-estimation-tab" class="tab-content">
-
-<div class="card glass-card boq-entry-card">
-
-<h3>BOQ Item Entry</h3>
-
-<div class="form-grid-est">
-
-<div class="form-group-est">
-
-<label for="boq-ref-select">BOQ Ref.</label>
-
-<div class="boq-ref-group">
-
-<input type="search" id="boq-search" placeholder="Search Ref...">
-
-<select id="boq-ref-select"></select>
-
-</div>
-
-</div>
-
-<div class="form-group-est description-group">
-
-<label for="boq-desc">Description</label>
-
-<input type="text" id="boq-desc" readonly>
-
-</div>
-
-<div class="form-group-est">
-
-<label for="boq-unit">Unit</label>
-
-<input type="text" id="boq-unit" readonly>
-
-</div>
-
-<div class="form-group-est description-group">
-
-<label>Quantity Calculation</label>
-
-<button class="form-button" onclick="showQuantityModalForBOQ()">Calculate Quantity</button>
-
-</div>
-
-<div class="form-group-est">
-
-<label for="boq-nr">NR</label>
-
-<input type="number" id="boq-nr" placeholder="e.g., 1" readonly>
-
-</div>
-
-<div class="form-group-est">
-
-<label for="boq-length">Length (m)</label>
-
-<input type="number" id="boq-length" placeholder="e.g., 4.00" readonly>
-
-</div>
-
-<div class="form-group-est">
-
-<label for="boq-width">Width (m)</label>
-
-<input type="number" id="boq-width" placeholder="e.g., 2.00" readonly>
-
-</div>
-
-<div class="form-group-est">
-
-<label for="boq-height">Height (m)</label>
-
-<input type="number" id="boq-height" placeholder="e.g., 0.07" readonly>
-
-</div>
-
-<div class="form-group-est">
-
-<label for="boq-total-qty">Total Qty.</label>
-
-<input type="text" id="boq-total-qty" readonly>
-
-</div>
-
-<div class="form-group-est">
-
-<label for="boq-rate">Rate</label>
-
-<input type="text" id="boq-rate" readonly>
-
-</div>
-
-<div class="form-group-est">
-
-<label for="boq-amount">Amount (QR)</label>
-
-<input type="text" id="boq-amount" readonly>
-
-</div>
-
-<div class="form-group-est description-group">
-
-<label for="boq-remarks">Remarks</label>
-
-<input type="text" id="boq-remarks">
-
-</div>
-
-</div>
-
-<div id="most-used-boq-container">
-
-<h4>Most Used BOQ Ref</h4>
-
-<ul id="most-used-boq-list"></ul>
-
-</div>
-
-<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
-
-<button onclick="downloadBOQTemplate()" class="primary-button" style="flex: 1;">Download BOQ Template</button>
-
-<button id="import-boq-csv-btn" class="primary-button" style="flex: 1;">Import BOQ from CSV</button>
-
-<input type="file" id="boq-csv-input" style="display:none;" accept=".csv">
-
-<button id="insert-boq-row-btn" class="primary-button" onclick="insertBOQRow()" style="flex: 1; background-color:#28a745;">Insert Row</button>
-
-</div>
-
-</div>
-
-
-<div class="printable-area">
-
-<div class="info-card glass-card">
-
-<div class="logo-container">
-
-<input type="file" accept="image/*" onchange="loadClientLogo('estimation')" style="display:none;" id="client-logo-estimation-input">
-
-<img id="client-logo-estimation" src="https://i.imgur.com/W1f3q2y.png" alt="Client Logo" title="Click to upload Client Logo" onclick="document.getElementById('client-logo-estimation-input').click()">
-
-</div>
-
-<div class="title-container">
-
-<div id="estimation-title-1" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">Maintenance of Strategic</div>
-
-<div id="estimation-title-2" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">Highways Qatar North</div>
-
-<div id="estimation-title-3" class="report-title-row" contenteditable="true" oninput="saveActiveReport()">ZF_093</div>
-
-<label class="report-date-label">
-
-<input type="date" id="estimation-date" oninput="saveActiveReport()">
-
-</label>
-
-<div id="estimation-small-title" class="small-title" contenteditable="true" oninput="saveActiveReport()">Cost Estimation</div>
-
-</div>
-
-<div class="logo-container">
-
-<input type="file" accept="image/*" onchange="loadCompanyLogo('estimation')" style="display:none;" id="company-logo-estimation-input">
-
-<img id="company-logo-estimation" src="https://i.imgur.com/1s3a1H4.png" alt="Company Logo" title="Click to upload Company Logo" onclick="document.getElementById('company-logo-estimation-input').click()">
-
-</div>
-
-<div class="print-header-replacement">
-
-<img id="est-client-logo-print-src" src="" alt="Client Logo" class="print-logo">
-
-<div class="print-title-container" id="estimation-print-title">
-
-</div>
-
-<img id="est-company-logo-print-src" src="" alt="Company Logo" class="print-logo">
-
-<div class="print-date-footer">
-
-<span id="estimation-print-date"></span>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="glass-card estimation-details">
-
-<div class="form-row"><label for="work-order-no">Work Order No.</label><input type="text" id="work-order-no" oninput="saveActiveReport()"></div>
-
-<div class="form-row"><label for="tpc-no">TPC No.</label><input type="text" id="tpc-no" oninput="saveActiveReport()"></div>
-
-<div class="form-row"><label for="work-desc">Description of Work</label><input type="text" id="work-desc" oninput="saveActiveReport()"></div>
-
-</div>
-
-
-<div class="glass-card">
-
-<div class="table-controls">
-
-<h3 class="table-controls-title">Cost Estimation</h3>
-
-<div class="menu-button" tabindex="0">
-
-<span>⋮</span>
-
-<div class="dropdown-menu" id="estimation-table-menu"></div>
-
-</div>
-
-</div>
-
-<div class="table-container">
-
-<table id="cost-estimation-table">
-
-<thead>
-
-<tr>
-
-<th>BOQ Ref.</th>
-
-<th>Description</th>
-
-<th>Unit</th>
-
-<th>NR</th>
-
-<th>Length (m)</th>
-
-<th>Width (m)</th>
-
-<th>Height (m)</th>
-
-<th>Total Qty.</th>
-
-<th>Rate</th>
-
-<th>Amount</th>
-
-<th>Remarks</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody></tbody>
-
-<tfoot>
-
-<tr>
-
-<td colspan="9" style="text-align: right; font-weight: bold; border: 1px solid black;">TOTAL Amount</td>
-
-<td id="total-amount-cell" style="font-weight: bold; border: 1px solid black;">QAR 0.00</td>
-
-<td colspan="2" style="border: 1px solid black;"></td>
-
-</tr>
-
-</tfoot>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div id="map-tab" class="tab-content">
-
-<div class="glass-card integrated-map-container">
-
-<h3 data-lang-key="tab_map"></h3>
-
-<div id="vehicle-map-controls">
-
-<button class="primary-button" onclick="centerVehicleMapOnUser()">My Location</button>
-
-<button class="primary-button" onclick="fitMapToAssetMarkers()">Fit All Assets</button>
-
-<button class="primary-button" onclick="fitMapToAllMarkers()">Fit to All</button>
-
-<hr style="flex-grow: 1; border-color: transparent;">
-
-<button class="primary-button" onclick="downloadCSVTemplate()">Download CSV Template</button>
-
-<button class="primary-button" onclick="document.getElementById('vehicle-csv-input').click()">Import KML/CSV</button>
-
-<input type="file" id="vehicle-csv-input" style="display:none;" accept=".csv,.kml" onchange="handleVehicleCSVUpload(event)">
-
-<button class="primary-button" onclick="clearMapMarkers()">Clear Map</button>
-
-</div>
-
-<div id="vehicle-map"></div>
-
-<div id="import-summary" style="margin-top: 10px; font-weight: bold;"></div>
-
-</div>
-
-</div>
-
-
-<div id="saved-projects" class="tab-content">
-
-<div class="glass-card">
-
-<h3 data-lang-key="tab_saved_projects"></h3>
-
-<input type="text" id="project-search" placeholder="Search projects by name..." onkeyup="filterProjects()" style="margin-bottom: 10px;">
-
-<div style="margin-bottom: 10px;">
-
-<label for="sort-projects">Sort by:</label>
-
-<select id="sort-projects" onchange="sortProjects()">
-
-<option value="name">Name</option>
-
-<option value="date-newest">Date Saved (Newest)</option>
-
-<option value="date-oldest">Date Saved (Oldest)</option>
-
-</select>
-
-</div>
-
-<ul id="projects-list"></ul>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<footer class="glass-card footer">
-
-<p style="margin: 0;">All rights reserved © <span id="current-year"></span></p>
-
-<p style="margin: 0;" data-lang-key="created_by"></p>
-
-<p style="margin: 0;"> Created by Eng. Ahmet Nasan  <span id="current-year"></span></p>
-
-<p style="margin: 0;" data-lang-key="created_by"></p>
-
-</footer>
-
-<div class="fab-container">
-
-<button id="camera-fab" class="fab" onclick="openCamera()">📷</button>
-
-<button id="add-fab" class="fab" onclick="document.querySelector('#asset').focus()">➕</button>
-
-</div>
-
-
-
-<div id="quantityModal" class="modal"><div class="modal-content glass-card"><h3 data-lang-key="enter_quantity_details"></h3><input type="number" id="length" data-lang-placeholder="length_m"><input type="number" id="width" data-lang-placeholder="width_m"><input type="number" id="depth" data-lang-placeholder="depth_m"><input type="number" id="repetitions" data-lang-placeholder="repetitions_nr"><div class="modal-buttons" style="display:flex; gap: 10px;"><button onclick="setQuantity()" class="primary-button" data-lang-key="set_quantity" style="flex: 1;"></button><button onclick="closeQuantityModal()" style="background-color: #dc3545; color:white; border:none; flex: 1; padding: 12px; border-radius: 8px; font-size: 15px;" data-lang-key="cancel"></button></div></div></div>
-
-
-
-<div id="camera-modal" class="modal"><div id="camera-modal-content" class="glass-card"><video id="camera-feed" autoplay playsinline></video><button id="capture-btn" onclick="capturePhoto()">📸</button><button id="close-camera-btn" onclick="closeCamera()">X</button></div></div>
-
-<canvas id="photo-canvas" style="display:none;"></canvas>
-
-
-
-<div id="preview-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); z-index: 3000; justify-content: center; align-items: center;"><div id="preview-content" style="background-color: white; width: 90%; height: 90%; overflow: auto; padding: 20px; position: relative;"><button id="close-preview" onclick="hidePreview()" style="position: absolute; top: 10px; right: 10px; font-size: 24px; background: none; border: none; cursor: pointer;">❌</button></div></div>
-
-
-
-<div id="confirm-delete-modal" class="modal">
-
-<div class="modal-content glass-card">
-
-<h3>Confirm Deletion</h3>
-
-<p>To confirm deletion, please type the project name: "<span id="project-to-delete-name"></span>"</p>
-
-<input type="text" id="delete-confirmation-input" placeholder="Type project name here">
-
-<div style="display:flex; gap: 10px;">
-
-<button onclick="confirmProjectDeletion()" class="primary-button" style="background-color: #dc3545; flex: 1;">Confirm Delete</button>
-
-<button onclick="cancelProjectDeletion()" class="primary-button" style="flex: 1;">Cancel</button>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <div id="login-page" class="page active centered-container">
+        <div class="form-card card">
+            <h1>Welcome to the Engineering Project Platform 👷‍♂</h1>
+            <p>Smart tools for managing maps, data, inspections, and reports for engineers and managers.</p>
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit" class="btn-primary" style="width:100%;">Sign In</button>
+                <div id="login-message" class="message" style="display:none;"></div>
+            </form>
+            <a href="#" class="toggle-link" id="show-signup-link">Need an account? Sign Up</a>
+        </div>
+    </div>
+
+    <div id="app-container" class="page">
+        <header class="header">
+            <h1 id="app-main-title">Project Dashboard</h1>
+            <div class="header-actions">
+                <span id="current-user-email"></span>
+                <select id="language-switcher" onchange="switchLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                </select>
+                <button class="btn-danger" onclick="signOut()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+            </div>
+        </header>
+
+        <div class="main-container app-grid">
+            <aside class="sidebar">
+                <button id="nav-contracts" class="nav-btn active" onclick="showAppPage('contracts-page')"><i class="fa-solid fa-file-contract"></i> Contracts</button>
+                <button id="nav-map" class="nav-btn" onclick="showAppPage('map-page')"><i class="fa-solid fa-map-location-dot"></i> GIS Map</button>
+                <button id="nav-tables" class="nav-btn" onclick="showAppPage('tables-page')"><i class="fa-solid fa-table"></i> Data Tables</button>
+                <button id="nav-ai" class="nav-btn" onclick="showAppPage('ai-page')"><i class="fa-solid fa-robot"></i> AI Analysis</button>
+                <button id="nav-notifications" class="nav-btn" onclick="showAppPage('notifications-page')"><i class="fa-solid fa-bell"></i> Notifications</button>
+                <button id="nav-admin" class="nav-btn" onclick="showAppPage('admin-page')" style="display: none;"><i class="fa-solid fa-user-shield"></i> Admin Panel</button>
+            </aside>
+
+            <main id="app-content-area">
+                <div id="contracts-page" class="app-content active">
+                    <div class="card">
+                        <h2><i class="fa-solid fa-file-contract"></i> Contract Management</h2>
+                        <p>Select a saved contract or add a new one.</p>
+                        <button class="btn-success" onclick="showModal('contract-form-modal')"><i class="fa-solid fa-plus"></i> Add New Contract</button>
+                    </div>
+                    <div class="card">
+                        <h3>Saved Contracts</h3>
+                        <div id="saved-contracts-list">
+                            <p>No contracts found. Add one to get started.</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="map-page" class="app-content" style="display:none; height:100%;">
+                    <div id="map-container"></div>
+                </div>
+                <div id="tables-page" class="app-content" style="display:none;">
+                     <div class="card">
+                        <h2><i class="fa-solid fa-table"></i> Bill of Quantities (BOQ)</h2>
+                        <div style="display:flex; gap: 10px; margin-bottom: 20px;">
+                             <button class="btn-success" onclick="addBoqRow()"><i class="fa-solid fa-plus"></i> Add Row</button>
+                             <button class="btn" onclick="exportTableToCsv('boq-table.csv')"><i class="fa-solid fa-file-csv"></i> Export to Excel</button>
+                             <button class="btn" onclick="exportTableToPdf()"><i class="fa-solid fa-file-pdf"></i> Export to PDF</button>
+                        </div>
+                        <div class="table-container" id="boq-table-container">
+                             <table id="boq-table">
+                                <thead>
+                                    <tr>
+                                        <th>BOQ Ref.</th>
+                                        <th>Asset</th>
+                                        <th>Description</th>
+                                        <th>Dimensions (L x W x H)</th>
+                                        <th>Unit</th>
+                                        <th>Rate</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="boq-table-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="ai-page" class="app-content" style="display:none;">
+                    <div class="card">
+                         <h2><i class="fa-solid fa-robot"></i> AI Road Defect Analysis</h2>
+                         <p>Upload a road surface image to analyze for defects.</p>
+                         <input type="file" id="ai-image-upload" accept="image/*">
+                         <button class="btn-primary" onclick="handleAIAnalysis()"><i class="fa-solid fa-magnifying-glass"></i> Analyze with AI</button>
+                    </div>
+                    <div class="card" id="ai-results-card" style="display:none;">
+                        <h3>Analysis Result</h3>
+                        <div id="ai-spinner" style="display:none; text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>Analyzing...</p></div>
+                        <div id="ai-results-table" class="table-container"></div>
+                    </div>
+                    <div class="card" id="ai-prompt-card" style="display:none;">
+                        <h3><i class="fa-solid fa-file-pen"></i> Edit AI Prompt (Admin)</h3>
+                        <textarea id="ai-prompt-textarea"></textarea>
+                        <button class="btn-success" onclick="saveAIPrompt()"><i class="fa-solid fa-save"></i> Save Prompt</button>
+                    </div>
+                </div>
+                <div id="notifications-page" class="app-content" style="display:none;">
+                    <div class="card">
+                        <h2><i class="fa-solid fa-bell"></i> Notifications</h2>
+                        <div class="table-container">
+                            <table id="notifications-table">
+                                <thead><tr><th>Date</th><th>Type</th><th>Message</th></tr></thead>
+                                <tbody id="notifications-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="admin-page" class="app-content" style="display:none;">
+                    <div class="card">
+                        <h2><i class="fa-solid fa-user-shield"></i> Admin Panel - User Approval</h2>
+                        <p>Review and manage new user registration requests.</p>
+                         <div class="table-container">
+                            <table id="admin-requests-table">
+                                <thead><tr><th>Email</th><th>Date Requested</th><th>Actions</th></tr></thead>
+                                <tbody id="admin-requests-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <div id="signup-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal('signup-modal')">&times;</button>
+            <h2>Create Your Account</h2>
+            <p>After signing up, an administrator will need to approve your account before you can log in.</p>
+            <form id="signup-form">
+                <input type="email" id="signup-email" placeholder="Email" required>
+                <input type="password" id="signup-password" placeholder="Password" required>
+                <button type="submit" class="btn-primary" style="width:100%;">Sign Up</button>
+                 <div id="signup-message" class="message" style="display:none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="contract-form-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal('contract-form-modal')">&times;</button>
+            <h2>Add New Contract</h2>
+            <form id="contract-form">
+                <input type="text" id="contract-title" placeholder="Contract Title" required>
+                <input type="text" id="contract-number" placeholder="Contract Number" required>
+                <label>Start Date:</label>
+                <input type="date" id="contract-start" required>
+                <label>End Date:</label>
+                <input type="date" id="contract-end" required>
+                <label>BOQ Upload (.csv):</label>
+                <input type="file" id="contract-boq" accept=".csv" required>
+                <small>Note: This BOQ will be used in the Data Tables page.</small>
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-top:10px;">
+                    <a href="#" onclick="downloadBoqTemplate()">Download BOQ Template</a>
+                    <button type="submit" class="btn-success">Save Contract</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p><strong>Developed by Eng. Ahmet Nasan</strong> | Civil Engineer & Software Developer</p>
+        <em>"Blending engineering precision with modern tech."</em>
+    </footer>
 
 <script>
-
-// --- DICTIONARY ---
-
-const langDict = {
-
-en: {
-
-report_title: "Asset Inspection Report",
-
-tab_inspection_report: "Inspection Report",
-
-tab_saved_projects: "Saved Projects",
-
-tab_cost_estimation: "Cost Estimation",
-
-tab_map: "Map", // Renamed from tab_vehicle_tracking
-
-date: "Date",
-
-add_new_asset: "Add New Asset",
-
-asset_description_placeholder: "Asset Description",
-
-drop_or_click_photos: "Drag & Drop or Click to Add Photos",
-
-details_and_recommendations: "Details & Recommendations",
-
-status_placeholder: "Status (e.g., Good, Damaged)",
-
-recommendation_placeholder: "Recommendation (e.g., Repair, Replace)",
-
-calculate_quantity: "Calculate Quantity",
-
-gps_location: "GPS Location",
-
-location_mode_auto: "Automatic",
-
-location_mode_manual: "Manual",
-
-location_mode_link: "Paste Link",
-
-get_current_gps: "Get Current GPS",
-
-manual_lat_placeholder: "Manual Latitude",
-
-manual_lng_placeholder: "Manual Longitude",
-
-paste_link_placeholder: "Paste Google Maps Link",
-
-convert_link_btn: "Convert Link",
-
-latitude: "Latitude",
-
-longitude: "Longitude",
-
-insert_location_to_form: "Insert to Form",
-
-add_row_to_table: "Add Row to Table",
-
-preview_report: "Preview Report",
-
-print_report: "Print Report",
-
-export_pdf_report: "Export PDF",
-
-print_estimation: "Print Estimation",
-
-export_pdf_estimation: "Export PDF",
-
-enter_quantity_details: "Enter Quantity Details",
-
-length_m: "Length (m)",
-
-width_m: "Width (m)",
-
-depth_m: "Depth/Height (m)", // Changed for clarity
-
-repetitions_nr: "Repetitions (NR)",
-
-set_quantity: "Set Quantity",
-
-cancel: "Cancel",
-
-download_csv_template: "Download CSV Template",
-
-clear_map: "Clear Map",
-
-assets_loaded: "Assets loaded:",
-
-total_assets: "Total assets:",
-
-last_modified: "Last Modified:",
-
-saved_date: "Saved Date:",
-
-project_name_placeholder: "Type project name to confirm",
-
-confirm_delete: "Confirm Deletion",
-
-cancel_delete: "Cancel",
-
-type_project_name: "Type the project name to confirm:",
-
-confirm_deletion_message: "Are you sure you want to delete this project?",
-
-},
-
-ar: {
-
-report_title: "تقرير فحص الأصول",
-
-tab_inspection_report: "تقرير الفحص",
-
-tab_saved_projects: "المشاريع المحفوظة",
-
-tab_cost_estimation: "تقدير التكلفة",
-
-tab_map: "الخريطة", // Renamed from tab_vehicle_tracking
-
-date: "التاريخ",
-
-add_new_asset: "إضافة أصل جديد",
-
-asset_description_placeholder: "وصف الأصل",
-
-drop_or_click_photos: "اسحب وأفلت أو انقر لإضافة صور",
-
-details_and_recommendations: "التفاصيل والتوصيات",
-
-status_placeholder: "الحالة (مثال: جيد، تالف)",
-
-recommendation_placeholder: "التوصية (مثال: إصلاح، استبدال)",
-
-calculate_quantity: "حساب الكمية",
-
-gps_location: "موقع GPS",
-
-location_mode_auto: "تلقائي",
-
-location_mode_manual: "يدوي",
-
-location_mode_link: "لصق الرابط",
-
-get_current_gps: "الحصول على GPS الحالي",
-
-manual_lat_placeholder: "خط العرض يدويًا",
-
-manual_lng_placeholder: "خط الطول يدويًا",
-
-paste_link_placeholder: "لصق رابط خرائط جوجل",
-
-convert_link_btn: "تحويل الرابط",
-
-latitude: "خط العرض",
-
-longitude: "خط الطول",
-
-insert_location_to_form: "إدراج في النموذج",
-
-add_row_to_table: "إضافة صف إلى الجدول",
-
-preview_report: "معاينة التقرير",
-
-print_report: "طباعة التقرير",
-
-export_pdf_report: "تصدير PDF",
-
-print_estimation: "طباعة التقدير",
-
-export_pdf_estimation: "تصدير PDF",
-
-enter_quantity_details: "أدخل تفاصيل الكمية",
-
-length_m: "الطول (م)",
-
-width_m: "العرض (م)",
-
-depth_m: "العمق/الارتفاع (م)", // Changed for clarity
-
-repetitions_nr: "التكرارات (رقم)",
-
-set_quantity: "تعيين الكمية",
-
-cancel: "إلغاء",
-
-download_csv_template: "تنزيل قالب CSV",
-
-clear_map: "مسح الخريطة",
-
-assets_loaded: "الأصول المحملة:",
-
-total_assets: "إجمالي الأصول:",
-
-last_modified: "آخر تعديل:",
-
-saved_date: "تاريخ الحفظ:",
-
-project_name_placeholder: "اكتب اسم المشروع للتأكيد",
-
-confirm_delete: "تأكيد الحذف",
-
-cancel_delete: "إلغاء",
-
-type_project_name: "اكتب اسم المشروع للتأكيد:",
-
-confirm_deletion_message: "هل أنت متأكد من أنك تريد حذف هذا المشروع؟",
-
-}
-
+// ======== SCRIPT START ========
+
+// ======== 0. UTILS & HELPERS ========
+const getEl = (id) => document.getElementById(id);
+const show = (id) => getEl(id).style.display = 'flex';
+const hide = (id) => getEl(id).style.display = 'none';
+
+const showModal = (id) => getEl(id).classList.add('active');
+const hideModal = (id) => getEl(id).classList.remove('active');
+
+const showPage = (pageId) => {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    getEl(pageId).classList.add('active');
 };
 
+const showAppPage = (pageId) => {
+    document.querySelectorAll('.app-content').forEach(p => hide(p.id));
+    getEl(pageId).style.display = 'block';
 
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    const navButtonId = pageId.replace('-page', '');
+    getEl(nav-${navButtonId}).classList.add('active');
 
-let currentLang = 'en'; // Default language
+    // Special handler for map initialization
+    if (pageId === 'map-page' && !window.mapInitialized) {
+        initializeMap();
+    }
+};
 
+const displayMessage = (elementId, text, type) => {
+    const el = getEl(elementId);
+    el.textContent = text;
+    el.className = message ${type};
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 5000);
+};
 
+const addNotification = (type, message) => {
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]'
+);
+    notifications.unshift({ date: new Date().toLocaleString(), type, message });
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+    loadNotifications();
+};
 
-function setLanguage(lang) {
+// ======== 1. DATABASE SIMULATION (localStorage) ========
+const DB = {
+    get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
+    set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
+    init: () => {
+        if (!localStorage.getItem('users')) {
+            // Add a default admin user
+            DB.set('users', [{ email: 'admin@demo.com', password: 'admin', is_admin: true, is_approved: true }]);
+        }
+        if (!localStorage.getItem('user_requests')) DB.set('user_requests', []);
+        if (!localStorage.getItem('contracts')) DB.set('contracts', []);
+        if (!localStorage.getItem('notifications')) DB.set('notifications', []);
+        if (!localStorage.getItem('ai_prompt')) {
+             localStorage.setItem('ai_prompt', `You are a civil engineering expert trained to analyze road surface images for pavement condition assessment. Examine the input image and identify all visible road surface defects. Use precise civil engineering terminology for each defect type. For every defect detected, provide the following details in tabular format:
+1. Defect Type
+2. Severity Level (Low/Med/High)
+3. Location in image
+4. Technical Description
+5. Recommended Action
+If no defects are found, return 'No visible defects detected'. Present result in structured table.`);
+        }
+    }
+};
 
-currentLang = lang;
+// ======== 2. AUTHENTICATION ========
+const Auth = {
+    currentUser: null,
+    handleLogin: (e) => {
+        e.preventDefault();
+        const email = getEl('login-email').value;
+        const password = getEl('login-password').value;
+        const users = DB.get('users');
 
-document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+        const foundUser = users.find(u => u.email === email && u.password === password);
 
-document.querySelectorAll('[data-lang-key]').forEach(element => {
+        if (foundUser) {
+            if (foundUser.is_approved) {
+                Auth.currentUser = foundUser;
+                localStorage.setItem('currentUser', JSON.stringify(foundUser));
+                showPage('app-container');
+                initializeApp();
+            } else {
+                displayMessage('login-message', 'Your account is pending administrator approval.', 'pending');
+            }
+        } else {
+            // Check if user is in requests
+            const requests = DB.get('user_requests');
+            if(requests.some(r => r.email === email)) {
+                 displayMessage('login-message', 'Your account is pending administrator approval.', 'pending');
+            } else {
+                displayMessage('login-message', 'Invalid email or password.', 'error');
+            }
+        }
+    },
+    handleSignup: (e) => {
+        e.preventDefault();
+        const email = getEl('signup-email').value;
+        const password = getEl('signup-password').value;
+        const users = DB.get('users');
+        const requests = DB.get('user_requests');
 
-const key = element.getAttribute('data-lang-key');
+        if (users.some(u => u.email === email) || requests.some(r => r.email === email)) {
+            displayMessage('signup-message', 'This email is already registered or pending approval.', 'error');
+            return;
+        }
 
-if (langDict[currentLang] && langDict[currentLang][key]) {
+        requests.push({ email, password, date: new Date().toISOString() });
+        DB.set('user_requests', requests);
+        displayMessage('signup-message', 'Sign up successful! An admin will approve your account shortly.', 'success');
+        addNotification('New User', New user request from ${email}.);
+        setTimeout(() => hideModal('signup-modal'), 2000);
+    },
+    signOut: () => {
+        Auth.currentUser = null;
+        localStorage.removeItem('currentUser');
+        showPage('login-page');
+        location.reload(); // To reset state
+    },
+    checkSession: () => {
+        const user = localStorage.getItem('currentUser');
+        if(user) {
+            Auth.currentUser = JSON.parse(user);
+            showPage('app-container');
+            initializeApp();
+        } else {
+            showPage('login-page');
+        }
+    }
+};
 
-element.textContent = langDict[currentLang][key];
+// ======== 3. APP INITIALIZATION ========
+const initializeApp = () => {
+    getEl('current-user-email').textContent = Auth.currentUser.email;
+    if (Auth.currentUser.is_admin) {
+        getEl('nav-admin').style.display = 'block';
+        getEl('ai-prompt-card').style.display = 'block';
+    }
+    loadContracts();
+    loadAdminRequests();
+    loadNotifications();
+    loadAIPrompt();
+};
 
-}
+// ======== 4. CONTRACTS ========
+const handleSaveContract = (e) => {
+    e.preventDefault();
+    const title = getEl('contract-title').value;
+    const number = getEl('contract-number').value;
+    const start = getEl('contract-start').value;
+    const end = getEl('contract-end').value;
+    const boqFile = getEl('contract-boq').files[0];
 
-});
+    if (!title || !number || !start || !end || !boqFile) {
+        alert('Please fill all fields and upload a BOQ file.');
+        return;
+    }
 
-document.querySelectorAll('[data-lang-placeholder]').forEach(element => {
+    Papa.parse(boqFile, {
+        header: true,
+        complete: (results) => {
+            const contracts = DB.get('contracts');
+            const newContract = {
+                id: C${Date.now()},
+                title, number, start, end,
+                boq: results.data
+            };
+            contracts.push(newContract);
+            DB.set('contracts', contracts);
+            hideModal('contract-form-modal');
+            loadContracts();
+            addNotification('Contract', New contract "${title}" added.);
+        },
+        error: (err) => {
+            alert('Error parsing CSV file: ' + err.message);
+        }
+    });
+};
 
-const key = element.getAttribute('data-lang-placeholder');
+const loadContracts = () => {
+    const contracts = DB.get('contracts');
+    const container = getEl('saved-contracts-list');
+    container.innerHTML = '';
+    if (contracts.length === 0) {
+        container.innerHTML = '<p>No contracts found. Add one to get started.</p>';
+        return;
+    }
+    contracts.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'contract-card';
+        card.innerHTML = `
+            <h3>${c.title}</h3>
+            <p><strong>Ref:</strong> ${c.number}</p>
+            <p><strong>Dates:</strong> ${c.start} to ${c.end}</p>
+        `;
+        card.onclick = () => openContract(c.id);
+        container.appendChild(card);
+    });
+};
 
-if (langDict[currentLang] && langDict[currentLang][key]) {
+const openContract = (contractId) => {
+    const contracts = DB.get('contracts');
+    const contract = contracts.find(c => c.id === contractId);
+    if (!contract) return;
 
-element.placeholder = langDict[currentLang][key];
+    localStorage.setItem('activeContractId', contractId);
+    getEl('app-main-title').textContent = contract.title;
+    loadBoqTable(contract.boq);
+    showAppPage('tables-page');
+};
 
-}
+const downloadBoqTemplate = () => {
+    const header = "BOQ Ref.,Asset,Description,Dimensions (L x W x H),Unit,Rate\n";
+    const blob = new Blob([header], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "BOQ_Template.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
 
-});
+// ======== 5. DATA TABLES (BOQ) ========
+const loadBoqTable = (boqData) => {
+    const tableBody = getEl('boq-table-body');
+    tableBody.innerHTML = '';
+    boqData.forEach((row, index) => {
+        if(row['BOQ Ref.']) { // Check if row is not empty
+            addBoqRow(row);
+        }
+    });
+};
 
-}
+const addBoqRow = (rowData = {}) => {
+    const tableBody = getEl('boq-table-body');
+    const newRow = tableBody.insertRow();
+    newRow.innerHTML = `
+        <td contenteditable="true">${rowData['BOQ Ref.'] || ''}</td>
+        <td contenteditable="true">${rowData['Asset'] || ''}</td>
+        <td contenteditable="true">${rowData['Description'] || ''}</td>
+        <td contenteditable="true" oninput="handleUnitInput(event)">${rowData['Dimensions (L x W x H)'] || ''}</td>
+        <td>${rowData['Unit'] || ''}</td>
+        <td contenteditable="true">${rowData['Rate'] || ''}</td>
+        <td><button class="btn-danger" onclick="deleteRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+    `;
+};
 
+const deleteRow = (btn) => {
+    const row = btn.parentNode.parentNode;
+    row.parentNode.removeChild(row);
+};
 
+const handleUnitInput = (event) => {
+    const dimensions = event.target.textContent.toLowerCase();
+    const unitCell = event.target.nextElementSibling;
 
-// --- GLOBAL VARIABLES ---
+    // L x W x H -> m³
+    if (dimensions.match(/(\d|\.)+\s?x\s?(\d|\.)+\s?x\s?(\d|\.)+/)) {
+        unitCell.textContent = 'm³';
+    } 
+    // L x W -> m²
+    else if (dimensions.match(/(\d|\.)+\s?x\s?(\d|\.)+/)) {
+        unitCell.textContent = 'm²';
+    }
+    // L -> m
+    else if (dimensions.match(/^(\d|\.)+$/)) {
+        unitCell.textContent = 'm';
+    }
+    // NR
+    else if (dimensions.toUpperCase() === 'NR') {
+         unitCell.textContent = 'NR';
+    }
+    else {
+        unitCell.textContent = 'Unit'; // Default
+    }
+};
 
-let reportTable;
+const exportTableToCsv = (filename) => {
+    let csv = [];
+    const rows = document.querySelectorAll("#boq-table tr");
+    for (const row of rows) {
+        let cols = row.querySelectorAll("td, th");
+        let csvrow = [];
+        for (const col of cols) {
+            // To handle cases where a cell might have a comma
+            let data = "${col.innerText.replace(/"/g, '""')}";
+            csvrow.push(data);
+        }
+        // Exclude the action column from export
+        csvrow.pop();
+        csv.push(csvrow.join(","));
+    }
+    const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(csvFile);
+    link.download = filename;
+    link.click();
+};
 
-let costEstimationTable;
+const exportTableToPdf = () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const container = getEl('boq-table-container').cloneNode(true);
 
+    // Clean up for printing
+    container.querySelectorAll('button').forEach(b => b.remove());
+    container.querySelectorAll('[contenteditable="true"]').forEach(el => el.removeAttribute('contenteditable'));
+
+    document.body.appendChild(container); // Needs to be in DOM for html2canvas
+
+    html2canvas(container).then(canvas => {
+        document.body.removeChild(container);
+        const imgData = canvas.toDataURL('image/png');
+        const imgProps = doc.getImageProperties(imgData);
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        doc.save("boq-report.pdf");
+    });
+};
+
+// ======== 6. GIS MAP ========
 let map;
+let drawnItems;
+window.mapInitialized = false;
 
-let currentMarker;
+const initializeMap = () => {
+    map = L.map('map-page').setView([25.2854, 51.5310], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
 
-let projectMarkers = [];
+    drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
 
-let editingRow = null;
+    const geomanControls = new L.Control.Geoman(map, {
+        position: 'topleft',
+        drawMarker: true,
+        drawCircleMarker: false,
+        drawCircle: false,
+        drawRectangle: true,
+        drawPolygon: true,
+        drawPolyline: true,
+    });
+    map.addControl(geomanControls);
 
-let projects = loadProjects();
+    map.on('pm:create', (e) => {
+        const layer = e.layer;
+        drawnItems.addLayer(layer);
+        calculateAndBindPopup(layer);
+    });
 
-let currentProjectName = "Unnamed Project"; // Default project name
+    addCustomMapControls();
+    window.mapInitialized = true;
+};
 
-let clientLogoInspection = null; // Stores data URL for inspection client logo
+const calculateAndBindPopup = (layer) => {
+    const geojson = layer.toGeoJSON();
+    let content = '<h4>Shape Details</h4>';
 
-let companyLogoInspection = null; // Stores data URL for inspection company logo
+    if (geojson.geometry.type === 'Polygon') {
+        const area = turf.area(geojson); // in square meters
+        content += <p><strong>Area:</strong> ${area.toFixed(2)} m²</p>;
+    } else if (geojson.geometry.type === 'LineString') {
+        const length = turf.length(geojson, { units: 'meters' });
+        content += <p><strong>Length:</strong> ${length.toFixed(2)} m</p>;
+    }
 
-let clientLogoEstimation = null; // Stores data URL for estimation client logo
+    const center = layer.getBounds().getCenter();
+    content += <p><strong>Center Coords:</strong> ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}</p>;
+    content += <button class="btn-danger btn-sm" onclick="removeLayer(${layer._leaflet_id})">Delete</button>;
+    layer.bindPopup(content).openPopup();
+};
 
-let companyLogoEstimation = null; // Stores data URL for estimation company logo
+window.removeLayer = (id) => {
+    drawnItems.eachLayer(layer => {
+        if (layer._leaflet_id === id) {
+            drawnItems.removeLayer(layer);
+        }
+    });
+};
 
-let quantityContext = 'inspection'; // 'inspection' or 'boq'
+const addCustomMapControls = () => {
+    const customControl = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd: function (map) {
+            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+            container.innerHTML = `
+                <a href="#" title="More Actions" role="button" aria-label="More Actions">
+                    <i class="fa-solid fa-ellipsis-vertical" style="font-size: 1.2em; padding: 5px;"></i>
+                </a>
+                <div class="custom-menu" style="display:none; background:white; padding: 5px; box-shadow: var(--shadow);">
+                    <button class="btn" style="width:100%; margin-bottom:5px;" onclick="getEl('kml-input').click()">Import KML</button>
+                    <button class="btn" style="width:100%;" onclick="getEl('csv-input').click()">Import CSV</button>
+                </div>
+                <input type="file" id="kml-input" style="display:none" accept=".kml" onchange="importKML(event)">
+                <input type="file" id="csv-input" style="display:none" accept=".csv" onchange="importCSV(event)">
+            `;
+            container.onclick = (e) => {
+                e.stopPropagation();
+                const menu = container.querySelector('.custom-menu');
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            }
+            L.DomEvent.disableClickPropagation(container);
+            return container;
+        }
+    });
+    map.addControl(new customControl());
+};
+
+const importKML = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const kmlLayer = omnivore.kml.parse(e.target.result);
+        drawnItems.addLayer(kmlLayer);
+        map.fitBounds(kmlLayer.getBounds());
+    };
+    reader.readAsText(file);
+};
+
+const importCSV = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    Papa.parse(file, {
+        header: true,
+        dynamicTyping: true,
+        complete: (results) => {
+            results.data.forEach(point => {
+                if (point.lat && point.lng) {
+                    const marker = L.marker([point.lat, point.lng]).addTo(drawnItems);
+                    let popupContent = '<ul>';
+                    for (const key in point) {
+                        popupContent += <li><strong>${key}:</strong> ${point[key]}</li>;
+                    }
+                    popupContent += '</ul>';
+                    marker.bindPopup(popupContent);
+                }
+            });
+        }
+    });
+};
 
 
+// ======== 7. AI & NOTIFICATIONS ========
+const handleAIAnalysis = () => {
+    const file = getEl('ai-image-upload').files[0];
+    if (!file) {
+        alert("Please upload an image first.");
+        return;
+    }
+    getEl('ai-results-card').style.display = 'block';
+    getEl('ai-results-table').style.display = 'none';
+    getEl('ai-spinner').style.display = 'block';
 
-// BOQ data (mock data for now)
+    // Simulate AI processing
+    setTimeout(() => {
+        const exampleResult = `
+            <table>
+                <thead>
+                    <tr><th>Defect Type</th><th>Severity</th><th>Location</th><th>Description</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Pothole</td><td>High</td><td>Lower-left</td><td>Surface collapse due to traffic and environmental factors.</td><td>Immediate Patching Required</td></tr>
+                    <tr><td>Longitudinal Crack</td><td>Medium</td><td>Center</td><td>Crack running parallel to the pavement's centerline, potential for water ingress.</td><td>Seal Crack</td></tr>
+                </tbody>
+            </table>
+        `;
+        getEl('ai-spinner').style.display = 'none';
+        getEl('ai-results-table').innerHTML = exampleResult;
+        getEl('ai-results-table').style.display = 'block';
+        addNotification('AI Analysis', Analysis complete for image ${file.name}.);
+    }, 2500);
+};
 
-const boqData = [
+const loadAIPrompt = () => {
+    getEl('ai-prompt-textarea').value = localStorage.getItem('ai_prompt');
+};
+const saveAIPrompt = () => {
+    localStorage.setItem('ai_prompt', getEl('ai-prompt-textarea').value);
+    alert('AI prompt saved!');
+};
 
-{ ref: "A1.1", description: "Excavation", unit: "m³", rate: 15.00 },
-
-{ ref: "A1.2", description: "Backfilling", unit: "m³", rate: 10.00 },
-
-{ ref: "B2.1", description: "Concrete Paving", unit: "m²", rate: 75.00 },
-
-{ ref: "B2.2", description: "Asphalt Layer", unit: "m²", rate: 50.00 },
-
-{ ref: "C3.1", description: "Kerb Installation", unit: "m.l", rate: 25.00 },
-
-{ ref: "C3.2", description: "Interlock Paving", unit: "m²", rate: 40.00 },
-
-{ ref: "D4.1", description: "Road Marking (White)", unit: "m²", rate: 12.00 },
-
-{ ref: "D4.2", description: "Road Marking (Yellow)", unit: "m²", rate: 12.00 },
-
-];
+const loadNotifications = () => {
+    const notifications = DB.get('notifications');
+    const tableBody = getEl('notifications-table-body');
+    tableBody.innerHTML = '';
+    notifications.forEach(n => {
+        const row = tableBody.insertRow();
+        row.innerHTML = <td>${n.date}</td><td>${n.type}</td><td>${n.message}</td>;
+    });
+};
 
 
+// ======== 8. ADMIN PANEL ========
+const loadAdminRequests = () => {
+    const requests = DB.get('user_requests');
+    const tableBody = getEl('admin-requests-body');
+    tableBody.innerHTML = '';
+    if (requests.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3">No pending user requests.</td></tr>';
+        return;
+    }
+    requests.forEach(req => {
+        const row = tableBody.insertRow();
+        row.innerHTML = `
+            <td>${req.email}</td>
+            <td>${new Date(req.date).toLocaleDateString()}</td>
+            <td>
+                <button class="btn-success btn-sm" onclick="approveUser('${req.email}')">Approve</button>
+                <button class="btn-danger btn-sm" onclick="rejectUser('${req.email}')">Reject</button>
+            </td>
+        `;
+    });
+};
+
+const approveUser = (email) => {
+    let requests = DB.get('user_requests');
+    let users = DB.get('users');
+    const userRequest = requests.find(r => r.email === email);
+
+    if(userRequest) {
+        users.push({ ...userRequest, is_approved: true, is_admin: false });
+        requests = requests.filter(r => r.email !== email);
+        DB.set('users', users);
+        DB.set('user_requests', requests);
+        addNotification('Admin', User ${email} has been approved.);
+        loadAdminRequests();
+    }
+};
+
+const rejectUser = (email) => {
+    let requests = DB.get('user_requests');
+    requests = requests.filter(r => r.email !== email);
+    DB.set('user_requests', requests);
+    addNotification('Admin', User request for ${email} has been rejected.);
+    loadAdminRequests();
+};
 
 
-
-// --- INITIALIZATION ---
-
+// ======== 9. EVENT LISTENERS ========
 document.addEventListener('DOMContentLoaded', () => {
-
-const today = new Date().toISOString().split('T')[0];
-
-document.getElementById('display-date').value = today;
-
-document.getElementById('estimation-date').value = today;
-
-document.getElementById('current-year').textContent = new Date().getFullYear();
-
-
-
-// Initialize tables (if they don't exist, create them)
-
-reportTable = document.getElementById('report-table');
-
-costEstimationTable = document.getElementById('cost-estimation-table');
-
-
-
-if (!reportTable.tHead) {
-
-reportTable.createTHead();
-
-const headerRow = reportTable.tHead.insertRow();
-
-const headers = ["ID", "Asset", "Status", "Recommendation", "Quantity", "Photos", "Latitude", "Longitude", "Action"];
-
-headers.forEach(text => {
-
-const th = document.createElement('th');
-
-th.textContent = text;
-
-headerRow.appendChild(th);
-
-});
-
-reportTable.createTBody();
-
-}
-
-
-// Setup project file import
-
-document.getElementById('project-import-input').addEventListener('change', importProjectFile);
-
-
-document.getElementById('import-boq-csv-btn').addEventListener('click', () => document.getElementById('boq-csv-input').click());
-
-document.getElementById('boq-csv-input').addEventListener('change', handleBOQ_CSV);
-
-
-
-loadActiveReport();
-
-updateProjectsList();
-
-setupProjectSearchAndSort(); // Initialize search and sort for saved projects
-
-populateMenus();
-
-
-
-// Setup BOQ Select
-
-const boqSelect = document.getElementById('boq-ref-select');
-
-boqData.forEach(item => {
-
-const option = document.createElement('option');
-
-option.value = item.ref;
-
-option.textContent = item.ref + " - " + item.description;
-
-boqSelect.appendChild(option);
-
-});
-
-boqSelect.addEventListener('change', updateBOQDetails);
-
-document.getElementById('boq-search').addEventListener('input', filterBOQOptions);
-
-updateBOQDetails(); // Initialize details with first item
-
-updateMostUsedBOQ(); // Initialize most used list
-
-
-
-// Make tables editable
-
-makeTableEditable('report-table');
-
-makeTableEditable('cost-estimation-table');
-
-
-
-// Set default language
-
-setLanguage('en');
-
-});
-
-
-// --- MENU POPULATION ---
-
-function populateMenus() {
-
-// Main Header Menu
-
-const mainMenu = document.querySelector('.main-header .dropdown-menu');
-
-mainMenu.innerHTML = `
-
-<button onclick="exportProjectFile()">💾 Save Project to File</button>
-
-<button onclick="document.getElementById('project-import-input').click()">📂 Import Project from File</button>
-
-<hr>
-
-<button onclick="saveProject()">📝 Save to Browser</button>
-
-<hr>
-
-<button onclick="setLanguage('en')">🇺🇸 English</button>
-
-<button onclick="setLanguage('ar')">🇸🇦 العربية</button>
-
-`;
-
-
-
-// Inspection Table Menu
-
-const inspectionMenu = document.getElementById('inspection-table-menu');
-
-inspectionMenu.innerHTML = `
-
-<button onclick="printContent('inspection')">🖨️ Print</button>
-
-<button onclick="exportToPdf('inspection')">📄 Export PDF</button>
-
-<hr>
-
-<button onclick="exportInspectionCSV()">📊 Export CSV</button>
-
-<button onclick="exportInspectionKML()">🗺️ Export KML</button>
-
-`;
-
-
-
-// Estimation Table Menu
-
-const estimationMenu = document.getElementById('estimation-table-menu');
-
-estimationMenu.innerHTML = `
-
-<button onclick="printContent('estimation')">🖨️ Print</button>
-
-<button onclick="exportToPdf('estimation')">📄 Export PDF</button>
-
-<hr>
-
-<button onclick="exportEstimationCSV()">📊 Export CSV</button>
-
-`;
-
-}
-
-
-
-// --- TAB MANAGEMENT ---
-
-function openTab(evt, tabName) {
-
-let i, tabcontent, tabbuttons;
-
-tabcontent = document.getElementsByClassName("tab-content");
-
-for (i = 0; i < tabcontent.length; i++) {
-
-tabcontent[i].style.display = "none";
-
-tabcontent[i].classList.remove('active');
-
-}
-
-tabbuttons = document.getElementsByClassName("tab-button");
-
-for (i = 0; i < tabbuttons.length; i++) {
-
-tabbuttons[i].classList.remove("active");
-
-}
-
-document.getElementById(tabName).style.display = "flex";
-
-document.getElementById(tabName).classList.add('active');
-
-evt.currentTarget.classList.add("active");
-
-
-
-if (tabName === 'map-tab' && !vehicleMap) {
-
-initializeVehicleMap();
-
-}
-
-saveActiveTab(tabName);
-
-}
-
-
-
-function saveActiveTab(tabName) {
-
-localStorage.setItem('activeTab', tabName);
-
-}
-
-
-
-function loadActiveTab() {
-
-const activeTab = localStorage.getItem('activeTab') || 'main-report';
-
-const tabButton = document.querySelector(`.tab-button[onclick*="${activeTab}"]`);
-
-if (tabButton) {
-
-tabButton.click(); // Simulate click to activate tab
-
-} else {
-
-document.querySelector('.tab-button.active').click(); // Fallback to default active
-
-}
-
-}
-
-
-
-// --- LOCAL STORAGE & PROJECT MANAGEMENT ---
-
-function generateId() {
-
-return '_' + Math.random().toString(36).substr(2, 9);
-
-}
-
-
-
-function saveActiveReport() {
-
-const reportData = {
-
-// Main project title
-
-projectTitle: document.querySelector('.main-title').textContent,
-
-
-// Inspection Report Data
-
-inspection: {
-
-title1: document.getElementById('inspection-title-1').innerHTML,
-
-title2: document.getElementById('inspection-title-2').innerHTML,
-
-title3: document.getElementById('inspection-title-3').innerHTML,
-
-date: document.getElementById('display-date').value,
-
-smallTitle: document.getElementById('inspection-small-title').innerHTML,
-
-tableData: [],
-
-},
-
-
-
-// Cost Estimation Data
-
-costEstimation: {
-
-title1: document.getElementById('estimation-title-1').innerHTML,
-
-title2: document.getElementById('estimation-title-2').innerHTML,
-
-title3: document.getElementById('estimation-title-3').innerHTML,
-
-date: document.getElementById('estimation-date').value,
-
-smallTitle: document.getElementById('estimation-small-title').innerHTML,
-
-workOrderNo: document.getElementById('work-order-no').value,
-
-tpcNo: document.getElementById('tpc-no').value,
-
-workDesc: document.getElementById('work-desc').value,
-
-tableData: []
-
-},
-
-
-
-// Logos
-
-clientLogo: clientLogoInspection, // Assuming logos are shared for now
-
-companyLogo: companyLogoInspection,
-
-};
-
-
-
-// Capture Inspection Report table
-
-const reportRows = reportTable.tBodies[0].querySelectorAll('tr');
-
-reportRows.forEach(row => {
-
-reportData.inspection.tableData.push({
-
-id: row.dataset.id,
-
-asset: row.cells[1].textContent,
-
-status: row.cells[2].textContent,
-
-recommendation: row.cells[3].textContent,
-
-quantity: row.cells[4].textContent,
-
-photos: Array.from(row.cells[5].querySelectorAll('img')).map(img => img.src),
-
-latitude: row.cells[6].textContent,
-
-longitude: row.cells[7].textContent
-
-});
-
-});
-
-
-
-// Capture Cost Estimation table
-
-const costRows = costEstimationTable.tBodies[0].querySelectorAll('tr');
-
-costRows.forEach(row => {
-
-reportData.costEstimation.tableData.push({
-
-boqRef: row.cells[0].textContent,
-
-description: row.cells[1].textContent,
-
-unit: row.cells[2].textContent,
-
-nr: row.cells[3].textContent,
-
-length: row.cells[4].textContent,
-
-width: row.cells[5].textContent,
-
-height: row.cells[6].textContent,
-
-totalQty: row.cells[7].textContent,
-
-rate: row.cells[8].textContent,
-
-amount: row.cells[9].textContent,
-
-remarks: row.cells[10].textContent,
-
-});
-
-});
-
-
-
-localStorage.setItem('activeReport', JSON.stringify(reportData));
-
-}
-
-
-
-function loadActiveReport() {
-
-const savedReport = localStorage.getItem('activeReport');
-
-if (savedReport) {
-
-const data = JSON.parse(savedReport);
-
-
-document.querySelector('.main-title').textContent = data.projectTitle || 'Project Dashboard';
-
-
-
-// Load Inspection Data
-
-if(data.inspection) {
-
-document.getElementById('inspection-title-1').innerHTML = data.inspection.title1 || 'Maintenance of Strategic';
-
-document.getElementById('inspection-title-2').innerHTML = data.inspection.title2 || 'Highways Qatar North';
-
-document.getElementById('inspection-title-3').innerHTML = data.inspection.title3 || 'ZF_093';
-
-document.getElementById('display-date').value = data.inspection.date || new Date().toISOString().split('T')[0];
-
-document.getElementById('inspection-small-title').innerHTML = data.inspection.smallTitle || 'Inspection Report';
-
-const inspTbody = reportTable.tBodies[0];
-
-inspTbody.innerHTML = '';
-
-if(data.inspection.tableData) data.inspection.tableData.forEach(rowData => addRow(rowData, true));
-
-}
-
-
-
-// Load Estimation Data
-
-if(data.costEstimation) {
-
-document.getElementById('estimation-title-1').innerHTML = data.costEstimation.title1 || 'Maintenance of Strategic';
-
-document.getElementById('estimation-title-2').innerHTML = data.costEstimation.title2 || 'Highways Qatar North';
-
-document.getElementById('estimation-title-3').innerHTML = data.costEstimation.title3 || 'ZF_093';
-
-document.getElementById('estimation-date').value = data.costEstimation.date || new Date().toISOString().split('T')[0];
-
-document.getElementById('estimation-small-title').innerHTML = data.costEstimation.smallTitle || 'Cost Estimation';
-
-document.getElementById('work-order-no').value = data.costEstimation.workOrderNo || '';
-
-document.getElementById('tpc-no').value = data.costEstimation.tpcNo || '';
-
-document.getElementById('work-desc').value = data.costEstimation.workDesc || '';
-
-const costTbody = costEstimationTable.tBodies[0];
-
-costTbody.innerHTML = '';
-
-if(data.costEstimation.tableData) data.costEstimation.tableData.forEach(rowData => insertBOQRow(rowData, true));
-
-calculateCostEstimationTotal();
-
-}
-
-
-
-// Load Logos
-
-clientLogoInspection = data.clientLogo || null;
-
-companyLogoInspection = data.companyLogo || null;
-
-clientLogoEstimation = data.clientLogo || null;
-
-companyLogoEstimation = data.companyLogo || null;
-
-
-
-if (clientLogoInspection) {
-
-document.getElementById('client-logo-inspection').src = clientLogoInspection;
-
-document.getElementById('client-logo-estimation').src = clientLogoInspection;
-
-}
-
-if (companyLogoInspection) {
-
-document.getElementById('company-logo-inspection').src = companyLogoInspection;
-
-document.getElementById('company-logo-estimation').src = companyLogoInspection;
-
-}
-
-
-
-}
-
-loadActiveTab();
-
-}
-
-
-function loadClientLogo(tab) {
-
-const inputId = tab === 'inspection' ? 'client-logo-inspection-input' : 'client-logo-estimation-input';
-
-const input = document.getElementById(inputId);
-
-if (input.files && input.files[0]) {
-
-const reader = new FileReader();
-
-reader.onload = function(e) {
-
-const logoDataUrl = e.target.result;
-
-document.getElementById('client-logo-inspection').src = logoDataUrl;
-
-document.getElementById('client-logo-estimation').src = logoDataUrl;
-
-clientLogoInspection = logoDataUrl;
-
-clientLogoEstimation = logoDataUrl;
-
-saveActiveReport();
-
-};
-
-reader.readAsDataURL(input.files[0]);
-
-}
-
-}
-
-
-function loadCompanyLogo(tab) {
-
-const inputId = tab === 'inspection' ? 'company-logo-inspection-input' : 'company-logo-estimation-input';
-
-const input = document.getElementById(inputId);
-
-if (input.files && input.files[0]) {
-
-const reader = new FileReader();
-
-reader.onload = function(e) {
-
-const logoDataUrl = e.target.result;
-
-document.getElementById('company-logo-inspection').src = logoDataUrl;
-
-document.getElementById('company-logo-estimation').src = logoDataUrl;
-
-companyLogoInspection = logoDataUrl;
-
-companyLogoEstimation = logoDataUrl;
-
-saveActiveReport();
-
-};
-
-reader.readAsDataURL(input.files[0]);
-
-}
-
-}
-
-
-
-// --- NEW: PROJECT FILE EXPORT / IMPORT ---
-
-function exportProjectFile() {
-
-saveActiveReport(); // Ensure current state is saved to localStorage
-
-const reportData = localStorage.getItem('activeReport');
-
-if (!reportData) {
-
-alert("No active project to save.");
-
-return;
-
-}
-
-
-const data = JSON.parse(reportData);
-
-const projectName = data.projectTitle || 'Unnamed Project';
-
-const fileName = `${projectName.replace(/ /g, '_')}.json`;
-
-
-const blob = new Blob([reportData], { type: 'application/json' });
-
-const link = document.createElement('a');
-
-link.href = URL.createObjectURL(blob);
-
-link.download = fileName;
-
-document.body.appendChild(link);
-
-link.click();
-
-document.body.removeChild(link);
-
-alert(`Project downloaded as ${fileName}`);
-
-}
-
-
-
-function importProjectFile(event) {
-
-const file = event.target.files[0];
-
-if (!file) return;
-
-
-
-const reader = new FileReader();
-
-reader.onload = function(e) {
-
-try {
-
-const fileContent = e.target.result;
-
-// Validate if it's a JSON file although not foolproof
-
-JSON.parse(fileContent);
-
-localStorage.setItem('activeReport', fileContent);
-
-loadActiveReport();
-
-alert(`Project "${JSON.parse(fileContent).projectTitle}" loaded successfully.`);
-
-} catch (error) {
-
-alert("Failed to import project. The file may be corrupt or not a valid project file.");
-
-console.error("Project import error:", error);
-
-} finally {
-
-// Reset file input to allow importing the same file again
-
-event.target.value = null;
-
-}
-
-};
-
-reader.readAsText(file);
-
-}
-
-
-
-function saveProject() {
-
-const projectName = prompt("Enter project name to save in browser:");
-
-if (projectName) {
-
-saveActiveReport(); // Ensure data is up-to-date
-
-const reportData = JSON.parse(localStorage.getItem('activeReport'));
-
-if (reportData) {
-
-reportData.name = projectName;
-
-reportData.savedDate = new Date().toISOString().split('T')[0];
-
-reportData.lastModified = new Date().toLocaleString();
-
-
-const projectIndex = projects.findIndex(p => p.name === projectName);
-
-if (projectIndex > -1) {
-
-if (confirm(`Project "${projectName}" already exists in the browser. Do you want to overwrite it?`)) {
-
-projects[projectIndex] = reportData;
-
-} else {
-
-return;
-
-}
-
-} else {
-
-projects.push(reportData);
-
-}
-
-localStorage.setItem('projects', JSON.stringify(projects));
-
-updateProjectsList();
-
-alert("Project saved to browser!");
-
-}
-
-}
-
-}
-
-
-
-function loadProject(projectName) {
-
-const project = projects.find(p => p.name === projectName);
-
-if (project) {
-
-localStorage.setItem('activeReport', JSON.stringify(project));
-
-loadActiveReport();
-
-alert(`Project "${projectName}" loaded!`);
-
-openTab({currentTarget: document.querySelector('.tab-button')}, 'main-report');
-
-} else {
-
-alert("Project not found!");
-
-}
-
-}
-
-
-
-function deleteProject(projectName) {
-
-document.getElementById('project-to-delete-name').textContent = projectName;
-
-document.getElementById('confirm-delete-modal').style.display = 'flex';
-
-}
-
-
-
-function confirmProjectDeletion() {
-
-const projectName = document.getElementById('project-to-delete-name').textContent;
-
-const confirmationInput = document.getElementById('delete-confirmation-input').value;
-
-
-
-if (confirmationInput === projectName) {
-
-projects = projects.filter(p => p.name !== projectName);
-
-localStorage.setItem('projects', JSON.stringify(projects));
-
-updateProjectsList();
-
-cancelProjectDeletion(); // Close modal
-
-alert(`Project "${projectName}" deleted!`);
-
-} else {
-
-alert("Project name does not match. Deletion cancelled.");
-
-}
-
-}
-
-
-
-function cancelProjectDeletion() {
-
-document.getElementById('confirm-delete-modal').style.display = 'none';
-
-document.getElementById('delete-confirmation-input').value = '';
-
-document.getElementById('project-to-delete-name').textContent = '';
-
-}
-
-
-
-function loadProjects() {
-
-const savedProjects = localStorage.getItem('projects');
-
-return savedProjects ? JSON.parse(savedProjects) : [];
-
-}
-
-
-
-function updateProjectsList() {
-
-const list = document.getElementById('projects-list');
-
-list.innerHTML = '';
-
-const sortedProjects = getSortedProjects();
-
-
-
-if (sortedProjects.length === 0) {
-
-list.innerHTML = '<li>No saved projects in browser.</li>';
-
-return;
-
-}
-
-
-
-sortedProjects.forEach(project => {
-
-const li = document.createElement('li');
-
-const lastModifiedText = project.lastModified ? ` (Last Modified: ${project.lastModified})` : '';
-
-
-
-li.innerHTML = `
-
-<span class="project-name" onclick="loadProject('${project.name}')">${project.name}</span>
-
-<small>Saved: ${project.savedDate}${lastModifiedText}</small>
-
-<button onclick="deleteProject('${project.name}')">Delete</button>
-
-`;
-
-list.appendChild(li);
-
-});
-
-}
-
-
-
-function setupProjectSearchAndSort() {
-
-document.getElementById('project-search').addEventListener('input', filterProjects);
-
-document.getElementById('sort-projects').addEventListener('change', updateProjectsList);
-
-}
-
-
-
-function filterProjects() {
-
-const searchTerm = document.getElementById('project-search').value.toLowerCase();
-
-const listItems = document.getElementById('projects-list').querySelectorAll('li');
-
-listItems.forEach(item => {
-
-const projectName = item.querySelector('.project-name').textContent.toLowerCase();
-
-if (projectName.includes(searchTerm)) {
-
-item.style.display = 'flex';
-
-} else {
-
-item.style.display = 'none';
-
-}
-
-});
-
-}
-
-
-
-function getSortedProjects() {
-
-const sortBy = document.getElementById('sort-projects').value;
-
-let sorted = [...projects];
-
-
-
-if (sortBy === 'name') {
-
-sorted.sort((a, b) => a.name.localeCompare(b.name));
-
-} else if (sortBy === 'date-newest') {
-
-sorted.sort((a, b) => new Date(b.savedDate) - new Date(a.savedDate));
-
-} else if (sortBy === 'date-oldest') {
-
-sorted.sort((a, b) => new Date(a.savedDate) - new Date(b.savedDate));
-
-}
-
-return sorted;
-
-}
-
-
-
-// --- CAMERA & PHOTO ---
-
-let cameraStream;
-
-async function openCamera() {
-
-const cameraModal = document.getElementById('camera-modal');
-
-const cameraFeed = document.getElementById('camera-feed');
-
-try {
-
-cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); // Prefer back camera
-
-cameraFeed.srcObject = cameraStream;
-
-cameraModal.style.display = 'flex';
-
-} catch (err) {
-
-console.error("Error accessing camera: ", err);
-
-alert("Could not access camera. Please ensure it's allowed and try again.");
-
-}
-
-}
-
-
-
-function closeCamera() {
-
-const cameraModal = document.getElementById('camera-modal');
-
-cameraModal.style.display = 'none';
-
-if (cameraStream) {
-
-cameraStream.getTracks().forEach(track => track.stop());
-
-}
-
-}
-
-
-
-function capturePhoto() {
-
-const cameraFeed = document.getElementById('camera-feed');
-
-const canvas = document.getElementById('photo-canvas');
-
-canvas.width = cameraFeed.videoWidth;
-
-canvas.height = cameraFeed.videoHeight;
-
-const context = canvas.getContext('2d');
-
-// Flip the image back to normal before drawing
-
-context.save();
-
-context.scale(-1, 1);
-
-context.drawImage(cameraFeed, -canvas.width, 0, canvas.width, canvas.height);
-
-context.restore();
-
-const dataUrl = canvas.toDataURL('image/jpeg', 0.9); // Use JPEG for smaller file size
-
-
-
-if (editingRow) {
-
-addPhotoToCell(editingRow, dataUrl);
-
-} else {
-
-addPhotoToPreview(dataUrl);
-
-}
-
-closeCamera();
-
-}
-
-
-
-function addPhotoToPreview(dataUrl) {
-
-const photoPreviews = document.getElementById('photo-previews');
-
-const img = document.createElement('img');
-
-img.src = dataUrl;
-
-img.classList.add('preview-image');
-
-img.onclick = () => showImagePreview(dataUrl); // Add click handler for preview
-
-photoPreviews.appendChild(img);
-
-}
-
-
-
-document.querySelector('.photo-input').addEventListener('change', (event) => {
-
-const files = event.target.files;
-
-for (let i = 0; i < files.length; i++) {
-
-const file = files[i];
-
-if (file.type.startsWith('image/')) {
-
-const reader = new FileReader();
-
-reader.onload = (e) => {
-
-if (editingRow) {
-
-addPhotoToCell(editingRow, e.target.result);
-
-} else {
-
-addPhotoToPreview(e.target.result);
-
-}
-
-};
-
-reader.readAsDataURL(file);
-
-}
-
-}
-
-});
-
-
-
-document.getElementById('drop-zone').addEventListener('dragover', (event) => {
-
-event.preventDefault();
-
-event.currentTarget.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.2)';
-
-});
-
-
-
-document.getElementById('drop-zone').addEventListener('dragleave', (event) => {
-
-event.preventDefault();
-
-event.currentTarget.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.05)';
-
-});
-
-
-
-document.getElementById('drop-zone').addEventListener('drop', (event) => {
-
-event.preventDefault();
-
-event.currentTarget.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.05)';
-
-const files = event.dataTransfer.files;
-
-for (let i = 0; i < files.length; i++) {
-
-const file = files[i];
-
-if (file.type.startsWith('image/')) {
-
-const reader = new FileReader();
-
-reader.onload = (e) => {
-
-if (editingRow) {
-
-addPhotoToCell(editingRow, e.target.result);
-
-} else {
-
-addPhotoToPreview(e.target.result);
-
-}
-
-};
-
-reader.readAsDataURL(file);
-
-}
-
-}
-
-});
-
-document.getElementById('drop-zone').addEventListener('click', (event) => {
-
-document.querySelector('.photo-input').click();
-
-});
-
-
-
-
-
-// --- GPS LOCATION ---
-
-function initializeMap() {
-
-if (map) map.remove(); // Remove existing map if any
-
-map = L.map('map').setView([25.3548, 51.1839], 13); // Default to Qatar
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-
-attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-
-}).addTo(map);
-
-document.getElementById('map').style.display = 'block';
-
-}
-
-
-
-function getLocation() {
-
-if (navigator.geolocation) {
-
-navigator.geolocation.getCurrentPosition(showPosition, showError);
-
-} else {
-
-alert("Geolocation is not supported by this browser.");
-
-}
-
-}
-
-
-
-function showPosition(position) {
-
-const lat = position.coords.latitude;
-
-const lng = position.coords.longitude;
-
-document.getElementById('lat-display').textContent = lat.toFixed(6);
-
-document.getElementById('lng-display').textContent = lng.toFixed(6);
-
-updateMap(lat, lng);
-
-}
-
-
-
-function showError(error) {
-
-switch (error.code) {
-
-case error.PERMISSION_DENIED:
-
-alert("User denied the request for Geolocation.");
-
-break;
-
-case error.POSITION_UNAVAILABLE:
-
-alert("Location information is unavailable.");
-
-break;
-
-case error.TIMEOUT:
-
-alert("The request to get user location timed out.");
-
-break;
-
-case error.UNKNOWN_ERROR:
-
-alert("An unknown error occurred.");
-
-break;
-
-}
-
-document.getElementById('lat-display').textContent = "N/A";
-
-document.getElementById('lng-display').textContent = "N/A";
-
-}
-
-
-
-function updateMap(lat, lng) {
-
-if (!map) initializeMap();
-
-map.setView([lat, lng], 13);
-
-if (currentMarker) {
-
-map.removeLayer(currentMarker);
-
-}
-
-currentMarker = L.marker([lat, lng]).addTo(map)
-
-.bindPopup("Current Location").openPopup();
-
-}
-
-
-
-function switchLocationMode(mode) {
-
-document.getElementById('location-auto-panel').style.display = 'none';
-
-document.getElementById('location-manual-panel').style.display = 'none';
-
-
-document.getElementById('gps-auto-btn').classList.remove('active');
-
-document.getElementById('gps-manual-btn').classList.remove('active');
-
-
-
-if (mode === 'auto') {
-
-document.getElementById('location-auto-panel').style.display = 'block';
-
-document.getElementById('gps-auto-btn').classList.add('active');
-
-getLocation(); // Get location automatically when switching to auto
-
-} else if (mode === 'manual') {
-
-document.getElementById('location-manual-panel').style.display = 'block';
-
-document.getElementById('gps-manual-btn').classList.add('active');
-
-updateLocationFromManual();
-
-}
-
-}
-
-
-
-function updateLocationFromManual() {
-
-const lat = parseFloat(document.getElementById('manual-lat').value);
-
-const lng = parseFloat(document.getElementById('manual-lng').value);
-
-if (!isNaN(lat) && !isNaN(lng)) {
-
-document.getElementById('lat-display').textContent = lat.toFixed(6);
-
-document.getElementById('lng-display').textContent = lng.toFixed(6);
-
-updateMap(lat, lng);
-
-} else {
-
-document.getElementById('lat-display').textContent = "N/A";
-
-document.getElementById('lng-display').textContent = "N/A";
-
-}
-
-}
-
-
-function insertLocationToForm() {
-
-const lat = document.getElementById('lat-display').textContent;
-
-const lng = document.getElementById('lng-display').textContent;
-
-
-
-if (lat !== "N/A" && lng !== "N/A") {
-
-if (editingRow) {
-
-editingRow.cells[6].textContent = lat;
-
-editingRow.cells[7].textContent = lng;
-
-saveActiveReport();
-
-} else {
-
-alert("Please select a row to insert the location into, or add a new row which will capture the current location.");
-
-}
-
-} else {
-
-alert("No valid GPS location to insert.");
-
-}
-
-}
-
-
-
-
-
-// --- QUANTITY MODAL (MODIFIED) ---
-
-function showQuantityModal() {
-
-document.getElementById('quantityModal').style.display = 'flex';
-
-}
-
-
-
-function showQuantityModalForInspection() {
-
-quantityContext = 'inspection';
-
-if (editingRow) {
-
-// For now, we don't parse the quantity back into dimensions, just open a fresh calculator
-
-document.getElementById('length').value = '';
-
-document.getElementById('width').value = '';
-
-document.getElementById('depth').value = '';
-
-document.getElementById('repetitions').value = '1';
-
-}
-
-showQuantityModal();
-
-}
-
-
-
-function showQuantityModalForBOQ() {
-
-quantityContext = 'boq';
-
-// Pre-fill the modal with the current values from the BOQ form
-
-document.getElementById('length').value = document.getElementById('boq-length').value;
-
-document.getElementById('width').value = document.getElementById('boq-width').value;
-
-document.getElementById('depth').value = document.getElementById('boq-height').value; // map height to depth
-
-document.getElementById('repetitions').value = document.getElementById('boq-nr').value;
-
-showQuantityModal();
-
-}
-
-
-
-function closeQuantityModal() {
-
-document.getElementById('quantityModal').style.display = 'none';
-
-}
-
-
-
-function setQuantity() {
-
-const length = parseFloat(document.getElementById('length').value) || 0;
-
-const width = parseFloat(document.getElementById('width').value) || 0;
-
-const depth = parseFloat(document.getElementById('depth').value) || 0;
-
-const repetitions = parseFloat(document.getElementById('repetitions').value) || 1;
-
-
-
-if (quantityContext === 'boq') {
-
-// Populate the BOQ form fields
-
-document.getElementById('boq-nr').value = repetitions;
-
-document.getElementById('boq-length').value = length;
-
-document.getElementById('boq-width').value = width;
-
-document.getElementById('boq-height').value = depth; // map modal 'depth' to form 'height'
-
-
-// Trigger calculation of total quantity and amount
-
-calculateBOQTotalQuantity();
-
-} else { // 'inspection' context
-
-let quantity = 0;
-
-if (length > 0 && width > 0 && depth > 0) {
-
-quantity = length * width * depth * repetitions;
-
-} else if (length > 0 && width > 0) {
-
-quantity = length * width * repetitions;
-
-} else if (length > 0) {
-
-quantity = length * repetitions;
-
-} else {
-
-quantity = repetitions;
-
-}
-
-
-if (editingRow) {
-
-editingRow.cells[4].textContent = quantity.toFixed(2);
-
-saveActiveReport();
-
-} else {
-
-alert("Please add a new row or select an existing row to set the quantity.")
-
-}
-
-}
-
-
-
-closeQuantityModal();
-
-}
-
-
-
-// --- INSPECTION REPORT TABLE ---
-
-function addRow(rowData = {}, fromLoad = false) {
-
-const tbody = reportTable.tBodies[0];
-
-const newRow = tbody.insertRow();
-
-newRow.dataset.id = rowData.id || generateId();
-
-
-
-const cells = [];
-
-for (let i = 0; i < 9; i++) { // 9 columns
-
-cells.push(newRow.insertCell(i));
-
-}
-
-
-let photoSrcs = [];
-
-if(fromLoad) {
-
-photoSrcs = rowData.photos || [];
-
-} else {
-
-photoSrcs = Array.from(document.querySelectorAll('#photo-previews img')).map(img => img.src);
-
-}
-
-
-
-cells[0].textContent = ''; // Will be set by updateRowNumbers
-
-cells[1].textContent = fromLoad ? rowData.asset : document.getElementById('asset').value;
-
-cells[1].setAttribute('contenteditable', 'true');
-
-cells[1].style.textAlign = 'left';
-
-cells[1].style.verticalAlign = 'middle';
-
-
-
-cells[2].textContent = fromLoad ? rowData.status : document.getElementById('status').value;
-
-cells[2].setAttribute('contenteditable', 'true');
-
-cells[3].textContent = fromLoad ? rowData.recommendation : document.getElementById('recommendation').value;
-
-cells[3].setAttribute('contenteditable', 'true');
-
-cells[4].textContent = fromLoad ? rowData.quantity : '';
-
-cells[4].setAttribute('contenteditable', 'true');
-
-
-
-const photoWrapper = document.createElement('div');
-
-photoWrapper.classList.add('photo-wrapper');
-
-cells[5].appendChild(photoWrapper);
-
-if (photoSrcs.length > 0) {
-
-photoSrcs.forEach(src => {
-
-const img = document.createElement('img');
-
-img.src = src;
-
-img.onclick = () => showImagePreview(src);
-
-photoWrapper.appendChild(img);
-
-});
-
-}
-
-cells[5].setAttribute('data-col-type', 'photos');
-
-cells[5].style.textAlign = 'center';
-
-cells[5].style.verticalAlign = 'middle';
-
-
-
-cells[6].textContent = fromLoad ? rowData.latitude : document.getElementById('lat-display').textContent;
-
-cells[6].setAttribute('contenteditable', 'true');
-
-cells[7].textContent = fromLoad ? rowData.longitude : document.getElementById('lng-display').textContent;
-
-cells[7].setAttribute('contenteditable', 'true');
-
-
-
-const actionDiv = document.createElement('div');
-
-actionDiv.style.display = 'flex';
-
-actionDiv.style.gap = '5px';
-
-actionDiv.style.justifyContent = 'center';
-
-
-
-const editButton = document.createElement('button');
-
-editButton.textContent = '✏️';
-
-editButton.title = 'Edit in Form';
-
-editButton.onclick = () => editRow(newRow);
-
-actionDiv.appendChild(editButton);
-
-
-
-const deleteButton = document.createElement('button');
-
-deleteButton.textContent = '🗑️';
-
-deleteButton.title = 'Delete Row';
-
-deleteButton.onclick = () => removeRow(newRow);
-
-actionDiv.appendChild(deleteButton);
-
-
-
-const addPhotoButton = document.createElement('button');
-
-addPhotoButton.textContent = '🖼️';
-
-addPhotoButton.title = 'Add Photo to this Row';
-
-addPhotoButton.onclick = () => { editingRow = newRow; document.querySelector('.photo-input').click(); };
-
-actionDiv.appendChild(addPhotoButton);
-
-
-
-const addGPSButton = document.createElement('button');
-
-addGPSButton.textContent = '📍';
-
-addGPSButton.title = 'Update GPS for this Row';
-
-addGPSButton.onclick = () => { editingRow = newRow; switchLocationMode('auto'); };
-
-actionDiv.appendChild(addGPSButton);
-
-
-
-cells[8].appendChild(actionDiv);
-
-
-
-if (!fromLoad) {
-
-document.getElementById('asset').value = '';
-
-document.getElementById('status').value = '';
-
-document.getElementById('recommendation').value = '';
-
-document.getElementById('photo-previews').innerHTML = '';
-
-document.getElementById('lat-display').textContent = 'N/A';
-
-document.getElementById('lng-display').textContent = 'N/A';
-
-if (currentMarker) {
-
-map.removeLayer(currentMarker);
-
-currentMarker = null;
-
-}
-
-}
-
-updateRowNumbers();
-
-saveActiveReport();
-
-}
-
-
-
-function removeRow(row) {
-
-if(confirm("Are you sure you want to delete this row?")) {
-
-row.remove();
-
-updateRowNumbers();
-
-saveActiveReport();
-
-}
-
-}
-
-
-
-function removeSelectedRow() {
-
-const selectedRows = Array.from(reportTable.tBodies[0].rows).filter(row => row.classList.contains('selected'));
-
-if(selectedRows.length === 0){
-
-alert("No rows selected. Click on a row to select it.");
-
-return;
-
-}
-
-if(confirm(`Are you sure you want to delete the ${selectedRows.length} selected rows?`)) {
-
-selectedRows.forEach(row => row.remove());
-
-updateRowNumbers();
-
-saveActiveReport();
-
-}
-
-}
-
-
-reportTable.addEventListener('click', (event) => {
-
-const row = event.target.closest('tr');
-
-if (row && row.parentElement.tagName === 'TBODY') {
-
-row.classList.toggle('selected');
-
-// style selected row
-
-if(row.classList.contains('selected')){
-
-row.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.2)';
-
-} else {
-
-row.style.backgroundColor = '';
-
-}
-
-}
-
-});
-
-
-
-function updateRowNumbers() {
-
-const rows = reportTable.tBodies[0].rows;
-
-for (let i = 0; i < rows.length; i++) {
-
-rows[i].cells[0].textContent = i + 1;
-
-}
-
-}
-
-
-
-function addColumn() {
-
-const headerRow = reportTable.tHead.rows[0];
-
-const columnName = prompt("Enter new column name:");
-
-if (!columnName) return;
-
-const newHeader = document.createElement('th');
-
-newHeader.textContent = columnName;
-
-// Insert before the 'Action' column
-
-headerRow.insertBefore(newHeader, headerRow.cells[headerRow.cells.length - 1]);
-
-
-
-const tbody = reportTable.tBodies[0];
-
-Array.from(tbody.rows).forEach(row => {
-
-const newCell = row.insertCell(row.cells.length - 1);
-
-newCell.textContent = '';
-
-newCell.setAttribute('contenteditable', 'true');
-
-});
-
-saveActiveReport();
-
-}
-
-
-
-function removeColumn() {
-
-const headerRow = reportTable.tHead.rows[0];
-
-// Essential columns are now 9
-
-if (headerRow.cells.length <= 9) {
-
-alert("Cannot remove essential columns.");
-
-return;
-
-}
-
-const columnIndex = prompt(`Enter the column number to remove (from 9 to ${headerRow.cells.length - 1}):`);
-
-const index = parseInt(columnIndex, 10) - 1;
-
-
-
-if (!isNaN(index) && index >= 8 && index < headerRow.cells.length-1) {
-
-headerRow.deleteCell(index);
-
-Array.from(reportTable.tBodies[0].rows).forEach(row => {
-
-row.deleteCell(index);
-
-});
-
-saveActiveReport();
-
-} else {
-
-alert("Invalid column number or cannot remove essential columns.");
-
-}
-
-}
-
-
-
-function editRow(row) {
-
-editingRow = row; // Set the global editingRow
-
-
-// Populate the data entry form with the row's data
-
-document.getElementById('asset').value = row.cells[1].textContent;
-
-document.getElementById('status').value = row.cells[2].textContent;
-
-document.getElementById('recommendation').value = row.cells[3].textContent;
-
-
-// Populate photo previews
-
-const photoPreviews = document.getElementById('photo-previews');
-
-photoPreviews.innerHTML = ''; // Clear existing previews
-
-Array.from(row.cells[5].querySelectorAll('img')).forEach(img => {
-
-addPhotoToPreview(img.src);
-
-});
-
-
-
-// Populate GPS fields
-
-document.getElementById('lat-display').textContent = row.cells[6].textContent;
-
-document.getElementById('lng-display').textContent = row.cells[7].textContent;
-
-updateLocationFromManual(); // This will also update the map
-
-
-
-// Focus the user's attention
-
-document.querySelector('.data-entry-card').scrollIntoView({ behavior: 'smooth' });
-
-alert("Row is now being edited in the 'Data Entry' form above. Add photos or change details and they will apply to this row.");
-
-}
-
-
-
-
-
-function addPhotoToCell(row, dataUrl) {
-
-const photoWrapper = row.cells[5].querySelector('.photo-wrapper');
-
-const img = document.createElement('img');
-
-img.src = dataUrl;
-
-img.onclick = () => showImagePreview(dataUrl);
-
-photoWrapper.appendChild(img);
-
-saveActiveReport();
-
-}
-
-
-
-
-
-function showImagePreview(src) {
-
-const previewOverlay = document.getElementById('preview-overlay');
-
-const previewContent = document.getElementById('preview-content');
-
-previewContent.innerHTML = `<img src="${src}" style="max-width:100%; height:auto; display:block; margin:auto;">`;
-
-
-const closeButton = document.createElement('button');
-
-closeButton.textContent = '❌';
-
-closeButton.style.position = 'absolute';
-
-closeButton.style.top = '10px';
-
-closeButton.style.right = '10px';
-
-closeButton.style.fontSize = '24px';
-
-closeButton.style.background = 'none';
-
-closeButton.style.border = 'none';
-
-closeButton.style.cursor = 'pointer';
-
-closeButton.onclick = hidePreview;
-
-previewContent.appendChild(closeButton);
-
-
-
-previewOverlay.style.display = 'flex';
-
-}
-
-
-
-function hidePreview() {
-
-document.getElementById('preview-overlay').style.display = 'none';
-
-document.getElementById('preview-content').innerHTML = '';
-
-}
-
-
-
-function makeTableEditable(tableId) {
-
-const table = document.getElementById(tableId);
-
-table.addEventListener('input', (event) => {
-
-const target = event.target;
-
-if (target.tagName === 'TD' && target.isContentEditable) {
-
-// When a cell is edited, update the editingRow if it matches
-
-const editedRow = target.parentElement;
-
-if (editingRow === editedRow) {
-
-// The change is already in the DOM, just need to save
-
-}
-
-saveActiveReport();
-
-if (tableId === 'cost-estimation-table') {
-
-calculateCostEstimationTotal();
-
-}
-
-}
-
-});
-
-}
-
-
-
-
-
-// --- COST ESTIMATION TAB ---
-
-function updateBOQDetails(boqRef = null) {
-
-const boqSelect = document.getElementById('boq-ref-select');
-
-const selectedRef = boqRef || boqSelect.value;
-
-
-if(boqRef) { // If a ref is passed, select it in the dropdown
-
-boqSelect.value = boqRef;
-
-}
-
-
-
-const selectedItem = boqData.find(item => item.ref === selectedRef);
-
-if (selectedItem) {
-
-document.getElementById('boq-desc').value = selectedItem.description;
-
-document.getElementById('boq-unit').value = selectedItem.unit;
-
-document.getElementById('boq-rate').value = selectedItem.rate.toFixed(2);
-
-calculateBOQTotalQuantity();
-
-}
-
-}
-
-
-
-function filterBOQOptions() {
-
-const searchTerm = document.getElementById('boq-search').value.toLowerCase();
-
-const boqSelect = document.getElementById('boq-ref-select');
-
-boqSelect.innerHTML = '';
-
-
-
-const filteredData = boqData.filter(item =>
-
-item.ref.toLowerCase().includes(searchTerm) ||
-
-item.description.toLowerCase().includes(searchTerm)
-
+    DB.init();
+    Auth.checkSession();
+
+    // Attach form submit listeners
+    getEl('login-form').addEventListener('submit', Auth.handleLogin);
+    getEl('s-- Create contracts table
+CREATE TABLE contracts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id),
+    title TEXT NOT NULL,
+    number TEXT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    boq_data JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-
-
-filteredData.forEach(item => {
-
-const option = document.createElement('option');
-
-option.value = item.ref;
-
-option.textContent = item.ref + " - " + item.description;
-
-boqSelect.appendChild(option);
-
-});
-
-updateBOQDetails();
-
-}
-
-
-function trackBOQUsage(boqRef) {
-
-let usage = JSON.parse(localStorage.getItem('boqUsage')) || {};
-
-usage[boqRef] = (usage[boqRef] || 0) + 1;
-
-localStorage.setItem('boqUsage', JSON.stringify(usage));
-
-updateMostUsedBOQ();
-
-}
-
-
-
-function updateMostUsedBOQ() {
-
-const usage = JSON.parse(localStorage.getItem('boqUsage')) || {};
-
-const list = document.getElementById('most-used-boq-list');
-
-list.innerHTML = '';
-
-
-
-// Sort by usage count and get top 10
-
-const sortedUsage = Object.entries(usage)
-
-.sort(([,a],[,b]) => b - a)
-
-.slice(0, 10);
-
-
-if (sortedUsage.length === 0) {
-
-list.innerHTML = '<li>Start adding items to see your most used here.</li>';
-
-return;
-
-}
-
-
-sortedUsage.forEach(([ref, count]) => {
-
-const li = document.createElement('li');
-
-li.textContent = `${ref} (${count})`;
-
-li.title = `Used ${count} times`;
-
-li.dataset.ref = ref;
-
-li.onclick = () => updateBOQDetails(ref);
-
-list.appendChild(li);
-
-});
-
-}
-
-
-function handleBOQ_CSV(event) {
-
-const file = event.target.files[0];
-
-if (!file) return;
-
-
-
-Papa.parse(file, {
-
-header: true,
-
-skipEmptyLines: true,
-
-complete: function(results) {
-
-results.data.forEach(row => {
-
-const boqRowData = {
-
-boqRef: row["BOQ Ref."],
-
-description: row["Description"],
-
-unit: row["Unit"],
-
-nr: row["NR"],
-
-length: row["Length (m)"],
-
-width: row["Width (m)"],
-
-height: row["Height (m)"],
-
-totalQty: row["Total Qty."],
-
-rate: row["Rate"],
-
-amount: row["Amount"],
-
-remarks: row["Remarks"],
-
-};
-
-insertBOQRow(boqRowData, true);
-
-});
-
-alert(`${results.data.length} rows imported successfully.`);
-
-},
-
-error: function(err) {
-
-alert("Error parsing CSV file.");
-
-console.error(err);
-
-}
-
-});
-
-}
-
-
-
-function calculateBOQTotalQuantity() {
-
-const nr = parseFloat(document.getElementById('boq-nr').value) || 0;
-
-const length = parseFloat(document.getElementById('boq-length').value) || 0;
-
-const width = parseFloat(document.getElementById('boq-width').value) || 0;
-
-const height = parseFloat(document.getElementById('boq-height').value) || 0;
-
-const rate = parseFloat(document.getElementById('boq-rate').value) || 0;
-
-
-
-let totalQty = 0;
-
-if (nr > 0 && length > 0 && width > 0 && height > 0) {
-
-totalQty = nr * length * width * height;
-
-} else if (nr > 0 && length > 0 && width > 0) {
-
-totalQty = nr * length * width;
-
-} else if (nr > 0 && length > 0) {
-
-totalQty = nr * length;
-
-} else if (nr > 0) {
-
-totalQty = nr;
-
-}
-
-
-
-const amount = totalQty * rate;
-
-
-
-document.getElementById('boq-total-qty').value = totalQty.toFixed(3);
-
-document.getElementById('boq-amount').value = amount.toFixed(2);
-
-}
-
-
-
-function insertBOQRow(rowData = {}, fromLoad = false) {
-
-const tbody = costEstimationTable.tBodies[0];
-
-const newRow = tbody.insertRow();
-
-newRow.dataset.id = rowData.id || generateId();
-
-
-const boqRef = fromLoad ? rowData.boqRef : document.getElementById('boq-ref-select').value;
-
-
-// Track usage only when user manually adds a row from the form
-
-if (!fromLoad && boqRef) {
-
-trackBOQUsage(boqRef);
-
-}
-
-
-
-const cells = [];
-
-for (let i = 0; i < 12; i++) {
-
-cells.push(newRow.insertCell(i));
-
-}
-
-
-
-cells[0].textContent = boqRef;
-
-cells[0].setAttribute('contenteditable', 'true');
-
-
-cells[1].textContent = fromLoad ? rowData.description : document.getElementById('boq-desc').value;
-
-cells[1].setAttribute('contenteditable', 'true');
-
-cells[1].classList.add('description-cell');
-
-
-
-cells[2].textContent = fromLoad ? rowData.unit : document.getElementById('boq-unit').value;
-
-cells[2].setAttribute('contenteditable', 'true');
-
-cells[3].textContent = fromLoad ? rowData.nr : document.getElementById('boq-nr').value;
-
-cells[3].setAttribute('contenteditable', 'true');
-
-cells[4].textContent = fromLoad ? rowData.length : document.getElementById('boq-length').value;
-
-cells[4].setAttribute('contenteditable', 'true');
-
-cells[5].textContent = fromLoad ? rowData.width : document.getElementById('boq-width').value;
-
-cells[5].setAttribute('contenteditable', 'true');
-
-cells[6].textContent = fromLoad ? rowData.height : document.getElementById('boq-height').value;
-
-cells[6].setAttribute('contenteditable', 'true');
-
-cells[7].textContent = fromLoad ? rowData.totalQty : document.getElementById('boq-total-qty').value;
-
-cells[7].setAttribute('contenteditable', 'true');
-
-cells[8].textContent = fromLoad ? rowData.rate : document.getElementById('boq-rate').value;
-
-cells[8].setAttribute('contenteditable', 'true');
-
-cells[9].textContent = fromLoad ? rowData.amount : document.getElementById('boq-amount').value;
-
-cells[9].setAttribute('contenteditable', 'true');
-
-cells[10].textContent = fromLoad ? rowData.remarks : document.getElementById('boq-remarks').value;
-
-cells[10].setAttribute('contenteditable', 'true');
-
-
-
-
-
-const actionDiv = document.createElement('div');
-
-actionDiv.style.display = 'flex';
-
-actionDiv.style.gap = '5px';
-
-actionDiv.style.justifyContent = 'center';
-
-
-
-const deleteButton = document.createElement('button');
-
-deleteButton.textContent = '🗑️';
-
-deleteButton.onclick = () => removeBOQRow(newRow);
-
-actionDiv.appendChild(deleteButton);
-
-
-
-cells[11].appendChild(actionDiv);
-
-
-
-if (!fromLoad) {
-
-// Clear the form for the next entry
-
-document.getElementById('boq-nr').value = '';
-
-document.getElementById('boq-length').value = '';
-
-document.getElementById('boq-width').value = '';
-
-document.getElementById('boq-height').value = '';
-
-document.getElementById('boq-total-qty').value = '';
-
-document.getElementById('boq-amount').value = '';
-
-document.getElementById('boq-remarks').value = '';
-
-}
-
-saveActiveReport();
-
-calculateCostEstimationTotal();
-
-}
-
-
-
-function removeBOQRow(row) {
-
-row.remove();
-
-saveActiveReport();
-
-calculateCostEstimationTotal();
-
-}
-
-
-
-function calculateCostEstimationTotal() {
-
-let totalAmount = 0;
-
-const rows = costEstimationTable.tBodies[0].rows;
-
-Array.from(rows).forEach(row => {
-
-const amountCell = row.cells[9];
-
-const amount = parseFloat(amountCell.textContent) || 0;
-
-totalAmount += amount;
-
-});
-
-document.getElementById('total-amount-cell').textContent = `QAR ${totalAmount.toFixed(2)}`;
-
-}
-
-
-
-
-
-// --- MAP TAB ---
-
-let vehicleMap;
-
-let vehicleMarkers = [];
-
-function initializeVehicleMap() {
-
-if (vehicleMap) vehicleMap.remove();
-
-vehicleMap = L.map('vehicle-map').setView([25.3548, 51.1839], 10);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-
-attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-
-}).addTo(vehicleMap);
-
-}
-
-
-
-function centerVehicleMapOnUser() {
-
-if (navigator.geolocation) {
-
-navigator.geolocation.getCurrentPosition((position) => {
-
-const lat = position.coords.latitude;
-
-const lng = position.coords.longitude;
-
-if (vehicleMap) {
-
-vehicleMap.setView([lat, lng], 13);
-
-L.marker([lat, lng]).addTo(vehicleMap).bindPopup("Your Location").openPopup();
-
-}
-
-}, (error) => {
-
-alert("Could not get your location: " + error.message);
-
-});
-
-} else {
-
-alert("Geolocation is not supported by this browser.");
-
-}
-
-}
-
-
-
-function fitMapToAssetMarkers() {
-
-if (vehicleMarkers.length > 0) {
-
-const group = new L.featureGroup(vehicleMarkers);
-
-vehicleMap.fitBounds(group.getBounds());
-
-} else {
-
-alert("No asset markers to fit to.");
-
-}
-
-}
-
-
-
-function fitMapToAllMarkers() {
-
-const allMarkers = [...vehicleMarkers];
-
-if (allMarkers.length > 0) {
-
-const group = new L.featureGroup(allMarkers);
-
-vehicleMap.fitBounds(group.getBounds());
-
-} else {
-
-alert("No markers on the map.");
-
-}
-
-}
-
-
-
-function downloadBOQTemplate() { // Renamed from downloadCSVTemplate for clarity
-
-const headers = "BOQ Ref.,Description,Unit,NR,Length (m),Width (m),Height (m),Total Qty.,Rate,Amount,Remarks";
-
-const blob = new Blob([headers], { type: 'text/csv;charset=utf-8;' });
-
-const link = document.createElement('a');
-
-link.href = URL.createObjectURL(blob);
-
-link.download = 'boq_template.csv';
-
-document.body.appendChild(link);
-
-link.click();
-
-document.body.removeChild(link);
-
-}
-
-
-
-function handleVehicleCSVUpload(event) {
-
-const file = event.target.files[0];
-
-if (!file) return;
-
-
-
-const reader = new FileReader();
-
-reader.onload = function(e) {
-
-const contents = e.target.result;
-
-clearMapMarkers();
-
-
-
-let assetsLoaded = 0;
-
-let totalAssets = 0;
-
-
-
-if (file.name.toLowerCase().endsWith('.csv')) {
-
-PapaParse.parse(contents, {
-
-header: true,
-
-skipEmptyLines: true,
-
-complete: function(results) {
-
-totalAssets = results.data.length;
-
-results.data.forEach(row => {
-
-// Find keys for lat/lng/asset case-insensitively
-
-const assetKey = Object.keys(row).find(k => k.toLowerCase() === 'asset');
-
-const latKey = Object.keys(row).find(k => k.toLowerCase() === 'latitude');
-
-const lngKey = Object.keys(row).find(k => k.toLowerCase() === 'longitude');
-
-const statusKey = Object.keys(row).find(k => k.toLowerCase() === 'status');
-
-
-
-const asset = row[assetKey];
-
-const lat = parseFloat(row[latKey]);
-
-const lng = parseFloat(row[lngKey]);
-
-const status = row[statusKey];
-
-
-
-if (asset && !isNaN(lat) && !isNaN(lng)) {
-
-const marker = L.marker([lat, lng]).addTo(vehicleMap)
-
-.bindPopup(`<b>${asset}</b><br>Status: ${status || 'N/A'}<br>Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`);
-
-vehicleMarkers.push(marker);
-
-assetsLoaded++;
-
-}
-
-});
-
-fitMapToAssetMarkers();
-
-displayImportSummary(assetsLoaded, totalAssets);
-
-}
-
-});
-
-} else if (file.name.toLowerCase().endsWith('.kml')) {
-
-const parser = new DOMParser();
-
-const kmlDoc = parser.parseFromString(contents, "text/xml");
-
-const placemarks = kmlDoc.querySelectorAll('Placemark');
-
-
-
-totalAssets = placemarks.length;
-
-placemarks.forEach(placemark => {
-
-const name = placemark.querySelector('name')?.textContent || 'Unnamed Asset';
-
-const description = placemark.querySelector('description')?.textContent || '';
-
-const coordinatesStr = placemark.querySelector('Point coordinates')?.textContent;
-
-
-
-if (coordinatesStr) {
-
-const coords = coordinatesStr.trim().split(',').map(Number);
-
-const lng = coords[0];
-
-const lat = coords[1];
-
-
-
-if (!isNaN(lat) && !isNaN(lng)) {
-
-const marker = L.marker([lat, lng]).addTo(vehicleMap)
-
-.bindPopup(`<b>${name}</b><br>${description}<br>Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`);
-
-vehicleMarkers.push(marker);
-
-assetsLoaded++;
-
-}
-
-}
-
-});
-
-fitMapToAssetMarkers();
-
-displayImportSummary(assetsLoaded, totalAssets);
-
-}
-
-};
-
-reader.readAsText(file);
-
-}
-
-
-
-function clearMapMarkers() {
-
-vehicleMarkers.forEach(marker => vehicleMap.removeLayer(marker));
-
-vehicleMarkers = [];
-
-document.getElementById('import-summary').textContent = '';
-
-}
-
-
-
-function displayImportSummary(loaded, total) {
-
-const summaryElement = document.getElementById('import-summary');
-
-summaryElement.textContent = `${langDict[currentLang].assets_loaded} ${loaded} / ${langDict[currentLang].total_assets} ${total}`;
-
-}
-
-
-
-// --- EXPORT FUNCTIONS ---
-
-function exportInspectionCSV() {
-
-const table = document.getElementById('report-table');
-
-let csv = [];
-
-// Get headers, excluding the last one (Action)
-
-const headers = Array.from(table.tHead.rows[0].cells).slice(0, -1).map(th => `"${th.textContent}"`).join(',');
-
-csv.push(headers);
-
-
-Array.from(table.tBodies[0].rows).forEach(row => {
-
-// Get cells, excluding the last one (Action)
-
-let rowData = Array.from(row.cells).slice(0, -1).map((cell, index) => {
-
-// For photos cell, get image count instead of data
-
-if(index === 5) {
-
-return cell.querySelectorAll('img').length + " photo(s)";
-
-}
-
-return `"${cell.textContent.replace(/"/g, '""')}"`;
-
-}).join(',');
-
-csv.push(rowData);
-
-});
-
-
-
-downloadFile(csv.join('\n'), 'inspection_report.csv', 'text/csv;charset=utf-8;');
-
-}
-
-
-function exportEstimationCSV() {
-
-const table = document.getElementById('cost-estimation-table');
-
-let csv = [];
-
-const headers = Array.from(table.tHead.rows[0].cells).slice(0, -1).map(th => `"${th.textContent}"`).join(',');
-
-csv.push(headers);
-
-
-Array.from(table.tBodies[0].rows).forEach(row => {
-
-let rowData = Array.from(row.cells).slice(0, -1).map(cell => `"${cell.textContent.replace(/"/g, '""')}"`).join(',');
-
-csv.push(rowData);
-
-});
-
-
-
-downloadFile(csv.join('\n'), 'cost_estimation.csv', 'text/csv;charset=utf-8;');
-
-}
-
-
-
-function exportInspectionKML() {
-
-const table = document.getElementById('report-table');
-
-let kmlPlacemarks = [];
-
-
-
-Array.from(table.tBodies[0].rows).forEach(row => {
-
-const lat = parseFloat(row.cells[6].textContent);
-
-const lng = parseFloat(row.cells[7].textContent);
-
-
-if(!isNaN(lat) && !isNaN(lng)) {
-
-const name = row.cells[1].textContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-const status = row.cells[2].textContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-const recommendation = row.cells[3].textContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-const quantity = row.cells[4].textContent;
-
-
-
-const description = `Status: ${status}\nRecommendation: ${recommendation}\nQuantity: ${quantity}`;
-
-
-kmlPlacemarks.push(`
-
-<Placemark>
-
-<name>${name}</name>
-
-<description>${description}</description>
-
-<Point>
-
-<coordinates>${lng},${lat},0</coordinates>
-
-</Point>
-
-</Placemark>
-
-`);
-
-}
-
-});
-
-
-
-if(kmlPlacemarks.length === 0){
-
-alert("No rows with valid GPS coordinates to export.");
-
-return;
-
-}
-
-
-
-const kmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-
-<kml xmlns="http://www.opengis.net/kml/2.2">
-
-<Document>
-
-<name>${document.querySelector('.main-title').textContent || 'Inspection Report'}</name>
-
-${kmlPlacemarks.join('')}
-
-</Document>
-
-</kml>`;
-
-
-
-downloadFile(kmlContent, 'inspection_locations.kml', 'application/vnd.google-earth.kml+xml');
-
-}
-
-
-
-function downloadFile(content, fileName, mimeType) {
-
-const blob = new Blob([content], { type: mimeType });
-
-const link = document.createElement('a');
-
-link.href = URL.createObjectURL(blob);
-
-link.download = fileName;
-
-document.body.appendChild(link);
-
-link.click();
-
-document.body.removeChild(link);
-
-}
-
-
-
-// --- PRINT & PDF EXPORT ---
-
-function preparePrintHeader(reportType) {
-
-if (reportType === 'inspection') {
-
-const clientLogoSrc = document.getElementById('client-logo-inspection').src;
-
-const companyLogoSrc = document.getElementById('company-logo-inspection').src;
-
-document.getElementById('client-logo-print-src').src = clientLogoSrc;
-
-document.getElementById('company-logo-print-src').src = companyLogoSrc;
-
-
-
-const titleContainer = document.getElementById('inspection-print-title');
-
-titleContainer.innerHTML = `
-
-<b>${document.getElementById('inspection-title-1').textContent}</b>
-
-<b>${document.getElementById('inspection-title-2').textContent}</b>
-
-<b>${document.getElementById('inspection-small-title').textContent}</b>
-
-`;
-
-document.getElementById('inspection-print-date').textContent = "Date: " + new Date(document.getElementById('display-date').value).toLocaleDateString();
-
-
-
-} else if (reportType === 'estimation') {
-
-const clientLogoSrc = document.getElementById('client-logo-estimation').src;
-
-const companyLogoSrc = document.getElementById('company-logo-estimation').src;
-
-document.getElementById('est-client-logo-print-src').src = clientLogoSrc;
-
-document.getElementById('est-company-logo-print-src').src = companyLogoSrc;
-
-
-const titleContainer = document.getElementById('estimation-print-title');
-
-titleContainer.innerHTML = `
-
-<b>${document.getElementById('estimation-title-1').textContent}</b>
-
-<b>${document.getElementById('estimation-title-2').textContent}</b>
-
-<b>${document.getElementById('estimation-small-title').textContent}</b>
-
-`;
-
-document.getElementById('estimation-print-date').textContent = "Date: " + new Date(document.getElementById('estimation-date').value).toLocaleDateString();
-
-}
-
-}
-
-
-
-function printContent(reportType) {
-
-preparePrintHeader(reportType);
-
-// The @media print CSS rules handle showing/hiding the correct elements
-
-window.print();
-
-}
-
-
-
-async function exportToPdf(reportType) {
-
-const { jsPDF } = window.jspdf;
-
-const pdf = new jsPDF('landscape', 'mm', 'a4');
-
-const contentToCapture = document.querySelector(`#${reportType === 'inspection' ? 'main-report' : 'cost-estimation-tab'} .printable-area`);
-
-
-if (!contentToCapture) {
-
-alert("Error: Printable content not found.");
-
-return;
-
-}
-
-
-preparePrintHeader(reportType);
-
-
-
-await html2canvas(contentToCapture, {
-
-scale: 2,
-
-useCORS: true,
-
-onclone: (doc) => {
-
-// Make the printable area visible in the cloned document for rendering
-
-const printable = doc.querySelector('.printable-area');
-
-if(printable) {
-
-printable.style.display = 'flex';
-
-// In the clone, also apply print styles temporarily for canvas rendering
-
-const style = doc.createElement('style');
-
-style.innerHTML = `
-
-@media all {
-
-.printable-area .menu-button, .printable-area button { display: none !important; }
-
-#report-table th:last-child, #report-table td:last-child,
-
-#cost-estimation-table th:last-child, #cost-estimation-table td:last-child {
-
-display: none !important;
-
-}
-
-table { font-size: 11pt !important; }
-
-.photo-wrapper img { width: 6cm !important; height: auto !important; }
-
-}
-
-`;
-
-doc.head.appendChild(style);
-
-}
-
-}
-
-}).then(canvas => {
-
-const imgData = canvas.toDataURL('image/png');
-
-const imgProps = pdf.getImageProperties(imgData);
-
-const pdfWidth = pdf.internal.pageSize.getWidth() - 20; // A4 landscape width with 10mm margins
-
-const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-let heightLeft = pdfHeight;
-
-let position = 10;
-
-
-pdf.addImage(imgData, 'PNG', 10, position, pdfWidth, pdfHeight);
-
-heightLeft -= (pdf.internal.pageSize.getHeight() - 20);
-
-
-
-while (heightLeft > 0) {
-
-position = - (pdf.internal.pageSize.getHeight() - 10) * (pdf.internal.pages.length - 1);
-
-pdf.addPage();
-
-pdf.addImage(imgData, 'PNG', 10, position, pdfWidth, pdfHeight);
-
-heightLeft -= (pdf.internal.pageSize.getHeight() - 20);
-
-}
-
-
-const projectTitle = document.querySelector('.main-title').textContent.trim() || 'report';
-
-pdf.save(`${projectTitle}-${reportType}.pdf`);
-
-});
-
-}
-
-
-
-// Initial call to switch location mode (default to 'auto')
-
-document.addEventListener('DOMContentLoaded', () => {
-
-switchLocationMode('auto');
-
-initializeVehicleMap();
-
+-- Create notifications table
+CREATE TABLE notifications (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id),
+    type TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Row Level Security
+ALTER TABLE contracts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for contracts
+CREATE POLICY "Users can view their own contracts" ON contracts
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own contracts" ON contracts
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Create policies for notifications
+CREATE POLICY "Users can view their own notifications" ON notifications
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own notifications" ON notifications
+    FOR INSERT WITH CHECK (auth.uid() = user_id);ignup-form').addEventListener('submit', Auth.handleSignup);
+    getEl('contract-form').addEventListener('submit', handleSaveContract);
+
+    // *FIX:* Attach click listener for signup link safely
+    getEl('show-signup-link').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent page jump
+        showModal('signup-modal');
+    });
 });
 
 </script>
-
 </body>
-
 </html>
