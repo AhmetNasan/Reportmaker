@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Project Platform - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-title {
+            margin-bottom: 2rem;
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+        }
+        .toggle-auth {
+            margin-top: 1rem;
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .error-message {
+            color: #e74c3c;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            background: #fdf2f2;
+        }
+        .success-message {
+            color: #27ae60;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            background: #f0f9f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <h1 class="login-title">Engineering Project Platform</h1>
+            
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                
+                <div class="form-group" id="username-group" style="display: none;">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" class="form-control">
+                </div>
+                
+                <button type="submit" class="btn-login" id="auth-button">Sign In</button>
+            </form>
+            
+            <div class="toggle-auth" id="toggle-auth">
+                Don't have an account? Sign up
+            </div>
+            
+            <div id="message-container"></div>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Supabase configuration
+        const supabaseUrl = 'https://cykjjrrexaqmsqwrgnzp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5a2pqcnJleGFxbXNxd3JnbnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MjUyMDksImV4cCI6MjA2NzIwMTIwOX0.Fx6f23TWCQQMCIkc5hcx8LqHyskVMm6WAhJl1UFZpMA';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        let isSignUpMode = false;
+        
+        // DOM elements
+        const authForm = document.getElementById('auth-form');
+        const authButton = document.getElementById('auth-button');
+        const toggleAuth = document.getElementById('toggle-auth');
+        const usernameGroup = document.getElementById('username-group');
+        const messageContainer = document.getElementById('message-container');
+        
+        // Check if user is already logged in
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'app.html';
+            }
+        });
+        
+        // Toggle between sign in and sign up
+        toggleAuth.addEventListener('click', () => {
+            isSignUpMode = !isSignUpMode;
+            
+            if (isSignUpMode) {
+                authButton.textContent = 'Sign Up';
+                toggleAuth.textContent = 'Already have an account? Sign in';
+                usernameGroup.style.display = 'block';
+            } else {
+                authButton.textContent = 'Sign In';
+                toggleAuth.textContent = "Don't have an account? Sign up";
+                usernameGroup.style.display = 'none';
+            }
+        });
+        
+        // Handle form submission
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+            
+            showMessage('Processing...', 'info');
+            
+            try {
+                if (isSignUpMode) {
+                    const { data, error } = await supabase.auth.signUp({
+                        email: email,
+                        password: password,
+                        options: {
+                            data: {
+                                username: username
+                            }
+                        }
+                    });
+                    
+                    if (error) throw error;
+                    
+                    showMessage('Please check your email for confirmation link!', 'success');
+                } else {
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password,
+                    });
+                    
+                    if (error) throw error;
+                    
+                    showMessage('Sign in successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'app.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        });
+        
+        function showMessage(text, type = 'info') {
+            messageContainer.innerHTML = `<div class="${type}-message">${text}</div>`;
+        }
+    </script>
+</body>
+</html>
