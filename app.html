@@ -5,1350 +5,229 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Engineering Project Platform</title>
 
-    <!-- External Libraries CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/marzipano@6.1.1/dist/marzipano.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css" type="text/css">
     
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="styles.css">
-
-    <!-- External Libraries JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-    <script src='https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js'></script>
-    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marzipano@6.1.1/dist/marzipano.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
-        <h1><i class="fas fa-building"></i> <span id="app-title" contenteditable="true" onclick="this.focus()">Engineering Project Platform</span></h1>
+        <h1><i class="fas fa-building"></i> <span id="app-title">Engineering Platform</span></h1>
         <div class="header-actions">
-            <!-- Global Three-Dot Menu -->
+            <div class="user-profile">
+                <span id="user-name">Loading...</span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
             <div class="dropdown">
-                <button class="btn btn-secondary menu-button" id="global-menu-btn">
+                <button class="btn btn-secondary menu-button" onclick="toggleGlobalMenu()">
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
                 <div class="dropdown-menu" id="global-menu">
-                    <button onclick="changeLanguage()">
-                        <i class="fas fa-globe"></i> Language Selection
-                    </button>
-                    <button onclick="newProject()">
-                        <i class="fas fa-file"></i> New File
-                    </button>
-                    <button onclick="saveProject()">
-                        <i class="fas fa-save"></i> Save Project
-                    </button>
-                    <button onclick="exportJSON()">
-                        <i class="fas fa-download"></i> Export JSON
-                    </button>
-                    <button onclick="importJSON()">
-                        <i class="fas fa-upload"></i> Import JSON
-                    </button>
-                    <button onclick="importHTML()">
-                        <i class="fas fa-file-import"></i> Import HTML
-                    </button>
-                    <button onclick="exportHTML()">
-                        <i class="fas fa-file-export"></i> Export HTML
-                    </button>
+                    <button onclick="openBackupManager()"><i class="fas fa-cloud"></i> Backup & Sync</button>
+                    <button onclick="generatePlatformReport()"><i class="fas fa-file-pdf"></i> Platform Report</button>
+                    <button onclick="window.print()"><i class="fas fa-print"></i> Print View</button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Project Name Display -->
-    <div class="project-name-bar">
-        <strong id="current-project-name">New Project</strong>
+    <div class="mobile-nav-toggle d-lg-none">
+        <button class="btn btn-primary" onclick="toggleMobileNav()">
+            <i class="fas fa-bars"></i> Menu
+        </button>
     </div>
 
-    <!-- Main Application Container -->
     <div class="main-container">
-        <!-- Dashboard Page -->
-        <div id="dashboard-page" class="page active">
-            <div class="app-grid">
-                <!-- Sidebar Navigation -->
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn active" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('contracts-page')">
-                            <i class="fas fa-file-contract"></i> Contracts & BOQ
-                        </button>
-                        <button class="nav-btn" onclick="showPage('inspection-page')">
-                            <i class="fas fa-clipboard-check"></i> Inspection Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('cost-estimation-page')">
-                            <i class="fas fa-calculator"></i> Cost Estimation
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> GIS Mapping
-                        </button>
-                        <button class="nav-btn" onclick="showPage('ai-detection-page')">
-                            <i class="fas fa-brain"></i> AI Detection
-                        </button>
-                        <button class="nav-btn" onclick="showPage('notebooks-page')">
-                            <i class="fas fa-book"></i> Notebooks
-                        </button>
-                        <button class="nav-btn" onclick="showPage('drawing-page')">
-                            <i class="fas fa-draw-polygon"></i> Drawing Tool
-                        </button>
-                        <button class="nav-btn" onclick="showPage('custom-reports-page')">
-                            <i class="fas fa-file-alt"></i> Custom Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                </aside>
+        <aside class="sidebar" id="main-sidebar">
+            <nav>
+                <button class="nav-btn active" onclick="showPage('dashboard-page')"><i class="fas fa-home"></i> Dashboard</button>
+                <button class="nav-btn" onclick="showPage('mapping-page')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
+                <button class="nav-btn" onclick="showPage('files-page')"><i class="fas fa-folder-open"></i> File Management</button>
+                <button class="nav-btn" onclick="showPage('chat-page')"><i class="fas fa-comments"></i> Team Chat</button>
+                <button class="nav-btn" onclick="showPage('inspection-page')"><i class="fas fa-clipboard-check"></i> Inspections</button>
+                <button class="nav-btn" onclick="showPage('maintenance-page')"><i class="fas fa-hard-hat"></i> Maintenance</button>
+                <button class="nav-btn" onclick="showPage('timeline-page')"><i class="fas fa-calendar-alt"></i> Project Timeline</button>
+                <button class="nav-btn" onclick="showPage('logistics-page')"><i class="fas fa-boxes"></i> Material Logistics</button>
+                 <button class="nav-btn" onclick="showPage('tracking-page')"><i class="fas fa-route"></i> Vehicle Tracking</button>
+                <button class="nav-btn" onclick="showPage('fabrication-page')"><i class="fas fa-tools"></i> Sign Fabrication</button>
+                <button class="nav-btn" onclick="showPage('scrap-page')"><i class="fas fa-recycle"></i> Scrap Management</button>
+                <button class="nav-btn" onclick="showPage('cad-page')"><i class="fas fa-drafting-compass"></i> CAD Editor</button>
+                <button class="nav-btn" onclick="showPage('tools-page')"><i class="fas fa-calculator"></i> Engineering Tools</button>
+                <button class="nav-btn" onclick="showPage('settings-page')"><i class="fas fa-cog"></i> Settings</button>
+            </nav>
+        </aside>
 
-                <!-- Main Content Area -->
-                <main class="main-content">
-                    <div class="card">
-                        <h2>Platform Overview</h2>
-                        <div class="dashboard-stats">
-                            <div class="stat-card">
-                                <div class="stat-number" id="total-projects">0</div>
-                                <div class="stat-label">Active Projects</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number" id="total-locations">0</div>
-                                <div class="stat-label">Mapped Locations</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number" id="total-reports">0</div>
-                                <div class="stat-label">Generated Reports</div>
-                            </div>
-                        </div>
-                        <canvas id="dashboard-chart" width="400" height="200"></canvas>
+        <main class="main-content">
+            <div id="dashboard-page" class="page active">
+                <div class="dashboard-header">
+                    <h2>Platform Overview</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" onclick="openCustomDashboard()"><i class="fas fa-chart-line"></i> Custom Dashboard</button>
                     </div>
-                </main>
+                </div>
+                <div id="dashboard-widgets-container" class="dashboard-stats">
+                    <div class="stat-card"><div class="stat-number" id="total-projects">0</div><div class="stat-label">Active Projects</div></div>
+                    <div class="stat-card"><div class="stat-number" id="total-files">0</div><div class="stat-label">Stored Files</div></div>
+                    <div class="stat-card"><div class="stat-number" id="total-inspections">0</div><div class="stat-label">Inspections</div></div>
+                    <div class="stat-card"><div class="stat-number" id="total-defects">0</div><div class="stat-label">AI Detections</div></div>
+                </div>
+                 <div class="activity-feed">
+                    <h5><i class="fas fa-history"></i> Recent Activity</h5>
+                    <div id="activity-list"></div>
+                </div>
             </div>
-        </div>
 
-        <!-- Contracts & BOQ Page -->
-        <div id="contracts-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('contracts-page')">
-                            <i class="fas fa-file-contract"></i> Contracts & BOQ
-                        </button>
-                        <button class="nav-btn" onclick="showPage('inspection-page')">
-                            <i class="fas fa-clipboard-check"></i> Inspection Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('cost-estimation-page')">
-                            <i class="fas fa-calculator"></i> Cost Estimation
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> GIS Mapping
-                        </button>
-                        <button class="nav-btn" onclick="showPage('ai-detection-page')">
-                            <i class="fas fa-brain"></i> AI Detection
-                        </button>
-                        <button class="nav-btn" onclick="showPage('notebooks-page')">
-                            <i class="fas fa-book"></i> Notebooks
-                        </button>
-                        <button class="nav-btn" onclick="showPage('drawing-page')">
-                            <i class="fas fa-draw-polygon"></i> Drawing Tool
-                        </button>
-                        <button class="nav-btn" onclick="showPage('custom-reports-page')">
-                            <i class="fas fa-file-alt"></i> Custom Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                </aside>
-
-                <main class="main-content">
-                    <div class="card">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h2>Contracts & BOQ System</h2>
-                            <div class="contract-actions">
-                                <button class="btn btn-primary" onclick="showCreateContractModal()">
-                                    <i class="fas fa-plus"></i> New Contract
-                                </button>
-                                <button class="btn btn-success" onclick="downloadBOQTemplate()">
-                                    <i class="fas fa-download"></i> Download BOQ Template
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Contract Form -->
-                        <div class="contract-form-section mb-4">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="logo-upload-section">
-                                        <h5>Company Logo</h5>
-                                        <div class="logo-upload-area" onclick="document.getElementById('company-logo-upload').click()">
-                                            <img id="company-logo-preview" src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='60' viewBox='0 0 150 60'><rect width='150' height='60' fill='%23f8f9fa' stroke='%23dee2e6'/><text x='75' y='35' text-anchor='middle' fill='%236c757d' font-family='Arial' font-size='12'>Company Logo</text></svg>" alt="Company Logo">
-                                            <input type="file" id="company-logo-upload" accept="image/*" style="display: none;" onchange="handleLogoUpload(event, 'company-logo-preview')">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="contract-info-section">
-                                        <h5>Contract Information</h5>
-                                        <div class="form-group">
-                                            <label>Contract Title</label>
-                                            <input type="text" id="contract-title" class="form-control" placeholder="Enter contract title">
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Contract Number</label>
-                                            <input type="text" id="contract-number" class="form-control" placeholder="Enter contract number">
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Project Value</label>
-                                            <input type="number" id="project-value" class="form-control" placeholder="Enter project value">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="logo-upload-section">
-                                        <h5>Client Logo</h5>
-                                        <div class="logo-upload-area" onclick="document.getElementById('client-logo-upload').click()">
-                                            <img id="client-logo-preview" src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='60' viewBox='0 0 150 60'><rect width='150' height='60' fill='%23f8f9fa' stroke='%23dee2e6'/><text x='75' y='35' text-anchor='middle' fill='%236c757d' font-family='Arial' font-size='12'>Client Logo</text></svg>" alt="Client Logo">
-                                            <input type="file" id="client-logo-upload" accept="image/*" style="display: none;" onchange="handleLogoUpload(event, 'client-logo-preview')">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Company Name</label>
-                                        <input type="text" id="company-name" class="form-control" placeholder="Enter company name">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Client Name</label>
-                                        <input type="text" id="client-name" class="form-control" placeholder="Enter client name">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Start Date</label>
-                                        <input type="date" id="start-date" class="form-control">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>End Date</label>
-                                        <input type="date" id="end-date" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- BOQ Upload Section -->
-                        <div class="boq-upload-section mb-4">
-                            <h5>BOQ Upload & Management</h5>
-                            <div class="boq-upload-area">
-                                <div class="upload-zone" onclick="document.getElementById('boq-upload').click()">
-                                    <i class="fas fa-file-excel fa-3x mb-3"></i>
-                                    <p>Click to upload BOQ Excel file (.xlsx)</p>
-                                    <small>Required columns: BOQ Ref., Asset, Description, Unit, Rate</small>
-                                    <input type="file" id="boq-upload" accept=".xlsx,.xls" style="display: none;" onchange="handleBOQUpload(event)">
-                                </div>
-                            </div>
-                            <div id="boq-preview" class="mt-3" style="display: none;">
-                                <h6>BOQ Preview</h6>
-                                <div class="table-container">
-                                    <table id="boq-table" class="table table-striped">
-                                        <thead id="boq-table-header"></thead>
-                                        <tbody id="boq-table-body"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Save Contract Button -->
-                        <div class="contract-actions">
-                            <button class="btn btn-success" onclick="saveContract()">
-                                <i class="fas fa-save"></i> Save Contract
-                            </button>
-                        </div>
-                        
-                        <!-- Saved Contracts List -->
-                        <div class="saved-contracts-section mt-5">
-                            <h5>Saved Contracts</h5>
-                            <div id="contracts-list" class="contracts-grid">
-                                <!-- Contracts will be populated here -->
-                            </div>
-                        </div>
+            <div id="mapping-page" class="page">
+                <h2><i class="fas fa-map-marked-alt"></i> GIS Mapping Tool</h2>
+                <div id="map-container">
                     </div>
-                </main>
             </div>
-        </div>
 
-        <!-- Inspection Reports Page -->
-        <div id="inspection-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('contracts-page')">
-                            <i class="fas fa-file-contract"></i> Contracts & BOQ
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('inspection-page')">
-                            <i class="fas fa-clipboard-check"></i> Inspection Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('cost-estimation-page')">
-                            <i class="fas fa-calculator"></i> Cost Estimation
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> GIS Mapping
-                        </button>
-                        <button class="nav-btn" onclick="showPage('ai-detection-page')">
-                            <i class="fas fa-brain"></i> AI Detection
-                        </button>
-                        <button class="nav-btn" onclick="showPage('notebooks-page')">
-                            <i class="fas fa-book"></i> Notebooks
-                        </button>
-                        <button class="nav-btn" onclick="showPage('drawing-page')">
-                            <i class="fas fa-draw-polygon"></i> Drawing Tool
-                        </button>
-                        <button class="nav-btn" onclick="showPage('custom-reports-page')">
-                            <i class="fas fa-file-alt"></i> Custom Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                    
-                    <!-- Contextual Menu for Inspection Reports -->
-                    <div class="contextual-actions mt-4">
-                        <h6>Report Actions</h6>
-                        <button class="btn btn-sm btn-primary w-100 mb-2" onclick="printInspectionReport()">
-                            <i class="fas fa-print"></i> Print Report
-                        </button>
-                        <button class="btn btn-sm btn-success w-100 mb-2" onclick="exportPhotos()">
-                            <i class="fas fa-images"></i> Export Photos
-                        </button>
-                        <button class="btn btn-sm btn-warning w-100 mb-2" onclick="exportKML()">
-                            <i class="fas fa-map-marker"></i> Export KML
-                        </button>
-                        <button class="btn btn-sm btn-info w-100 mb-2" onclick="exportInspectionCSV()">
-                            <i class="fas fa-file-csv"></i> Export CSV
-                        </button>
-                        <button class="btn btn-sm btn-secondary w-100 mb-2" onclick="newReport()">
-                            <i class="fas fa-file"></i> New Report
-                        </button>
-                        <button class="btn btn-sm btn-danger w-100" onclick="clearInspectionData()">
-                            <i class="fas fa-trash"></i> Clear Data
-                        </button>
+            <div id="files-page" class="page">
+                 <h2><i class="fas fa-folder-open"></i> File Management</h2>
+                 <div class="file-manager-controls">
+                     <button class="btn btn-primary" onclick="triggerFileUpload()"><i class="fas fa-upload"></i> Upload Files</button>
+                     <input type="text" id="file-search" class="form-control" placeholder="Search files by name or contract...">
+                 </div>
+                 <div class="file-manager-content">
+                    <div class="folder-tree">
+                        <h6>Project Folders</h6>
+                        <div id="folder-tree-view"></div>
                     </div>
-                </aside>
-
-                <main class="main-content">
-                    <!-- Header with Logos and Report Title -->
-                    <div class="glass-card">
-                        <div class="info-card">
-                            <div class="logo-container">
-                                <img id="inspection-company-logo" src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='60' viewBox='0 0 150 60'><rect width='150' height='60' fill='%23f8f9fa' stroke='%23dee2e6'/><text x='75' y='35' text-anchor='middle' fill='%236c757d' font-family='Arial' font-size='12'>Company Logo</text></svg>" onclick="document.getElementById('inspection-company-logo-upload').click()">
-                                <input type="file" id="inspection-company-logo-upload" accept="image/*" style="display: none;" onchange="handleLogoUpload(event, 'inspection-company-logo')">
-                            </div>
-                            <div class="title-container">
-                                <h1 class="report-title-row" contenteditable="true">Asset Inspection Report</h1>
-                                <div class="report-date-label">
-                                    Report Date: <input type="date" id="inspection-date" value="">
-                                </div>
-                                <div class="small-title">Field Inspection Documentation</div>
-                            </div>
-                            <div class="logo-container">
-                                <img id="inspection-client-logo" src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='60' viewBox='0 0 150 60'><rect width='150' height='60' fill='%23f8f9fa' stroke='%23dee2e6'/><text x='75' y='35' text-anchor='middle' fill='%236c757d' font-family='Arial' font-size='12'>Client Logo</text></svg>" onclick="document.getElementById('inspection-client-logo-upload').click()">
-                                <input type="file" id="inspection-client-logo-upload" accept="image/*" style="display: none;" onchange="handleLogoUpload(event, 'inspection-client-logo')">
-                            </div>
-                        </div>
+                    <div class="file-list-view">
+                        <h6>Files</h6>
+                        <div id="file-list-container"></div>
                     </div>
-
-                    <!-- Data Entry Section -->
-                    <div class="glass-card data-entry-card">
-                        <div class="form-grid">
-                            <!-- Asset Information -->
-                            <div class="form-group">
-                                <h3>Asset Information</h3>
-                                <input type="text" id="asset-id" placeholder="Asset ID" class="form-control">
-                                <input type="text" id="asset-type" placeholder="Asset Type" class="form-control">
-                                <input type="text" id="asset-location" placeholder="Asset Location" class="form-control">
-                            </div>
-
-                            <!-- Inspector Details -->
-                            <div class="form-group">
-                                <h3>Inspector Details</h3>
-                                <input type="text" id="inspector-name" placeholder="Inspector Name" class="form-control">
-                                <input type="text" id="inspector-id" placeholder="Inspector ID" class="form-control">
-                                <input type="text" id="inspection-team" placeholder="Inspection Team" class="form-control">
-                            </div>
-
-                            <!-- Photo Upload -->
-                            <div class="form-group">
-                                <h3>Photo Documentation</h3>
-                                <div id="photo-drop-zone" class="upload-zone">
-                                    <div class="drop-zone-buttons">
-                                        <button type="button" class="icon-button" onclick="document.getElementById('photo-upload').click()">
-                                            📁
-                                        </button>
-                                        <button type="button" class="icon-button" onclick="openCamera()">
-                                            📷
-                                        </button>
-                                    </div>
-                                    <p>Upload photos or take pictures</p>
-                                    <input type="file" id="photo-upload" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event)">
-                                </div>
-                                <div id="photo-previews" class="photo-previews mt-2"></div>
-                            </div>
-                        </div>
-
-                        <!-- GPS Location Section -->
-                        <div class="form-group">
-                            <h3>GPS Location</h3>
-                            <div class="location-mode-switcher">
-                                <button type="button" class="location-mode-btn active" onclick="switchLocationMode('auto')">Auto GPS</button>
-                                <button type="button" class="location-mode-btn" onclick="switchLocationMode('manual')">Manual Entry</button>
-                                <button type="button" class="location-mode-btn" onclick="switchLocationMode('map')">Map Select</button>
-                            </div>
-                            
-                            <div id="location-panel-auto" class="location-panel">
-                                <button type="button" class="btn btn-primary" onclick="getCurrentLocation()">
-                                    <i class="fas fa-crosshairs"></i> Get Current Location
-                                </button>
-                                <div class="location-display-wrapper">
-                                    <div id="current-location-display">Location: Not detected</div>
-                                    <button type="button" id="insert-location-btn" class="btn btn-success btn-sm" onclick="insertLocationToTable()" style="display: none;">
-                                        Insert to Table
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div id="location-panel-manual" class="location-panel" style="display: none;">
-                                <div class="form-row">
-                                    <input type="number" id="manual-lat" placeholder="Latitude" step="any" class="form-control">
-                                    <input type="number" id="manual-lng" placeholder="Longitude" step="any" class="form-control">
-                                </div>
-                            </div>
-                            
-                            <div id="location-panel-map" class="location-panel" style="display: none;">
-                                <div id="inspection-map" style="height: 200px; border-radius: 12px;"></div>
-                                <small>Click on map to select location</small>
-                            </div>
-                        </div>
-
-                        <!-- Add to Table Button -->
-                        <button type="button" class="primary-button w-100" onclick="addInspectionEntry()">
-                            <i class="fas fa-plus"></i> Add Entry to Table
-                        </button>
-                    </div>
-
-                    <!-- Inspection Table -->
-                    <div class="glass-card">
-                        <div class="table-controls">
-                            <span class="table-controls-title">Inspection Data</span>
-                            <button type="button" onclick="addInspectionColumn()">➕ Column</button>
-                            <button type="button" onclick="deleteInspectionColumn()">➖ Column</button>
-                        </div>
-                        
-                        <div class="table-container">
-                            <table id="inspection-table">
-                                <thead>
-                                    <tr>
-                                        <th>Item</th>
-                                        <th>Asset ID</th>
-                                        <th>Asset Type</th>
-                                        <th>Location</th>
-                                        <th>Inspector</th>
-                                        <th>Photos</th>
-                                        <th>GPS Coordinates</th>
-                                        <th>Notes</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="inspection-table-body">
-                                    <!-- Table rows will be populated dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </main>
+                </div>
             </div>
-        </div>
 
-        <!-- Cost Estimation Page -->
-        <div id="cost-estimation-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('contracts-page')">
-                            <i class="fas fa-file-contract"></i> Contracts & BOQ
-                        </button>
-                        <button class="nav-btn" onclick="showPage('inspection-page')">
-                            <i class="fas fa-clipboard-check"></i> Inspection Reports
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('cost-estimation-page')">
-                            <i class="fas fa-calculator"></i> Cost Estimation
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> GIS Mapping
-                        </button>
-                        <button class="nav-btn" onclick="showPage('ai-detection-page')">
-                            <i class="fas fa-brain"></i> AI Detection
-                        </button>
-                        <button class="nav-btn" onclick="showPage('notebooks-page')">
-                            <i class="fas fa-book"></i> Notebooks
-                        </button>
-                        <button class="nav-btn" onclick="showPage('drawing-page')">
-                            <i class="fas fa-draw-polygon"></i> Drawing Tool
-                        </button>
-                        <button class="nav-btn" onclick="showPage('custom-reports-page')">
-                            <i class="fas fa-file-alt"></i> Custom Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                    
-                    <!-- Contextual Menu for Cost Estimation -->
-                    <div class="contextual-actions mt-4">
-                        <h6>Estimation Actions</h6>
-                        <button class="btn btn-sm btn-primary w-100 mb-2" onclick="printCostEstimation()">
-                            <i class="fas fa-print"></i> Print Report
-                        </button>
-                        <button class="btn btn-sm btn-info w-100 mb-2" onclick="exportCostCSV()">
-                            <i class="fas fa-file-csv"></i> Export CSV
-                        </button>
-                        <button class="btn btn-sm btn-secondary w-100 mb-2" onclick="newCostEstimation()">
-                            <i class="fas fa-file"></i> New Estimation
-                        </button>
-                        <button class="btn btn-sm btn-danger w-100" onclick="clearCostData()">
-                            <i class="fas fa-trash"></i> Clear Data
-                        </button>
+             <div id="chat-page" class="page">
+                <h2><i class="fas fa-comments"></i> Team Chat</h2>
+                <div class="chat-container">
+                    <div class="conversation-list">
+                        <h6>Conversations</h6>
+                        <button class="btn btn-sm btn-primary w-100 mt-2" onclick="startNewConversation()"><i class="fas fa-plus"></i> New Chat</button>
+                        <div id="conversation-list-view"></div>
                     </div>
-                </aside>
-
-                <main class="main-content">
-                    <!-- Cost Estimation Header -->
-                    <div class="glass-card">
-                        <div class="estimation-header">
-                            <img id="cost-company-logo" src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='60' viewBox='0 0 150 60'><rect width='150' height='60' fill='%23f8f9fa' stroke='%23dee2e6'/><text x='75' y='35' text-anchor='middle' fill='%236c757d' font-family='Arial' font-size='12'>Company Logo</text></svg>" onclick="document.getElementById('cost-company-logo-upload').click()">
-                            <input type="file" id="cost-company-logo-upload" accept="image/*" style="display: none;" onchange="handleLogoUpload(event, 'cost-company-logo')">
-                            
-                            <div class="estimation-title">
-                                <h2 contenteditable="true">Cost Estimation Report</h2>
-                                <h3 contenteditable="true">Project Cost Analysis</h3>
-                            </div>
-                            
-                            <img id="cost-client-logo" src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='60' viewBox='0 0 150 60'><rect width='150' height='60' fill='%23f8f9fa' stroke='%23dee2e6'/><text x='75' y='35' text-anchor='middle' fill='%236c757d' font-family='Arial' font-size='12'>Client Logo</text></svg>" onclick="document.getElementById('cost-client-logo-upload').click()">
-                            <input type="file" id="cost-client-logo-upload" accept="image/*" style="display: none;" onchange="handleLogoUpload(event, 'cost-client-logo')">
+                    <div class="chat-main">
+                        <div id="chat-messages" class="messages-container">
+                            <p>Select a conversation to start chatting.</p>
                         </div>
-                        
-                        <!-- Estimation Details -->
-                        <div class="estimation-details">
-                            <div class="form-row">
-                                <label>Work Order Number:</label>
-                                <input type="text" id="work-order-number" class="form-control" placeholder="Enter work order number">
-                            </div>
-                            <div class="form-row">
-                                <label>TPC No:</label>
-                                <input type="text" id="tpc-number" class="form-control" placeholder="Enter TPC number">
-                            </div>
-                            <div class="form-row">
-                                <label>Description of Work:</label>
-                                <input type="text" id="work-description" class="form-control" placeholder="Enter work description">
+                        <div class="chat-input-area">
+                            <textarea id="chat-message-input" class="form-control" placeholder="Type a message..." rows="1"></textarea>
+                            <div class="chat-actions">
+                                <button title="Send Message" class="btn btn-primary" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                                <button title="Attach File" class="btn btn-secondary" onclick="attachFile()"><i class="fas fa-paperclip"></i></button>
+                                <button title="Attach Photo" class="btn btn-secondary" onclick="attachPhoto()"><i class="fas fa-camera"></i></button>
+                                <button title="Share Location" class="btn btn-secondary" onclick="shareLocation()"><i class="fas fa-map-marker-alt"></i></button>
                             </div>
                         </div>
                     </div>
-
-                    <!-- BOQ Entry Section -->
-                    <div class="glass-card boq-entry-card">
-                        <h3>BOQ Entry</h3>
-                        <div class="form-grid-est">
-                            <div class="boq-ref-group">
-                                <div class="form-group-est">
-                                    <label>BOQ Ref.</label>
-                                    <select id="boq-reference" class="form-control" onchange="autofillBOQData()">
-                                        <option value="">Select BOQ Reference</option>
-                                        <!-- BOQ references populated from contracts -->
-                                    </select>
-                                </div>
-                                <button type="button" class="btn btn-info btn-sm" onclick="openCalculator()">
-                                    <i class="fas fa-calculator"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="form-group-est">
-                                <label>Asset</label>
-                                <input type="text" id="boq-asset" class="form-control" placeholder="Asset type">
-                            </div>
-                            
-                            <div class="form-group-est">
-                                <label>Unit</label>
-                                <input type="text" id="boq-unit" class="form-control" placeholder="Unit">
-                            </div>
-                            
-                            <div class="form-group-est">
-                                <label>Quantity</label>
-                                <input type="number" id="boq-quantity" class="form-control" placeholder="Quantity" step="0.01">
-                            </div>
-                            
-                            <div class="form-group-est">
-                                <label>Rate</label>
-                                <input type="number" id="boq-rate" class="form-control" placeholder="Rate" step="0.01">
-                            </div>
-                            
-                            <div class="description-group">
-                                <div class="form-group-est">
-                                    <label>Description</label>
-                                    <input type="text" id="boq-description" class="form-control" placeholder="Description">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button type="button" class="primary-button w-100 mt-3" onclick="addCostEstimationEntry()">
-                            <i class="fas fa-plus"></i> Add to Estimation
-                        </button>
-                    </div>
-
-                    <!-- Cost Estimation Table -->
-                    <div class="glass-card">
-                        <div class="table-controls">
-                            <span class="table-controls-title">Cost Estimation</span>
-                            <button type="button" onclick="addCostColumn()">➕ Column</button>
-                            <button type="button" onclick="deleteCostColumn()">➖ Column</button>
-                        </div>
-                        
-                        <div class="table-container">
-                            <table id="cost-estimation-table">
-                                <thead>
-                                    <tr>
-                                        <th>Item</th>
-                                        <th>BOQ Ref.</th>
-                                        <th>Description</th>
-                                        <th>Asset</th>
-                                        <th>Unit</th>
-                                        <th>Quantity</th>
-                                        <th>Rate</th>
-                                        <th>Amount</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="cost-estimation-table-body">
-                                    <!-- Table rows will be populated dynamically -->
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="7"><strong>Total Estimated Cost</strong></td>
-                                        <td><strong id="total-cost">0.00</strong></td>
-                                        <td></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                </main>
+                </div>
             </div>
-        </div>
 
-        <!-- GIS Mapping Page -->
-        <div id="mapping-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('contracts-page')">
-                            <i class="fas fa-file-contract"></i> Contracts & BOQ
-                        </button>
-                        <button class="nav-btn" onclick="showPage('inspection-page')">
-                            <i class="fas fa-clipboard-check"></i> Inspection Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('cost-estimation-page')">
-                            <i class="fas fa-calculator"></i> Cost Estimation
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> GIS Mapping
-                        </button>
-                        <button class="nav-btn" onclick="showPage('ai-detection-page')">
-                            <i class="fas fa-brain"></i> AI Detection
-                        </button>
-                        <button class="nav-btn" onclick="showPage('notebooks-page')">
-                            <i class="fas fa-book"></i> Notebooks
-                        </button>
-                        <button class="nav-btn" onclick="showPage('drawing-page')">
-                            <i class="fas fa-draw-polygon"></i> Drawing Tool
-                        </button>
-                        <button class="nav-btn" onclick="showPage('custom-reports-page')">
-                            <i class="fas fa-file-alt"></i> Custom Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                    <div class="mt-4">
-                        <h6>Map Tools</h6>
-                        <button class="btn btn-sm btn-primary mb-2 w-100" onclick="addMarker()">
-                            <i class="fas fa-map-marker-alt"></i> Add Marker
-                        </button>
-                        <button class="btn btn-sm btn-secondary mb-2 w-100" onclick="drawPolygon()">
-                            <i class="fas fa-draw-polygon"></i> Draw Area
-                        </button>
-                        <button class="btn btn-sm btn-success mb-2 w-100" onclick="measureDistance()">
-                            <i class="fas fa-ruler"></i> Measure
-                        </button>
-                        <button class="btn btn-sm btn-warning mb-2 w-100" onclick="clearMap()">
-                            <i class="fas fa-eraser"></i> Clear Map
-                        </button>
-                        <button class="btn btn-sm btn-info mb-2 w-100" onclick="importMapData()">
-                            <i class="fas fa-upload"></i> Import KML/CSV
-                        </button>
-                        <button class="btn btn-sm btn-danger mb-2 w-100" onclick="exportMapData()">
-                            <i class="fas fa-download"></i> Export Map
-                        </button>
-                        <button class="btn btn-sm btn-primary mb-2 w-100" onclick="printMap()">
-                            <i class="fas fa-print"></i> Print Map
-                        </button>
-                    </div>
-                </aside>
-
-                <main class="main-content">
-                    <div class="card" style="height: 100%;">
-                        <div id="map-container"></div>
-                    </div>
-                </main>
+            <div id="inspection-page" class="page"><h2><i class="fas fa-clipboard-check"></i> Inspection Management</h2></div>
+            <div id="maintenance-page" class="page"><h2><i class="fas fa-hard-hat"></i> Repair & Maintenance Tracking</h2></div>
+            <div id="timeline-page" class="page"><h2><i class="fas fa-calendar-alt"></i> Project Timeline</h2></div>
+            <div id="logistics-page" class="page"><h2><i class="fas fa-boxes"></i> Material Logistics</h2></div>
+            <div id="tracking-page" class="page"><h2><i class="fas fa-route"></i> Vehicle Tracking</h2></div>
+            <div id="fabrication-page" class="page"><h2><i class="fas fa-tools"></i> Sign Fabrication</h2></div>
+            <div id="scrap-page" class="page"><h2><i class="fas fa-recycle"></i> Scrap Management</h2></div>
+            <div id="cad-page" class="page">
+                <h2><i class="fas fa-drafting-compass"></i> CAD Viewer/Editor</h2>
+                <div class="cad-controls">
+                    <input type="file" id="cad-file-input" accept=".dxf,.svg" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('cad-file-input').click()"><i class="fas fa-upload"></i> Import DXF/SVG</button>
+                </div>
+                <div id="cad-viewer"></div>
             </div>
-        </div>
-
-        <!-- AI Detection Page -->
-        <div id="ai-detection-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('contracts-page')">
-                            <i class="fas fa-file-contract"></i> Contracts & BOQ
-                        </button>
-                        <button class="nav-btn" onclick="showPage('inspection-page')">
-                            <i class="fas fa-clipboard-check"></i> Inspection Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('cost-estimation-page')">
-                            <i class="fas fa-calculator"></i> Cost Estimation
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> GIS Mapping
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('ai-detection-page')">
-                            <i class="fas fa-brain"></i> AI Detection
-                        </button>
-                        <button class="nav-btn" onclick="showPage('notebooks-page')">
-                            <i class="fas fa-book"></i> Notebooks
-                        </button>
-                        <button class="nav-btn" onclick="showPage('drawing-page')">
-                            <i class="fas fa-draw-polygon"></i> Drawing Tool
-                        </button>
-                        <button class="nav-btn" onclick="showPage('custom-reports-page')">
-                            <i class="fas fa-file-alt"></i> Custom Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                </aside>
-
-                <main class="main-content">
-                    <div class="card">
-                        <h2>AI Road Defect Detection</h2>
-                        
-                        <!-- Image Upload Section -->
-                        <div class="ai-upload-section mb-4">
-                            <div class="upload-zone" onclick="document.getElementById('ai-image-upload').click()">
-                                <i class="fas fa-camera fa-3x mb-3"></i>
-                                <p>Upload road images for AI analysis</p>
-                                <small>Supports: JPG, PNG, HEIC - Extracts GPS and timestamp automatically</small>
-                                <input type="file" id="ai-image-upload" accept="image/*" multiple style="display: none;" onchange="handleAIImageUpload(event)">
-                            </div>
-                        </div>
-                        
-                        <!-- Processing Status -->
-                        <div id="ai-processing-status" class="processing-status mb-4" style="display: none;">
-                            <div class="loading-spinner"></div>
-                            <p>Analyzing images with AI... Please wait</p>
-                        </div>
-                        
-                        <!-- AI Results Table -->
-                        <div class="ai-results-section">
-                            <h5>Detection Results</h5>
-                            <div class="table-container">
-                                <table id="ai-results-table" class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Image Preview</th>
-                                            <th>GPS Coordinates</th>
-                                            <th>Timestamp</th>
-                                            <th>Defects Detected</th>
-                                            <th>Severity</th>
-                                            <th>Recommended Action</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="ai-results-body">
-                                        <!-- AI results will be populated here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        <!-- Export Options -->
-                        <div class="ai-export-section mt-4">
-                            <button class="btn btn-success" onclick="exportAIResults('csv')">
-                                <i class="fas fa-file-csv"></i> Export CSV
-                            </button>
-                            <button class="btn btn-primary" onclick="exportAIResults('xlsx')">
-                                <i class="fas fa-file-excel"></i> Export Excel
-                            </button>
-                            <button class="btn btn-danger" onclick="exportAIResults('pdf')">
-                                <i class="fas fa-file-pdf"></i> Export PDF
-                            </button>
-                        </div>
+            <div id="tools-page" class="page"><h2><i class="fas fa-calculator"></i> Engineering Tools</h2></div>
+            
+            <div id="settings-page" class="page">
+                <h2><i class="fas fa-cog"></i> Settings</h2>
+                <div class="settings-tabs">
+                    <button class="settings-tab active" onclick="showSettingsTab('theme')">Theme</button>
+                    <button class="settings-tab" onclick="showSettingsTab('ai')">AI</button>
+                    <button class="settings-tab" onclick="showSettingsTab('security')">Security</button>
+                    <button class="settings-tab" onclick="showSettingsTab('telegram')">Telegram</button>
+                    <button class="settings-tab" onclick="showSettingsTab('user')">User Roles</button>
+                </div>
+                
+                <div id="theme-settings" class="settings-panel active">
+                     <h5>Theme Personalization</h5>
+                    <div class="theme-selector mb-4">
+                        <div class="theme-option" data-theme="light">Light</div>
+                        <div class="theme-option" data-theme="dark">Dark</div>
                     </div>
-                </main>
+                    <div class="form-group">
+                        <label for="custom-background">Custom Background Image</label>
+                        <input type="file" class="form-control" id="custom-background" accept="image/*" onchange="handleBackgroundUpload(event)">
+                    </div>
+                     <div class="form-group">
+                        <label for="font-size">Font Size</label>
+                        <select id="font-size" class="form-select" onchange="adjustFontSize(this.value)">
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="ai-settings" class="settings-panel">
+                    <h5>AI Analysis Prompt</h5>
+                    <textarea id="ai-prompt" class="form-control" rows="12"></textarea>
+                    <button class="btn btn-primary mt-2" onclick="saveAISettings()">Save AI Prompt</button>
+                </div>
+
+                <div id="security-settings" class="settings-panel">
+                     <h5>Security & Access Control</h5>
+                    <div class="form-group">
+                        <label for="session-timeout">Session Timeout (minutes)</label>
+                        <input type="number" class="form-control" id="session-timeout" value="60">
+                    </div>
+                     <button class="btn btn-primary" onclick="saveSecuritySettings()">Save Security Settings</button>
+                </div>
+                
+                <div id="telegram-settings" class="settings-panel">
+                    <h5>Telegram Integration</h5>
+                    <div class="form-group">
+                        <label for="telegram-bot-token">Bot Token</label>
+                        <input type="password" class="form-control" id="telegram-bot-token" placeholder="Enter Telegram bot token">
+                    </div>
+                    <div class="form-group">
+                        <label for="telegram-chat-id">Chat ID</label>
+                        <input type="text" class="form-control" id="telegram-chat-id" placeholder="Enter default Telegram chat ID">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveTelegramSettings()">Save Telegram Settings</button>
+                </div>
+
+                 <div id="user-settings" class="settings-panel">
+                    <h5>User Management</h5>
+                    </div>
             </div>
-        </div>
-
-        <!-- Notebooks Page -->
-        <div id="notebooks-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('contracts-page')">
-                            <i class="fas fa-file-contract"></i> Contracts & BOQ
-                        </button>
-                        <button class="nav-btn" onclick="showPage('inspection-page')">
-                            <i class="fas fa-clipboard-check"></i> Inspection Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('cost-estimation-page')">
-                            <i class="fas fa-calculator"></i> Cost Estimation
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> GIS Mapping
-                        </button>
-                        <button class="nav-btn" onclick="showPage('ai-detection-page')">
-                            <i class="fas fa-brain"></i> AI Detection
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('notebooks-page')">
-                            <i class="fas fa-book"></i> Notebooks
-                        </button>
-                        <button class="nav-btn" onclick="showPage('drawing-page')">
-                            <i class="fas fa-draw-polygon"></i> Drawing Tool
-                        </button>
-                        <button class="nav-btn" onclick="showPage('custom-reports-page')">
-                            <i class="fas fa-file-alt"></i> Custom Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                </aside>
-
-                <main class="main-content">
-                    <div class="card">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h2>Project Notebooks</h2>
-                            <button class="btn btn-primary" onclick="createNewNote()">
-                                <i class="fas fa-plus"></i> New Note
-                            </button>
-                        </div>
-                        
-                        <!-- Search and Filter -->
-                        <div class="notebook-filters mb-4">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <input type="text" id="note-search" class="form-control" placeholder="Search notes..." onkeyup="searchNotes()">
-                                </div>
-                                <div class="col-md-6">
-                                    <select id="note-tag-filter" class="form-control" onchange="filterNotesByTag()">
-                                        <option value="">All Tags</option>
-                                        <!-- Tags will be populated dynamically -->
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Notes List -->
-                        <div id="notes-list" class="notes-grid">
-                            <!-- Notes will be populated here -->
-                        </div>
-                    </div>
-                </main>
-            </div>
-        </div>
-
-        <!-- Drawing Tool Page -->
-        <div id="drawing-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('contracts-page')">
-                            <i class="fas fa-file-contract"></i> Contracts & BOQ
-                        </button>
-                        <button class="nav-btn" onclick="showPage('inspection-page')">
-                            <i class="fas fa-clipboard-check"></i> Inspection Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('cost-estimation-page')">
-                            <i class="fas fa-calculator"></i> Cost Estimation
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> GIS Mapping
-                        </button>
-                        <button class="nav-btn" onclick="showPage('ai-detection-page')">
-                            <i class="fas fa-brain"></i> AI Detection
-                        </button>
-                        <button class="nav-btn" onclick="showPage('notebooks-page')">
-                            <i class="fas fa-book"></i> Notebooks
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('drawing-page')">
-                            <i class="fas fa-draw-polygon"></i> Drawing Tool
-                        </button>
-                        <button class="nav-btn" onclick="showPage('custom-reports-page')">
-                            <i class="fas fa-file-alt"></i> Custom Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                    
-                    <!-- Drawing Tools -->
-                    <div class="drawing-tools mt-4">
-                        <h6>Drawing Tools</h6>
-                        <button class="btn btn-sm btn-primary mb-2 w-100" onclick="selectDrawingTool('pen')">
-                            <i class="fas fa-pen"></i> Pen
-                        </button>
-                        <button class="btn btn-sm btn-secondary mb-2 w-100" onclick="selectDrawingTool('rectangle')">
-                            <i class="fas fa-square"></i> Rectangle
-                        </button>
-                        <button class="btn btn-sm btn-info mb-2 w-100" onclick="selectDrawingTool('circle')">
-                            <i class="fas fa-circle"></i> Circle
-                        </button>
-                        <button class="btn btn-sm btn-warning mb-2 w-100" onclick="selectDrawingTool('arrow')">
-                            <i class="fas fa-arrow-right"></i> Arrow
-                        </button>
-                        <button class="btn btn-sm btn-success mb-2 w-100" onclick="selectDrawingTool('text')">
-                            <i class="fas fa-font"></i> Text
-                        </button>
-                        <button class="btn btn-sm btn-danger mb-2 w-100" onclick="selectDrawingTool('eraser')">
-                            <i class="fas fa-eraser"></i> Eraser
-                        </button>
-                        
-                        <hr>
-                        <h6>Colors & Stroke</h6>
-                        <input type="color" id="stroke-color" value="#000000" class="form-control mb-2">
-                        <input type="range" id="stroke-width" min="1" max="20" value="2" class="form-control mb-2">
-                        
-                        <hr>
-                        <button class="btn btn-sm btn-primary mb-2 w-100" onclick="loadBackgroundImage()">
-                            <i class="fas fa-image"></i> Load Image
-                        </button>
-                        <button class="btn btn-sm btn-success mb-2 w-100" onclick="saveDrawing()">
-                            <i class="fas fa-save"></i> Save Drawing
-                        </button>
-                        <button class="btn btn-sm btn-warning mb-2 w-100" onclick="clearDrawing()">
-                            <i class="fas fa-trash"></i> Clear All
-                        </button>
-                    </div>
-                </aside>
-
-                <main class="main-content">
-                    <div class="card" style="height: 100%;">
-                        <canvas id="drawing-canvas" style="border: 1px solid #ccc; width: 100%; height: 100%;"></canvas>
-                    </div>
-                </main>
-            </div>
-        </div>
-
-        <!-- Custom Reports Page -->
-        <div id="custom-reports-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('contracts-page')">
-                            <i class="fas fa-file-contract"></i> Contracts & BOQ
-                        </button>
-                        <button class="nav-btn" onclick="showPage('inspection-page')">
-                            <i class="fas fa-clipboard-check"></i> Inspection Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('cost-estimation-page')">
-                            <i class="fas fa-calculator"></i> Cost Estimation
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> GIS Mapping
-                        </button>
-                        <button class="nav-btn" onclick="showPage('ai-detection-page')">
-                            <i class="fas fa-brain"></i> AI Detection
-                        </button>
-                        <button class="nav-btn" onclick="showPage('notebooks-page')">
-                            <i class="fas fa-book"></i> Notebooks
-                        </button>
-                        <button class="nav-btn" onclick="showPage('drawing-page')">
-                            <i class="fas fa-draw-polygon"></i> Drawing Tool
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('custom-reports-page')">
-                            <i class="fas fa-file-alt"></i> Custom Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                </aside>
-
-                <main class="main-content">
-                    <div class="card">
-                        <h2>Custom Reports Builder</h2>
-                        <p>Create personalized reports combining structured data and visual layout</p>
-                        
-                        <!-- Report Template Selection -->
-                        <div class="template-selection mb-4">
-                            <h5>Select Report Template</h5>
-                            <div class="template-grid">
-                                <div class="template-card" onclick="selectTemplate('inspection-summary')">
-                                    <i class="fas fa-clipboard-check fa-2x"></i>
-                                    <h6>Inspection Summary</h6>
-                                    <p>Comprehensive inspection report with photos and data</p>
-                                </div>
-                                <div class="template-card" onclick="selectTemplate('cost-breakdown')">
-                                    <i class="fas fa-calculator fa-2x"></i>
-                                    <h6>Cost Breakdown</h6>
-                                    <p>Detailed cost analysis with BOQ integration</p>
-                                </div>
-                                <div class="template-card" onclick="selectTemplate('project-overview')">
-                                    <i class="fas fa-chart-bar fa-2x"></i>
-                                    <h6>Project Overview</h6>
-                                    <p>High-level project status and metrics</p>
-                                </div>
-                                <div class="template-card" onclick="selectTemplate('custom-layout')">
-                                    <i class="fas fa-magic fa-2x"></i>
-                                    <h6>Custom Layout</h6>
-                                    <p>Build your own report from scratch</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Report Builder Interface -->
-                        <div id="report-builder" class="report-builder-section" style="display: none;">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <!-- Data Sources Panel -->
-                                    <div class="data-sources-panel">
-                                        <h6>Data Sources</h6>
-                                        <div class="data-source-list">
-                                            <div class="data-source-item" draggable="true" data-type="contract">
-                                                <i class="fas fa-file-contract"></i> Contract Data
-                                            </div>
-                                            <div class="data-source-item" draggable="true" data-type="boq">
-                                                <i class="fas fa-list"></i> BOQ Items
-                                            </div>
-                                            <div class="data-source-item" draggable="true" data-type="inspection">
-                                                <i class="fas fa-clipboard-check"></i> Inspection Data
-                                            </div>
-                                            <div class="data-source-item" draggable="true" data-type="cost">
-                                                <i class="fas fa-calculator"></i> Cost Estimation
-                                            </div>
-                                            <div class="data-source-item" draggable="true" data-type="chart">
-                                                <i class="fas fa-chart-bar"></i> Charts
-                                            </div>
-                                            <div class="data-source-item" draggable="true" data-type="map">
-                                                <i class="fas fa-map"></i> Map Views
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-9">
-                                    <!-- Report Canvas -->
-                                    <div class="report-canvas" id="report-canvas">
-                                        <div class="canvas-placeholder">
-                                            <i class="fas fa-plus fa-3x"></i>
-                                            <p>Drag and drop elements here to build your report</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Generate Report Button -->
-                        <div class="report-generation mt-4" style="display: none;">
-                            <button class="btn btn-success" onclick="generateCustomReport()">
-                                <i class="fas fa-file-pdf"></i> Generate Report
-                            </button>
-                        </div>
-                    </div>
-                </main>
-            </div>
-        </div>
-
-        <!-- Reports Page -->
-        <div id="reports-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('projects-page')">
-                            <i class="fas fa-project-diagram"></i> Projects
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> Mapping
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('reports-page')">
-                            <i class="fas fa-chart-bar"></i> Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('data-page')">
-                            <i class="fas fa-database"></i> Data Management
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                </aside>
-
-                <main class="main-content">
-                    <div class="card">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h2>Reports & Analytics</h2>
-                            <button class="btn btn-primary" onclick="generateReport()">
-                                <i class="fas fa-file-pdf"></i> Generate PDF Report
-                            </button>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5>Project Status Distribution</h5>
-                                        <canvas id="status-chart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5>Monthly Progress</h5>
-                                        <canvas id="progress-chart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card mt-4">
-                            <div class="card-body">
-                                <h5>Detailed Analytics</h5>
-                                <canvas id="analytics-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
-        </div>
-
-        <!-- Data Management Page -->
-        <div id="data-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('projects-page')">
-                            <i class="fas fa-project-diagram"></i> Projects
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> Mapping
-                        </button>
-                        <button class="nav-btn" onclick="showPage('reports-page')">
-                            <i class="fas fa-chart-bar"></i> Reports
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('data-page')">
-                            <i class="fas fa-database"></i> Data Management
-                        </button>
-                        <button class="nav-btn" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                </aside>
-
-                <main class="main-content">
-                    <div class="card">
-                        <h2>Data Management</h2>
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <button class="btn btn-success w-100" onclick="document.getElementById('csv-upload').click()">
-                                    <i class="fas fa-upload"></i> Import CSV Data
-                                </button>
-                                <input type="file" id="csv-upload" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)">
-                            </div>
-                            <div class="col-md-6">
-                                <button class="btn btn-primary w-100" onclick="exportCSV()">
-                                    <i class="fas fa-download"></i> Export CSV Data
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="table-container">
-                            <table id="data-table">
-                                <thead>
-                                    <tr id="data-table-header">
-                                        <!-- Dynamic headers -->
-                                    </tr>
-                                </thead>
-                                <tbody id="data-table-body">
-                                    <!-- Dynamic data -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </main>
-            </div>
-        </div>
-
-        <!-- Settings Page -->
-        <div id="settings-page" class="page">
-            <div class="app-grid">
-                <aside class="sidebar">
-                    <nav>
-                        <button class="nav-btn" onclick="showPage('dashboard-page')">
-                            <i class="fas fa-home"></i> Dashboard
-                        </button>
-                        <button class="nav-btn" onclick="showPage('projects-page')">
-                            <i class="fas fa-project-diagram"></i> Projects
-                        </button>
-                        <button class="nav-btn" onclick="showPage('mapping-page')">
-                            <i class="fas fa-map"></i> Mapping
-                        </button>
-                        <button class="nav-btn" onclick="showPage('reports-page')">
-                            <i class="fas fa-chart-bar"></i> Reports
-                        </button>
-                        <button class="nav-btn" onclick="showPage('data-page')">
-                            <i class="fas fa-database"></i> Data Management
-                        </button>
-                        <button class="nav-btn active" onclick="showPage('settings-page')">
-                            <i class="fas fa-cog"></i> Settings
-                        </button>
-                    </nav>
-                </aside>
-
-                <main class="main-content">
-                    <div class="card">
-                        <h2>Application Settings</h2>
-                        
-                        <form id="settings-form">
-                            <div class="mb-3">
-                                <label for="api-key" class="form-label">Map API Key</label>
-                                <input type="password" class="form-control" id="api-key" placeholder="Enter your mapping API key">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="default-location" class="form-label">Default Map Location</label>
-                                <input type="text" class="form-control" id="default-location" placeholder="Latitude, Longitude" value="40.7128, -74.0060">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="zoom-level" class="form-label">Default Zoom Level</label>
-                                <input type="range" class="form-range" id="zoom-level" min="1" max="18" value="10">
-                                <span id="zoom-display">10</span>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="auto-save">
-                                    <label class="form-check-label" for="auto-save">
-                                        Auto-save changes
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Settings
-                            </button>
-                        </form>
-                    </div>
-                </main>
-            </div>
-        </div>
+        </main>
     </div>
 
-    <!-- Modals -->
-    <!-- Create Project Modal -->
-    <div class="modal-overlay" id="create-project-modal">
-        <div class="modal-content">
-            <button class="modal-close-btn" onclick="hideModal('create-project-modal')">&times;</button>
-            <h3>Create New Project</h3>
-            <form id="create-project-form">
-                <div class="mb-3">
-                    <label for="project-name" class="form-label">Project Name</label>
-                    <input type="text" class="form-control" id="project-name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="project-location" class="form-label">Location</label>
-                    <input type="text" class="form-control" id="project-location" required>
-                </div>
-                <div class="mb-3">
-                    <label for="project-description" class="form-label">Description</label>
-                    <textarea class="form-control" id="project-description" rows="3"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="project-status" class="form-label">Status</label>
-                    <select class="form-control" id="project-status" required>
-                        <option value="planning">Planning</option>
-                        <option value="in-progress">In Progress</option>
-                        <option value="completed">Completed</option>
-                        <option value="on-hold">On Hold</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create Project
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Messages -->
     <div id="message-container"></div>
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin fa-3x"></i>
+            <p>Loading...</p>
+        </div>
+    </div>
 
-    <!-- Custom JavaScript -->
-    <script src="app.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.js"></script>
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <script src="script.js"></script>
 </body>
 </html>
