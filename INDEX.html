@@ -1,0 +1,977 @@
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Project Platform</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+    <script src='https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js'></script>
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background-color: #ecf0f1;
+            --card-bg: #ffffff;
+            --text-color: #34495e;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --success-color: #27ae60;
+            --danger-color: #c0392b;
+            --warning-color: #f39c12;
+        }
+
+        /* Base & Bilingual Support */
+        html[dir="rtl"] { font-family: 'Tahoma', sans-serif; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Page Visibility */
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+            flex-grow: 1;
+        }
+        .page.active {
+            display: flex;
+            flex-direction: column;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Layouts */
+        .main-container {
+            width: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .centered-container {
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+
+        /* Card Style */
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        html[dir="rtl"] .card { text-align: right; }
+
+        /* Forms & Buttons */
+        .form-card { max-width: 450px; width: 100%; }
+        h1, h2, h3 { color: var(--primary-color); }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        textarea { min-height: 120px; resize: vertical; }
+
+        button, .btn {
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            border: none;
+            background-color: var(--secondary-color);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        button:hover, .btn:hover { background-color: #2980b9; }
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-primary:hover { background-color: #1a252f; }
+        .btn-success { background-color: var(--success-color); }
+        .btn-success:hover { background-color: #229954; }
+        .btn-danger { background-color: var(--danger-color); }
+        .btn-danger:hover { background-color: #a93226; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: var(--card-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 { margin: 0; font-size: 1.5em; }
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+
+        /* Sidebar Navigation */
+        .sidebar { padding: 20px; background: var(--card-bg); border-radius: var(--border-radius); }
+        .sidebar .nav-btn {
+            display: block; width: 100%; text-align: left;
+            margin-bottom: 10px; background: none; color: var(--text-color);
+            font-weight: 500; padding: 15px;
+        }
+        .sidebar .nav-btn.active, .sidebar .nav-btn:hover { background-color: #ecf0f1; color: var(--primary-color); }
+
+        /* Map Container */
+        #map-container { height: 100%; width: 100%; border-radius: var(--border-radius); }
+        .leaflet-popup-content-wrapper { padding: 10px; }
+
+        /* Tables */
+        .table-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ecf0f1; }
+        th { background-color: var(--primary-color); color: white; font-weight: 600; }
+        tr:hover { background-color: #f8f9fa; }
+        td[contenteditable="true"] { background-color: #fdfde2; }
+
+        /* Popups / Modals */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: white; padding: 30px; border-radius: var(--border-radius);
+            width: 90%; max-width: 600px; position: relative;
+        }
+        .modal-close-btn {
+            position: absolute; top: 15px; right: 20px;
+            font-size: 30px; cursor: pointer; border: none; background: none; color: #7f8c8d;
+        }
+
+        /* Specific Component Styles */
+        #contract-selection-list, #saved-contracts-list {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+        }
+        .contract-card { border: 1px solid #ecf0f1; padding: 20px; border-radius: var(--border-radius); cursor: pointer; transition: all 0.3s; }
+        .contract-card:hover { border-color: var(--secondary-color); box-shadow: var(--shadow); }
+
+        .message {
+            padding: 15px; border-radius: var(--border-radius); margin-top: 15px;
+            text-align: center;
+        }
+        .message.error { background-color: #fbeae5; color: var(--danger-color); }
+        .message.success { background-color: #eaf7eb; color: var(--success-color); }
+        .message.pending { background-color: #fef9e7; color: var(--warning-color); }
+
+        .toggle-link {
+            display: block; text-align: center; margin-top: 20px;
+            color: var(--secondary-color); text-decoration: none;
+        }
+
+        /* Footer */
+        .footer { text-align: center; padding: 20px; color: #7f8c8d; }
+
+    </style>
+</head>
+<body>
+
+    <div id="login-page" class="page active centered-container">
+        <div class="form-card card">
+            <h1>Welcome to the Engineering Project Platform 👷‍♂</h1>
+            <p>Smart tools for managing maps, data, inspections, and reports for engineers and managers.</p>
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit" class="btn-primary" style="width:100%;">Sign In</button>
+                <div id="login-message" class="message" style="display:none;"></div>
+            </form>
+            <a href="#" class="toggle-link" id="show-signup-link">Need an account? Sign Up</a>
+        </div>
+    </div>
+
+    <div id="app-container" class="page">
+        <header class="header">
+            <h1 id="app-main-title">Project Dashboard</h1>
+            <div class="header-actions">
+                <span id="current-user-email"></span>
+                <select id="language-switcher" onchange="switchLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                </select>
+                <button class="btn-danger" onclick="signOut()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+            </div>
+        </header>
+
+        <div class="main-container app-grid">
+            <aside class="sidebar">
+                <button id="nav-contracts" class="nav-btn active" onclick="showAppPage('contracts-page')"><i class="fa-solid fa-file-contract"></i> Contracts</button>
+                <button id="nav-map" class="nav-btn" onclick="showAppPage('map-page')"><i class="fa-solid fa-map-location-dot"></i> GIS Map</button>
+                <button id="nav-tables" class="nav-btn" onclick="showAppPage('tables-page')"><i class="fa-solid fa-table"></i> Data Tables</button>
+                <button id="nav-ai" class="nav-btn" onclick="showAppPage('ai-page')"><i class="fa-solid fa-robot"></i> AI Analysis</button>
+                <button id="nav-notifications" class="nav-btn" onclick="showAppPage('notifications-page')"><i class="fa-solid fa-bell"></i> Notifications</button>
+                <button id="nav-admin" class="nav-btn" onclick="showAppPage('admin-page')" style="display: none;"><i class="fa-solid fa-user-shield"></i> Admin Panel</button>
+            </aside>
+
+            <main id="app-content-area">
+                <div id="contracts-page" class="app-content active">
+                    <div class="card">
+                        <h2><i class="fa-solid fa-file-contract"></i> Contract Management</h2>
+                        <p>Select a saved contract or add a new one.</p>
+                        <button class="btn-success" onclick="showModal('contract-form-modal')"><i class="fa-solid fa-plus"></i> Add New Contract</button>
+                    </div>
+                    <div class="card">
+                        <h3>Saved Contracts</h3>
+                        <div id="saved-contracts-list">
+                            <p>No contracts found. Add one to get started.</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="map-page" class="app-content" style="display:none; height:100%;">
+                    <div id="map-container"></div>
+                </div>
+                <div id="tables-page" class="app-content" style="display:none;">
+                     <div class="card">
+                        <h2><i class="fa-solid fa-table"></i> Bill of Quantities (BOQ)</h2>
+                        <div style="display:flex; gap: 10px; margin-bottom: 20px;">
+                             <button class="btn-success" onclick="addBoqRow()"><i class="fa-solid fa-plus"></i> Add Row</button>
+                             <button class="btn" onclick="exportTableToCsv('boq-table.csv')"><i class="fa-solid fa-file-csv"></i> Export to Excel</button>
+                             <button class="btn" onclick="exportTableToPdf()"><i class="fa-solid fa-file-pdf"></i> Export to PDF</button>
+                        </div>
+                        <div class="table-container" id="boq-table-container">
+                             <table id="boq-table">
+                                <thead>
+                                    <tr>
+                                        <th>BOQ Ref.</th>
+                                        <th>Asset</th>
+                                        <th>Description</th>
+                                        <th>Dimensions (L x W x H)</th>
+                                        <th>Unit</th>
+                                        <th>Rate</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="boq-table-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="ai-page" class="app-content" style="display:none;">
+                    <div class="card">
+                         <h2><i class="fa-solid fa-robot"></i> AI Road Defect Analysis</h2>
+                         <p>Upload a road surface image to analyze for defects.</p>
+                         <input type="file" id="ai-image-upload" accept="image/*">
+                         <button class="btn-primary" onclick="handleAIAnalysis()"><i class="fa-solid fa-magnifying-glass"></i> Analyze with AI</button>
+                    </div>
+                    <div class="card" id="ai-results-card" style="display:none;">
+                        <h3>Analysis Result</h3>
+                        <div id="ai-spinner" style="display:none; text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>Analyzing...</p></div>
+                        <div id="ai-results-table" class="table-container"></div>
+                    </div>
+                    <div class="card" id="ai-prompt-card" style="display:none;">
+                        <h3><i class="fa-solid fa-file-pen"></i> Edit AI Prompt (Admin)</h3>
+                        <textarea id="ai-prompt-textarea"></textarea>
+                        <button class="btn-success" onclick="saveAIPrompt()"><i class="fa-solid fa-save"></i> Save Prompt</button>
+                    </div>
+                </div>
+                <div id="notifications-page" class="app-content" style="display:none;">
+                    <div class="card">
+                        <h2><i class="fa-solid fa-bell"></i> Notifications</h2>
+                        <div class="table-container">
+                            <table id="notifications-table">
+                                <thead><tr><th>Date</th><th>Type</th><th>Message</th></tr></thead>
+                                <tbody id="notifications-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="admin-page" class="app-content" style="display:none;">
+                    <div class="card">
+                        <h2><i class="fa-solid fa-user-shield"></i> Admin Panel - User Approval</h2>
+                        <p>Review and manage new user registration requests.</p>
+                         <div class="table-container">
+                            <table id="admin-requests-table">
+                                <thead><tr><th>Email</th><th>Date Requested</th><th>Actions</th></tr></thead>
+                                <tbody id="admin-requests-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <div id="signup-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal('signup-modal')">&times;</button>
+            <h2>Create Your Account</h2>
+            <p>After signing up, an administrator will need to approve your account before you can log in.</p>
+            <form id="signup-form">
+                <input type="email" id="signup-email" placeholder="Email" required>
+                <input type="password" id="signup-password" placeholder="Password" required>
+                <button type="submit" class="btn-primary" style="width:100%;">Sign Up</button>
+                 <div id="signup-message" class="message" style="display:none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="contract-form-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal('contract-form-modal')">&times;</button>
+            <h2>Add New Contract</h2>
+            <form id="contract-form">
+                <input type="text" id="contract-title" placeholder="Contract Title" required>
+                <input type="text" id="contract-number" placeholder="Contract Number" required>
+                <label>Start Date:</label>
+                <input type="date" id="contract-start" required>
+                <label>End Date:</label>
+                <input type="date" id="contract-end" required>
+                <label>BOQ Upload (.csv):</label>
+                <input type="file" id="contract-boq" accept=".csv" required>
+                <small>Note: This BOQ will be used in the Data Tables page.</small>
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-top:10px;">
+                    <a href="#" onclick="downloadBoqTemplate()">Download BOQ Template</a>
+                    <button type="submit" class="btn-success">Save Contract</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p><strong>Developed by Eng. Ahmet Nasan</strong> | Civil Engineer & Software Developer</p>
+        <em>"Blending engineering precision with modern tech."</em>
+    </footer>
+
+<script>
+// ======== SCRIPT START ========
+
+// ======== 0. UTILS & HELPERS ========
+const getEl = (id) => document.getElementById(id);
+const show = (id) => getEl(id).style.display = 'flex';
+const hide = (id) => getEl(id).style.display = 'none';
+
+const showModal = (id) => getEl(id).classList.add('active');
+const hideModal = (id) => getEl(id).classList.remove('active');
+
+const showPage = (pageId) => {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    getEl(pageId).classList.add('active');
+};
+
+const showAppPage = (pageId) => {
+    document.querySelectorAll('.app-content').forEach(p => hide(p.id));
+    getEl(pageId).style.display = 'block';
+
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    const navButtonId = pageId.replace('-page', '');
+    getEl(nav-${navButtonId}).classList.add('active');
+
+    // Special handler for map initialization
+    if (pageId === 'map-page' && !window.mapInitialized) {
+        initializeMap();
+    }
+};
+
+const displayMessage = (elementId, text, type) => {
+    const el = getEl(elementId);
+    el.textContent = text;
+    el.className = message ${type};
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 5000);
+};
+
+const addNotification = (type, message) => {
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]'
+);
+    notifications.unshift({ date: new Date().toLocaleString(), type, message });
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+    loadNotifications();
+};
+
+// ======== 1. DATABASE SIMULATION (localStorage) ========
+const DB = {
+    get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
+    set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
+    init: () => {
+        if (!localStorage.getItem('users')) {
+            // Add a default admin user
+            DB.set('users', [{ email: 'admin@demo.com', password: 'admin', is_admin: true, is_approved: true }]);
+        }
+        if (!localStorage.getItem('user_requests')) DB.set('user_requests', []);
+        if (!localStorage.getItem('contracts')) DB.set('contracts', []);
+        if (!localStorage.getItem('notifications')) DB.set('notifications', []);
+        if (!localStorage.getItem('ai_prompt')) {
+             localStorage.setItem('ai_prompt', `You are a civil engineering expert trained to analyze road surface images for pavement condition assessment. Examine the input image and identify all visible road surface defects. Use precise civil engineering terminology for each defect type. For every defect detected, provide the following details in tabular format:
+1. Defect Type
+2. Severity Level (Low/Med/High)
+3. Location in image
+4. Technical Description
+5. Recommended Action
+If no defects are found, return 'No visible defects detected'. Present result in structured table.`);
+        }
+    }
+};
+
+// ======== 2. AUTHENTICATION ========
+const Auth = {
+    currentUser: null,
+    handleLogin: (e) => {
+        e.preventDefault();
+        const email = getEl('login-email').value;
+        const password = getEl('login-password').value;
+        const users = DB.get('users');
+
+        const foundUser = users.find(u => u.email === email && u.password === password);
+
+        if (foundUser) {
+            if (foundUser.is_approved) {
+                Auth.currentUser = foundUser;
+                localStorage.setItem('currentUser', JSON.stringify(foundUser));
+                showPage('app-container');
+                initializeApp();
+            } else {
+                displayMessage('login-message', 'Your account is pending administrator approval.', 'pending');
+            }
+        } else {
+            // Check if user is in requests
+            const requests = DB.get('user_requests');
+            if(requests.some(r => r.email === email)) {
+                 displayMessage('login-message', 'Your account is pending administrator approval.', 'pending');
+            } else {
+                displayMessage('login-message', 'Invalid email or password.', 'error');
+            }
+        }
+    },
+    handleSignup: (e) => {
+        e.preventDefault();
+        const email = getEl('signup-email').value;
+        const password = getEl('signup-password').value;
+        const users = DB.get('users');
+        const requests = DB.get('user_requests');
+
+        if (users.some(u => u.email === email) || requests.some(r => r.email === email)) {
+            displayMessage('signup-message', 'This email is already registered or pending approval.', 'error');
+            return;
+        }
+
+        requests.push({ email, password, date: new Date().toISOString() });
+        DB.set('user_requests', requests);
+        displayMessage('signup-message', 'Sign up successful! An admin will approve your account shortly.', 'success');
+        addNotification('New User', New user request from ${email}.);
+        setTimeout(() => hideModal('signup-modal'), 2000);
+    },
+    signOut: () => {
+        Auth.currentUser = null;
+        localStorage.removeItem('currentUser');
+        showPage('login-page');
+        location.reload(); // To reset state
+    },
+    checkSession: () => {
+        const user = localStorage.getItem('currentUser');
+        if(user) {
+            Auth.currentUser = JSON.parse(user);
+            showPage('app-container');
+            initializeApp();
+        } else {
+            showPage('login-page');
+        }
+    }
+};
+
+// ======== 3. APP INITIALIZATION ========
+const initializeApp = () => {
+    getEl('current-user-email').textContent = Auth.currentUser.email;
+    if (Auth.currentUser.is_admin) {
+        getEl('nav-admin').style.display = 'block';
+        getEl('ai-prompt-card').style.display = 'block';
+    }
+    loadContracts();
+    loadAdminRequests();
+    loadNotifications();
+    loadAIPrompt();
+};
+
+// ======== 4. CONTRACTS ========
+const handleSaveContract = (e) => {
+    e.preventDefault();
+    const title = getEl('contract-title').value;
+    const number = getEl('contract-number').value;
+    const start = getEl('contract-start').value;
+    const end = getEl('contract-end').value;
+    const boqFile = getEl('contract-boq').files[0];
+
+    if (!title || !number || !start || !end || !boqFile) {
+        alert('Please fill all fields and upload a BOQ file.');
+        return;
+    }
+
+    Papa.parse(boqFile, {
+        header: true,
+        complete: (results) => {
+            const contracts = DB.get('contracts');
+            const newContract = {
+                id: C${Date.now()},
+                title, number, start, end,
+                boq: results.data
+            };
+            contracts.push(newContract);
+            DB.set('contracts', contracts);
+            hideModal('contract-form-modal');
+            loadContracts();
+            addNotification('Contract', New contract "${title}" added.);
+        },
+        error: (err) => {
+            alert('Error parsing CSV file: ' + err.message);
+        }
+    });
+};
+
+const loadContracts = () => {
+    const contracts = DB.get('contracts');
+    const container = getEl('saved-contracts-list');
+    container.innerHTML = '';
+    if (contracts.length === 0) {
+        container.innerHTML = '<p>No contracts found. Add one to get started.</p>';
+        return;
+    }
+    contracts.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'contract-card';
+        card.innerHTML = `
+            <h3>${c.title}</h3>
+            <p><strong>Ref:</strong> ${c.number}</p>
+            <p><strong>Dates:</strong> ${c.start} to ${c.end}</p>
+        `;
+        card.onclick = () => openContract(c.id);
+        container.appendChild(card);
+    });
+};
+
+const openContract = (contractId) => {
+    const contracts = DB.get('contracts');
+    const contract = contracts.find(c => c.id === contractId);
+    if (!contract) return;
+
+    localStorage.setItem('activeContractId', contractId);
+    getEl('app-main-title').textContent = contract.title;
+    loadBoqTable(contract.boq);
+    showAppPage('tables-page');
+};
+
+const downloadBoqTemplate = () => {
+    const header = "BOQ Ref.,Asset,Description,Dimensions (L x W x H),Unit,Rate\n";
+    const blob = new Blob([header], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "BOQ_Template.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+// ======== 5. DATA TABLES (BOQ) ========
+const loadBoqTable = (boqData) => {
+    const tableBody = getEl('boq-table-body');
+    tableBody.innerHTML = '';
+    boqData.forEach((row, index) => {
+        if(row['BOQ Ref.']) { // Check if row is not empty
+            addBoqRow(row);
+        }
+    });
+};
+
+const addBoqRow = (rowData = {}) => {
+    const tableBody = getEl('boq-table-body');
+    const newRow = tableBody.insertRow();
+    newRow.innerHTML = `
+        <td contenteditable="true">${rowData['BOQ Ref.'] || ''}</td>
+        <td contenteditable="true">${rowData['Asset'] || ''}</td>
+        <td contenteditable="true">${rowData['Description'] || ''}</td>
+        <td contenteditable="true" oninput="handleUnitInput(event)">${rowData['Dimensions (L x W x H)'] || ''}</td>
+        <td>${rowData['Unit'] || ''}</td>
+        <td contenteditable="true">${rowData['Rate'] || ''}</td>
+        <td><button class="btn-danger" onclick="deleteRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+    `;
+};
+
+const deleteRow = (btn) => {
+    const row = btn.parentNode.parentNode;
+    row.parentNode.removeChild(row);
+};
+
+const handleUnitInput = (event) => {
+    const dimensions = event.target.textContent.toLowerCase();
+    const unitCell = event.target.nextElementSibling;
+
+    // L x W x H -> m³
+    if (dimensions.match(/(\d|\.)+\s?x\s?(\d|\.)+\s?x\s?(\d|\.)+/)) {
+        unitCell.textContent = 'm³';
+    } 
+    // L x W -> m²
+    else if (dimensions.match(/(\d|\.)+\s?x\s?(\d|\.)+/)) {
+        unitCell.textContent = 'm²';
+    }
+    // L -> m
+    else if (dimensions.match(/^(\d|\.)+$/)) {
+        unitCell.textContent = 'm';
+    }
+    // NR
+    else if (dimensions.toUpperCase() === 'NR') {
+         unitCell.textContent = 'NR';
+    }
+    else {
+        unitCell.textContent = 'Unit'; // Default
+    }
+};
+
+const exportTableToCsv = (filename) => {
+    let csv = [];
+    const rows = document.querySelectorAll("#boq-table tr");
+    for (const row of rows) {
+        let cols = row.querySelectorAll("td, th");
+        let csvrow = [];
+        for (const col of cols) {
+            // To handle cases where a cell might have a comma
+            let data = "${col.innerText.replace(/"/g, '""')}";
+            csvrow.push(data);
+        }
+        // Exclude the action column from export
+        csvrow.pop();
+        csv.push(csvrow.join(","));
+    }
+    const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(csvFile);
+    link.download = filename;
+    link.click();
+};
+
+const exportTableToPdf = () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const container = getEl('boq-table-container').cloneNode(true);
+
+    // Clean up for printing
+    container.querySelectorAll('button').forEach(b => b.remove());
+    container.querySelectorAll('[contenteditable="true"]').forEach(el => el.removeAttribute('contenteditable'));
+
+    document.body.appendChild(container); // Needs to be in DOM for html2canvas
+
+    html2canvas(container).then(canvas => {
+        document.body.removeChild(container);
+        const imgData = canvas.toDataURL('image/png');
+        const imgProps = doc.getImageProperties(imgData);
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        doc.save("boq-report.pdf");
+    });
+};
+
+// ======== 6. GIS MAP ========
+let map;
+let drawnItems;
+window.mapInitialized = false;
+
+const initializeMap = () => {
+    map = L.map('map-page').setView([25.2854, 51.5310], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    const geomanControls = new L.Control.Geoman(map, {
+        position: 'topleft',
+        drawMarker: true,
+        drawCircleMarker: false,
+        drawCircle: false,
+        drawRectangle: true,
+        drawPolygon: true,
+        drawPolyline: true,
+    });
+    map.addControl(geomanControls);
+
+    map.on('pm:create', (e) => {
+        const layer = e.layer;
+        drawnItems.addLayer(layer);
+        calculateAndBindPopup(layer);
+    });
+
+    addCustomMapControls();
+    window.mapInitialized = true;
+};
+
+const calculateAndBindPopup = (layer) => {
+    const geojson = layer.toGeoJSON();
+    let content = '<h4>Shape Details</h4>';
+
+    if (geojson.geometry.type === 'Polygon') {
+        const area = turf.area(geojson); // in square meters
+        content += <p><strong>Area:</strong> ${area.toFixed(2)} m²</p>;
+    } else if (geojson.geometry.type === 'LineString') {
+        const length = turf.length(geojson, { units: 'meters' });
+        content += <p><strong>Length:</strong> ${length.toFixed(2)} m</p>;
+    }
+
+    const center = layer.getBounds().getCenter();
+    content += <p><strong>Center Coords:</strong> ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}</p>;
+    content += <button class="btn-danger btn-sm" onclick="removeLayer(${layer._leaflet_id})">Delete</button>;
+    layer.bindPopup(content).openPopup();
+};
+
+window.removeLayer = (id) => {
+    drawnItems.eachLayer(layer => {
+        if (layer._leaflet_id === id) {
+            drawnItems.removeLayer(layer);
+        }
+    });
+};
+
+const addCustomMapControls = () => {
+    const customControl = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd: function (map) {
+            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+            container.innerHTML = `
+                <a href="#" title="More Actions" role="button" aria-label="More Actions">
+                    <i class="fa-solid fa-ellipsis-vertical" style="font-size: 1.2em; padding: 5px;"></i>
+                </a>
+                <div class="custom-menu" style="display:none; background:white; padding: 5px; box-shadow: var(--shadow);">
+                    <button class="btn" style="width:100%; margin-bottom:5px;" onclick="getEl('kml-input').click()">Import KML</button>
+                    <button class="btn" style="width:100%;" onclick="getEl('csv-input').click()">Import CSV</button>
+                </div>
+                <input type="file" id="kml-input" style="display:none" accept=".kml" onchange="importKML(event)">
+                <input type="file" id="csv-input" style="display:none" accept=".csv" onchange="importCSV(event)">
+            `;
+            container.onclick = (e) => {
+                e.stopPropagation();
+                const menu = container.querySelector('.custom-menu');
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            }
+            L.DomEvent.disableClickPropagation(container);
+            return container;
+        }
+    });
+    map.addControl(new customControl());
+};
+
+const importKML = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const kmlLayer = omnivore.kml.parse(e.target.result);
+        drawnItems.addLayer(kmlLayer);
+        map.fitBounds(kmlLayer.getBounds());
+    };
+    reader.readAsText(file);
+};
+
+const importCSV = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    Papa.parse(file, {
+        header: true,
+        dynamicTyping: true,
+        complete: (results) => {
+            results.data.forEach(point => {
+                if (point.lat && point.lng) {
+                    const marker = L.marker([point.lat, point.lng]).addTo(drawnItems);
+                    let popupContent = '<ul>';
+                    for (const key in point) {
+                        popupContent += <li><strong>${key}:</strong> ${point[key]}</li>;
+                    }
+                    popupContent += '</ul>';
+                    marker.bindPopup(popupContent);
+                }
+            });
+        }
+    });
+};
+
+
+// ======== 7. AI & NOTIFICATIONS ========
+const handleAIAnalysis = () => {
+    const file = getEl('ai-image-upload').files[0];
+    if (!file) {
+        alert("Please upload an image first.");
+        return;
+    }
+    getEl('ai-results-card').style.display = 'block';
+    getEl('ai-results-table').style.display = 'none';
+    getEl('ai-spinner').style.display = 'block';
+
+    // Simulate AI processing
+    setTimeout(() => {
+        const exampleResult = `
+            <table>
+                <thead>
+                    <tr><th>Defect Type</th><th>Severity</th><th>Location</th><th>Description</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Pothole</td><td>High</td><td>Lower-left</td><td>Surface collapse due to traffic and environmental factors.</td><td>Immediate Patching Required</td></tr>
+                    <tr><td>Longitudinal Crack</td><td>Medium</td><td>Center</td><td>Crack running parallel to the pavement's centerline, potential for water ingress.</td><td>Seal Crack</td></tr>
+                </tbody>
+            </table>
+        `;
+        getEl('ai-spinner').style.display = 'none';
+        getEl('ai-results-table').innerHTML = exampleResult;
+        getEl('ai-results-table').style.display = 'block';
+        addNotification('AI Analysis', Analysis complete for image ${file.name}.);
+    }, 2500);
+};
+
+const loadAIPrompt = () => {
+    getEl('ai-prompt-textarea').value = localStorage.getItem('ai_prompt');
+};
+const saveAIPrompt = () => {
+    localStorage.setItem('ai_prompt', getEl('ai-prompt-textarea').value);
+    alert('AI prompt saved!');
+};
+
+const loadNotifications = () => {
+    const notifications = DB.get('notifications');
+    const tableBody = getEl('notifications-table-body');
+    tableBody.innerHTML = '';
+    notifications.forEach(n => {
+        const row = tableBody.insertRow();
+        row.innerHTML = <td>${n.date}</td><td>${n.type}</td><td>${n.message}</td>;
+    });
+};
+
+
+// ======== 8. ADMIN PANEL ========
+const loadAdminRequests = () => {
+    const requests = DB.get('user_requests');
+    const tableBody = getEl('admin-requests-body');
+    tableBody.innerHTML = '';
+    if (requests.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3">No pending user requests.</td></tr>';
+        return;
+    }
+    requests.forEach(req => {
+        const row = tableBody.insertRow();
+        row.innerHTML = `
+            <td>${req.email}</td>
+            <td>${new Date(req.date).toLocaleDateString()}</td>
+            <td>
+                <button class="btn-success btn-sm" onclick="approveUser('${req.email}')">Approve</button>
+                <button class="btn-danger btn-sm" onclick="rejectUser('${req.email}')">Reject</button>
+            </td>
+        `;
+    });
+};
+
+const approveUser = (email) => {
+    let requests = DB.get('user_requests');
+    let users = DB.get('users');
+    const userRequest = requests.find(r => r.email === email);
+
+    if(userRequest) {
+        users.push({ ...userRequest, is_approved: true, is_admin: false });
+        requests = requests.filter(r => r.email !== email);
+        DB.set('users', users);
+        DB.set('user_requests', requests);
+        addNotification('Admin', User ${email} has been approved.);
+        loadAdminRequests();
+    }
+};
+
+const rejectUser = (email) => {
+    let requests = DB.get('user_requests');
+    requests = requests.filter(r => r.email !== email);
+    DB.set('user_requests', requests);
+    addNotification('Admin', User request for ${email} has been rejected.);
+    loadAdminRequests();
+};
+
+
+// ======== 9. EVENT LISTENERS ========
+document.addEventListener('DOMContentLoaded', () => {
+    DB.init();
+    Auth.checkSession();
+
+    // Attach form submit listeners
+    getEl('login-form').addEventListener('submit', Auth.handleLogin);
+    getEl('s-- Create contracts table
+CREATE TABLE contracts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id),
+    title TEXT NOT NULL,
+    number TEXT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    boq_data JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create notifications table
+CREATE TABLE notifications (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id),
+    type TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Row Level Security
+ALTER TABLE contracts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for contracts
+CREATE POLICY "Users can view their own contracts" ON contracts
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own contracts" ON contracts
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Create policies for notifications
+CREATE POLICY "Users can view their own notifications" ON notifications
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own notifications" ON notifications
+    FOR INSERT WITH CHECK (auth.uid() = user_id);ignup-form').addEventListener('submit', Auth.handleSignup);
+    getEl('contract-form').addEventListener('submit', handleSaveContract);
+
+    // *FIX:* Attach click listener for signup link safely
+    getEl('show-signup-link').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent page jump
+        showModal('signup-modal');
+    });
+});
+
+</script>
+</body>
+</html>
