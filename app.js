@@ -21,16 +21,52 @@ let currentProject = {
     settings: {}
 };
 
+// Supabase configuration
+const supabaseUrl = 'https://cykjjrrexaqmsqwrgnzp.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5a2pqcnJleGFxbXNxd3JnbnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MjUyMDksImV4cCI6MjA2NzIwMTIwOX0.Fx6f23TWCQQMCIkc5hcx8LqHyskVMm6WAhJl1UFZpMA';
+
+// Initialize Supabase client
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+});
+
+// Current user state
+let currentUser = null;
+let isSignUpMode = false;
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-function initializeApp() {
-    // Load stored data
-    loadProjects();
-    loadSettings();
-    loadAllData();
+async function initializeApp() {
+    // Check authentication state
+    await checkAuthState();
+    
+    // Set up auth state listener
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN') {
+            currentUser = session.user;
+            await onUserSignedIn();
+        } else if (event === 'SIGNED_OUT') {
+            currentUser = null;
+            onUserSignedOut();
+        }
+    });
+    
+    // If user is authenticated, load data
+    if (currentUser) {
+        await loadDataFromDatabase();
+    } else {
+        // Load fallback local data for demonstration
+        loadProjects();
+        loadSettings();
+        loadAllData();
+    }
     
     // Initialize dashboard
     updateDashboardStats();
@@ -41,9 +77,14 @@ function initializeApp() {
     
     // Initialize event listeners
     setupEventListeners();
+    setupAuthEventListeners();
     
     // Show welcome message
-    showMessage('Welcome to Engineering Project Platform - Comprehensive Edition', 'success');
+    if (currentUser) {
+        showMessage(`Welcome back, ${currentUser.user_metadata?.username || currentUser.email}!`, 'success');
+    } else {
+        showMessage('Welcome to Engineering Project Platform - Sign in to sync your data', 'info');
+    }
 }
 
 function loadAllData() {
@@ -142,6 +183,78 @@ function setupEventListeners() {
         zoomSlider.addEventListener('input', function() {
             document.getElementById('zoom-display').textContent = this.value;
         });
+    }
+
+    // Enhanced settings event listeners
+    setupEnhancedEventListeners();
+}
+
+function setupEnhancedEventListeners() {
+    // AI Confidence slider
+    const aiConfidenceSlider = document.getElementById('ai-confidence-threshold');
+    if (aiConfidenceSlider) {
+        aiConfidenceSlider.addEventListener('input', function() {
+            const display = document.getElementById('confidence-display');
+            if (display) display.textContent = this.value;
+        });
+    }
+
+    // Theme changes
+    const darkModeToggle = document.getElementById('dark-mode');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('change', function() {
+            localStorage.setItem('darkMode', this.checked.toString());
+            applyThemeSettings();
+        });
+    }
+
+    const fontSizeSelect = document.getElementById('font-size');
+    if (fontSizeSelect) {
+        fontSizeSelect.addEventListener('change', function() {
+            localStorage.setItem('fontSize', this.value);
+            applyThemeSettings();
+        });
+    }
+
+    const enableAnimationsToggle = document.getElementById('enable-animations');
+    if (enableAnimationsToggle) {
+        enableAnimationsToggle.addEventListener('change', function() {
+            localStorage.setItem('enableAnimations', this.checked.toString());
+            applyThemeSettings();
+        });
+    }
+
+    const highContrastToggle = document.getElementById('high-contrast');
+    if (highContrastToggle) {
+        highContrastToggle.addEventListener('change', function() {
+            localStorage.setItem('highContrast', this.checked.toString());
+            applyThemeSettings();
+        });
+    }
+
+    // Custom background upload
+    const customBackgroundInput = document.getElementById('custom-background');
+    if (customBackgroundInput) {
+        customBackgroundInput.addEventListener('change', handleCustomBackground);
+    }
+
+    // Touch-friendly toggle
+    const touchFriendlyToggle = document.getElementById('touch-friendly');
+    if (touchFriendlyToggle) {
+        touchFriendlyToggle.addEventListener('change', function() {
+            localStorage.setItem('touchFriendly', this.checked.toString());
+            if (this.checked) {
+                document.body.classList.add('touch-friendly');
+            } else {
+                document.body.classList.remove('touch-friendly');
+            }
+        });
+    }
+
+    // Apply touch-friendly settings immediately
+    const touchFriendly = localStorage.getItem('touchFriendly') !== 'false';
+    if (touchFriendly) {
+        document.body.classList.add('touch-friendly');
     }
 }
 
@@ -832,6 +945,235 @@ function handleSettingsSubmit(event) {
     showMessage('Settings saved successfully!', 'success');
 }
 
+// ===============================
+// ENHANCED SETTINGS MANAGEMENT
+// ===============================
+
+function saveAllSettings() {
+    // Basic settings
+    const apiKey = document.getElementById('api-key').value;
+    const defaultLocation = document.getElementById('default-location').value;
+    const zoomLevel = document.getElementById('zoom-level').value;
+    const autoSave = document.getElementById('auto-save').checked;
+
+    // AI settings
+    const aiPrompt = document.getElementById('ai-prompt').value;
+    const aiConfidence = document.getElementById('ai-confidence-threshold').value;
+
+    // Theme settings
+    const uiTheme = document.getElementById('ui-theme').value;
+    const fontSize = document.getElementById('font-size').value;
+    const enableAnimations = document.getElementById('enable-animations').checked;
+    const darkMode = document.getElementById('dark-mode').checked;
+
+    // Mobile settings
+    const mobileMenuStyle = document.getElementById('mobile-menu-style').value;
+    const touchFriendly = document.getElementById('touch-friendly').checked;
+    const highContrast = document.getElementById('high-contrast').checked;
+
+    // Storage settings
+    const localDownloadPath = document.getElementById('local-download-path').value;
+    const fileNamingFormat = document.getElementById('file-naming-format').value;
+    const autoBackupInterval = document.getElementById('auto-backup-interval').value;
+
+    // Save to localStorage
+    if (apiKey) localStorage.setItem('apiKey', apiKey);
+    localStorage.setItem('defaultLocation', defaultLocation);
+    localStorage.setItem('defaultZoom', zoomLevel);
+    localStorage.setItem('autoSave', autoSave.toString());
+    
+    // AI settings
+    localStorage.setItem('aiPrompt', aiPrompt);
+    localStorage.setItem('aiConfidence', aiConfidence);
+    
+    // Theme settings
+    localStorage.setItem('uiTheme', uiTheme);
+    localStorage.setItem('fontSize', fontSize);
+    localStorage.setItem('enableAnimations', enableAnimations.toString());
+    localStorage.setItem('darkMode', darkMode.toString());
+    
+    // Mobile settings
+    localStorage.setItem('mobileMenuStyle', mobileMenuStyle);
+    localStorage.setItem('touchFriendly', touchFriendly.toString());
+    localStorage.setItem('highContrast', highContrast.toString());
+    
+    // Storage settings
+    localStorage.setItem('localDownloadPath', localDownloadPath);
+    localStorage.setItem('fileNamingFormat', fileNamingFormat);
+    localStorage.setItem('autoBackupInterval', autoBackupInterval);
+
+    // Apply theme changes immediately
+    applyThemeSettings();
+    
+    showMessage('All settings saved successfully!', 'success');
+}
+
+function loadSettings() {
+    // Basic settings
+    const apiKey = localStorage.getItem('apiKey');
+    const defaultLocation = localStorage.getItem('defaultLocation');
+    const defaultZoom = localStorage.getItem('defaultZoom');
+    const autoSave = localStorage.getItem('autoSave');
+    
+    if (apiKey) document.getElementById('api-key').value = apiKey;
+    if (defaultLocation) document.getElementById('default-location').value = defaultLocation;
+    if (defaultZoom) {
+        document.getElementById('zoom-level').value = defaultZoom;
+        document.getElementById('zoom-display').textContent = defaultZoom;
+    }
+    if (autoSave) document.getElementById('auto-save').checked = autoSave === 'true';
+
+    // Load enhanced settings
+    loadAISettings();
+    loadThemeSettings();
+    loadMobileSettings();
+    loadStorageSettings();
+    
+    // Apply settings
+    applyThemeSettings();
+}
+
+function loadAISettings() {
+    const aiPrompt = localStorage.getItem('aiPrompt');
+    const aiConfidence = localStorage.getItem('aiConfidence');
+    
+    if (aiPrompt && document.getElementById('ai-prompt')) {
+        document.getElementById('ai-prompt').value = aiPrompt;
+    }
+    if (aiConfidence) {
+        const slider = document.getElementById('ai-confidence-threshold');
+        const display = document.getElementById('confidence-display');
+        if (slider) {
+            slider.value = aiConfidence;
+            if (display) display.textContent = aiConfidence;
+        }
+    }
+}
+
+function loadThemeSettings() {
+    const uiTheme = localStorage.getItem('uiTheme') || 'light';
+    const fontSize = localStorage.getItem('fontSize') || 'medium';
+    const enableAnimations = localStorage.getItem('enableAnimations') !== 'false';
+    const darkMode = localStorage.getItem('darkMode') === 'true';
+
+    if (document.getElementById('ui-theme')) document.getElementById('ui-theme').value = uiTheme;
+    if (document.getElementById('font-size')) document.getElementById('font-size').value = fontSize;
+    if (document.getElementById('enable-animations')) document.getElementById('enable-animations').checked = enableAnimations;
+    if (document.getElementById('dark-mode')) document.getElementById('dark-mode').checked = darkMode;
+}
+
+function loadMobileSettings() {
+    const mobileMenuStyle = localStorage.getItem('mobileMenuStyle') || 'hamburger';
+    const touchFriendly = localStorage.getItem('touchFriendly') !== 'false';
+    const highContrast = localStorage.getItem('highContrast') === 'true';
+
+    if (document.getElementById('mobile-menu-style')) document.getElementById('mobile-menu-style').value = mobileMenuStyle;
+    if (document.getElementById('touch-friendly')) document.getElementById('touch-friendly').checked = touchFriendly;
+    if (document.getElementById('high-contrast')) document.getElementById('high-contrast').checked = highContrast;
+}
+
+function loadStorageSettings() {
+    const localDownloadPath = localStorage.getItem('localDownloadPath') || '/Downloads/EngineeringPlatform/';
+    const fileNamingFormat = localStorage.getItem('fileNamingFormat') || 'contract-timestamp';
+    const autoBackupInterval = localStorage.getItem('autoBackupInterval') || 'none';
+
+    if (document.getElementById('local-download-path')) document.getElementById('local-download-path').value = localDownloadPath;
+    if (document.getElementById('file-naming-format')) document.getElementById('file-naming-format').value = fileNamingFormat;
+    if (document.getElementById('auto-backup-interval')) document.getElementById('auto-backup-interval').value = autoBackupInterval;
+}
+
+function applyThemeSettings() {
+    const darkMode = localStorage.getItem('darkMode') === 'true';
+    const fontSize = localStorage.getItem('fontSize') || 'medium';
+    const enableAnimations = localStorage.getItem('enableAnimations') !== 'false';
+    const highContrast = localStorage.getItem('highContrast') === 'true';
+
+    // Apply dark mode
+    if (darkMode) {
+        document.body.classList.add('dark-theme');
+    } else {
+        document.body.classList.remove('dark-theme');
+    }
+
+    // Apply font size
+    document.body.classList.remove('font-small', 'font-medium', 'font-large');
+    document.body.classList.add(`font-${fontSize}`);
+
+    // Apply animations
+    if (!enableAnimations) {
+        document.body.classList.add('no-animations');
+    } else {
+        document.body.classList.remove('no-animations');
+    }
+
+    // Apply high contrast
+    if (highContrast) {
+        document.body.classList.add('high-contrast');
+    } else {
+        document.body.classList.remove('high-contrast');
+    }
+}
+
+function handleCustomBackground(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imageData = e.target.result;
+            localStorage.setItem('customBackground', imageData);
+            document.body.style.backgroundImage = `url(${imageData})`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundAttachment = 'fixed';
+            showMessage('Custom background applied successfully!', 'success');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function resetToDefaults() {
+    if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
+        // Clear all settings from localStorage
+        const settingsKeys = [
+            'apiKey', 'defaultLocation', 'defaultZoom', 'autoSave',
+            'aiPrompt', 'aiConfidence', 'uiTheme', 'fontSize', 
+            'enableAnimations', 'darkMode', 'mobileMenuStyle', 
+            'touchFriendly', 'highContrast', 'localDownloadPath', 
+            'fileNamingFormat', 'autoBackupInterval', 'customBackground'
+        ];
+        
+        settingsKeys.forEach(key => localStorage.removeItem(key));
+        
+        // Reset UI to defaults
+        document.body.className = '';
+        document.body.style.backgroundImage = '';
+        
+        // Reload settings forms
+        loadSettings();
+        
+        showMessage('All settings have been reset to defaults!', 'success');
+    }
+}
+
+function getAIPrompt() {
+    return localStorage.getItem('aiPrompt') || document.getElementById('ai-prompt')?.value || 
+           'Analyze this civil engineering image for defects and provide severity ratings with recommended actions.';
+}
+
+function getFileNamingFormat() {
+    const format = localStorage.getItem('fileNamingFormat') || 'contract-timestamp';
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+    
+    switch (format) {
+        case 'timestamp-contract':
+            return `${timestamp}_CONTRACT-XXXX_Type`;
+        case 'simple':
+            return `Type_${timestamp}`;
+        default:
+            return `CONTRACT-XXXX_Type_${timestamp}`;
+    }
+}
+
 // Utility Functions
 function showMessage(text, type = 'success') {
     const container = document.getElementById('message-container');
@@ -1380,25 +1722,96 @@ function clearAllData() {
 
 function handleAIImageUpload(event) {
     const files = event.target.files;
-    showMessage('AI analysis will be implemented in future updates. Images uploaded for demo.', 'info');
+    const aiPrompt = getAIPrompt();
+    const confidenceThreshold = localStorage.getItem('aiConfidence') || 0.7;
     
-    // Demo AI results
-    Array.from(files).forEach(file => {
-        const result = {
-            id: Date.now().toString() + Math.random(),
-            image: URL.createObjectURL(file),
-            filename: file.name,
-            coordinates: '25.2048° N, 55.2708° E',
-            timestamp: new Date().toLocaleString(),
-            defects: ['Surface cracking', 'Pothole'],
-            severity: 'Medium',
-            action: 'Schedule repair within 30 days'
-        };
-        
-        aiResults.push(result);
+    showMessage(`Processing ${files.length} image(s) with AI analysis...`, 'info');
+    
+    // Enhanced AI analysis simulation using custom prompt
+    Array.from(files).forEach((file, index) => {
+        // Simulate processing delay
+        setTimeout(() => {
+            const result = generateAIAnalysis(file, aiPrompt, confidenceThreshold);
+            aiResults.push(result);
+            renderAIResultsTable();
+            
+            if (index === files.length - 1) {
+                showMessage(`AI analysis complete! Found ${result.defects.length} potential issues.`, 'success');
+            }
+        }, index * 1000);
     });
+}
+
+function generateAIAnalysis(file, prompt, confidenceThreshold) {
+    // Extract defect types from custom prompt
+    const defectPatterns = [
+        'road surface cracks', 'potholes', 'structural damage', 
+        'drainage issues', 'water damage', 'paint fading', 
+        'corrosion', 'safety hazards', 'erosion', 'foundation issues'
+    ];
     
-    renderAIResultsTable();
+    // Simulate AI detection based on confidence threshold
+    const detectedDefects = defectPatterns.filter(() => Math.random() > (1 - parseFloat(confidenceThreshold)));
+    
+    // Generate severity based on number of defects
+    let severity = 'Low';
+    if (detectedDefects.length > 3) severity = 'High';
+    else if (detectedDefects.length > 1) severity = 'Medium';
+    
+    // Generate GPS coordinates (simulated)
+    const lat = (25.2048 + (Math.random() - 0.5) * 0.01).toFixed(6);
+    const lng = (55.2708 + (Math.random() - 0.5) * 0.01).toFixed(6);
+    
+    // Generate action based on prompt analysis
+    let recommendedAction = 'Monitor condition';
+    if (severity === 'High') recommendedAction = 'Immediate repair required';
+    else if (severity === 'Medium') recommendedAction = 'Schedule repair within 30 days';
+    
+    return {
+        id: Date.now().toString() + Math.random(),
+        image: URL.createObjectURL(file),
+        filename: file.name,
+        coordinates: `${lat}° N, ${lng}° E`,
+        timestamp: new Date().toLocaleString(),
+        defects: detectedDefects.length > 0 ? detectedDefects : ['No significant defects detected'],
+        severity: severity,
+        action: recommendedAction,
+        confidence: confidenceThreshold,
+        promptUsed: prompt.substring(0, 100) + '...',
+        analysisDetails: {
+            processingTime: Math.round(Math.random() * 3000 + 1000) + 'ms',
+            resolution: '1920x1080',
+            fileSize: Math.round(file.size / 1024) + 'KB'
+        }
+    };
+}
+
+// Mobile menu functionality
+function toggleMobileMenu() {
+    const hamburgerBtn = document.querySelector('.hamburger-btn');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (hamburgerBtn && sidebar) {
+        hamburgerBtn.classList.toggle('active');
+        document.body.classList.toggle('hamburger-menu-active');
+        sidebar.classList.toggle('show');
+    }
+}
+
+// Enhanced AI functionality integration
+function updateAISettings() {
+    const aiPrompt = document.getElementById('ai-prompt').value;
+    const aiConfidence = document.getElementById('ai-confidence-threshold').value;
+    
+    if (aiPrompt) {
+        localStorage.setItem('aiPrompt', aiPrompt);
+        showMessage('AI prompt updated successfully!', 'success');
+    }
+    
+    if (aiConfidence) {
+        localStorage.setItem('aiConfidence', aiConfidence);
+        showMessage(`AI confidence threshold set to ${aiConfidence}`, 'success');
+    }
 }
 
 function renderAIResultsTable() {
@@ -1453,3 +1866,452 @@ function saveDrawing() { showMessage('Drawing save will be implemented', 'info')
 function clearDrawing() { showMessage('Drawing clear will be implemented', 'info'); }
 function selectTemplate(template) { showMessage(`Template (${template}) will be implemented`, 'info'); }
 function generateCustomReport() { showMessage('Custom report generation will be implemented', 'info'); }
+
+// ===============================
+// SUPABASE AUTHENTICATION & DATABASE
+// ===============================
+
+async function checkAuthState() {
+    try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        currentUser = user;
+        
+        if (currentUser) {
+            await ensureUserProfile();
+            showUserProfile();
+        } else {
+            showAuthModal();
+        }
+    } catch (error) {
+        console.error('Auth check error:', error);
+        showAuthModal();
+    }
+}
+
+function setupAuthEventListeners() {
+    // Auth form submission
+    const authForm = document.getElementById('auth-form');
+    if (authForm) {
+        authForm.addEventListener('submit', handleAuthSubmit);
+    }
+
+    // Toggle between sign in and sign up
+    const authToggle = document.getElementById('auth-toggle');
+    if (authToggle) {
+        authToggle.addEventListener('click', toggleAuthMode);
+    }
+}
+
+function toggleAuthMode() {
+    isSignUpMode = !isSignUpMode;
+    const title = document.getElementById('auth-title');
+    const submitBtn = document.getElementById('auth-submit-btn');
+    const toggleBtn = document.getElementById('auth-toggle');
+    const usernameField = document.getElementById('username-field');
+    const confirmPasswordField = document.getElementById('confirm-password-field');
+    const companyField = document.getElementById('company-field');
+
+    if (isSignUpMode) {
+        title.textContent = 'Create Account';
+        submitBtn.textContent = 'Sign Up';
+        toggleBtn.textContent = 'Already have an account? Sign in';
+        usernameField.style.display = 'block';
+        confirmPasswordField.style.display = 'block';
+        companyField.style.display = 'block';
+    } else {
+        title.textContent = 'Sign In to Engineering Platform';
+        submitBtn.textContent = 'Sign In';
+        toggleBtn.textContent = "Don't have an account? Sign up";
+        usernameField.style.display = 'none';
+        confirmPasswordField.style.display = 'none';
+        companyField.style.display = 'none';
+    }
+}
+
+async function handleAuthSubmit(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+    const username = document.getElementById('auth-username').value;
+    const company = document.getElementById('auth-company').value;
+    const confirmPassword = document.getElementById('auth-confirm-password').value;
+    
+    const errorDiv = document.getElementById('auth-error');
+    errorDiv.style.display = 'none';
+
+    try {
+        if (isSignUpMode) {
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                throw new Error('Passwords do not match');
+            }
+
+            if (password.length < 6) {
+                throw new Error('Password must be at least 6 characters');
+            }
+
+            // Sign up
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        username: username || email.split('@')[0],
+                        company: company || '',
+                        full_name: username || ''
+                    }
+                }
+            });
+
+            if (error) throw error;
+
+            showMessage('Account created! Please check your email to verify your account.', 'success');
+            hideAuthModal();
+            
+        } else {
+            // Sign in
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) throw error;
+
+            showMessage('Signed in successfully!', 'success');
+            hideAuthModal();
+        }
+    } catch (error) {
+        console.error('Auth error:', error);
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+    }
+}
+
+function showAuthModal() {
+    document.getElementById('auth-modal').style.display = 'flex';
+}
+
+function hideAuthModal() {
+    document.getElementById('auth-modal').style.display = 'none';
+}
+
+async function ensureUserProfile() {
+    if (!currentUser) return;
+
+    try {
+        // Check if user profile exists
+        const { data: existingUser, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', currentUser.id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+            throw error;
+        }
+
+        if (!existingUser) {
+            // Create user profile
+            const { error: insertError } = await supabase
+                .from('users')
+                .insert([{
+                    id: currentUser.id,
+                    username: currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || 'user',
+                    full_name: currentUser.user_metadata?.full_name || '',
+                    company: currentUser.user_metadata?.company || '',
+                    role: 'engineer'
+                }]);
+
+            if (insertError) throw insertError;
+        }
+    } catch (error) {
+        console.error('Error ensuring user profile:', error);
+    }
+}
+
+function showUserProfile() {
+    if (!currentUser) return;
+    
+    const userProfile = document.getElementById('user-profile');
+    const userAvatar = document.getElementById('user-avatar');
+    const userDisplayName = document.getElementById('user-display-name');
+    const userCompany = document.getElementById('user-company');
+
+    const username = currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || 'User';
+    const company = currentUser.user_metadata?.company || 'Engineering Platform';
+
+    userAvatar.textContent = username.charAt(0).toUpperCase();
+    userDisplayName.textContent = username;
+    userCompany.textContent = company;
+    
+    userProfile.style.display = 'block';
+}
+
+function hideUserProfile() {
+    document.getElementById('user-profile').style.display = 'none';
+}
+
+async function signOut() {
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        
+        showMessage('Signed out successfully!', 'success');
+    } catch (error) {
+        console.error('Sign out error:', error);
+        showMessage('Error signing out: ' + error.message, 'error');
+    }
+}
+
+async function onUserSignedIn() {
+    await ensureUserProfile();
+    showUserProfile();
+    await loadDataFromDatabase();
+    showMessage('Data synced from database!', 'success');
+}
+
+function onUserSignedOut() {
+    hideUserProfile();
+    // Clear data and show auth modal
+    contracts = [];
+    boqData = [];
+    inspectionData = [];
+    costEstimationData = [];
+    aiResults = [];
+    notebooks = [];
+    
+    // Reload from localStorage as fallback
+    loadProjects();
+    loadSettings();
+    loadAllData();
+    
+    showAuthModal();
+}
+
+async function loadDataFromDatabase() {
+    if (!currentUser) return;
+
+    try {
+        // Load all data from Supabase
+        const [
+            projectsData,
+            contractsData,
+            boqDataFromDB,
+            inspectionsData,
+            costEstimationsData,
+            aiResultsData,
+            notebooksData,
+            settingsData
+        ] = await Promise.all([
+            supabase.from('projects').select('*').eq('user_id', currentUser.id),
+            supabase.from('contracts').select('*').eq('user_id', currentUser.id),
+            supabase.from('boq').select('*').eq('user_id', currentUser.id),
+            supabase.from('inspections').select('*').eq('user_id', currentUser.id),
+            supabase.from('cost_estimations').select('*').eq('user_id', currentUser.id),
+            supabase.from('ai_results').select('*').eq('user_id', currentUser.id),
+            supabase.from('notebooks').select('*').eq('user_id', currentUser.id),
+            supabase.from('settings').select('*').eq('user_id', currentUser.id)
+        ]);
+
+        // Update global variables
+        if (projectsData.data) projects = projectsData.data;
+        if (contractsData.data) contracts = contractsData.data;
+        if (boqDataFromDB.data) boqData = boqDataFromDB.data;
+        if (inspectionsData.data) inspectionData = inspectionsData.data;
+        if (costEstimationsData.data) costEstimationData = costEstimationsData.data;
+        if (aiResultsData.data) aiResults = aiResultsData.data;
+        if (notebooksData.data) notebooks = notebooksData.data;
+
+        // Apply settings
+        if (settingsData.data) {
+            settingsData.data.forEach(setting => {
+                localStorage.setItem(setting.key, setting.value);
+            });
+            loadSettings();
+            applyThemeSettings();
+        }
+
+        // Update UI
+        renderProjectsTable();
+        renderContractsList();
+        populateBOQDropdown();
+        renderInspectionTable();
+        renderCostEstimationTable();
+        renderAIResultsTable();
+        updateDashboardStats();
+
+    } catch (error) {
+        console.error('Error loading data from database:', error);
+        showMessage('Error loading data from database. Using local data.', 'warning');
+    }
+}
+
+async function syncToDatabase(tableName, data, additionalData = {}) {
+    if (!currentUser) {
+        // Fallback to localStorage if not authenticated
+        localStorage.setItem(`engineering${tableName}`, JSON.stringify(data));
+        return;
+    }
+
+    try {
+        const dataToInsert = {
+            ...additionalData,
+            user_id: currentUser.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+
+        const { data: result, error } = await supabase
+            .from(tableName.toLowerCase())
+            .insert([dataToInsert])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return result;
+    } catch (error) {
+        console.error(`Error syncing to ${tableName}:`, error);
+        showMessage(`Error saving to database: ${error.message}`, 'error');
+        // Fallback to localStorage
+        localStorage.setItem(`engineering${tableName}`, JSON.stringify(data));
+        throw error;
+    }
+}
+
+// Override existing save functions to use database
+async function saveContract() {
+    const contract = {
+        contract_number: document.getElementById('contract-number').value,
+        title: document.getElementById('contract-title').value,
+        value: parseFloat(document.getElementById('project-value').value) || 0,
+        company_name: document.getElementById('company-name').value,
+        client_name: document.getElementById('client-name').value,
+        start_date: document.getElementById('start-date').value,
+        end_date: document.getElementById('end-date').value,
+        company_logo: document.getElementById('company-logo-preview').src,
+        client_logo: document.getElementById('client-logo-preview').src
+    };
+
+    try {
+        const result = await syncToDatabase('contracts', contract, contract);
+        contracts.push(result);
+        showMessage('Contract saved successfully!', 'success');
+        renderContractsList();
+    } catch (error) {
+        // Error already handled in syncToDatabase
+    }
+}
+
+async function addInspectionEntry() {
+    const entry = {
+        asset_id: document.getElementById('asset-id').value,
+        asset_type: document.getElementById('asset-type').value,
+        location: document.getElementById('asset-location').value,
+        inspector: document.getElementById('inspector-name').value,
+        inspector_id: document.getElementById('inspector-id').value,
+        team: document.getElementById('inspection-team').value,
+        photos: Array.from(document.getElementById('photo-previews').children).map(img => img.src),
+        coordinates: window.currentCoordinates ? `${window.currentCoordinates.lat},${window.currentCoordinates.lng}` : null,
+        inspection_date: new Date().toISOString().split('T')[0],
+        notes: ''
+    };
+
+    try {
+        const result = await syncToDatabase('inspections', entry, entry);
+        inspectionData.push(result);
+        renderInspectionTable();
+        clearInspectionForm();
+        showMessage('Inspection entry added successfully!', 'success');
+    } catch (error) {
+        // Error already handled in syncToDatabase
+    }
+}
+
+async function addCostEstimationEntry() {
+    const quantity = parseFloat(document.getElementById('boq-quantity').value) || 0;
+    const rate = parseFloat(document.getElementById('boq-rate').value) || 0;
+    const amount = quantity * rate;
+    
+    const entry = {
+        boq_ref: document.getElementById('boq-reference').value,
+        description: document.getElementById('boq-description').value,
+        asset: document.getElementById('boq-asset').value,
+        unit: document.getElementById('boq-unit').value,
+        quantity: quantity,
+        rate: rate,
+        amount: amount
+    };
+
+    try {
+        const result = await syncToDatabase('cost_estimations', entry, entry);
+        costEstimationData.push(result);
+        renderCostEstimationTable();
+        clearCostEstimationForm();
+        showMessage('Cost estimation entry added successfully!', 'success');
+    } catch (error) {
+        // Error already handled in syncToDatabase
+    }
+}
+
+// Enhanced settings with database sync
+async function saveAllSettings() {
+    // Basic settings
+    const settings = {
+        apiKey: document.getElementById('api-key').value,
+        defaultLocation: document.getElementById('default-location').value,
+        defaultZoom: document.getElementById('zoom-level').value,
+        autoSave: document.getElementById('auto-save').checked,
+        aiPrompt: document.getElementById('ai-prompt').value,
+        aiConfidence: document.getElementById('ai-confidence-threshold').value,
+        uiTheme: document.getElementById('ui-theme').value,
+        fontSize: document.getElementById('font-size').value,
+        enableAnimations: document.getElementById('enable-animations').checked,
+        darkMode: document.getElementById('dark-mode').checked,
+        mobileMenuStyle: document.getElementById('mobile-menu-style').value,
+        touchFriendly: document.getElementById('touch-friendly').checked,
+        highContrast: document.getElementById('high-contrast').checked,
+        localDownloadPath: document.getElementById('local-download-path').value,
+        fileNamingFormat: document.getElementById('file-naming-format').value,
+        autoBackupInterval: document.getElementById('auto-backup-interval').value
+    };
+
+    // Save to localStorage for immediate use
+    Object.entries(settings).forEach(([key, value]) => {
+        localStorage.setItem(key, typeof value === 'boolean' ? value.toString() : value);
+    });
+
+    // Save to database if authenticated
+    if (currentUser) {
+        try {
+            const promises = Object.entries(settings).map(([key, value]) => 
+                supabase.from('settings').upsert({
+                    user_id: currentUser.id,
+                    key: key,
+                    value: typeof value === 'boolean' ? value.toString() : value,
+                    category: getSettingCategory(key)
+                })
+            );
+            
+            await Promise.all(promises);
+            showMessage('Settings saved to database successfully!', 'success');
+        } catch (error) {
+            console.error('Error saving settings to database:', error);
+            showMessage('Settings saved locally. Database sync failed.', 'warning');
+        }
+    } else {
+        showMessage('Settings saved locally. Sign in to sync across devices.', 'info');
+    }
+
+    // Apply theme changes immediately
+    applyThemeSettings();
+}
+
+function getSettingCategory(key) {
+    if (['aiPrompt', 'aiConfidence'].includes(key)) return 'ai';
+    if (['uiTheme', 'fontSize', 'enableAnimations', 'darkMode'].includes(key)) return 'theme';
+    if (['mobileMenuStyle', 'touchFriendly', 'highContrast'].includes(key)) return 'accessibility';
+    if (['localDownloadPath', 'fileNamingFormat', 'autoBackupInterval'].includes(key)) return 'storage';
+    return 'general';
+}

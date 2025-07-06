@@ -1299,11 +1299,154 @@
                                     </label>
                                 </div>
                             </div>
-                            
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Settings
-                            </button>
                         </form>
+                    </div>
+
+                    <!-- AI Analysis Settings -->
+                    <div class="card mt-4">
+                        <h3><i class="fas fa-robot"></i> AI Analysis Settings</h3>
+                        <form id="ai-settings-form">
+                            <div class="mb-3">
+                                <label for="ai-prompt" class="form-label">AI Analysis Prompt</label>
+                                <textarea id="ai-prompt" rows="8" class="form-control" placeholder="Enter your custom AI prompt for image analysis...">Analyze this civil engineering image for defects. Look for:
+1. Road surface cracks and potholes
+2. Structural damage to bridges or buildings
+3. Drainage issues and water damage
+4. Paint fading or corrosion
+5. Safety hazards
+
+Provide a severity rating (Low/Medium/High) and recommended actions for each defect found. Include coordinates if available.</textarea>
+                                <small class="text-muted">This prompt will be used for AI-powered defect detection and analysis</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="ai-confidence-threshold" class="form-label">AI Confidence Threshold</label>
+                                <input type="range" class="form-range" id="ai-confidence-threshold" min="0.1" max="1.0" step="0.1" value="0.7">
+                                <span id="confidence-display">0.7</span>
+                                <small class="text-muted">Minimum confidence level for AI detections</small>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Theme & Appearance Settings -->
+                    <div class="card mt-4">
+                        <h3><i class="fas fa-palette"></i> Theme & Appearance</h3>
+                        <form id="theme-settings-form">
+                            <div class="mb-3">
+                                <label for="ui-theme" class="form-label">UI Theme</label>
+                                <select id="ui-theme" class="form-control">
+                                    <option value="light">Light Theme</option>
+                                    <option value="dark">Dark Theme</option>
+                                    <option value="custom">Custom Theme</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="custom-background" class="form-label">Custom Background Image</label>
+                                <input type="file" id="custom-background" accept="image/*" class="form-control">
+                                <small class="text-muted">Upload a custom background image for your workspace</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="font-size" class="form-label">Font Size</label>
+                                <select id="font-size" class="form-control">
+                                    <option value="small">Small</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="large">Large</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enable-animations" checked>
+                                    <label class="form-check-label" for="enable-animations">
+                                        Enable Animations
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="dark-mode">
+                                    <label class="form-check-label" for="dark-mode">
+                                        Enable Dark Mode
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Mobile & Accessibility Settings -->
+                    <div class="card mt-4">
+                        <h3><i class="fas fa-mobile-alt"></i> Mobile & Accessibility</h3>
+                        <form id="mobile-settings-form">
+                            <div class="mb-3">
+                                <label for="mobile-menu-style" class="form-label">Mobile Menu Style</label>
+                                <select id="mobile-menu-style" class="form-control">
+                                    <option value="hamburger">Hamburger Menu</option>
+                                    <option value="bottom-nav">Bottom Navigation</option>
+                                    <option value="sidebar">Collapsible Sidebar</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="touch-friendly" checked>
+                                    <label class="form-check-label" for="touch-friendly">
+                                        Enhanced Touch Controls
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="high-contrast">
+                                    <label class="form-check-label" for="high-contrast">
+                                        High Contrast Mode
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- File Storage Settings -->
+                    <div class="card mt-4">
+                        <h3><i class="fas fa-hdd"></i> File Storage Settings</h3>
+                        <form id="storage-settings-form">
+                            <div class="mb-3">
+                                <label for="local-download-path" class="form-label">Local Download Directory</label>
+                                <input type="text" class="form-control" id="local-download-path" placeholder="/Downloads/EngineeringPlatform/">
+                                <small class="text-muted">Default directory for file downloads</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="file-naming-format" class="form-label">File Naming Format</label>
+                                <select id="file-naming-format" class="form-control">
+                                    <option value="contract-timestamp">CONTRACT-XXXX_Type_YYYY-MM-DD_HHMM</option>
+                                    <option value="timestamp-contract">YYYY-MM-DD_HHMM_CONTRACT-XXXX_Type</option>
+                                    <option value="simple">Type_YYYY-MM-DD_HHMM</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="auto-backup-interval" class="form-label">Auto-backup Interval</label>
+                                <select id="auto-backup-interval" class="form-control">
+                                    <option value="none">Disabled</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary" onclick="saveAllSettings()">
+                            <i class="fas fa-save"></i> Save All Settings
+                        </button>
+                        <button type="button" class="btn btn-secondary ms-2" onclick="resetToDefaults()">
+                            <i class="fas fa-undo"></i> Reset to Defaults
+                        </button>
                     </div>
                 </main>
             </div>
@@ -1348,7 +1491,61 @@
     <!-- Messages -->
     <div id="message-container"></div>
 
+    <!-- Authentication Modal -->
+    <div class="modal-overlay" id="auth-modal" style="display: none;">
+        <div class="modal-content">
+            <h3 id="auth-title">Sign In to Engineering Platform</h3>
+            <form id="auth-form">
+                <div class="mb-3" id="username-field" style="display: none;">
+                    <label for="auth-username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="auth-username">
+                </div>
+                <div class="mb-3">
+                    <label for="auth-email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="auth-email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="auth-password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="auth-password" required>
+                </div>
+                <div class="mb-3" id="confirm-password-field" style="display: none;">
+                    <label for="auth-confirm-password" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" id="auth-confirm-password">
+                </div>
+                <div class="mb-3" id="company-field" style="display: none;">
+                    <label for="auth-company" class="form-label">Company</label>
+                    <input type="text" class="form-control" id="auth-company">
+                </div>
+                <button type="submit" class="btn btn-primary w-100" id="auth-submit-btn">Sign In</button>
+            </form>
+            <div class="text-center mt-3">
+                <button type="button" class="btn btn-link" id="auth-toggle">
+                    Don't have an account? Sign up
+                </button>
+            </div>
+            <div id="auth-error" class="alert alert-danger mt-3" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- User Profile Display -->
+    <div id="user-profile" style="display: none; position: fixed; top: 20px; right: 20px; background: var(--card-bg); padding: 10px; border-radius: 8px; box-shadow: var(--shadow);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div id="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;"></div>
+            <div>
+                <div id="user-display-name" style="font-weight: bold;"></div>
+                <div id="user-company" style="font-size: 12px; color: var(--text-color); opacity: 0.7;"></div>
+            </div>
+            <button onclick="signOut()" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- Custom JavaScript -->
+    <script type="module" src="server/db.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
