@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Project Platform</title>
+
+    <!-- External Libraries CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    
+    <!-- Mapbox GL JS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css" type="text/css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="enhanced-styles.css">
+
+    <!-- External Libraries JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+    <script src='https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js'></script>
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Mapbox GL JS -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.js"></script>
+    
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <!-- Socket.io for real-time chat -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1><i class="fas fa-building"></i> <span id="app-title" contenteditable="true" onclick="this.focus()">Engineering Project Platform</span></h1>
+        <div class="header-actions">
+            <!-- User Profile -->
+            <div class="user-profile">
+                <span id="user-name">Demo User</span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+            <!-- Global Three-Dot Menu -->
+            <div class="dropdown">
+                <button class="btn btn-secondary menu-button" id="global-menu-btn">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="dropdown-menu" id="global-menu">
+                    <button onclick="newProject()">
+                        <i class="fas fa-file"></i> New File
+                    </button>
+                    <button onclick="saveProject()">
+                        <i class="fas fa-save"></i> Save Project
+                    </button>
+                    <button onclick="exportJSON()">
+                        <i class="fas fa-download"></i> Export JSON
+                    </button>
+                    <button onclick="importJSON()">
+                        <i class="fas fa-upload"></i> Import JSON
+                    </button>
+                    <button onclick="openBackupManager()">
+                        <i class="fas fa-cloud"></i> Backup & Sync
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Project Name Display -->
+    <div class="project-name-bar">
+        <strong id="current-project-name">Demo Project</strong>
+        <div class="project-actions">
+            <button class="btn btn-sm btn-outline-primary" onclick="openFileManager()">
+                <i class="fas fa-folder"></i> Files
+            </button>
+            <button class="btn btn-sm btn-outline-success" onclick="openChatPanel()">
+                <i class="fas fa-comments"></i> Chat
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Toggle -->
+    <div class="mobile-nav-toggle d-lg-none">
+        <button class="btn btn-primary" onclick="toggleMobileNav()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Main Application Container -->
+    <div class="main-container">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page active">
+            <div class="app-grid">
+                <!-- Sidebar Navigation -->
+                <aside class="sidebar" id="main-sidebar">
+                    <nav>
+                        <button class="nav-btn active" onclick="showPage('dashboard-page')">
+                            <i class="fas fa-home"></i> Dashboard
+                        </button>
+                        <button class="nav-btn" onclick="showPage('contracts-page')">
+                            <i class="fas fa-file-contract"></i> Contracts & BOQ
+                        </button>
+                        <button class="nav-btn" onclick="showPage('inspection-page')">
+                            <i class="fas fa-clipboard-check"></i> Inspection Reports
+                        </button>
+                        <button class="nav-btn" onclick="showPage('cost-estimation-page')">
+                            <i class="fas fa-calculator"></i> Cost Estimation
+                        </button>
+                        <button class="nav-btn" onclick="showPage('mapping-page')">
+                            <i class="fas fa-map"></i> GIS Mapping
+                        </button>
+                        <button class="nav-btn" onclick="showPage('ai-detection-page')">
+                            <i class="fas fa-brain"></i> AI Detection
+                        </button>
+                        <button class="nav-btn" onclick="showPage('notebooks-page')">
+                            <i class="fas fa-book"></i> Notebooks
+                        </button>
+                        <button class="nav-btn" onclick="showPage('drawing-page')">
+                            <i class="fas fa-draw-polygon"></i> CAD Editor
+                        </button>
+                        <button class="nav-btn" onclick="showPage('tracking-page')">
+                            <i class="fas fa-route"></i> Vehicle Tracking
+                        </button>
+                        <button class="nav-btn" onclick="showPage('timeline-page')">
+                            <i class="fas fa-calendar-alt"></i> Project Timeline
+                        </button>
+                        <button class="nav-btn" onclick="showPage('logistics-page')">
+                            <i class="fas fa-boxes"></i> Material Logistics
+                        </button>
+                        <button class="nav-btn" onclick="showPage('fabrication-page')">
+                            <i class="fas fa-tools"></i> Sign Fabrication
+                        </button>
+                        <button class="nav-btn" onclick="showPage('custom-reports-page')">
+                            <i class="fas fa-file-alt"></i> Custom Reports
+                        </button>
+                        <button class="nav-btn" onclick="showPage('settings-page')">
+                            <i class="fas fa-cog"></i> Settings
+                        </button>
+                    </nav>
+                </aside>
+
+                <!-- Main Content Area -->
+                <main class="main-content">
+                    <div class="dashboard-header">
+                        <h2>🚀 Enhanced Engineering Platform</h2>
+                        <div class="dashboard-actions">
+                            <button class="btn btn-primary" onclick="openCustomDashboard()">
+                                <i class="fas fa-chart-line"></i> Custom Dashboard
+                            </button>
+                            <button class="btn btn-success" onclick="generatePlatformReport()">
+                                <i class="fas fa-file-pdf"></i> Generate Report
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-projects">5</div>
+                            <div class="stat-label">Active Projects</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-locations">12</div>
+                            <div class="stat-label">Mapped Locations</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-reports">8</div>
+                            <div class="stat-label">Generated Reports</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-files">24</div>
+                            <div class="stat-label">Stored Files</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Showcase -->
+                    <div class="feature-showcase">
+                        <h4>✨ New Enhanced Features</h4>
+                        <div class="feature-grid">
+                            <div class="feature-card" onclick="openChatPanel()">
+                                <i class="fas fa-comments"></i>
+                                <h5>Real-time Chat</h5>
+                                <p>File attachments, photos, location sharing</p>
+                            </div>
+                            <div class="feature-card" onclick="showPage('mapping-page')">
+                                <i class="fas fa-map"></i>
+                                <h5>Advanced GIS</h5>
+                                <p>Mapbox integration with floating UI cards</p>
+                            </div>
+                            <div class="feature-card" onclick="showPage('tracking-page')">
+                                <i class="fas fa-route"></i>
+                                <h5>Vehicle Tracking</h5>
+                                <p>Real-time GPS with geofencing</p>
+                            </div>
+                            <div class="feature-card" onclick="showPage('ai-detection-page')">
+                                <i class="fas fa-brain"></i>
+                                <h5>AI Analysis</h5>
+                                <p>Telegram bot integration for defect detection</p>
+                            </div>
+                            <div class="feature-card" onclick="showPage('logistics-page')">
+                                <i class="fas fa-boxes"></i>
+                                <h5>Material Logistics</h5>
+                                <p>Inventory management with cost tracking</p>
+                            </div>
+                            <div class="feature-card" onclick="showPage('settings-page')">
+                                <i class="fas fa-palette"></i>
+                                <h5>Theme System</h5>
+                                <p>Light/dark themes with custom backgrounds</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Real-time Activity Feed -->
+                    <div class="activity-feed">
+                        <h5>Recent Activity</h5>
+                        <div id="activity-list">
+                            <div class="activity-item">
+                                <i class="fas fa-upload"></i>
+                                <span>File uploaded: Contract_ABC_2024.pdf</span>
+                                <small>2 minutes ago</small>
+                            </div>
+                            <div class="activity-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>New location mapped: Site A coordinates</span>
+                                <small>15 minutes ago</small>
+                            </div>
+                            <div class="activity-item">
+                                <i class="fas fa-comments"></i>
+                                <span>New chat message received</span>
+                                <small>1 hour ago</small>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Mapping Page -->
+        <div id="mapping-page" class="page">
+            <div class="app-grid">
+                <aside class="sidebar">
+                    <nav>
+                        <button class="nav-btn" onclick="showPage('dashboard-page')">
+                            <i class="fas fa-home"></i> Dashboard
+                        </button>
+                        <button class="nav-btn active" onclick="showPage('mapping-page')">
+                            <i class="fas fa-map"></i> GIS Mapping
+                        </button>
+                    </nav>
+                </aside>
+
+                <main class="main-content">
+                    <div class="mapping-header">
+                        <h2>🗺️ Advanced GIS Mapping</h2>
+                        <div class="mapping-controls">
+                            <button class="btn btn-primary" onclick="drawPolygon()">
+                                <i class="fas fa-draw-polygon"></i> Draw Polygon
+                            </button>
+                            <button class="btn btn-success" onclick="addMarker()">
+                                <i class="fas fa-map-marker-alt"></i> Add Marker
+                            </button>
+                            <button class="btn btn-info" onclick="measureDistance()">
+                                <i class="fas fa-ruler"></i> Measure
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="map-container" style="height: 600px; position: relative;">
+                        <!-- Map will be initialized here -->
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Vehicle Tracking Page -->
+        <div id="tracking-page" class="page">
+            <div class="app-grid">
+                <aside class="sidebar">
+                    <nav>
+                        <button class="nav-btn" onclick="showPage('dashboard-page')">
+                            <i class="fas fa-home"></i> Dashboard
+                        </button>
+                        <button class="nav-btn active" onclick="showPage('tracking-page')">
+                            <i class="fas fa-route"></i> Vehicle Tracking
+                        </button>
+                    </nav>
+                    
+                    <div class="tracking-controls mt-4">
+                        <h6>Vehicle Controls</h6>
+                        <button class="btn btn-sm btn-primary mb-2 w-100" onclick="startTracking()">
+                            <i class="fas fa-play"></i> Start Tracking
+                        </button>
+                        <button class="btn btn-sm btn-danger mb-2 w-100" onclick="stopTracking()">
+                            <i class="fas fa-stop"></i> Stop Tracking
+                        </button>
+                        <button class="btn btn-sm btn-info mb-2 w-100" onclick="viewHistory()">
+                            <i class="fas fa-history"></i> View History
+                        </button>
+                        <button class="btn btn-sm btn-warning mb-2 w-100" onclick="setGeofence()">
+                            <i class="fas fa-map-marked"></i> Set Geofence
+                        </button>
+                    </div>
+                </aside>
+
+                <main class="main-content">
+                    <div class="tracking-header">
+                        <h2>🚗 Live Vehicle Tracking</h2>
+                        <div class="tracking-status">
+                            <span id="tracking-status" class="status-indicator offline">Offline</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tracking-dashboard">
+                        <div class="vehicle-list">
+                            <h5>Active Vehicles</h5>
+                            <div id="vehicle-list">
+                                <div class="vehicle-card">
+                                    <div class="vehicle-info">
+                                        <h6>Vehicle 001</h6>
+                                        <p>Status: <span class="text-success">Online</span></p>
+                                        <p>Speed: 45 km/h</p>
+                                        <p>Location: Downtown</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tracking-map-container">
+                            <div id="tracking-map"></div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings-page" class="page">
+            <div class="app-grid">
+                <aside class="sidebar">
+                    <nav>
+                        <button class="nav-btn" onclick="showPage('dashboard-page')">
+                            <i class="fas fa-home"></i> Dashboard
+                        </button>
+                        <button class="nav-btn active" onclick="showPage('settings-page')">
+                            <i class="fas fa-cog"></i> Settings
+                        </button>
+                    </nav>
+                </aside>
+
+                <main class="main-content">
+                    <div class="settings-container">
+                        <h2>⚙️ Application Settings</h2>
+                        
+                        <div class="settings-tabs">
+                            <button class="settings-tab active" onclick="showSettingsTab('theme')">Theme & UI</button>
+                            <button class="settings-tab" onclick="showSettingsTab('general')">General</button>
+                            <button class="settings-tab" onclick="showSettingsTab('ai')">AI Configuration</button>
+                        </div>
+                        
+                        <!-- Theme Settings -->
+                        <div id="theme-settings" class="settings-panel active">
+                            <h5>🎨 Theme Personalization</h5>
+                            
+                            <div class="theme-selector mb-4">
+                                <label class="form-label">Choose Theme</label>
+                                <div class="theme-options">
+                                    <div class="theme-option" onclick="setTheme('light')">
+                                        <div class="theme-preview light-theme"></div>
+                                        <span>Light</span>
+                                    </div>
+                                    <div class="theme-option" onclick="setTheme('dark')">
+                                        <div class="theme-preview dark-theme"></div>
+                                        <span>Dark</span>
+                                    </div>
+                                    <div class="theme-option" onclick="setTheme('custom')">
+                                        <div class="theme-preview custom-theme"></div>
+                                        <span>Custom</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="custom-background" class="form-label">Custom Background Image</label>
+                                <input type="file" class="form-control" id="custom-background" accept="image/*" onchange="handleBackgroundUpload(event)">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="font-size" class="form-label">Font Size</label>
+                                <select id="font-size" class="form-select" onchange="adjustFontSize(this.value)">
+                                    <option value="small">Small</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="large">Large</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Panel (Floating) -->
+    <div id="chat-panel" class="chat-panel">
+        <div class="chat-header">
+            <h5><i class="fas fa-comments"></i> Team Chat</h5>
+            <div class="chat-actions">
+                <button class="btn btn-sm btn-outline-light" onclick="minimizeChatPanel()">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-light" onclick="closeChatPanel()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="chat-conversations">
+            <div class="conversation-list">
+                <h6>Conversations</h6>
+                <div id="conversation-list">
+                    <div class="conversation-item active">
+                        <div class="conversation-info">
+                            <div class="conversation-name">Project Team</div>
+                            <div class="conversation-last-message">Welcome to the enhanced platform!</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-primary w-100 mt-2" onclick="startNewConversation()">
+                    <i class="fas fa-plus"></i> New Chat
+                </button>
+            </div>
+            
+            <div class="chat-messages">
+                <div id="chat-messages" class="messages-container">
+                    <div class="message received">
+                        <div class="message-content">
+                            <p>Welcome to the enhanced Engineering Platform! 🚀</p>
+                        </div>
+                        <div class="message-meta">
+                            <span class="message-time">2 minutes ago</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <div class="input-group">
+                        <input type="text" id="chat-message-input" class="form-control" placeholder="Type a message...">
+                        <button class="btn btn-primary" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="chat-attachments">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="attachFile()">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="attachPhoto()">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="shareLocation()">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Manager Panel (Floating) -->
+    <div id="file-manager-panel" class="file-manager-panel">
+        <div class="file-manager-header">
+            <h5><i class="fas fa-folder"></i> File Manager</h5>
+            <div class="file-manager-actions">
+                <button class="btn btn-sm btn-primary" onclick="uploadFile()">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+                <button class="btn btn-sm btn-outline-light" onclick="closeFileManager()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="file-manager-content">
+            <div class="file-explorer">
+                <div class="folder-tree">
+                    <h6>Project Folders</h6>
+                    <div id="folder-tree">
+                        <div class="folder-item">
+                            <div class="folder-header">
+                                <i class="fas fa-folder"></i> Contracts
+                            </div>
+                        </div>
+                        <div class="folder-item">
+                            <div class="folder-header">
+                                <i class="fas fa-folder"></i> GIS Reports
+                            </div>
+                        </div>
+                        <div class="folder-item">
+                            <div class="folder-header">
+                                <i class="fas fa-folder"></i> Chat Media
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="file-listing">
+                    <div class="file-controls">
+                        <input type="text" id="file-search" class="form-control form-control-sm" placeholder="Search files...">
+                        <select id="file-filter" class="form-select form-select-sm">
+                            <option value="">All Files</option>
+                            <option value="pdf">PDF</option>
+                            <option value="xlsx">Excel</option>
+                            <option value="dwg">CAD Files</option>
+                            <option value="images">Images</option>
+                        </select>
+                    </div>
+                    
+                    <div id="file-list" class="file-list">
+                        <div class="file-item">
+                            <div class="file-info">
+                                <i class="fas fa-file-pdf"></i>
+                                <div>
+                                    <div class="file-name">Contract_ABC_2024.pdf</div>
+                                    <div class="file-details">2.5 MB • 2 days ago</div>
+                                </div>
+                            </div>
+                            <div class="file-actions">
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin fa-3x"></i>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script src="enhanced-features.js"></script>
+    <script src="chat-system.js"></script>
+    <script src="mapbox-integration.js"></script>
+    <script src="telegram-integration.js"></script>
+    <script src="additional-systems.js"></script>
+
+    <script>
+        // Basic functionality to ensure the page works
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            const selectedPage = document.getElementById(pageId);
+            if (selectedPage) {
+                selectedPage.classList.add('active');
+            }
+            
+            // Update navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            event.target.classList.add('active');
+        }
+        
+        function openChatPanel() {
+            const panel = document.getElementById('chat-panel');
+            if (panel) {
+                panel.classList.add('active');
+            }
+        }
+        
+        function closeChatPanel() {
+            const panel = document.getElementById('chat-panel');
+            if (panel) {
+                panel.classList.remove('active');
+            }
+        }
+        
+        function openFileManager() {
+            const panel = document.getElementById('file-manager-panel');
+            if (panel) {
+                panel.classList.add('active');
+            }
+        }
+        
+        function closeFileManager() {
+            const panel = document.getElementById('file-manager-panel');
+            if (panel) {
+                panel.classList.remove('active');
+            }
+        }
+        
+        function setTheme(themeName) {
+            document.body.className = document.body.className.replace(/theme-\w+/g, '');
+            document.body.classList.add(`theme-${themeName}`);
+            localStorage.setItem('selectedTheme', themeName);
+        }
+        
+        function showSettingsTab(tabName) {
+            // Hide all panels
+            document.querySelectorAll('.settings-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // Show selected panel
+            const selectedPanel = document.getElementById(`${tabName}-settings`);
+            if (selectedPanel) {
+                selectedPanel.classList.add('active');
+            }
+            
+            // Update tabs
+            document.querySelectorAll('.settings-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            event.target.classList.add('active');
+        }
+        
+        // Show success message on load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (typeof showMessage === 'function') {
+                    showMessage('Enhanced Engineering Platform loaded successfully! 🚀', 'success');
+                } else {
+                    alert('Enhanced Engineering Platform loaded successfully! 🚀');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
