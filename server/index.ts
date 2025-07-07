@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import type { Request, Response } from "express";
 
 dotenv.config();
 
@@ -12,7 +13,7 @@ app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
 
-app.get("/api/health", (_req, res) => {
+app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
 
