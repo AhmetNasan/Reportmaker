@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engineering Platform - Contract Management System</title>
+    <meta name="description" content="Professional engineering contract management platform with project tracking, GIS mapping, AI inspections, and comprehensive reporting." />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Engineering Platform - Contract Management System" />
+    <meta property="og:description" content="Professional engineering contract management platform with project tracking, GIS mapping, AI inspections, and comprehensive reporting." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://yourwebsite.com" />
+    <meta property="og:image" content="https://yourwebsite.com/og-image.png" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Engineering Platform - Contract Management System" />
+    <meta name="twitter:description" content="Professional engineering contract management platform with project tracking, GIS mapping, AI inspections, and comprehensive reporting." />
+    <meta name="twitter:image" content="https://yourwebsite.com/twitter-image.png" />
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="keywords" content="engineering, contracts, project management, GIS, AI inspections, construction, infrastructure" />
+    <meta name="author" content="Engineering Platform" />
+    <meta name="robots" content="index, follow" />
+    
+    <style>
+      /* Loading styles */
+      .loading-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f9fafb;
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e5e7eb;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        margin-top: 16px;
+        color: #6b7280;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Loading fallback -->
+      <div class="loading-container">
+        <div>
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Loading Engineering Platform...</div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
