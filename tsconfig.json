@@ -13,7 +13,13 @@
     "rootDir": "./",
     "outDir": "dist",
     "types": ["node", "vite/client"],
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": "./",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@server/*": ["server/*"],
+      "@client/*": ["client/src/*"]
+    }
   },
   "include": ["server", "shared", "client"],
   "exclude": ["node_modules", "dist"]
