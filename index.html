@@ -1,71 +1,779 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Engineering Platform - Contract Management System</title>
-    <meta name="description" content="Professional engineering contract management platform with project tracking, GIS mapping, AI inspections, and comprehensive reporting." />
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Engineering Platform - Contract Management System" />
-    <meta property="og:description" content="Professional engineering contract management platform with project tracking, GIS mapping, AI inspections, and comprehensive reporting." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://yourwebsite.com" />
-    <meta property="og:image" content="https://yourwebsite.com/og-image.png" />
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Engineering Platform - Contract Management System" />
-    <meta name="twitter:description" content="Professional engineering contract management platform with project tracking, GIS mapping, AI inspections, and comprehensive reporting." />
-    <meta name="twitter:image" content="https://yourwebsite.com/twitter-image.png" />
-    
-    <!-- Additional SEO Meta Tags -->
-    <meta name="keywords" content="engineering, contracts, project management, GIS, AI inspections, construction, infrastructure" />
-    <meta name="author" content="Engineering Platform" />
-    <meta name="robots" content="index, follow" />
-    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Project Site Monitoring</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://unpkg.com/maplibre-gl@4.1.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@4.1.0/dist/maplibre-gl.js"></script>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
     <style>
-      /* Loading styles */
-      .loading-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #f9fafb;
-      }
-      
-      .loading-spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid #e5e7eb;
-        border-top: 4px solid #3b82f6;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-      
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      
-      .loading-text {
-        margin-top: 16px;
-        color: #6b7280;
-        font-family: system-ui, -apple-system, sans-serif;
-      }
+        /* --- Universal Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Open Sans", sans-serif;
+        }
+
+        /* --- STYLES FOR THE NEW AUTHENTICATION SCREEN --- */
+        #auth-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        #auth-screen::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url("https://i.postimg.cc/0jv27Qvw/20008380-645221846.jpg"), #000;
+            background-position: center;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        .auth-wrapper {
+            width: 400px;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            transition: all 0.3s ease;
+        }
+
+        .auth-wrapper:hover {
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-wrapper form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-wrapper h2 {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        .auth-wrapper .input-field {
+            position: relative;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            margin: 20px 0;
+        }
+
+        .auth-wrapper .input-field label {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            color: #ffffff;
+            font-size: 16px;
+            pointer-events: none;
+            transition: 0.3s ease;
+        }
+
+        .auth-wrapper .input-field input {
+            width: 100%;
+            height: 40px;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #ffffff;
+            padding: 0 5px;
+        }
+
+        .auth-wrapper .input-field input:focus~label,
+        .auth-wrapper .input-field input:valid~label {
+            font-size: 0.9rem;
+            top: 10px;
+            transform: translateY(-150%);
+            color: #ffdde1;
+        }
+
+        .auth-wrapper .forget {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 25px 0 35px 0;
+            color: #ffffff;
+        }
+
+        .auth-wrapper #remember {
+            accent-color: #ffdde1;
+        }
+
+        .auth-wrapper .forget label {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-wrapper .forget label p {
+            margin-left: 8px;
+        }
+
+        .auth-wrapper a {
+            color: #ffdde1;
+            text-decoration: none;
+        }
+
+        .auth-wrapper a:hover {
+            text-decoration: underline;
+        }
+
+        .auth-wrapper button[type="submit"] {
+            background-color: #271930;
+            color: #ffffff;
+            font-weight: 600;
+            border: none;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 25px;
+            font-size: 16px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .auth-wrapper button[type="submit"]:hover {
+            color: #000000;
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #ffffff;
+        }
+
+        .auth-wrapper .register {
+            text-align: center;
+            margin-top: 30px;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        /* --- STYLES FOR THE MAIN APPLICATION --- */
+        :root {
+            --primary-color: #007bff;
+            --background-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .hidden { display: none !important; }
+        .app-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--background-color);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-bottom: 1px solid #e0e0e0;
+        }
+        header h1 { font-size: 1.5rem; margin: 0; color: var(--primary-color); }
+        nav { display: flex; gap: 1rem; padding: 0.5rem 1.5rem; background: #e9ecef;}
+        .nav-button, .action-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--primary-color);
+            background-color: var(--card-bg);
+            color: var(--primary-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+        .nav-button.active, .nav-button:hover, .action-button:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        main { flex-grow: 1; display: flex; overflow: hidden; }
+        .tab-content { width: 100%; padding: 1.5rem; overflow-y: auto; }
+        #map-tab { padding: 0; position: relative; }
+        #map { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--card-bg);
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+        .map-controls label { font-weight: 600; margin-right: 0.5rem; }
+        .card {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+        .card h2 { margin-top: 0; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="email"],
+        .form-group input[type="file"],
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        #admin-password-screen .modal-content {
+            background-color: white; padding: 2rem; border-radius: 8px;
+            width: 90%; max-width: 400px; text-align: center;
+        }
+        .notification-list { list-style: none; padding: 0; }
+        .notification-item {
+            background-color: #f8f9fa; padding: 1rem; border-radius: var(--border-radius);
+            border-left: 5px solid var(--primary-color); margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .notification-item.critical { border-color: #dc3545; }
+        .notification-item p { margin: 0; }
+        .notification-item small { color: #6c757d; }
     </style>
-  </head>
-  <body>
-    <div id="root">
-      <!-- Loading fallback -->
-      <div class="loading-container">
-        <div>
-          <div class="loading-spinner"></div>
-          <div class="loading-text">Loading Engineering Platform...</div>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div id="auth-container">
+            <div id="login-wrapper" class="auth-wrapper">
+                <form id="login-form">
+                    <h2>Login</h2>
+                    <div class="input-field">
+                        <input type="email" id="login-email" required>
+                        <label>Enter your email</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="password" id="login-password" required>
+                        <label>Enter your password</label>
+                    </div>
+                    <button type="submit">Log In</button>
+                    <div class="register">
+                        <p>Don't have an account? <a class="toggle-auth" data-form="signup">Register</a></p>
+                    </div>
+                </form>
+            </div>
+            <div id="signup-wrapper" class="auth-wrapper hidden">
+                <form id="signup-form">
+                    <h2>Sign Up</h2>
+                    <div class="input-field">
+                        <input type="email" id="signup-email" required>
+                        <label>Enter your email</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="password" id="signup-password" required>
+                        <label>Enter your password</label>
+                    </div>
+                    <button type="submit">Sign Up</button>
+                    <div class="register">
+                        <p>Already have an account? <a class="toggle-auth" data-form="login">Login</a></p>
+                    </div>
+                </form>
+            </div>
         </div>
-      </div>
     </div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+    <div id="admin-password-screen" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+        <div class="modal-content">
+            <h2>Admin Panel Access</h2>
+            <div class="form-group">
+                <label for="admin-password">Password</label>
+                <input type="password" id="admin-password" placeholder="Enter admin password">
+            </div>
+            <button id="admin-login-btn" class="action-button">Login</button>
+            <button id="admin-cancel-btn" class="nav-button" style="margin-top: 0.5rem;">Cancel</button>
+        </div>
+    </div>
+
+    <div id="app-container" class="app-container hidden">
+        <header>
+            <h1>Site Monitor</h1>
+            <div id="user-info">
+                <span id="user-email"></span>
+                <button id="admin-panel-btn" class="nav-button">Admin</button>
+                <button id="logout-btn" class="action-button">Logout</button>
+            </div>
+        </header>
+
+        <nav>
+            <button class="nav-button active" data-tab="map-tab">🗺️ Dashboard</button>
+            <button class="nav-button" data-tab="report-tab">📝 New Report</button>
+            <button class="nav-button" data-tab="notifications-tab">🔔 Notifications</button>
+            <button class="nav-button hidden" data-tab="admin-tab">⚙️ Admin Panel</button>
+        </nav>
+
+        <main>
+            <div id="map-tab" class="tab-content">
+                <div id="map"></div>
+                <div class="map-controls">
+                    <label for="toggle-traffic">Show Traffic:</label>
+                    <input type="checkbox" id="toggle-traffic">
+                </div>
+            </div>
+
+            <div id="report-tab" class="tab-content hidden">
+                <div class="card">
+                    <h2>Submit a New Report</h2>
+                    <form id="report-form">
+                        <div class="form-group">
+                            <label for="report-image">Image of Issue</label>
+                            <input type="file" id="report-image" accept="image/*" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="report-notes">Notes</label>
+                            <textarea id="report-notes" rows="4" placeholder="Describe the issue, location, etc."></textarea>
+                        </div>
+                        <button type="submit" class="action-button">Submit & Analyze</button>
+                    </form>
+                    <p id="report-status"></p>
+                </div>
+            </div>
+
+            <div id="notifications-tab" class="tab-content hidden">
+                <div class="card">
+                    <h2>Recent Notifications</h2>
+                    <ul id="notification-list" class="notification-list">
+                        </ul>
+                </div>
+            </div>
+
+            <div id="admin-tab" class="tab-content hidden">
+                <div class="card">
+                    <h2>API Key Management</h2>
+                    <p>Enter and save the API keys for the external services.</p>
+                    <form id="api-key-form">
+                        <div class="form-group">
+                            <label for="key-tomtom">TomTom API Key (Traffic & Routing)</label>
+                            <input type="password" id="key-tomtom">
+                        </div>
+                        <div class="form-group">
+                            <label for="key-openweathermap">OpenWeatherMap API Key</label>
+                            <input type="password" id="key-openweathermap">
+                        </div>
+                        <div class="form-group">
+                            <label for="key-roboflow-url">Roboflow API URL (AI Model)</label>
+                            <input type="text" id="key-roboflow-url">
+                        </div>
+                        <div class="form-group">
+                            <label for="key-roboflow-private">Roboflow Private API Key</label>
+                            <input type="password" id="key-roboflow-private">
+                        </div>
+                        <div class="form-group">
+                            <label for="key-telegram-token">Telegram Bot Token</label>
+                            <input type="password" id="key-telegram-token">
+                        </div>
+                        <div class="form-group">
+                            <label for="key-telegram-chatid">Telegram Chat ID</label>
+                            <input type="text" id="key-telegram-chatid">
+                        </div>
+                        <button type="submit" class="action-button">Save Keys</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- ✅ SUPABASE KEYS HAVE BEEN ADDED ---
+    const SUPABASE_URL = 'https://cykjjrrexaqmsqwrgnzp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5a2pqcnJleGFxbXNxd3JnbnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MjUyMDksImV4cCI6MjA2NzIwMTIwOX0.Fx6f23TWCQQMCIkc5hcx8LqHyskVMm6WAhJl1UFZpMA';
+    // ------------------------------------------
+
+    const { createClient } = supabase;
+    const dbClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // --- State & DOM Elements ---
+    let map;
+    let apiKeys = {};
+    const appState = {
+        currentUser: null,
+        isAdmin: false, 
+    };
+
+    const authScreen = document.getElementById('auth-screen');
+    const appContainer = document.getElementById('app-container');
+    const authContainer = document.getElementById('auth-container');
+    const loginWrapper = document.getElementById('login-wrapper');
+    const signupWrapper = document.getElementById('signup-wrapper');
+    const logoutBtn = document.getElementById('logout-btn');
+    const adminPanelBtn = document.getElementById('admin-panel-btn');
+    const adminPasswordScreen = document.getElementById('admin-password-screen');
+    const adminLoginBtn = document.getElementById('admin-login-btn');
+    const adminCancelBtn = document.getElementById('admin-cancel-btn');
+    
+    // --- App Initialization ---
+    function init() {
+        loadApiKeys();
+        setupEventListeners();
+        checkUserSession();
+    }
+
+    // --- Authentication ---
+    function setupAuthEventListeners() {
+        authContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('toggle-auth')) {
+                const formToShow = e.target.dataset.form;
+                if (formToShow === 'signup') {
+                    loginWrapper.classList.add('hidden');
+                    signupWrapper.classList.remove('hidden');
+                } else {
+                    signupWrapper.classList.add('hidden');
+                    loginWrapper.classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleLogin();
+        });
+        document.getElementById('signup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleSignup();
+        });
+    }
+
+    async function handleLogin() {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const { data, error } = await dbClient.auth.signInWithPassword({ email, password });
+        if (error) alert(error.message);
+    }
+    
+    async function handleSignup() {
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        const { data, error } = await dbClient.auth.signUp({ email, password });
+        if (error) {
+            alert(error.message);
+        } else {
+            alert('Signup successful! Please check your email for a confirmation link.');
+            loginWrapper.classList.remove('hidden');
+            signupWrapper.classList.add('hidden');
+        }
+    }
+
+    async function handleLogout() {
+        await dbClient.auth.signOut();
+    }
+
+    async function checkUserSession() {
+        const { data: { session } } = await dbClient.auth.getSession();
+        appState.currentUser = session?.user || null;
+        updateUIForAuthState();
+
+        dbClient.auth.onAuthStateChange((_event, session) => {
+            appState.currentUser = session?.user || null;
+            updateUIForAuthState();
+        });
+    }
+    
+    function updateUIForAuthState() {
+        if (appState.currentUser) {
+            authScreen.classList.add('hidden');
+            document.body.style.background = 'var(--background-color)'; // Reset body background
+            appContainer.classList.remove('hidden');
+            document.getElementById('user-email').textContent = appState.currentUser.email;
+            if (!map) initMap(); // Initialize map only after login
+            loadReportsOnMap();
+            loadNotifications();
+        } else {
+            authScreen.classList.remove('hidden');
+            document.body.style.background = 'transparent'; // Let auth screen background show
+            appContainer.classList.add('hidden');
+        }
+    }
+
+    // --- Admin Panel & API Keys ---
+    function loadApiKeys() {
+        const storedKeys = localStorage.getItem('siteMonitorApiKeys');
+        if (storedKeys) {
+            apiKeys = JSON.parse(storedKeys);
+        } else {
+            setTimeout(() => {
+                if(appState.currentUser && !Object.keys(apiKeys).length) {
+                    alert('Welcome! Please go to the Admin Panel to set up your API keys.');
+                }
+            }, 5000);
+        }
+    }
+
+    function saveApiKeys(e) {
+        e.preventDefault();
+        apiKeys = {
+            tomtom: document.getElementById('key-tomtom').value,
+            openweathermap: document.getElementById('key-openweathermap').value,
+            roboflowUrl: document.getElementById('key-roboflow-url').value,
+            roboflowPrivate: document.getElementById('key-roboflow-private').value,
+            telegramToken: document.getElementById('key-telegram-token').value,
+            telegramChatId: document.getElementById('key-telegram-chatid').value
+        };
+        localStorage.setItem('siteMonitorApiKeys', JSON.stringify(apiKeys));
+        alert('API Keys saved successfully!');
+    }
+    
+    function handleAdminLogin() {
+        const pass = document.getElementById('admin-password').value;
+        if (pass === 'Admin169633%') {
+            appState.isAdmin = true;
+            document.querySelector('.nav-button[data-tab="admin-tab"]').classList.remove('hidden');
+            adminPasswordScreen.classList.add('hidden');
+            showTab('admin-tab');
+            document.getElementById('key-tomtom').value = apiKeys.tomtom || '';
+            document.getElementById('key-openweathermap').value = apiKeys.openweathermap || '';
+            document.getElementById('key-roboflow-url').value = apiKeys.roboflowUrl || '';
+            document.getElementById('key-roboflow-private').value = apiKeys.roboflowPrivate || '';
+            document.getElementById('key-telegram-token').value = apiKeys.telegramToken || '';
+            document.getElementById('key-telegram-chatid').value = apiKeys.telegramChatId || '';
+        } else {
+            alert('Incorrect password.');
+        }
+    }
+
+    // --- Navigation ---
+    function setupEventListeners() {
+        setupAuthEventListeners(); // Specific to auth forms
+        logoutBtn.addEventListener('click', handleLogout);
+        adminPanelBtn.addEventListener('click', () => adminPasswordScreen.classList.remove('hidden'));
+        adminLoginBtn.addEventListener('click', handleAdminLogin);
+        adminCancelBtn.addEventListener('click', () => adminPasswordScreen.classList.add('hidden'));
+
+        document.querySelector('nav').addEventListener('click', (e) => {
+            if (e.target.matches('.nav-button')) {
+                showTab(e.target.dataset.tab);
+            }
+        });
+        
+        document.getElementById('api-key-form').addEventListener('submit', saveApiKeys);
+        document.getElementById('report-form').addEventListener('submit', handleReportSubmit);
+    }
+    
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+        document.getElementById(tabId).classList.remove('hidden');
+        
+        document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.nav-button[data-tab="${tabId}"]`).classList.add('active');
+        
+        if (tabId === 'map-tab' && map) {
+            map.resize();
+        }
+    }
+
+    // --- Map Logic ---
+    function initMap() {
+        if (map) return; 
+
+        const qnasApiKey = 'ba80a013eb1d4a08a198f79991aefd4b';
+        const qnasTileUrl = `https://tiles.qnas.qa/styles/osm-bright/{z}/{x}/{y}.png?key=${qnasApiKey}`;
+
+        map = new maplibregl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                sources: {
+                    'qnas-tiles': {
+                        type: 'raster',
+                        tiles: [qnasTileUrl],
+                        tileSize: 256,
+                        attribution: '&copy; <a href="https://gisqatar.org.qa/">GIS Qatar</a>'
+                    }
+                },
+                layers: [{
+                    id: 'qnas-layer',
+                    type: 'raster',
+                    source: 'qnas-tiles',
+                    minzoom: 0,
+                    maxzoom: 22
+                }]
+            },
+            center: [51.5310, 25.2867], // Doha, Qatar
+            zoom: 10
+        });
+        
+        map.on('load', () => {
+            document.getElementById('toggle-traffic').addEventListener('change', (e) => {
+                if (!apiKeys.tomtom) return alert('TomTom API key not set in Admin Panel.');
+                toggleTrafficLayer(e.target.checked);
+            });
+        });
+    }
+    
+    async function loadReportsOnMap() {
+        const { data: reports, error } = await dbClient.from('reports').select('*');
+        if (error) return console.error('Error fetching reports:', error);
+
+        reports.forEach(report => {
+            if (report.location && report.location.longitude && report.location.latitude) {
+                const popupHTML = `
+                    <div>
+                        <h4>Defect Report</h4>
+                        <p>${report.notes || 'No notes.'}</p>
+                        <p><strong>Status:</strong> ${report.status}</p>
+                        <img src="${report.image_url}" width="150" alt="Defect image">
+                        <small>Reported at: ${new Date(report.created_at).toLocaleString()}</small>
+                    </div>
+                `;
+                new maplibregl.Marker()
+                    .setLngLat([report.location.longitude, report.location.latitude])
+                    .setPopup(new maplibregl.Popup().setHTML(popupHTML))
+                    .addTo(map);
+            }
+        });
+    }
+    
+    function toggleTrafficLayer(visible) {
+        alert(`Traffic layer visibility set to ${visible}. (This is a demo feature)`);
+    }
+
+    // --- Report Submission & AI ---
+    async function handleReportSubmit(e) {
+        e.preventDefault();
+        if (!apiKeys.roboflowUrl || !apiKeys.roboflowPrivate) {
+            return alert('Roboflow API keys are not set in the Admin Panel.');
+        }
+
+        const reportStatusEl = document.getElementById('report-status');
+        reportStatusEl.textContent = 'Submitting...';
+
+        const imageFile = document.getElementById('report-image').files[0];
+        const notes = document.getElementById('report-notes').value;
+
+        const location = await new Promise(resolve => {
+            navigator.geolocation.getCurrentPosition(
+                pos => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+                err => {
+                    console.warn('Could not get location:', err.message);
+                    resolve(null); 
+                }
+            );
+        });
+        
+        reportStatusEl.textContent = 'Uploading image...';
+        const filePath = `reports/${appState.currentUser.id}/${Date.now()}-${imageFile.name}`;
+        const { data: uploadData, error: uploadError } = await dbClient.storage
+            .from('report-images')
+            .upload(filePath, imageFile);
+        
+        if (uploadError) {
+            reportStatusEl.textContent = `Upload Error: ${uploadError.message}`;
+            return console.error(uploadError);
+        }
+        
+        const { data: { publicUrl } } = dbClient.storage.from('report-images').getPublicUrl(filePath);
+
+        reportStatusEl.textContent = 'Analyzing image with AI...';
+        let analysisResult = {};
+        try {
+            const roboflowUrlWithKey = `${apiKeys.roboflowUrl}?api_key=${apiKeys.roboflowPrivate}&image=${encodeURIComponent(publicUrl)}`;
+            const response = await fetch(roboflowUrlWithKey, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+            analysisResult = await response.json();
+        } catch (aiError) {
+            console.error('AI analysis failed:', aiError);
+            analysisResult = { error: 'AI analysis failed' };
+        }
+        
+        reportStatusEl.textContent = 'Saving final report...';
+        const reportData = {
+            user_id: appState.currentUser.id,
+            notes: notes,
+            image_url: publicUrl,
+            location: location,
+            ai_analysis: analysisResult,
+            status: analysisResult.predictions?.length > 0 ? 'Defect Detected' : 'No Defect Detected'
+        };
+
+        const { error: insertError } = await dbClient.from('reports').insert(reportData);
+
+        if (insertError) {
+            reportStatusEl.textContent = `Database Error: ${insertError.message}`;
+            return console.error(insertError);
+        }
+
+        reportStatusEl.textContent = 'Report submitted successfully!';
+        document.getElementById('report-form').reset();
+        
+        if(analysisResult.predictions?.length > 0) {
+            sendTelegramAlert(`🚨 Critical Defect Detected! \nNotes: ${notes}\nImage: ${publicUrl}`);
+        }
+    }
+    
+    // --- Notifications ---
+    async function loadNotifications() {
+        const listEl = document.getElementById('notification-list');
+        const { data: notifications, error } = await dbClient.from('reports')
+            .select('*').order('created_at', { ascending: false }).limit(20);
+            
+        if (error) return console.error('Error fetching notifications:', error);
+        
+        listEl.innerHTML = notifications.map(n => `
+            <li class="notification-item ${n.status === 'Defect Detected' ? 'critical' : ''}">
+                <p><strong>${n.status}</strong></p>
+                <p>${n.notes || 'No notes provided.'}</p>
+                <small>${new Date(n.created_at).toLocaleString()}</small>
+            </li>
+        `).join('');
+    }
+
+    async function sendTelegramAlert(message) {
+        if (!apiKeys.telegramToken || !apiKeys.telegramChatId) return;
+        const url = `https://api.telegram.org/bot${apiKeys.telegramToken}/sendMessage`;
+        try {
+            await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: apiKeys.telegramChatId,
+                    text: message
+                })
+            });
+        } catch (e) {
+            console.error("Failed to send Telegram alert:", e);
+        }
+    }
+
+    // --- Start the App ---
+    init();
+
+});
+</script>
+</body>
 </html>
