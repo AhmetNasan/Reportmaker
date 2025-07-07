@@ -1,0 +1,430 @@
+/* Main CSS File - client/src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Variables for Theme */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+/* Base Styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom Component Styles */
+@layer components {
+  /* Dashboard Stats Cards */
+  .stats-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow;
+  }
+
+  .stats-card-header {
+    @apply flex items-center justify-between mb-4;
+  }
+
+  .stats-number {
+    @apply text-3xl font-bold text-gray-900;
+  }
+
+  .stats-label {
+    @apply text-sm text-gray-600 uppercase tracking-wide;
+  }
+
+  /* Contract Cards */
+  .contract-card {
+    @apply bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden;
+  }
+
+  .contract-card:hover {
+    @apply transform -translate-y-1;
+  }
+
+  .contract-status-active {
+    @apply bg-green-100 text-green-800 border-green-200;
+  }
+
+  .contract-status-planning {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+  }
+
+  .contract-status-completed {
+    @apply bg-gray-100 text-gray-800 border-gray-200;
+  }
+
+  .contract-status-cancelled {
+    @apply bg-red-100 text-red-800 border-red-200;
+  }
+
+  /* Project Progress Bars */
+  .progress-container {
+    @apply w-full bg-gray-200 rounded-full h-2.5;
+  }
+
+  .progress-bar {
+    @apply h-2.5 rounded-full transition-all duration-500;
+  }
+
+  .progress-low {
+    @apply bg-red-400;
+  }
+
+  .progress-medium {
+    @apply bg-yellow-400;
+  }
+
+  .progress-high {
+    @apply bg-green-400;
+  }
+
+  /* File Upload Styles */
+  .upload-area {
+    @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer transition-colors;
+  }
+
+  .upload-area:hover {
+    @apply border-gray-400 bg-gray-50;
+  }
+
+  .upload-area.dragover {
+    @apply border-blue-400 bg-blue-50;
+  }
+
+  .file-item {
+    @apply flex items-center justify-between p-3 bg-gray-50 rounded-md border;
+  }
+
+  .file-item:hover {
+    @apply bg-gray-100;
+  }
+
+  /* Form Styles */
+  .form-section {
+    @apply space-y-6 p-6 bg-white rounded-lg border border-gray-200;
+  }
+
+  .form-section-header {
+    @apply border-b border-gray-200 pb-4 mb-6;
+  }
+
+  .form-group {
+    @apply space-y-2;
+  }
+
+  .form-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+
+  /* Navigation Styles */
+  .nav-item {
+    @apply flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors;
+  }
+
+  .nav-item-active {
+    @apply bg-blue-600 text-white;
+  }
+
+  .nav-item-inactive {
+    @apply text-gray-700 hover:bg-gray-100;
+  }
+
+  /* Button Variants */
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors;
+  }
+
+  .btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+  }
+
+  /* Chart Styles */
+  .chart-container {
+    @apply bg-white p-6 rounded-lg border border-gray-200 shadow-sm;
+  }
+
+  .chart-title {
+    @apply text-lg font-semibold text-gray-900 mb-4;
+  }
+
+  /* Table Styles */
+  .data-table {
+    @apply w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm;
+  }
+
+  .data-table th {
+    @apply bg-gray-50 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200;
+  }
+
+  .data-table td {
+    @apply px-4 py-3 text-sm text-gray-900 border-b border-gray-200;
+  }
+
+  .data-table tr:hover {
+    @apply bg-gray-50;
+  }
+
+  /* Badge Styles */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .badge-error {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 text-blue-800;
+  }
+
+  /* Loading Styles */
+  .spinner {
+    @apply animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600;
+  }
+
+  .loading-overlay {
+    @apply fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50;
+  }
+
+  /* Responsive Utilities */
+  .container-responsive {
+    @apply mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .grid-responsive {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+  }
+
+  /* Animation Classes */
+  .fade-in {
+    @apply animate-in fade-in-0 duration-500;
+  }
+
+  .slide-in {
+    @apply animate-in slide-in-from-bottom-4 duration-500;
+  }
+
+  .scale-in {
+    @apply animate-in zoom-in-95 duration-300;
+  }
+
+  /* Print Styles */
+  @media print {
+    .no-print {
+      @apply hidden;
+    }
+    
+    .print-break {
+      page-break-after: always;
+    }
+    
+    .print-no-break {
+      page-break-inside: avoid;
+    }
+  }
+
+  /* Mobile Optimizations */
+  @media (max-width: 768px) {
+    .mobile-stack {
+      @apply flex-col space-y-2 space-x-0;
+    }
+    
+    .mobile-full {
+      @apply w-full;
+    }
+    
+    .mobile-hidden {
+      @apply hidden;
+    }
+  }
+
+  /* Dark Mode Styles */
+  .dark .stats-card {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .dark .contract-card {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .dark .form-section {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .dark .chart-container {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .dark .data-table {
+    @apply bg-gray-800;
+  }
+
+  .dark .data-table th {
+    @apply bg-gray-700 text-gray-300 border-gray-600;
+  }
+
+  .dark .data-table td {
+    @apply text-gray-200 border-gray-600;
+  }
+
+  .dark .data-table tr:hover {
+    @apply bg-gray-700;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Focus Styles for Accessibility */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+/* Transition Classes */
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+.transition-colors {
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.transition-transform {
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Glassmorphism Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Gradient Backgrounds */
+.gradient-blue {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-green {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+/* Text Utilities */
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Shadow Utilities */
+.shadow-soft {
+  box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-strong {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
