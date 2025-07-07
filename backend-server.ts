@@ -38,7 +38,7 @@ import multer from "multer";
 import { createServer } from "http";
 import { storage } from "./storage";
 import { insertContractSchema, insertProjectSchema, insertInspectionSchema } from "@shared/schema";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 const upload = multer({
   dest: "uploads/",
@@ -80,7 +80,7 @@ export async function registerRoutes(app: Express) {
       res.status(201).json(contract);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid contract data", errors: error.errors });
+        return res.status(400).json({ message: "Invalid contract data", issues: error.issues });
       }
       console.error("Error creating contract:", error);
       res.status(500).json({ message: "Failed to create contract" });
@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express) {
       res.status(201).json(project);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid project data", errors: error.errors });
+        return res.status(400).json({ message: "Invalid project data", issues: error.issues });
       }
       console.error("Error creating project:", error);
       res.status(500).json({ message: "Failed to create project" });
@@ -165,7 +165,7 @@ export async function registerRoutes(app: Express) {
       res.status(201).json(inspection);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid inspection data", errors: error.errors });
+        return res.status(400).json({ message: "Invalid inspection data", issues: error.issues });
       }
       console.error("Error creating inspection:", error);
       res.status(500).json({ message: "Failed to create inspection" });
