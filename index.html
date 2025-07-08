@@ -1,4 +1,5 @@
-!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -25,17 +26,17 @@
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
-            --background-color: #ecf0f1;
-            --card-bg: #ffffff;
+            --background-color: #f5f7fa;
+            --card-bg: rgba(255, 255, 255, 0.25);
             --text-color: #34495e;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            --border-radius: 8px;
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --border-radius: 16px;
             --success-color: #27ae60;
             --danger-color: #e74c3c;
             --warning-color: #f39c12;
             --info-color: #17a2b8;
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(200, 210, 220, 0.7);
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
             --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
@@ -48,10 +49,21 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--background-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: var(--text-color);
             line-height: 1.6;
             overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Base */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
         }
 
         /* Authentication Styles */
@@ -69,10 +81,13 @@
         }
 
         .auth-card {
-            background: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
             padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             width: 100%;
             max-width: 400px;
             text-align: center;
@@ -95,10 +110,14 @@
 
         .auth-input {
             padding: 15px;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
             font-size: 16px;
             transition: all 0.3s ease;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--text-color);
         }
 
         .auth-input:focus {
@@ -112,7 +131,7 @@
             background: var(--gradient-primary);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
@@ -138,7 +157,11 @@
         }
 
         .header {
-            background: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 0 0 20px 20px;
             padding: 15px 30px;
             box-shadow: var(--shadow);
             display: flex;
@@ -147,6 +170,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            margin-bottom: 20px;
         }
 
         .header-left {
@@ -171,17 +195,20 @@
         }
 
         .theme-toggle {
-            background: none;
-            border: none;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
             font-size: 20px;
             cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
+            padding: 10px;
             transition: all 0.3s ease;
+            color: var(--text-color);
         }
 
         .theme-toggle:hover {
-            background: var(--background-color);
+            transform: scale(1.1);
         }
 
         .user-menu {
@@ -199,14 +226,22 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
         }
 
         .user-dropdown {
             position: absolute;
             top: 100%;
             right: 0;
-            background: var(--card-bg);
-            border-radius: 8px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
             box-shadow: var(--shadow);
             min-width: 200px;
             display: none;
@@ -227,18 +262,24 @@
         }
 
         .user-dropdown-item:hover {
-            background: var(--background-color);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .app-layout {
             display: flex;
-            height: calc(100vh - 70px);
+            height: calc(100vh - 90px);
+            gap: 20px;
+            padding: 0 20px;
         }
 
         .sidebar {
             width: 280px;
-            background: var(--card-bg);
-            border-right: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
             overflow-y: auto;
             transition: transform 0.3s ease;
         }
@@ -250,7 +291,7 @@
             border: none;
             padding: 10px;
             margin: 10px;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
         }
 
@@ -280,7 +321,7 @@
 
         .nav-item:hover,
         .nav-item.active {
-            background: var(--background-color);
+            background: rgba(255, 255, 255, 0.1);
             color: var(--secondary-color);
         }
 
@@ -292,12 +333,11 @@
         .main-content {
             flex: 1;
             overflow-y: auto;
-            background: var(--background-color);
+            padding-right: 20px;
         }
 
         .page {
             display: none;
-            padding: 30px;
             animation: fadeIn 0.3s ease-in-out;
         }
 
@@ -311,7 +351,10 @@
         }
 
         .card {
-            background: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
             border-radius: var(--border-radius);
             padding: 25px;
             margin-bottom: 25px;
@@ -321,7 +364,7 @@
 
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
         }
 
         .card-header {
@@ -337,13 +380,13 @@
             font-size: 24px;
             font-weight: 600;
             margin: 0;
-            color: var(--primary-color);
+            color: var(--text-color);
         }
 
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: 12px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
@@ -352,20 +395,43 @@
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            background: var(--secondary-color);
-            color: white;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-color);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .btn-primary { background: var(--primary-color); }
-        .btn-success { background: var(--success-color); }
-        .btn-danger { background: var(--danger-color); }
-        .btn-warning { background: var(--warning-color); }
-        .btn-info { background: var(--info-color); }
+        .btn-primary { 
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+        }
+        .btn-success { 
+            background: var(--success-color);
+            color: white;
+            border: none;
+        }
+        .btn-danger { 
+            background: var(--danger-color);
+            color: white;
+            border: none;
+        }
+        .btn-warning { 
+            background: var(--warning-color);
+            color: white;
+            border: none;
+        }
+        .btn-info { 
+            background: var(--info-color);
+            color: white;
+            border: none;
+        }
 
         .form-group {
             margin-bottom: 20px;
@@ -383,10 +449,14 @@
         .form-textarea {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e1e8ed;
-            border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
             font-size: 14px;
             transition: all 0.3s ease;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--text-color);
         }
 
         .form-input:focus,
@@ -408,6 +478,9 @@
             border-radius: var(--border-radius);
             overflow: hidden;
             border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
         }
 
         .map-controls {
@@ -416,8 +489,44 @@
             gap: 10px;
             margin-bottom: 20px;
             padding: 15px;
-            background: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
             border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .gps-info {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .gps-info h3 {
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .gps-coordinate {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .measurement-display {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 10px;
+            margin-top: 10px;
             box-shadow: var(--shadow);
         }
 
@@ -426,12 +535,15 @@
             overflow-x: auto;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
-            background: var(--card-bg);
         }
 
         .table th,
@@ -442,15 +554,15 @@
         }
 
         .table th {
-            background: var(--primary-color);
-            color: white;
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--text-color);
             font-weight: 600;
             position: sticky;
             top: 0;
         }
 
         .table tbody tr:hover {
-            background: rgba(52, 152, 219, 0.05);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         /* Modal Styles */
@@ -472,7 +584,10 @@
         }
 
         .modal-content {
-            background: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
             border-radius: var(--border-radius);
             padding: 30px;
             width: 90%;
@@ -480,6 +595,7 @@
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
+            box-shadow: var(--shadow);
         }
 
         .modal-close {
@@ -495,7 +611,7 @@
 
         /* CAD Drawing Styles */
         .drawing-canvas {
-            border: 2px solid var(--glass-border);
+            border: 1px solid var(--glass-border);
             border-radius: var(--border-radius);
             background: white;
             cursor: crosshair;
@@ -507,16 +623,21 @@
             gap: 10px;
             margin-bottom: 20px;
             padding: 15px;
-            background: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
         }
 
         .tool-btn {
             padding: 10px 15px;
-            background: #f8f9fa;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border);
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -524,6 +645,7 @@
         .tool-btn.active {
             background: var(--secondary-color);
             color: white;
+            border: none;
         }
 
         /* Stats Cards */
@@ -535,7 +657,10 @@
         }
 
         .stat-card {
-            background: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
             padding: 25px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
@@ -565,41 +690,66 @@
         }
 
         .stat-label {
-            color: #7f8c8d;
+            color: var(--text-color);
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
+        .file-upload {
+            border: 2px dashed var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            text-align: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .file-upload:hover {
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
+            .app-layout {
+                flex-direction: column;
+                height: auto;
+                gap: 10px;
+                padding: 0 10px;
+            }
+
             .sidebar {
-                position: fixed;
-                top: 70px;
-                left: 0;
-                height: calc(100vh - 70px);
-                transform: translateX(-100%);
-                z-index: 1500;
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .sidebar-toggle {
-                display: block;
+                width: 100%;
+                height: auto;
+                order: 2;
             }
 
             .main-content {
-                width: 100%;
-            }
-
-            .page {
-                padding: 15px;
+                order: 1;
+                padding-right: 0;
             }
 
             .header {
                 padding: 10px 15px;
+                border-radius: 0;
+                margin-bottom: 10px;
+            }
+
+            .sidebar-toggle {
+                display: block;
             }
 
             .stats-grid {
@@ -610,14 +760,62 @@
                 margin: 20px;
                 padding: 30px 20px;
             }
+
+            .map-container {
+                height: 400px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .map-controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-left {
+                gap: 10px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .map-container {
+                height: 300px;
+            }
+
+            .drawing-canvas {
+                width: 100%;
+                height: 300px;
+            }
+
+            .drawing-tools {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .tool-btn {
+                width: 100%;
+                text-align: center;
+            }
         }
 
         /* Dark Theme */
         [data-theme="dark"] {
             --background-color: #1a1a1a;
-            --card-bg: #2d2d2d;
+            --card-bg: rgba(45, 45, 45, 0.25);
             --text-color: #e1e1e1;
             --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(45, 45, 45, 0.15);
         }
 
         /* Loading Spinner */
@@ -802,23 +1000,25 @@
             <main class="main-content">
                 <!-- Dashboard Page -->
                 <div id="dashboard-page" class="page active">
-                    <h1>Dashboard</h1>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-number" id="active-projects">5</div>
-                            <div class="stat-label">Active Projects</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="pending-inspections">12</div>
-                            <div class="stat-label">Pending Inspections</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="vehicles-online">8</div>
-                            <div class="stat-label">Vehicles Online</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="ai-analyses">23</div>
-                            <div class="stat-label">AI Analyses Today</div>
+                    <div class="card">
+                        <h1>Dashboard</h1>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="active-projects">5</div>
+                                <div class="stat-label">Active Projects</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="pending-inspections">12</div>
+                                <div class="stat-label">Pending Inspections</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="vehicles-online">8</div>
+                                <div class="stat-label">Vehicles Online</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="ai-analyses">23</div>
+                                <div class="stat-label">AI Analyses Today</div>
+                            </div>
                         </div>
                     </div>
 
@@ -827,21 +1027,21 @@
                             <h3 class="card-title">Recent Activity</h3>
                         </div>
                         <div id="recent-activity">
-                            <div class="activity-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee;">
+                            <div class="activity-item">
                                 <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
                                 <div>
                                     <strong>New inspection completed</strong> for Bridge A-123
                                     <br><small style="color: #666;">2 minutes ago</small>
                                 </div>
                             </div>
-                            <div class="activity-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee;">
+                            <div class="activity-item">
                                 <i class="fas fa-robot" style="color: var(--info-color);"></i>
                                 <div>
                                     <strong>AI defect analysis completed</strong> for Road Section B
                                     <br><small style="color: #666;">15 minutes ago</small>
                                 </div>
                             </div>
-                            <div class="activity-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 0;">
+                            <div class="activity-item">
                                 <i class="fas fa-truck" style="color: var(--warning-color);"></i>
                                 <div>
                                     <strong>Vehicle VH-001</strong> entered geofenced area
@@ -903,6 +1103,11 @@
                                 <option value="poor">Poor (3-4)</option>
                                 <option value="critical">Critical (1-2)</option>
                             </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Upload Photos</label>
+                            <input type="file" id="inspection-photos" class="form-input" multiple accept="image/*">
                         </div>
                         
                         <div class="form-group">
@@ -1036,6 +1241,24 @@
                         <div class="card-header">
                             <h1 class="card-title">GIS Mapping System</h1>
                         </div>
+                        
+                        <!-- GPS Information Panel -->
+                        <div class="gps-info">
+                            <h3><i class="fas fa-satellite-dish"></i> GPS Information</h3>
+                            <div class="gps-coordinate">
+                                <strong>Latitude:</strong> <span id="gps-lat">25.2854°</span>
+                            </div>
+                            <div class="gps-coordinate">
+                                <strong>Longitude:</strong> <span id="gps-lng">51.5310°</span>
+                            </div>
+                            <div class="gps-coordinate">
+                                <strong>Altitude:</strong> <span id="gps-alt">12m</span>
+                            </div>
+                            <div class="gps-coordinate">
+                                <strong>Accuracy:</strong> <span id="gps-accuracy">±5m</span>
+                            </div>
+                        </div>
+                        
                         <div class="map-controls">
                             <button class="btn btn-primary" id="standard-view" onclick="setMapView('standard')">
                                 <i class="fas fa-map"></i> Standard
@@ -1052,15 +1275,25 @@
                             <button class="btn" onclick="showQNAS()">
                                 <i class="fas fa-question-circle"></i> QNAS System
                             </button>
+                            <button class="btn" onclick="exportMapToPDF()">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
                             <button class="btn" onclick="exportMapData()">
-                                <i class="fas fa-download"></i> Export
+                                <i class="fas fa-download"></i> Export Data
                             </button>
                             <input type="file" id="map-import" accept=".json,.geojson" style="display: none;" onchange="importMapData(event)">
                             <button class="btn" onclick="document.getElementById('map-import').click()">
                                 <i class="fas fa-upload"></i> Import
                             </button>
                         </div>
+                        
                         <div id="map" class="map-container"></div>
+                        
+                        <!-- Measurement Display -->
+                        <div id="measurement-display" class="measurement-display" style="display: none;">
+                            <h4><i class="fas fa-ruler"></i> Measurements</h4>
+                            <div id="measurement-results"></div>
+                        </div>
                         
                         <!-- QNAS Panel -->
                         <div id="qnas-panel" style="display: none; margin-top: 20px;" class="card">
@@ -1141,19 +1374,7 @@
                     </div>
                 </div>
 
-                <!-- Additional Pages -->
-                <div id="contracts-page" class="page">
-                    <div class="card">
-                        <div class="card-header">
-                            <h1 class="card-title">Contracts & BOQ Management</h1>
-                            <button class="btn btn-primary" onclick="createContract()">
-                                <i class="fas fa-plus"></i> New Contract
-                            </button>
-                        </div>
-                        <p>Contract management interface with BOQ integration.</p>
-                    </div>
-                </div>
-
+                <!-- AI Defect Analysis Page -->
                 <div id="ai-defect-page" class="page">
                     <div class="card">
                         <div class="card-header">
@@ -1179,6 +1400,18 @@
                             <h1 class="card-title">Project Management</h1>
                         </div>
                         <p>Project management interface.</p>
+                    </div>
+                </div>
+
+                <div id="contracts-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Contracts & BOQ Management</h1>
+                            <button class="btn btn-primary" onclick="createContract()">
+                                <i class="fas fa-plus"></i> New Contract
+                            </button>
+                        </div>
+                        <p>Contract management interface with BOQ integration.</p>
                     </div>
                 </div>
 
@@ -1360,6 +1593,9 @@
         let isDrawing = false;
         let trafficSimulation = false;
         let weatherSimulation = false;
+        let currentGPSPosition = null;
+        let measurementLayers = [];
+        let analysisPhotos = [];
 
         // Supabase Configuration
         const SUPABASE_URL = 'https://cykjjrrexaqmsqwrgnzp.supabase.co';
@@ -1435,6 +1671,49 @@
             }
         }
 
+        // GPS Functions
+        function initializeGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        currentGPSPosition = position;
+                        updateGPSDisplay(position);
+                    },
+                    (error) => {
+                        console.error('GPS error:', error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+
+                // Watch position changes
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        currentGPSPosition = position;
+                        updateGPSDisplay(position);
+                    },
+                    (error) => {
+                        console.error('GPS error:', error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            }
+        }
+
+        function updateGPSDisplay(position) {
+            document.getElementById('gps-lat').textContent = position.coords.latitude.toFixed(6) + '°';
+            document.getElementById('gps-lng').textContent = position.coords.longitude.toFixed(6) + '°';
+            document.getElementById('gps-alt').textContent = (position.coords.altitude || 0).toFixed(0) + 'm';
+            document.getElementById('gps-accuracy').textContent = '±' + position.coords.accuracy.toFixed(0) + 'm';
+        }
+
         // Map Functions
         function initializeMap() {
             if (map) return;
@@ -1458,7 +1737,7 @@
             // Add default layer
             standardLayer.addTo(map);
 
-            // Add drawing controls if available
+            // Add drawing controls with measurement
             if (L.PM) {
                 map.pm.addControls({
                     position: 'topleft',
@@ -1472,9 +1751,84 @@
                     cutPolygon: true,
                     removalMode: true
                 });
+
+                // Add measurement functionality
+                map.on('pm:create', function(e) {
+                    const layer = e.layer;
+                    measurementLayers.push(layer);
+                    
+                    if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+                        // Calculate line length
+                        const length = calculateLineLength(layer);
+                        layer.bindTooltip(`Length: ${length.toFixed(2)} km`, {permanent: true});
+                        updateMeasurementDisplay('line', length);
+                    } else if (layer instanceof L.Polygon) {
+                        // Calculate polygon area
+                        const area = calculatePolygonArea(layer);
+                        layer.bindTooltip(`Area: ${area.toFixed(2)} km²`, {permanent: true});
+                        updateMeasurementDisplay('polygon', area);
+                    }
+                });
+
+                map.on('pm:remove', function(e) {
+                    const index = measurementLayers.indexOf(e.layer);
+                    if (index > -1) {
+                        measurementLayers.splice(index, 1);
+                    }
+                    if (measurementLayers.length === 0) {
+                        document.getElementById('measurement-display').style.display = 'none';
+                    }
+                });
             }
 
+            // Initialize GPS
+            initializeGPS();
+
             console.log('Map initialized successfully');
+        }
+
+        function calculateLineLength(layer) {
+            const latlngs = layer.getLatLngs();
+            let totalLength = 0;
+            
+            for (let i = 0; i < latlngs.length - 1; i++) {
+                totalLength += latlngs[i].distanceTo(latlngs[i + 1]);
+            }
+            
+            return totalLength / 1000; // Convert to kilometers
+        }
+
+        function calculatePolygonArea(layer) {
+            const latlngs = layer.getLatLngs()[0];
+            let area = 0;
+            
+            for (let i = 0; i < latlngs.length; i++) {
+                const j = (i + 1) % latlngs.length;
+                area += latlngs[i].lat * latlngs[j].lng;
+                area -= latlngs[j].lat * latlngs[i].lng;
+            }
+            
+            area = Math.abs(area) / 2;
+            
+            // Convert to square kilometers (rough approximation)
+            const earthRadius = 6371;
+            const latRadians = Math.PI / 180;
+            return area * latRadians * latRadians * earthRadius * earthRadius;
+        }
+
+        function updateMeasurementDisplay(type, value) {
+            const display = document.getElementById('measurement-display');
+            const results = document.getElementById('measurement-results');
+            
+            display.style.display = 'block';
+            
+            const measurement = document.createElement('div');
+            measurement.innerHTML = `
+                <strong>${type === 'line' ? 'Line Length' : 'Polygon Area'}:</strong> 
+                ${value.toFixed(2)} ${type === 'line' ? 'km' : 'km²'}
+            `;
+            
+            results.appendChild(measurement);
         }
 
         function setMapView(viewType) {
@@ -1500,7 +1854,6 @@
         function toggleTrafficLayer() {
             trafficSimulation = !trafficSimulation;
             if (trafficSimulation) {
-                // Simulate traffic overlay
                 console.log('Traffic simulation enabled');
                 alert('Traffic simulation layer activated');
             } else {
@@ -1512,7 +1865,6 @@
         function toggleWeatherLayer() {
             weatherSimulation = !weatherSimulation;
             if (weatherSimulation) {
-                // Simulate weather overlay
                 console.log('Weather simulation enabled');
                 alert('Weather simulation layer activated');
             } else {
@@ -1547,11 +1899,65 @@
             }, 2000);
         }
 
+        function exportMapToPDF() {
+            const mapElement = document.getElementById('map');
+            
+            html2canvas(mapElement, {
+                useCORS: true,
+                allowTaint: true,
+                scale: 2
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF();
+                
+                // Add title
+                pdf.setFontSize(20);
+                pdf.text('GIS Map Export', 20, 20);
+                
+                // Add GPS coordinates
+                if (currentGPSPosition) {
+                    pdf.setFontSize(12);
+                    pdf.text(`GPS: ${currentGPSPosition.coords.latitude.toFixed(6)}, ${currentGPSPosition.coords.longitude.toFixed(6)}`, 20, 35);
+                }
+                
+                // Add map image
+                const imgWidth = 170;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 20, 50, imgWidth, imgHeight);
+                
+                // Add measurements if available
+                if (measurementLayers.length > 0) {
+                    pdf.setFontSize(14);
+                    pdf.text('Measurements:', 20, 50 + imgHeight + 20);
+                    
+                    let yPos = 50 + imgHeight + 35;
+                    measurementLayers.forEach((layer, index) => {
+                        if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+                            const length = calculateLineLength(layer);
+                            pdf.text(`Line ${index + 1}: ${length.toFixed(2)} km`, 20, yPos);
+                        } else if (layer instanceof L.Polygon) {
+                            const area = calculatePolygonArea(layer);
+                            pdf.text(`Polygon ${index + 1}: ${area.toFixed(2)} km²`, 20, yPos);
+                        }
+                        yPos += 10;
+                    });
+                }
+                
+                pdf.save('map-export.pdf');
+            });
+        }
+
         function exportMapData() {
             const mapData = {
                 center: map ? map.getCenter() : null,
                 zoom: map ? map.getZoom() : null,
                 view: currentMapView,
+                measurements: measurementLayers.map(layer => ({
+                    type: layer instanceof L.Polygon ? 'polygon' : 'line',
+                    coordinates: layer.getLatLngs()
+                })),
+                gps: currentGPSPosition,
                 timestamp: new Date().toISOString()
             };
 
@@ -1680,7 +2086,8 @@
                 actions: document.getElementById('recommended-actions').value,
                 priority: document.getElementById('priority-level').value,
                 date: new Date().toLocaleDateString(),
-                inspector: 'Current User'
+                inspector: 'Current User',
+                photos: analysisPhotos.slice() // Include photos in inspection
             };
 
             inspections.push(inspection);
@@ -1690,6 +2097,7 @@
             document.getElementById('asset-name').value = '';
             document.getElementById('inspection-notes').value = '';
             document.getElementById('recommended-actions').value = '';
+            document.getElementById('inspection-photos').value = '';
             
             console.log('Inspection saved:', inspection);
             alert('Inspection report saved successfully!');
@@ -1721,7 +2129,11 @@
         function viewInspection(id) {
             const inspection = inspections.find(i => i.id === id);
             if (inspection) {
-                alert(`Inspection Details:\n\nAsset: ${inspection.assetName}\nCondition: ${inspection.condition}\nNotes: ${inspection.notes}`);
+                let photoInfo = '';
+                if (inspection.photos && inspection.photos.length > 0) {
+                    photoInfo = `\n\nAttached Photos: ${inspection.photos.length} image(s)`;
+                }
+                alert(`Inspection Details:\n\nAsset: ${inspection.assetName}\nCondition: ${inspection.condition}\nNotes: ${inspection.notes}${photoInfo}`);
             }
         }
 
@@ -1855,10 +2267,13 @@
             document.getElementById(modalId).classList.remove('active');
         }
 
-        // AI Defect Analysis
+        // AI Defect Analysis with Photo Attachment
         function analyzeDefects(event) {
             const files = event.target.files;
             if (!files.length) return;
+
+            // Store photos for later attachment to reports
+            analysisPhotos = Array.from(files);
 
             const resultsContainer = document.getElementById('results-container');
             const analysisResults = document.getElementById('analysis-results');
@@ -1869,34 +2284,34 @@
             // Simulate AI analysis
             setTimeout(() => {
                 resultsContainer.innerHTML = `
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Defect Type</th>
-                                    <th>Confidence</th>
-                                    <th>Severity</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>${files[0].name}</td>
-                                    <td>Pothole</td>
-                                    <td>92%</td>
-                                    <td><span style="color: var(--danger-color);">High</span></td>
-                                </tr>
-                                <tr>
-                                    <td>${files[0].name}</td>
-                                    <td>Crack</td>
-                                    <td>78%</td>
-                                    <td><span style="color: var(--warning-color);">Medium</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="card">
+                        <h4>Analysis Results with Attached Photos</h4>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Defect Type</th>
+                                        <th>Confidence</th>
+                                        <th>Severity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Array.from(files).map(file => `
+                                        <tr>
+                                            <td>${file.name}</td>
+                                            <td>Pothole</td>
+                                            <td>92%</td>
+                                            <td><span style="color: var(--danger-color);">High</span></td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p><strong>Note:</strong> Photos are automatically attached to inspection reports.</p>
                     </div>
                 `;
-                console.log('AI analysis completed');
+                console.log('AI analysis completed with photos attached');
             }, 3000);
         }
 
@@ -1920,6 +2335,12 @@
         // App Initialization
         function initializeApp() {
             console.log('Engineering Platform initialized successfully');
+            
+            // Load saved API configuration
+            const savedConfig = localStorage.getItem('apiConfig');
+            if (savedConfig) {
+                apiConfig = JSON.parse(savedConfig);
+            }
         }
 
         // Initialize on DOM load
@@ -1938,6 +2359,14 @@
                     document.getElementById('user-dropdown').classList.remove('active');
                 }
             });
+
+            // Mobile sidebar toggle
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', () => {
+                    document.getElementById('sidebar').classList.toggle('active');
+                });
+            }
         });
     </script>
 </body>
