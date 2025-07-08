@@ -1,11 +1,11 @@
-
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Engineering Project Platform</title>
 
+    <!-- External Libraries -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -13,15 +13,13 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-    <script src='https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js'></script>
-    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marzipano@6.1.1/dist/marzipano.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 
     <style>
         :root {
@@ -33,1093 +31,1281 @@
             --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             --border-radius: 8px;
             --success-color: #27ae60;
-            --danger-color: #c0392b;
+            --danger-color: #e74c3c;
             --warning-color: #f39c12;
-            --primary-color-rgb: 0, 123, 255;
+            --info-color: #17a2b8;
             --glass-bg: rgba(255, 255, 255, 0.85);
             --glass-border: rgba(200, 210, 220, 0.7);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--background-color);
-            margin: 0;
+            background: var(--background-color);
             color: var(--text-color);
-            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Authentication Styles */
+        .auth-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--gradient-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-form {
             display: flex;
             flex-direction: column;
+            gap: 20px;
+        }
+
+        .auth-input {
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .auth-btn {
+            padding: 15px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .auth-toggle {
+            color: var(--secondary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 15px;
+        }
+
+        /* Main App Styles */
+        .main-app {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--card-bg);
+            padding: 15px 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--background-color);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            min-width: 200px;
+            display: none;
+            z-index: 1001;
+        }
+
+        .user-dropdown.active {
+            display: block;
+        }
+
+        .user-dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-dropdown-item:hover {
+            background: var(--background-color);
+        }
+
+        .app-layout {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--card-bg);
+            border-right: 1px solid var(--glass-border);
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .nav-section {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav-section-title {
+            padding: 0 20px 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: var(--background-color);
+            color: var(--secondary-color);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--background-color);
         }
 
         .page {
             display: none;
-            animation: fadeIn 0.4s ease-in-out;
-            flex-grow: 1;
-        }
-        .page.active {
-            display: flex;
-            flex-direction: column;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+            padding: 30px;
+            animation: fadeIn 0.3s ease-in-out;
         }
 
-        .main-container {
-            width: 100%;
-            max-width: 1800px;
-            margin: 0 auto;
-            padding: 20px;
-            box-sizing: border-box;
+        .page.active {
+            display: block;
         }
-        .app-grid {
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            gap: 20px;
-            height: calc(100vh - 80px);
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .card {
             background: var(--card-bg);
+            border-radius: var(--border-radius);
             padding: 25px;
-            border-radius: var(--border-radius);
+            margin-bottom: 25px;
             box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--glass-border);
         }
 
-        .glass-card {
-            background-color: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 15px;
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+            color: var(--primary-color);
         }
 
-        h1, h2, h3 { color: var(--primary-color); }
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #bdc3c7;
-            border-radius: var(--border-radius);
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        textarea { min-height: 120px; resize: vertical; }
-
-        button, .btn {
-            padding: 12px 20px;
-            border-radius: var(--border-radius);
+        .btn {
+            padding: 12px 24px;
             border: none;
-            background-color: var(--secondary-color);
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
+            border-radius: var(--border-radius);
+            font-size: 14px;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-        }
-        button:hover, .btn:hover { background-color: #2980b9; }
-        .btn-primary { background-color: var(--primary-color); }
-        .btn-primary:hover { background-color: #1a252f; }
-        .btn-success { background-color: var(--success-color); }
-        .btn-success:hover { background-color: #229954; }
-        .btn-danger { background-color: var(--danger-color); }
-        .btn-danger:hover { background-color: #a93226; }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 30px;
-            background: var(--card-bg);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header h1 { margin: 0; font-size: 1.5em; }
-        .header-actions { display: flex; gap: 15px; align-items: center; }
-
-        .sidebar { 
-            padding: 20px; 
-            background: var(--card-bg); 
-            border-radius: var(--border-radius); 
-            overflow-y: auto;
-        }
-        .sidebar .nav-btn {
-            display: block; width: 100%; text-align: left;
-            margin-bottom: 10px; background: none; color: var(--text-color);
-            font-weight: 500; padding: 15px;
-        }
-        .sidebar .nav-btn.active, .sidebar .nav-btn:hover { 
-            background-color: #ecf0f1; 
-            color: var(--primary-color); 
-        }
-
-        #map-container { 
-            height: 100%; 
-            width: 100%; 
-            border-radius: var(--border-radius); 
-        }
-
-        .table-container { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ecf0f1; }
-        th { background-color: var(--primary-color); color: white; font-weight: 600; }
-        tr:hover { background-color: #f8f9fa; }
-
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: none; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-content {
-            background: white; padding: 30px; border-radius: var(--border-radius);
-            width: 90%; max-width: 600px; position: relative;
-        }
-        .modal-close-btn {
-            position: absolute; top: 15px; right: 20px;
-            font-size: 30px; cursor: pointer; border: none; background: none; color: #7f8c8d;
-        }
-
-        .contract-card { 
-            border: 1px solid #ecf0f1; 
-            padding: 20px; 
-            border-radius: var(--border-radius); 
-            cursor: pointer; 
-            transition: all 0.3s; 
-        }
-        .contract-card:hover { 
-            border-color: var(--secondary-color); 
-            box-shadow: var(--shadow); 
-        }
-
-        .message {
-            padding: 15px; 
-            border-radius: var(--border-radius); 
-            margin-top: 15px;
-            text-align: center;
-        }
-        .message.error { background-color: #fbeae5; color: var(--danger-color); }
-        .message.success { background-color: #eaf7eb; color: var(--success-color); }
-        .message.warning { background-color: #fef9e7; color: var(--warning-color); }
-
-        .form-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 15px; 
-        }
-
-        .app-content {
-            display: none;
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        .app-content.active {
-            display: block;
-        }
-
-        #vehicle-map-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-
-        #vehicle-map {
-            height: 70vh;
-            width: 100%;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--glass-border);
-        }
-
-        .traffic-info, .weather-info, .qnas-panel {
-            background: var(--glass-bg);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            margin: 10px 0;
-        }
-
-        #drawing-canvas-container {
-            position: relative;
-            width: 100%;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 500px;
-        }
-
-        #drawing-canvas {
-            background-color: white;
-            cursor: crosshair;
-            display: block;
-        }
-
-        #drawing-toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding: 10px;
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            margin-bottom: 15px;
-            box-shadow: var(--shadow);
-        }
-
-        #drawing-toolbar button {
-            padding: 8px 12px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            background-color: #f0f0f0;
-            cursor: pointer;
-        }
-
-        #drawing-toolbar button.active {
-            background-color: var(--secondary-color);
+            text-decoration: none;
+            background: var(--secondary-color);
             color: white;
         }
 
-        .note-entry {
-            background-color: var(--card-bg);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 15px;
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
         }
 
-        .note-meta {
-            font-size: 0.8em;
-            color: #777;
-            margin-bottom: 10px;
+        .btn-primary { background: var(--primary-color); }
+        .btn-success { background: var(--success-color); }
+        .btn-danger { background: var(--danger-color); }
+        .btn-warning { background: var(--warning-color); }
+        .btn-info { background: var(--info-color); }
+
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        .tag-pill {
-            display: inline-block;
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-
-        .estimation-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .estimation-title {
-            text-align: center;
-            flex-grow: 1;
-        }
-
-        .info-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .drop-zone {
-            border: 2px dashed var(--secondary-color);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            margin: 10px 0;
-        }
-
-        .drop-zone:hover {
-            background-color: rgba(52, 152, 219, 0.1);
-        }
-
-        .photo-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .photo-wrapper img {
-            max-height: 100px;
-            border-radius: 5px;
-            cursor: pointer;
-            object-fit: cover;
-        }
-
-        #report-map {
-            width: 100%;
-            height: 120px;
-            border-radius: var(--border-radius);
-            background-color: #e9ecef;
-            border: 1px solid var(--glass-border);
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .location-mode-switcher {
-            display: flex;
-            width: 100%;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--glass-border);
-            margin-bottom: 10px;
-        }
-
-        .location-mode-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            background-color: rgba(255,255,255,0.5);
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-size: 14px;
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
             font-weight: 500;
+            color: var(--text-color);
         }
 
-        .location-mode-btn.active {
-            background-color: var(--secondary-color);
-            color: white;
-            font-weight: bold;
-        }
-
-        .fab-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 100;
-        }
-
-        .fab {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            font-size: 22px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.2s;
-        }
-
-        .fab:hover {
-            transform: scale(1.1);
-        }
-
-        #camera-fab {
-            background-color: #28a745;
-        }
-
-        #add-fab {
-            background-color: var(--secondary-color);
-        }
-
-        .primary-button {
-            border: none;
-            background-color: var(--secondary-color);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
             padding: 12px;
+            border: 2px solid #e1e8ed;
             border-radius: var(--border-radius);
-            font-size: 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
         }
 
-        .primary-button:hover {
-            background-color: #2980b9;
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
-        .main-header-report {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            z-index: 110;
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
         }
 
-        .main-title-report {
-            font-size: clamp(18px, 5vw, 24px);
-            font-weight: bold;
-            color: var(--text-color);
-        }
-
-        .menu-button {
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 40px;
-            right: 0;
-            background-color: var(--glass-bg);
-            backdrop-filter: blur(15px);
+        /* Map Styles */
+        .map-container {
+            height: 600px;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            z-index: 2500;
-            width: 260px;
             overflow: hidden;
             border: 1px solid var(--glass-border);
         }
 
-        .dropdown-menu button {
+        .map-controls {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            padding: 10px 15px;
-            background: none;
-            border: none;
-            font-size: 15px;
-            cursor: pointer;
-            color: var(--text-color);
-            text-align: left;
-        }
-
-        .dropdown-menu button:hover {
-            background-color: rgba(52, 152, 219, 0.1);
-        }
-
-        .menu-button:focus-within .dropdown-menu {
-            display: block;
-        }
-
-        .table-controls {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            margin-bottom: 10px;
-            align-items: center;
-        }
-
-        .table-controls button {
-            background-color: rgba(255,255,255,0.5);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            padding: 6px 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .table-controls button:hover {
-            background-color: rgba(255,255,255,0.8);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content-report {
-            padding: 20px;
-            width: 90%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             gap: 10px;
-            background: white;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
         }
 
-        #saved-contracts-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        #projects-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        #projects-list li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            border-bottom: 1px solid var(--glass-border);
-            background-color: var(--card-bg);
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
             border-radius: var(--border-radius);
-            margin-bottom: 10px;
             box-shadow: var(--shadow);
         }
 
-        #projects-list .project-name {
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        #projects-list .project-name:hover {
-            color: var(--secondary-color);
-        }
-
-        .marzipano-viewer {
+        .table {
             width: 100%;
-            height: 500px;
-            background-color: #000;
+            border-collapse: collapse;
+            background: var(--card-bg);
+        }
+
+        .table th,
+        .table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
             border-radius: var(--border-radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        /* CAD Drawing Styles */
+        .drawing-canvas {
+            border: 2px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            background: white;
+            cursor: crosshair;
+        }
+
+        .drawing-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .tool-btn {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tool-btn.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
             overflow: hidden;
         }
 
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .app-grid {
-                grid-template-columns: 1fr;
-                height: auto;
-            }
-            
             .sidebar {
-                order: 2;
+                position: fixed;
+                top: 70px;
+                left: 0;
+                height: calc(100vh - 70px);
+                transform: translateX(-100%);
+                z-index: 1500;
             }
-            
-            .main-container {
-                padding: 10px;
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .main-content {
+                width: 100%;
+            }
+
+            .page {
+                padding: 15px;
+            }
+
+            .header {
+                padding: 10px 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-card {
+                margin: 20px;
+                padding: 30px 20px;
             }
         }
+
+        /* Dark Theme */
+        [data-theme="dark"] {
+            --background-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e1e1e1;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--glass-border);
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 1rem; }
+        .p-1 { padding: 0.25rem; }
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 1rem; }
+        .d-flex { display: flex; }
+        .flex-column { flex-direction: column; }
+        .align-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .gap-1 { gap: 0.25rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 1rem; }
+        .w-100 { width: 100%; }
+        .h-100 { height: 100%; }
     </style>
 </head>
 <body>
-    <div id="app-container" class="page active">
+    <!-- Authentication Container -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">🏗️</div>
+            <h2 id="auth-title">Welcome to Engineering Platform</h2>
+            <p id="auth-subtitle">Sign in to continue</p>
+
+            <form id="auth-form" class="auth-form">
+                <input type="email" id="auth-email" class="auth-input" placeholder="Email" required>
+                <input type="password" id="auth-password" class="auth-input" placeholder="Password" required>
+                <input type="text" id="auth-name" class="auth-input" placeholder="Full Name" style="display: none;">
+                <button type="submit" id="auth-submit" class="auth-btn">Sign In</button>
+                <div id="auth-toggle" class="auth-toggle">Don't have an account? Sign up</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="main-app" class="main-app">
+        <!-- Header -->
         <header class="header">
-            <h1 id="app-main-title">Engineering Project Platform</h1>
-            <div class="header-actions">
-                <select id="language-switcher" onchange="switchLanguage(this.value)">
-                    <option value="en">English</option>
-                    <option value="ar">العربية</option>
-                </select>
-                <button class="btn-success" onclick="showModal('save-project-modal')">
-                    <i class="fa-solid fa-save"></i> Save Project
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
                 </button>
+                <div class="logo">Engineering Platform</div>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-menu">
+                    <div class="user-avatar" onclick="toggleUserMenu()">
+                        <span id="user-initial">U</span>
+                    </div>
+                    <div id="user-dropdown" class="user-dropdown">
+                        <div class="user-dropdown-item" onclick="showProfile()">
+                            <i class="fas fa-user"></i> Profile
+                        </div>
+                        <div class="user-dropdown-item" onclick="showSettings()">
+                            <i class="fas fa-cog"></i> Settings
+                        </div>
+                        <div class="user-dropdown-item" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 
-        <div class="main-container app-grid">
-            <aside class="sidebar">
-                <button id="nav-dashboard" class="nav-btn active" onclick="showAppPage('dashboard-page')">
-                    <i class="fa-solid fa-chart-line"></i> Dashboard
-                </button>
-                <button id="nav-contracts" class="nav-btn" onclick="showAppPage('contracts-page')">
-                    <i class="fa-solid fa-file-contract"></i> Contracts
-                </button>
-                <button id="nav-map" class="nav-btn" onclick="showAppPage('map-page')">
-                    <i class="fa-solid fa-map-location-dot"></i> GIS Map
-                </button>
-                <button id="nav-inspection" class="nav-btn" onclick="showAppPage('inspection-page')">
-                    <i class="fa-solid fa-file-lines"></i> Inspection Report
-                </button>
-                <button id="nav-cost-estimation" class="nav-btn" onclick="showAppPage('cost-estimation-page')">
-                    <i class="fa-solid fa-calculator"></i> Cost Estimation
-                </button>
-                <button id="nav-ai" class="nav-btn" onclick="showAppPage('ai-page')">
-                    <i class="fa-solid fa-robot"></i> AI Analysis
-                </button>
-                <button id="nav-drawing" class="nav-btn" onclick="showAppPage('drawing-page')">
-                    <i class="fa-solid fa-pencil-ruler"></i> CAD Drawing
-                </button>
-                <button id="nav-notebook" class="nav-btn" onclick="showAppPage('notebook-page')">
-                    <i class="fa-solid fa-book"></i> Notebook
-                </button>
-                <button id="nav-projects" class="nav-btn" onclick="showAppPage('projects-page')">
-                    <i class="fa-solid fa-folder-open"></i> Projects
-                </button>
-                <button id="nav-notifications" class="nav-btn" onclick="showAppPage('notifications-page')">
-                    <i class="fa-solid fa-bell"></i> Notifications
-                </button>
-            </aside>
+        <div class="app-layout">
+            <!-- Sidebar -->
+            <nav id="sidebar" class="sidebar">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <div class="nav-item active" onclick="showPage('dashboard')">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </div>
+                    <div class="nav-item" onclick="showPage('projects')">
+                        <i class="fas fa-project-diagram"></i> Projects
+                    </div>
+                    <div class="nav-item" onclick="showPage('notifications')">
+                        <i class="fas fa-bell"></i> Notifications
+                    </div>
+                </div>
 
-            <main id="app-content-area">
+                <div class="nav-section">
+                    <div class="nav-section-title">Project Management</div>
+                    <div class="nav-item" onclick="showPage('contracts')">
+                        <i class="fas fa-file-contract"></i> Contracts & BOQ
+                    </div>
+                    <div class="nav-item" onclick="showPage('inspection')">
+                        <i class="fas fa-clipboard-check"></i> Inspection Reports
+                    </div>
+                    <div class="nav-item" onclick="showPage('cost-estimation')">
+                        <i class="fas fa-calculator"></i> Cost Estimation
+                    </div>
+                    <div class="nav-item" onclick="showPage('timeline')">
+                        <i class="fas fa-timeline"></i> Project Timeline
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Engineering Tools</div>
+                    <div class="nav-item" onclick="showPage('map')">
+                        <i class="fas fa-map-marked-alt"></i> GIS Mapping
+                    </div>
+                    <div class="nav-item" onclick="showPage('drawing')">
+                        <i class="fas fa-drafting-compass"></i> CAD Drawing
+                    </div>
+                    <div class="nav-item" onclick="showPage('ai-defect')">
+                        <i class="fas fa-robot"></i> AI Defect Analysis
+                    </div>
+                    <div class="nav-item" onclick="showPage('notebooks')">
+                        <i class="fas fa-book"></i> Notebooks
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Operations</div>
+                    <div class="nav-item" onclick="showPage('vehicle-tracking')">
+                        <i class="fas fa-truck"></i> Vehicle Tracking
+                    </div>
+                    <div class="nav-item" onclick="showPage('material-logistics')">
+                        <i class="fas fa-boxes"></i> Material Logistics
+                    </div>
+                    <div class="nav-item" onclick="showPage('sign-fabrication')">
+                        <i class="fas fa-sign"></i> Sign Fabrication
+                    </div>
+                    <div class="nav-item" onclick="showPage('scrap-management')">
+                        <i class="fas fa-recycle"></i> Scrap Management
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Communication</div>
+                    <div class="nav-item" onclick="showPage('chat')">
+                        <i class="fas fa-comments"></i> Team Chat
+                    </div>
+                    <div class="nav-item" onclick="showPage('telegram')">
+                        <i class="fab fa-telegram"></i> Telegram Integration
+                    </div>
+                    <div class="nav-item" onclick="showPage('reports')">
+                        <i class="fas fa-chart-bar"></i> Custom Reports
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <div class="nav-item" onclick="showPage('file-manager')">
+                        <i class="fas fa-folder"></i> File Manager
+                    </div>
+                    <div class="nav-item" onclick="showPage('settings')">
+                        <i class="fas fa-cog"></i> Settings
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="main-content">
                 <!-- Dashboard Page -->
-                <div id="dashboard-page" class="app-content active">
+                <div id="dashboard-page" class="page active">
+                    <h1>Dashboard</h1>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="active-projects">5</div>
+                            <div class="stat-label">Active Projects</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="pending-inspections">12</div>
+                            <div class="stat-label">Pending Inspections</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="vehicles-online">8</div>
+                            <div class="stat-label">Vehicles Online</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="ai-analyses">23</div>
+                            <div class="stat-label">AI Analyses Today</div>
+                        </div>
+                    </div>
+
                     <div class="card">
-                        <h2><i class="fa-solid fa-chart-line"></i> Project Dashboard</h2>
-                        <div class="form-grid">
-                            <div class="card">
-                                <h3>Quick Stats</h3>
-                                <p><strong>Active Projects:</strong> <span id="active-projects-count">1</span></p>
-                                <p><strong>Contracts:</strong> <span id="contracts-count">0</span></p>
-                                <p><strong>Notifications:</strong> <span id="notifications-count">0</span></p>
-                                <p><strong>AI Analyses:</strong> <span id="ai-analyses-count">0</span></p>
-                            </div>
-                            <div class="card">
-                                <h3>Recent Activity</h3>
-                                <div id="recent-activity">
-                                    <p>Welcome to your Engineering Platform!</p>
-                                </div>
-                            </div>
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Activity</h3>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Contracts Page -->
-                <div id="contracts-page" class="app-content">
-                    <div class="card">
-                        <h2><i class="fa-solid fa-file-contract"></i> Contract Management</h2>
-                        <p>Select a saved contract or add a new one.</p>
-                        <button class="btn-success" onclick="showModal('contract-form-modal')">
-                            <i class="fa-solid fa-plus"></i> Add New Contract
-                        </button>
-                    </div>
-                    <div class="card">
-                        <h3>Saved Contracts</h3>
-                        <div id="saved-contracts-list">
-                            <p>No contracts found. Add one to get started.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- GIS Map Page -->
-                <div id="map-page" class="app-content">
-                    <div id="vehicle-map-controls">
-                        <button class="btn" onclick="toggleTrafficLayer()">
-                            <i class="fa-solid fa-car"></i> Traffic Layer
-                        </button>
-                        <button class="btn" onclick="toggleWeatherLayer()">
-                            <i class="fa-solid fa-cloud"></i> Weather Layer
-                        </button>
-                        <button class="btn" onclick="showQNAS()">
-                            <i class="fa-solid fa-question-circle"></i> Q&A System
-                        </button>
-                        <button class="btn" onclick="simulateTrafficIncident()">
-                            <i class="fa-solid fa-exclamation-triangle"></i> Simulate Traffic
-                        </button>
-                        <button class="btn" onclick="simulateWeatherAlert()">
-                            <i class="fa-solid fa-cloud-rain"></i> Simulate Weather
-                        </button>
-                        <button class="btn" onclick="exportMapJson()">
-                            <i class="fa-solid fa-download"></i> Export Map
-                        </button>
-                        <input type="file" id="import-map-json" style="display:none;" onchange="importMapJson(event)">
-                        <button class="btn" onclick="document.getElementById('import-map-json').click()">
-                            <i class="fa-solid fa-upload"></i> Import Map
-                        </button>
-                    </div>
-                    <div id="map-container"></div>
-                    
-                    <div class="traffic-info" id="traffic-info" style="display:none;">
-                        <h4><i class="fa-solid fa-car"></i> Traffic Information</h4>
-                        <p>Real-time traffic data would be integrated here from traffic APIs.</p>
-                        <div id="traffic-alerts"></div>
-                    </div>
-                    
-                    <div class="weather-info" id="weather-info" style="display:none;">
-                        <h4><i class="fa-solid fa-cloud"></i> Weather Information</h4>
-                        <p>Current weather conditions and forecasts for the project area.</p>
-                        <div id="weather-alerts"></div>
-                    </div>
-                    
-                    <div class="qnas-panel" id="qnas-panel" style="display:none;">
-                        <h4><i class="fa-solid fa-question-circle"></i> Q&A System</h4>
-                        <div id="qnas-content">
-                            <textarea id="qnas-question" placeholder="Ask a question about the project..."></textarea>
-                            <button class="btn-primary" onclick="submitQNASQuestion()">Submit Question</button>
-                            <div id="qnas-responses"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Inspection Report Page -->
-                <div id="inspection-page" class="app-content">
-                    <div class="glass-card">
-                        <div class="main-header-report">
-                            <h1 class="main-title-report" contenteditable="true">Asset Inspection Report</h1>
-                            <div class="menu-button" tabindex="0">
-                                <span>⋮</span>
-                                <div class="dropdown-menu">
-                                    <button onclick="printReportContent()">
-                                        <i class="fa-solid fa-print"></i> Print Report
-                                    </button>
-                                    <button onclick="exportToPdfReport()">
-                                        <i class="fa-solid fa-file-pdf"></i> Export PDF
-                                    </button>
-                                    <button onclick="saveCurrentProject()">
-                                        <i class="fa-solid fa-save"></i> Save Project
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-card glass-card">
-                        <div>
-                            <input type="file" accept="image/*" onchange="loadClientLogo()" style="display:none;" id="client-logo-input">
-                            <img id="client-logo" src="" alt="Client Logo" onclick="document.getElementById('client-logo-input').click();" style="max-height: 60px; max-width: 120px; object-fit: contain; border-radius: 8px; cursor: pointer;">
-                        </div>
-                        <div>
-                            <label for="display-date">
-                                <strong>Date:</strong>
-                                <input type="date" id="display-date">
-                            </label>
-                        </div>
-                        <input type="file" accept="image/*" onchange="loadCompanyLogo()" style="display:none;" id="company-logo-input">
-                        <img id="company-logo" src="" alt="Company Logo" onclick="document.getElementById('company-logo-input').click();" style="max-height: 60px; max-width: 120px; object-fit: contain; border-radius: 8px; cursor: pointer;">
-                    </div>
-
-                    <div class="form-grid">
-                        <div class="card glass-card">
-                            <h3>Add New Asset</h3>
-                            <div class="form-group">
-                                <input type="text" id="asset" placeholder="Asset Description">
-                                <div class="drop-zone" onclick="document.getElementById('photo-input').click()">
-                                    <p>Drag & Drop or Click to Add Photos</p>
-                                    <div style="display: flex; gap: 10px; justify-content: center;">
-                                        <button onclick="event.stopPropagation(); document.getElementById('photo-input').click()">📷 Gallery</button>
-                                        <button onclick="event.stopPropagation(); openCamera()">📸 Camera</button>
-                                        <button onclick="event.stopPropagation(); open360Viewer()">🌐 360° View</button>
-                                    </div>
-                                </div>
-                                <input type="file" id="photo-input" accept="image/*" multiple style="display: none;">
-                                <div id="photo-previews" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px;"></div>
-                            </div>
-                        </div>
-                        <div class="card glass-card">
-                            <h3>Details & Recommendations</h3>
-                            <input type="text" id="status" placeholder="Status (e.g., Good, Damaged)">
-                            <input type="text" id="recommendation" placeholder="Recommendation (e.g., Repair, Replace)">
-                            <button class="primary-button" onclick="showQuantityModal()">Calculate Quantity</button>
-                        </div>
-                        <div class="card glass-card">
-                            <h3>GPS Location</h3>
-                            <div id="report-map"></div>
-                            <div class="location-mode-switcher">
-                                <button id="gps-auto-btn" class="location-mode-btn active" onclick="switchLocationMode('auto')">Automatic</button>
-                                <button id="gps-manual-btn" class="location-mode-btn" onclick="switchLocationMode('manual')">Manual</button>
-                            </div>
-                            <div id="location-auto-panel">
-                                <button class="primary-button" onclick="getCurrentLocation()">Get Current GPS</button>
-                            </div>
-                            <div id="location-manual-panel" style="display: none;">
-                                <input type="number" id="manual-lat" placeholder="Manual Latitude" step="any">
-                                <input type="number" id="manual-lng" placeholder="Manual Longitude" step="any">
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div id="recent-activity">
+                            <div class="activity-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee;">
+                                <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
                                 <div>
-                                    <small><strong>Latitude:</strong> <span id="lat-display">N/A</span></small><br>
-                                    <small><strong>Longitude:</strong> <span id="lng-display">N/A</span></small>
+                                    <strong>New inspection completed</strong> for Bridge A-123
+                                    <br><small style="color: #666;">2 minutes ago</small>
                                 </div>
-                                <button class="primary-button" onclick="insertLocationToForm()">Insert to Form</button>
+                            </div>
+                            <div class="activity-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee;">
+                                <i class="fas fa-robot" style="color: var(--info-color);"></i>
+                                <div>
+                                    <strong>AI defect analysis completed</strong> for Road Section B
+                                    <br><small style="color: #666;">15 minutes ago</small>
+                                </div>
+                            </div>
+                            <div class="activity-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 0;">
+                                <i class="fas fa-truck" style="color: var(--warning-color);"></i>
+                                <div>
+                                    <strong>Vehicle VH-001</strong> entered geofenced area
+                                    <br><small style="color: #666;">1 hour ago</small>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <button onclick="addRowToTable()" class="primary-button">Add Row to Table</button>
-
-                    <div class="glass-card">
-                        <div class="table-controls">
-                            <h3>Inspection Report Table</h3>
-                            <div>
-                                <button onclick="addColumnToTable()" title="Add Column">➕ Column</button>
-                                <button onclick="removeSelectedRow()" title="Remove Row">🗑️ Row</button>
-                                <button onclick="printReportContent()">🖨️ Print</button>
-                                <button onclick="exportToPdfReport()">📄 Export PDF</button>
-                            </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Quick Actions</h3>
                         </div>
-                        <div class="table-container">
-                            <table id="report-table">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" onclick="showPage('inspection')">
+                                <i class="fas fa-plus"></i> New Inspection
+                            </button>
+                            <button class="btn btn-success" onclick="showPage('ai-defect')">
+                                <i class="fas fa-robot"></i> AI Analysis
+                            </button>
+                            <button class="btn btn-warning" onclick="showPage('contracts')">
+                                <i class="fas fa-file-contract"></i> New Contract
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inspection Reports Page -->
+                <div id="inspection-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Inspection Reports System</h1>
+                            <button class="btn btn-primary" onclick="showModal('inspection-modal')">
+                                <i class="fas fa-plus"></i> New Inspection
+                            </button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Asset/Structure Name</label>
+                            <input type="text" id="asset-name" class="form-input" placeholder="Enter asset name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Inspection Type</label>
+                            <select id="inspection-type" class="form-select">
+                                <option value="routine">Routine Inspection</option>
+                                <option value="detailed">Detailed Inspection</option>
+                                <option value="special">Special Inspection</option>
+                                <option value="emergency">Emergency Inspection</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Condition Rating</label>
+                            <select id="condition-rating" class="form-select">
+                                <option value="excellent">Excellent (9-10)</option>
+                                <option value="good">Good (7-8)</option>
+                                <option value="fair">Fair (5-6)</option>
+                                <option value="poor">Poor (3-4)</option>
+                                <option value="critical">Critical (1-2)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Inspection Notes</label>
+                            <textarea id="inspection-notes" class="form-textarea" placeholder="Enter detailed inspection findings..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Recommended Actions</label>
+                            <textarea id="recommended-actions" class="form-textarea" placeholder="Enter recommended maintenance actions..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Priority Level</label>
+                            <select id="priority-level" class="form-select">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn btn-success" onclick="saveInspection()">
+                            <i class="fas fa-save"></i> Save Inspection Report
+                        </button>
+                        
+                        <div class="table-container" style="margin-top: 30px;">
+                            <table class="table">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
                                         <th>Asset</th>
-                                        <th>Status</th>
-                                        <th>Recommendation</th>
-                                        <th>Quantity</th>
-                                        <th>Photos</th>
-                                        <th>Latitude</th>
-                                        <th>Longitude</th>
-                                        <th>Action</th>
+                                        <th>Type</th>
+                                        <th>Condition</th>
+                                        <th>Priority</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody id="inspections-table">
+                                    <tr>
+                                        <td>INS-001</td>
+                                        <td>Bridge A-123</td>
+                                        <td>Routine</td>
+                                        <td><span style="color: var(--success-color);">Good</span></td>
+                                        <td><span style="color: var(--warning-color);">Medium</span></td>
+                                        <td>2024-01-15</td>
+                                        <td>
+                                            <button class="btn btn-info" onclick="viewInspection('INS-001')">View</button>
+                                            <button class="btn btn-warning" onclick="editInspection('INS-001')">Edit</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
                 <!-- Cost Estimation Page -->
-                <div id="cost-estimation-page" class="app-content">
-                    <div class="glass-card">
-                        <div class="estimation-header">
-                            <input type="file" accept="image/*" onchange="loadClientLogoEstimation()" style="display:none;" id="client-logo-estimation-input">
-                            <img id="client-logo-estimation" src="" alt="Client Logo" onclick="document.getElementById('client-logo-estimation-input').click()" style="max-height: 60px; max-width: 150px; object-fit: contain; cursor: pointer;">
-                            <div class="estimation-title">
-                                <h2 contenteditable="true">Maintenance of Strategic Highways Qatar North ZF_093</h2>
-                                <h3 contenteditable="true">Cost Estimation</h3>
-                            </div>
-                            <input type="file" accept="image/*" onchange="loadCompanyLogoEstimation()" style="display:none;" id="company-logo-estimation-input">
-                            <img id="company-logo-estimation" src="" alt="Company Logo" onclick="document.getElementById('company-logo-estimation-input').click()" style="max-height: 60px; max-width: 150px; object-fit: contain; cursor: pointer;">
+                <div id="cost-estimation-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Cost Estimation System</h1>
+                            <button class="btn btn-primary" onclick="addEstimationItem()">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
                         </div>
-                    </div>
-
-                    <div class="glass-card">
-                        <h3>Project Details</h3>
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <div style="display: flex; gap: 15px; align-items: center;">
-                                <label style="font-weight: bold; flex-basis: 150px;">Work Order No.</label>
-                                <input type="text" id="work-order-no" style="flex-grow: 1;">
-                            </div>
-                            <div style="display: flex; gap: 15px; align-items: center;">
-                                <label style="font-weight: bold; flex-basis: 150px;">TPC No.</label>
-                                <input type="text" id="tpc-no" style="flex-grow: 1;">
-                            </div>
-                            <div style="display: flex; gap: 15px; align-items: center;">
-                                <label style="font-weight: bold; flex-basis: 150px;">Description of Work</label>
-                                <input type="text" id="work-desc" style="flex-grow: 1;">
-                            </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Project Name</label>
+                            <input type="text" id="project-name" class="form-input" placeholder="Enter project name">
                         </div>
-                    </div>
-
-                    <div class="card glass-card">
-                        <h3>BOQ Item Entry</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end;">
-                            <div>
-                                <label>BOQ Ref.</label>
-                                <select id="boq-ref-select">
-                                    <option value="B.01">B.01 - Site Clearance</option>
-                                    <option value="C.01">C.01 - Excavation</option>
-                                    <option value="D.01">D.01 - Drainage Works</option>
-                                    <option value="E.01">E.01 - Earthworks</option>
-                                    <option value="F.01">F.01 - Sub-Base</option>
-                                    <option value="G.01">G.01 - Asphalt Surfacing</option>
-                                </select>
-                            </div>
-                            <div style="grid-column: 1 / -1;">
-                                <label>Description</label>
-                                <input type="text" id="boq-desc" readonly>
-                            </div>
-                            <div>
-                                <label>Unit</label>
-                                <input type="text" id="boq-unit" readonly>
-                            </div>
-                            <div>
-                                <label>NR</label>
-                                <input type="number" id="boq-nr" placeholder="e.g., 1">
-                            </div>
-                            <div>
-                                <label>Length (m)</label>
-                                <input type="number" id="boq-length" placeholder="e.g., 4.00">
-                            </div>
-                            <div>
-                                <label>Width (m)</label>
-                                <input type="number" id="boq-width" placeholder="e.g., 2.00">
-                            </div>
-                            <div>
-                                <label>Height (m)</label>
-                                <input type="number" id="boq-height" placeholder="e.g., 0.07">
-                            </div>
-                            <div>
-                                <label>Total Qty.</label>
-                                <input type="text" id="boq-total-qty" readonly>
-                            </div>
-                            <div>
-                                <label>Rate</label>
-                                <input type="text" id="boq-rate" readonly>
-                            </div>
-                            <div>
-                                <label>Amount (QR)</label>
-                                <input type="text" id="boq-amount" readonly>
-                            </div>
-                            <div style="grid-column: 1 / -1;">
-                                <label>Remarks</label>
-                                <input type="text" id="boq-remarks">
+                        
+                        <div class="form-group">
+                            <label class="form-label">Project Type</label>
+                            <select id="project-type" class="form-select">
+                                <option value="road">Road Construction</option>
+                                <option value="bridge">Bridge Construction</option>
+                                <option value="building">Building Construction</option>
+                                <option value="maintenance">Maintenance Works</option>
+                            </select>
+                        </div>
+                        
+                        <div id="cost-items" style="margin: 20px 0;">
+                            <h3>Cost Items</h3>
+                            <div class="table-container">
+                                <table class="table" id="cost-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Description</th>
+                                            <th>Unit</th>
+                                            <th>Quantity</th>
+                                            <th>Rate</th>
+                                            <th>Amount</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cost-items-body">
+                                        <tr>
+                                            <td colspan="6" class="text-center">No items added yet</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="4">Total Estimated Cost:</th>
+                                            <th id="total-cost">$0.00</th>
+                                            <th></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 10px; margin-top: 15px;">
-                            <button onclick="downloadBOQTemplate()" class="primary-button">Download BOQ Template</button>
-                            <button onclick="document.getElementById('boq-csv-input').click()" class="primary-button">Import BOQ CSV</button>
-                            <input type="file" id="boq-csv-input" style="display:none;" accept=".csv">
-                            <button onclick="insertBOQRowFromForm()" class="btn-success">Insert Row</button>
-                        </div>
-                    </div>
-
-                    <div class="glass-card">
-                        <div class="table-controls">
-                            <h3>Cost Estimation Table</h3>
-                            <div>
-                                <button onclick="printCostEstimation()">🖨️ Print</button>
-                                <button onclick="exportCostEstimationPDF()">📄 Export PDF</button>
-                            </div>
-                        </div>
-                        <div class="table-container">
-                            <table id="cost-estimation-table">
-                                <thead>
-                                    <tr>
-                                        <th>BOQ Ref.</th>
-                                        <th>Description</th>
-                                        <th>Unit</th>
-                                        <th>NR</th>
-                                        <th>Length (m)</th>
-                                        <th>Width (m)</th>
-                                        <th>Height (m)</th>
-                                        <th>Total Qty.</th>
-                                        <th>Rate</th>
-                                        <th>Amount</th>
-                                        <th>Remarks</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="9" style="text-align: right; font-weight: bold;">TOTAL Amount</td>
-                                        <td id="total-amount-cell" style="font-weight: bold;">QAR 0.00</td>
-                                        <td colspan="2"></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success" onclick="saveEstimation()">
+                                <i class="fas fa-save"></i> Save Estimation
+                            </button>
+                            <button class="btn btn-info" onclick="exportEstimation()">
+                                <i class="fas fa-download"></i> Export PDF
+                            </button>
+                            <button class="btn btn-warning" onclick="clearEstimation()">
+                                <i class="fas fa-trash"></i> Clear All
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- AI Analysis Page -->
-                <div id="ai-page" class="app-content">
+                <!-- GIS Mapping Page -->
+                <div id="map-page" class="page">
                     <div class="card">
-                        <h2><i class="fa-solid fa-robot"></i> AI Road Defect Analysis</h2>
-                        <p>Upload a road surface image to analyze for defects.</p>
-                        <input type="file" id="ai-image-upload" accept="image/*">
-                        <button class="btn-primary" onclick="handleAIAnalysis()">
-                            <i class="fa-solid fa-magnifying-glass"></i> Analyze with AI
-                        </button>
-                    </div>
-                    <div class="card" id="ai-results-card" style="display:none;">
-                        <h3>Analysis Result</h3>
-                        <div id="ai-spinner" style="display:none; text-align:center; padding:20px;">
-                            <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
-                            <p>Analyzing...</p>
+                        <div class="card-header">
+                            <h1 class="card-title">GIS Mapping System</h1>
                         </div>
-                        <div id="ai-results-table" class="table-container"></div>
-                        <div style="display:flex; gap: 10px; margin-top: 20px;">
-                            <button class="btn" onclick="exportAiResultsToCsv()">
-                                <i class="fa-solid fa-file-csv"></i> Export to CSV
+                        <div class="map-controls">
+                            <button class="btn btn-primary" id="standard-view" onclick="setMapView('standard')">
+                                <i class="fas fa-map"></i> Standard
                             </button>
-                            <button class="btn" onclick="exportAiResultsToPdf()">
-                                <i class="fa-solid fa-file-pdf"></i> Export to PDF
+                            <button class="btn" id="satellite-view" onclick="setMapView('satellite')">
+                                <i class="fas fa-satellite"></i> Satellite
                             </button>
+                            <button class="btn" onclick="toggleTrafficLayer()">
+                                <i class="fas fa-car"></i> Traffic Simulation
+                            </button>
+                            <button class="btn" onclick="toggleWeatherLayer()">
+                                <i class="fas fa-cloud"></i> Weather Simulation
+                            </button>
+                            <button class="btn" onclick="showQNAS()">
+                                <i class="fas fa-question-circle"></i> QNAS System
+                            </button>
+                            <button class="btn" onclick="exportMapData()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                            <input type="file" id="map-import" accept=".json,.geojson" style="display: none;" onchange="importMapData(event)">
+                            <button class="btn" onclick="document.getElementById('map-import').click()">
+                                <i class="fas fa-upload"></i> Import
+                            </button>
+                        </div>
+                        <div id="map" class="map-container"></div>
+                        
+                        <!-- QNAS Panel -->
+                        <div id="qnas-panel" style="display: none; margin-top: 20px;" class="card">
+                            <h3>Quality Navigation and Analysis System (QNAS)</h3>
+                            <div class="form-group">
+                                <label class="form-label">Analysis Type</label>
+                                <select id="qnas-type" class="form-select">
+                                    <option value="traffic">Traffic Flow Analysis</option>
+                                    <option value="route">Route Optimization</option>
+                                    <option value="accessibility">Accessibility Analysis</option>
+                                    <option value="safety">Safety Assessment</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" onclick="runQNASAnalysis()">
+                                <i class="fas fa-play"></i> Run Analysis
+                            </button>
+                            <div id="qnas-results" style="margin-top: 15px;"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- CAD Drawing Page -->
-                <div id="drawing-page" class="app-content">
+                <div id="drawing-page" class="page">
                     <div class="card">
-                        <h2><i class="fa-solid fa-pencil-ruler"></i> CAD Drawing & Annotation</h2>
-                        <div id="drawing-toolbar">
-                            <button id="tool-pen" class="active" onclick="setDrawingTool('pen')">🖊️ Pen</button>
-                            <button id="tool-rect" onclick="setDrawingTool('rect')">⬛ Rectangle</button>
-                            <button id="tool-circle" onclick="setDrawingTool('circle')">🔵 Circle</button>
-                            <button id="tool-arrow" onclick="setDrawingTool('arrow')">↗️ Arrow</button>
-                            <button id="tool-text" onclick="setDrawingTool('text')">🅰️ Text</button>
-                            <button id="tool-eraser" onclick="setDrawingTool('eraser')">🧼 Eraser</button>
-                            <label for="stroke-color">Color:</label>
-                            <input type="color" id="stroke-color" value="#000000" onchange="setDrawingColor(this.value)">
-                            <label for="stroke-width">Width:</label>
-                            <input type="number" id="stroke-width" value="2" min="1" max="20" onchange="setDrawingWidth(this.value)">
-                            <button onclick="clearDrawingCanvas()">Clear Canvas</button>
-                            <input type="file" id="drawing-image-upload" accept="image/*" onchange="loadDrawingImage(event)" style="display:none;">
-                            <button onclick="document.getElementById('drawing-image-upload').click()">📁 Import Image</button>
-                            <button onclick="saveDrawing()">💾 Save Drawing</button>
-                            <button onclick="exportDrawing('png')">📤 Export PNG</button>
-                            <button onclick="exportDrawing('dwg')">📤 Export DWG</button>
-                            <button onclick="exportDrawing('json')">📤 Export JSON</button>
+                        <div class="card-header">
+                            <h1 class="card-title">CAD Drawing Editor</h1>
+                            <div class="d-flex gap-2">
+                                <input type="file" id="cad-import" accept=".dwg,.dxf,.json" style="display: none;" onchange="importCAD(event)">
+                                <button class="btn btn-info" onclick="document.getElementById('cad-import').click()">
+                                    <i class="fas fa-upload"></i> Import
+                                </button>
+                                <button class="btn btn-success" onclick="exportCAD()">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                                <button class="btn btn-warning" onclick="insertCADElement()">
+                                    <i class="fas fa-plus"></i> Insert Element
+                                </button>
+                            </div>
                         </div>
-                        <div id="drawing-canvas-container">
-                            <canvas id="drawing-canvas"></canvas>
+                        
+                        <div class="drawing-tools">
+                            <button class="tool-btn active" onclick="selectTool('select')" data-tool="select">
+                                <i class="fas fa-mouse-pointer"></i> Select
+                            </button>
+                            <button class="tool-btn" onclick="selectTool('line')" data-tool="line">
+                                <i class="fas fa-minus"></i> Line
+                            </button>
+                            <button class="tool-btn" onclick="selectTool('rectangle')" data-tool="rectangle">
+                                <i class="fas fa-square"></i> Rectangle
+                            </button>
+                            <button class="tool-btn" onclick="selectTool('circle')" data-tool="circle">
+                                <i class="fas fa-circle"></i> Circle
+                            </button>
+                            <button class="tool-btn" onclick="selectTool('text')" data-tool="text">
+                                <i class="fas fa-font"></i> Text
+                            </button>
+                            <button class="tool-btn" onclick="clearDrawing()" data-tool="clear">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
                         </div>
-                        <div id="saved-drawings-list" style="margin-top: 20px;">
-                            <h3>Saved Drawings</h3>
-                            <ul id="drawings-list"></ul>
+                        
+                        <canvas id="drawing-canvas" class="drawing-canvas" width="800" height="600"></canvas>
+                        
+                        <div class="d-flex gap-2" style="margin-top: 15px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Stroke Color:</label>
+                                <input type="color" id="stroke-color" value="#000000" style="width: 50px; height: 35px; border: none; border-radius: 4px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Fill Color:</label>
+                                <input type="color" id="fill-color" value="#ffffff" style="width: 50px; height: 35px; border: none; border-radius: 4px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Line Width:</label>
+                                <input type="range" id="line-width" min="1" max="10" value="2" style="width: 100px;">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Notebook Page -->
-                <div id="notebook-page" class="app-content">
+                <!-- Additional Pages -->
+                <div id="contracts-page" class="page">
                     <div class="card">
-                        <h2><i class="fa-solid fa-book"></i> Engineering Notebook</h2>
-                        <div style="display:flex; gap: 10px; margin-bottom: 20px;">
-                            <button class="btn-success" onclick="showModal('note-modal')">
-                                <i class="fa-solid fa-plus"></i> Add New Note
+                        <div class="card-header">
+                            <h1 class="card-title">Contracts & BOQ Management</h1>
+                            <button class="btn btn-primary" onclick="createContract()">
+                                <i class="fas fa-plus"></i> New Contract
                             </button>
-                            <input type="text" id="note-filter-tags" placeholder="Filter by tags (comma-separated)" style="flex-grow: 1;">
-                            <button class="btn" onclick="filterNotes()">Apply Filter</button>
-                            <button class="btn" onclick="loadNotes()">Clear Filter</button>
                         </div>
-                        <div id="notes-list">
-                            <p>No notes yet. Add one to get started.</p>
+                        <p>Contract management interface with BOQ integration.</p>
+                    </div>
+                </div>
+
+                <div id="ai-defect-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">AI-Powered Defect Analysis</h1>
+                        </div>
+                        <div class="file-upload" onclick="document.getElementById('defect-image').click()">
+                            <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                            <h3>Upload Images for Analysis</h3>
+                            <p>Drag and drop images here or click to select</p>
+                            <input type="file" id="defect-image" multiple accept="image/*" style="display: none;" onchange="analyzeDefects(event)">
+                        </div>
+                        <div id="analysis-results" style="display: none;">
+                            <h3>Analysis Results</h3>
+                            <div id="results-container"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Projects Page -->
-                <div id="projects-page" class="app-content">
+                <!-- Other placeholder pages -->
+                <div id="projects-page" class="page">
                     <div class="card">
-                        <h2><i class="fa-solid fa-folder-open"></i> Project Management</h2>
-                        <p>Manage your engineering projects.</p>
-                        <div style="display:flex; gap: 10px; margin-bottom: 20px;">
-                            <button class="btn-success" onclick="createNewProject()">
-                                <i class="fa-solid fa-plus"></i> New Project
-                            </button>
-                            <input type="file" id="import-projects-json" accept=".json" style="display:none;" onchange="importAllProjects(event)">
-                            <button class="btn" onclick="document.getElementById('import-projects-json').click()">
-                                <i class="fa-solid fa-upload"></i> Import Projects
-                            </button>
-                            <button class="btn" onclick="exportAllProjects()">
-                                <i class="fa-solid fa-download"></i> Export All Projects
-                            </button>
+                        <div class="card-header">
+                            <h1 class="card-title">Project Management</h1>
                         </div>
-                    </div>
-                    <div class="card">
-                        <h3>Your Projects</h3>
-                        <ul id="projects-list">
-                            <p>No projects saved yet. Create a new one or save your current work.</p>
-                        </ul>
+                        <p>Project management interface.</p>
                     </div>
                 </div>
 
-                <!-- Notifications Page -->
-                <div id="notifications-page" class="app-content">
+                <div id="timeline-page" class="page">
                     <div class="card">
-                        <h2><i class="fa-solid fa-bell"></i> Notifications</h2>
-                        <div class="table-container">
-                            <table id="notifications-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Type</th>
-                                        <th>Message</th>
-                                        <th>Severity</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="notifications-table-body"></tbody>
-                            </table>
+                        <div class="card-header">
+                            <h1 class="card-title">Project Timeline</h1>
+                        </div>
+                        <p>Project timeline interface.</p>
+                    </div>
+                </div>
+
+                <div id="notebooks-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Engineering Notebooks</h1>
+                        </div>
+                        <p>Engineering notebooks interface.</p>
+                    </div>
+                </div>
+
+                <div id="vehicle-tracking-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Vehicle Tracking System</h1>
+                        </div>
+                        <p>Vehicle tracking interface.</p>
+                    </div>
+                </div>
+
+                <div id="material-logistics-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Material Logistics Management</h1>
+                        </div>
+                        <p>Material logistics interface.</p>
+                    </div>
+                </div>
+
+                <div id="sign-fabrication-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Sign Fabrication Management</h1>
+                        </div>
+                        <p>Sign fabrication interface.</p>
+                    </div>
+                </div>
+
+                <div id="scrap-management-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Scrap Management</h1>
+                        </div>
+                        <p>Scrap management interface.</p>
+                    </div>
+                </div>
+
+                <div id="chat-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Team Chat</h1>
+                        </div>
+                        <p>Team chat interface.</p>
+                    </div>
+                </div>
+
+                <div id="telegram-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Telegram Integration</h1>
+                        </div>
+                        <p>Telegram integration interface.</p>
+                    </div>
+                </div>
+
+                <div id="reports-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Custom Reports</h1>
+                        </div>
+                        <p>Custom reports interface.</p>
+                    </div>
+                </div>
+
+                <div id="file-manager-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">File Manager</h1>
+                        </div>
+                        <p>File manager interface.</p>
+                    </div>
+                </div>
+
+                <div id="notifications-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Notifications</h1>
+                        </div>
+                        <p>Notifications interface.</p>
+                    </div>
+                </div>
+
+                <div id="settings-page" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h1 class="card-title">Settings</h1>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Admin Panel Access</label>
+                            <input type="password" id="admin-password" class="form-input" placeholder="Enter admin password">
+                            <button class="btn btn-primary mt-2" onclick="accessAdminPanel()">Access Admin Panel</button>
+                        </div>
+                        <div id="admin-panel" style="display: none;">
+                            <h3>API Configuration</h3>
+                            <div class="form-group">
+                                <label class="form-label">Roboflow API Key</label>
+                                <input type="text" id="roboflow-key" class="form-input" placeholder="Enter Roboflow API key">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Telegram Bot Token</label>
+                                <input type="text" id="telegram-token" class="form-input" placeholder="Enter Telegram bot token">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Weather API Key</label>
+                                <input type="text" id="weather-key" class="form-input" placeholder="Enter weather API key">
+                            </div>
+                            <button class="btn btn-success" onclick="saveAPIConfig()">Save Configuration</button>
                         </div>
                     </div>
                 </div>
@@ -1128,847 +1314,329 @@
     </div>
 
     <!-- Modals -->
-    <div id="contract-form-modal" class="modal-overlay">
+    <div id="inspection-modal" class="modal">
         <div class="modal-content">
-            <button class="modal-close-btn" onclick="hideModal('contract-form-modal')">&times;</button>
-            <h2>Add New Contract</h2>
-            <form id="contract-form" onsubmit="handleSaveContract(event)">
-                <input type="text" id="contract-title" placeholder="Contract Title" required>
-                <input type="text" id="contract-number" placeholder="Contract Number" required>
-                <label>Start Date:</label>
-                <input type="date" id="contract-start" required>
-                <label>End Date:</label>
-                <input type="date" id="contract-end" required>
-                <label>Project Value:</label>
-                <input type="number" id="contract-value" placeholder="Project Value" required>
-                <label>Company Name:</label>
-                <input type="text" id="company-name" placeholder="Company Name" required>
-                <label>Client Name:</label>
-                <input type="text" id="client-name" placeholder="Client Name" required>
-                <button type="submit" class="btn-success">Save Contract</button>
+            <button class="modal-close" onclick="hideModal('inspection-modal')">&times;</button>
+            <h2>New Inspection Report</h2>
+            <form id="inspection-form">
+                <div class="form-group">
+                    <label class="form-label">Asset Name</label>
+                    <input type="text" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-select">
+                        <option>Good</option>
+                        <option>Fair</option>
+                        <option>Poor</option>
+                        <option>Critical</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-textarea"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Inspection</button>
             </form>
         </div>
-    </div>
-
-    <div id="save-project-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn" onclick="hideModal('save-project-modal')">&times;</button>
-            <h2>Save Project</h2>
-            <form id="save-project-form" onsubmit="handleSaveProject(event)">
-                <label for="project-name-input">Project Name:</label>
-                <input type="text" id="project-name-input" placeholder="Enter project name" required>
-                <button type="submit" class="btn-success">Save Project</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="note-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn" onclick="hideModal('note-modal')">&times;</button>
-            <h2 id="note-modal-title">Add New Note</h2>
-            <form id="note-form" onsubmit="handleSaveNote(event)">
-                <label for="note-title">Title:</label>
-                <input type="text" id="note-title" placeholder="Note Title" required>
-                <label for="note-content">Content:</label>
-                <textarea id="note-content" placeholder="Write your note here..."></textarea>
-                <label for="note-tags">Tags (comma-separated):</label>
-                <input type="text" id="note-tags" placeholder="e.g., road, inspection, defect">
-                <button type="submit" class="btn-success">Save Note</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="quantity-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn" onclick="hideModal('quantity-modal')">&times;</button>
-            <h3>Enter Quantity Details</h3>
-            <input type="number" id="length" placeholder="Length (m)">
-            <input type="number" id="width" placeholder="Width (m)">
-            <input type="number" id="depth" placeholder="Depth (m)">
-            <input type="number" id="repetitions" placeholder="Repetitions (NR)">
-            <button onclick="calculateQuantity()" class="btn-primary">Calculate Quantity</button>
-        </div>
-    </div>
-
-    <div id="marzipano-viewer-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 90vw; max-height: 90vh; padding: 0;">
-            <button class="modal-close-btn" onclick="hideModal('marzipano-viewer-modal')">&times;</button>
-            <div id="marzipano-viewer" class="marzipano-viewer"></div>
-        </div>
-    </div>
-
-    <!-- Floating Action Buttons -->
-    <div class="fab-container">
-        <button id="camera-fab" class="fab" onclick="openCamera()" title="Open Camera">📷</button>
-        <button id="add-fab" class="fab" onclick="focusAssetInput()" title="Add New Asset">➕</button>
     </div>
 
     <script>
         // Global Variables
-        let currentProjectId = localStorage.getItem('currentProjectId') || 'default-project';
-        let currentLang = 'en';
-        let map, drawnItems, reportMap;
-        let drawingCanvas, drawingCtx;
-        let currentTool = 'pen';
-        let strokeColor = '#000000';
-        let strokeWidth = 2;
-        let currentDrawingData = [];
+        let currentUser = null;
+        let currentPage = 'dashboard';
+        let map = null;
+        let standardLayer = null;
+        let satelliteLayer = null;
+        let currentMapView = 'standard';
+        let isAuthMode = 'signin';
+        let notifications = [];
+        let projects = [];
+        let apiConfig = {};
+        let inspections = [];
+        let costItems = [];
+        let drawingContext = null;
+        let currentTool = 'select';
         let isDrawing = false;
-        let trafficLayerVisible = false;
-        let weatherLayerVisible = false;
-        let qnasVisible = false;
-        let editingNoteId = null;
-        let currentLatitude = null;
-        let currentLongitude = null;
-        let reportCurrentMarker = null;
-        let clientLogo = null;
-        let companyLogo = null;
+        let trafficSimulation = false;
+        let weatherSimulation = false;
 
-        // Utility Functions
-        const getEl = (id) => document.getElementById(id);
-        const showModal = (id) => getEl(id).classList.add('active');
-        const hideModal = (id) => getEl(id).classList.remove('active');
-        const generateId = () => 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://cykjjrrexaqmsqwrgnzp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5a2pqcnJleGFxbXNxd3JnbnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MjUyMDksImV4cCI6MjA2NzIwMTIwOX0.Fx6f23TWCQQMCIkc5hcx8LqHyskVMm6WAhJl1UFZpMA';
 
-        // Database Simulation
-        const DB = {
-            get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
-            set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
-            init: () => {
-                if (!localStorage.getItem('contracts')) DB.set('contracts', []);
-                if (!localStorage.getItem('notifications')) DB.set('notifications', []);
-                if (!localStorage.getItem('projects')) DB.set('projects', []);
-                if (!localStorage.getItem('notes')) DB.set('notes', []);
-                if (!localStorage.getItem('drawings')) DB.set('drawings', []);
-                if (!localStorage.getItem('mapData')) DB.set('mapData', { layers: [] });
-            }
-        };
-
-        // BOQ Data
-        const boqData = [
-            { ref: 'B.01', description: 'Site Clearance', unit: 'm²', rate: 15.50 },
-            { ref: 'C.01', description: 'Excavation in ordinary material', unit: 'm³', rate: 25.75 },
-            { ref: 'D.01', description: 'Drainage pipe installation', unit: 'm', rate: 85.00 },
-            { ref: 'E.01', description: 'Earthworks - Fill material', unit: 'm³', rate: 18.25 },
-            { ref: 'F.01', description: 'Sub-base material', unit: 'm³', rate: 32.50 },
-            { ref: 'G.01', description: 'Asphalt concrete surfacing', unit: 'm²', rate: 45.75 }
-        ];
-
-        // Language Support
-        function switchLanguage(lang) {
-            currentLang = lang;
-            document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
-        }
+        // Initialize Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Page Navigation
-        function showAppPage(pageId) {
+        function showPage(pageId) {
+            console.log('Switched to page:', pageId + '-page');
+            
             // Hide all pages
-            document.querySelectorAll('.app-content').forEach(page => {
+            document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
-            
+
             // Show selected page
-            getEl(pageId).classList.add('active');
-            
+            const page = document.getElementById(`${pageId}-page`);
+            if (page) {
+                page.classList.add('active');
+                currentPage = pageId;
+            }
+
             // Update navigation
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            const navBtn = document.querySelector(`[onclick="showAppPage('${pageId}')"]`);
-            if (navBtn) navBtn.classList.add('active');
-            
-            // Page-specific initialization
-            if (pageId === 'map-page' && !window.mapInitialized) {
-                setTimeout(initializeMap, 100);
-            }
-            if (pageId === 'inspection-page') {
-                setTimeout(initializeReportMap, 100);
-            }
-            if (pageId === 'drawing-page') {
-                setTimeout(initializeDrawingCanvas, 100);
-            }
-            if (pageId === 'projects-page') {
-                loadProjectsList();
-            }
-            if (pageId === 'notebook-page') {
-                loadNotes();
-            }
-            if (pageId === 'notifications-page') {
-                loadNotifications();
-            }
-            if (pageId === 'contracts-page') {
-                loadContracts();
-            }
-            if (pageId === 'dashboard-page') {
-                updateDashboardStats();
-            }
-            
-            console.log('Switched to page:', pageId);
-        }
-
-        // Dashboard Functions
-        function updateDashboardStats() {
-            const projects = DB.get('projects');
-            const contracts = DB.get('contracts');
-            const notifications = DB.get('notifications');
-            
-            getEl('active-projects-count').textContent = projects.length;
-            getEl('contracts-count').textContent = contracts.length;
-            getEl('notifications-count').textContent = notifications.length;
-            getEl('ai-analyses-count').textContent = '0'; // This would be calculated from AI results
-        }
-
-        // Contract Management
-        function handleSaveContract(e) {
-            e.preventDefault();
-            const title = getEl('contract-title').value;
-            const number = getEl('contract-number').value;
-            const start = getEl('contract-start').value;
-            const end = getEl('contract-end').value;
-            const value = getEl('contract-value').value;
-            const company = getEl('company-name').value;
-            const client = getEl('client-name').value;
-
-            const contracts = DB.get('contracts');
-            const newContract = {
-                id: generateId(),
-                title, number, start, end, value, company, client,
-                createdAt: new Date().toISOString()
-            };
-            contracts.push(newContract);
-            DB.set('contracts', contracts);
-            
-            hideModal('contract-form-modal');
-            getEl('contract-form').reset();
-            loadContracts();
-            addNotification('Contract', `New contract "${title}" added.`, 'success');
-        }
-
-        function loadContracts() {
-            const contracts = DB.get('contracts');
-            const container = getEl('saved-contracts-list');
-            container.innerHTML = '';
-            
-            if (contracts.length === 0) {
-                container.innerHTML = '<p>No contracts found. Add one to get started.</p>';
-                return;
-            }
-            
-            contracts.forEach(contract => {
-                const card = document.createElement('div');
-                card.className = 'contract-card';
-                card.innerHTML = `
-                    <h3>${contract.title}</h3>
-                    <p><strong>Number:</strong> ${contract.number}</p>
-                    <p><strong>Value:</strong> $${contract.value}</p>
-                    <p><strong>Company:</strong> ${contract.company}</p>
-                    <p><strong>Client:</strong> ${contract.client}</p>
-                    <p><strong>Period:</strong> ${contract.start} to ${contract.end}</p>
-                    <button class="btn-danger" onclick="deleteContract('${contract.id}')">Delete</button>
-                `;
-                container.appendChild(card);
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
             });
+
+            const navItem = document.querySelector(`[onclick="showPage('${pageId}')"]`);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+
+            // Initialize page-specific functionality
+            if (pageId === 'map' && !map) {
+                setTimeout(initializeMap, 100);
+            } else if (pageId === 'drawing') {
+                setTimeout(initializeDrawing, 100);
+            }
         }
 
-        function deleteContract(contractId) {
-            if (!confirm('Are you sure you want to delete this contract?')) return;
-            let contracts = DB.get('contracts');
-            contracts = contracts.filter(c => c.id !== contractId);
-            DB.set('contracts', contracts);
-            loadContracts();
-            addNotification('Contract', 'Contract deleted.', 'danger');
+        // Authentication Functions
+        async function initAuth() {
+            // Skip authentication for demo
+            showMainApp();
+        }
+
+        function showMainApp() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            initializeApp();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        function toggleUserMenu() {
+            document.getElementById('user-dropdown').classList.toggle('active');
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle i');
+
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeToggle.className = 'fas fa-moon';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.className = 'fas fa-sun';
+            }
         }
 
         // Map Functions
         function initializeMap() {
-            if (window.mapInitialized) return;
-            
-            const mapContainer = getEl('map-container');
-            if (!mapContainer) return;
-            
-            map = L.map('map-container').setView([25.2854, 51.5310], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            if (map) return;
+
+            const mapElement = document.getElementById('map');
+            if (!mapElement) return;
+
+            // Initialize map
+            map = L.map('map').setView([25.2854, 51.5310], 12);
+
+            // Standard tile layer
+            standardLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-
-            drawnItems = new L.FeatureGroup();
-            map.addLayer(drawnItems);
-
-            // Add drawing controls
-            map.pm.addControls({
-                position: 'topleft',
-                drawCircle: false,
             });
 
-            map.on('pm:create', (e) => {
-                drawnItems.addLayer(e.layer);
-                addNotification('Map', 'New feature added to map.', 'info');
+            // Satellite tile layer
+            satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles © Esri'
             });
 
-            window.mapInitialized = true;
+            // Add default layer
+            standardLayer.addTo(map);
+
+            // Add drawing controls if available
+            if (L.PM) {
+                map.pm.addControls({
+                    position: 'topleft',
+                    drawCircle: true,
+                    drawMarker: true,
+                    drawPolygon: true,
+                    drawRectangle: true,
+                    drawPolyline: true,
+                    editMode: true,
+                    dragMode: true,
+                    cutPolygon: true,
+                    removalMode: true
+                });
+            }
+
+            console.log('Map initialized successfully');
+        }
+
+        function setMapView(viewType) {
+            if (!map) return;
+
+            if (viewType === 'satellite') {
+                map.removeLayer(standardLayer);
+                map.addLayer(satelliteLayer);
+                currentMapView = 'satellite';
+                document.getElementById('satellite-view').classList.add('btn-primary');
+                document.getElementById('standard-view').classList.remove('btn-primary');
+            } else {
+                map.removeLayer(satelliteLayer);
+                map.addLayer(standardLayer);
+                currentMapView = 'standard';
+                document.getElementById('standard-view').classList.add('btn-primary');
+                document.getElementById('satellite-view').classList.remove('btn-primary');
+            }
+
+            console.log(`Switched to ${viewType} view`);
         }
 
         function toggleTrafficLayer() {
-            trafficLayerVisible = !trafficLayerVisible;
-            const trafficInfo = getEl('traffic-info');
-            
-            if (trafficLayerVisible) {
-                trafficInfo.style.display = 'block';
-                getEl('traffic-alerts').innerHTML = '<p>✅ Traffic monitoring active</p>';
-                addNotification('Traffic', 'Traffic layer activated.', 'info');
+            trafficSimulation = !trafficSimulation;
+            if (trafficSimulation) {
+                // Simulate traffic overlay
+                console.log('Traffic simulation enabled');
+                alert('Traffic simulation layer activated');
             } else {
-                trafficInfo.style.display = 'none';
-                addNotification('Traffic', 'Traffic layer deactivated.', 'info');
+                console.log('Traffic simulation disabled');
+                alert('Traffic simulation layer deactivated');
             }
         }
 
         function toggleWeatherLayer() {
-            weatherLayerVisible = !weatherLayerVisible;
-            const weatherInfo = getEl('weather-info');
-            
-            if (weatherLayerVisible) {
-                weatherInfo.style.display = 'block';
-                getEl('weather-alerts').innerHTML = '<p>☀️ Clear weather conditions</p>';
-                addNotification('Weather', 'Weather layer activated.', 'info');
+            weatherSimulation = !weatherSimulation;
+            if (weatherSimulation) {
+                // Simulate weather overlay
+                console.log('Weather simulation enabled');
+                alert('Weather simulation layer activated');
             } else {
-                weatherInfo.style.display = 'none';
-                addNotification('Weather', 'Weather layer deactivated.', 'info');
+                console.log('Weather simulation disabled');
+                alert('Weather simulation layer deactivated');
             }
         }
 
         function showQNAS() {
-            qnasVisible = !qnasVisible;
-            const qnasPanel = getEl('qnas-panel');
-            qnasPanel.style.display = qnasVisible ? 'block' : 'none';
+            const panel = document.getElementById('qnas-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         }
 
-        function submitQNASQuestion() {
-            const question = getEl('qnas-question').value;
-            if (!question.trim()) return;
+        function runQNASAnalysis() {
+            const analysisType = document.getElementById('qnas-type').value;
+            const resultsDiv = document.getElementById('qnas-results');
             
-            const responses = getEl('qnas-responses');
-            const questionDiv = document.createElement('div');
-            questionDiv.innerHTML = `
-                <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px;">
-                    <strong>Q:</strong> ${question}
-                </div>
-                <div style="background: #e8f5e8; padding: 10px; margin: 10px 0; border-radius: 5px;">
-                    <strong>A:</strong> This is a simulated response. In a real implementation, this would connect to an AI service or knowledge base.
-                </div>
-            `;
-            responses.appendChild(questionDiv);
-            getEl('qnas-question').value = '';
+            resultsDiv.innerHTML = '<div class="spinner"></div><p>Running QNAS analysis...</p>';
+            
+            setTimeout(() => {
+                resultsDiv.innerHTML = `
+                    <div class="card">
+                        <h4>${analysisType.charAt(0).toUpperCase() + analysisType.slice(1)} Analysis Results</h4>
+                        <p>Analysis completed successfully. Results show optimal routing patterns and traffic flow recommendations.</p>
+                        <ul>
+                            <li>Efficiency Score: 85%</li>
+                            <li>Recommended Routes: 3 alternative paths identified</li>
+                            <li>Estimated Time Savings: 15-20 minutes</li>
+                        </ul>
+                    </div>
+                `;
+            }, 2000);
         }
 
-        function simulateTrafficIncident() {
-            addNotification('Traffic', 'Simulated: Traffic congestion detected near project site.', 'warning');
-            if (trafficLayerVisible) {
-                getEl('traffic-alerts').innerHTML = '<p>⚠️ Traffic incident reported</p>';
-            }
-        }
+        function exportMapData() {
+            const mapData = {
+                center: map ? map.getCenter() : null,
+                zoom: map ? map.getZoom() : null,
+                view: currentMapView,
+                timestamp: new Date().toISOString()
+            };
 
-        function simulateWeatherAlert() {
-            addNotification('Weather', 'Simulated: Severe weather warning for the region.', 'danger');
-            if (weatherLayerVisible) {
-                getEl('weather-alerts').innerHTML = '<p>🌧️ Weather alert active</p>';
-            }
-        }
+            const dataStr = JSON.stringify(mapData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
 
-        function exportMapJson() {
-            const mapData = { layers: [] }; // Simplified for demo
-            const blob = new Blob([JSON.stringify(mapData, null, 2)], { type: 'application/json' });
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'map_data.json';
+            link.href = url;
+            link.download = 'map-data.json';
             link.click();
-            addNotification('Map', 'Map data exported.', 'success');
+
+            console.log('Map data exported successfully');
         }
 
-        function importMapJson(event) {
+        function importMapData(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const mapData = JSON.parse(e.target.result);
-                    addNotification('Map', 'Map data imported successfully.', 'success');
+                    console.log('Map data imported:', mapData);
+                    alert('Map data imported successfully');
                 } catch (error) {
-                    addNotification('Map', 'Error importing map data.', 'error');
+                    console.error('Error importing map data:', error);
+                    alert('Error importing map data');
                 }
             };
             reader.readAsText(file);
         }
 
-        // Inspection Report Functions
-        function initializeReportMap() {
-            const reportMapEl = getEl('report-map');
-            if (!reportMapEl || reportMap) return;
+        // CAD Drawing Functions
+        function initializeDrawing() {
+            const canvas = document.getElementById('drawing-canvas');
+            if (!canvas) return;
+
+            drawingContext = canvas.getContext('2d');
             
-            reportMap = L.map('report-map').setView([25.2854, 51.5310], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(reportMap);
-        }
-
-        function switchLocationMode(mode) {
-            const autoPanel = getEl('location-auto-panel');
-            const manualPanel = getEl('location-manual-panel');
-            const autoBtn = getEl('gps-auto-btn');
-            const manualBtn = getEl('gps-manual-btn');
-            
-            if (mode === 'auto') {
-                autoPanel.style.display = 'block';
-                manualPanel.style.display = 'none';
-                autoBtn.classList.add('active');
-                manualBtn.classList.remove('active');
-            } else {
-                autoPanel.style.display = 'none';
-                manualPanel.style.display = 'block';
-                autoBtn.classList.remove('active');
-                manualBtn.classList.add('active');
-            }
-        }
-
-        function getCurrentLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    currentLatitude = position.coords.latitude;
-                    currentLongitude = position.coords.longitude;
-                    updateLocationDisplay();
-                    updateReportMap();
-                    addNotification('GPS', 'Location acquired successfully.', 'success');
-                }, (error) => {
-                    addNotification('GPS', 'Failed to get location: ' + error.message, 'error');
-                });
-            } else {
-                addNotification('GPS', 'Geolocation is not supported by this browser.', 'error');
-            }
-        }
-
-        function updateLocationDisplay() {
-            getEl('lat-display').textContent = currentLatitude ? currentLatitude.toFixed(6) : 'N/A';
-            getEl('lng-display').textContent = currentLongitude ? currentLongitude.toFixed(6) : 'N/A';
-        }
-
-        function updateReportMap() {
-            if (reportMap && currentLatitude && currentLongitude) {
-                reportMap.setView([currentLatitude, currentLongitude], 15);
-                
-                if (reportCurrentMarker) {
-                    reportMap.removeLayer(reportCurrentMarker);
-                }
-                
-                reportCurrentMarker = L.marker([currentLatitude, currentLongitude])
-                    .addTo(reportMap)
-                    .bindPopup('Current Location')
-                    .openPopup();
-            }
-        }
-
-        function insertLocationToForm() {
-            if (currentLatitude && currentLongitude) {
-                // This would typically insert coordinates into the current form
-                addNotification('GPS', 'Location inserted to form.', 'success');
-            } else {
-                addNotification('GPS', 'No location data available.', 'warning');
-            }
-        }
-
-        function showQuantityModal() {
-            showModal('quantity-modal');
-        }
-
-        function calculateQuantity() {
-            const length = parseFloat(getEl('length').value) || 0;
-            const width = parseFloat(getEl('width').value) || 0;
-            const depth = parseFloat(getEl('depth').value) || 0;
-            const repetitions = parseFloat(getEl('repetitions').value) || 1;
-            
-            let quantity = 0;
-            let unit = '';
-            
-            if (depth > 0) {
-                quantity = length * width * depth * repetitions;
-                unit = 'm³';
-            } else if (width > 0) {
-                quantity = length * width * repetitions;
-                unit = 'm²';
-            } else {
-                quantity = length * repetitions;
-                unit = 'm';
-            }
-            
-            // Insert into recommendation field
-            getEl('recommendation').value = `Quantity: ${quantity.toFixed(2)} ${unit}`;
-            hideModal('quantity-modal');
-            addNotification('Calculation', `Quantity calculated: ${quantity.toFixed(2)} ${unit}`, 'success');
-        }
-
-        function addRowToTable() {
-            const asset = getEl('asset').value;
-            const status = getEl('status').value;
-            const recommendation = getEl('recommendation').value;
-            
-            if (!asset.trim()) {
-                addNotification('Form', 'Please enter asset description.', 'warning');
-                return;
-            }
-            
-            const table = getEl('report-table').querySelector('tbody');
-            const row = table.insertRow();
-            row.innerHTML = `
-                <td>${table.rows.length}</td>
-                <td>${asset}</td>
-                <td>${status}</td>
-                <td>${recommendation}</td>
-                <td>-</td>
-                <td>-</td>
-                <td>${currentLatitude || '-'}</td>
-                <td>${currentLongitude || '-'}</td>
-                <td><button class="btn-danger" onclick="deleteTableRow(this)">Delete</button></td>
-            `;
-            
-            // Clear form
-            getEl('asset').value = '';
-            getEl('status').value = '';
-            getEl('recommendation').value = '';
-            
-            addNotification('Report', 'New row added to inspection report.', 'success');
-        }
-
-        function deleteTableRow(button) {
-            const row = button.closest('tr');
-            row.remove();
-            addNotification('Report', 'Row deleted from table.', 'info');
-        }
-
-        function addColumnToTable() {
-            const table = getEl('report-table');
-            const headerRow = table.querySelector('thead tr');
-            const columnName = prompt('Enter column name:');
-            
-            if (columnName) {
-                const th = document.createElement('th');
-                th.textContent = columnName;
-                headerRow.insertBefore(th, headerRow.lastElementChild);
-                
-                // Add empty cells to existing rows
-                table.querySelectorAll('tbody tr').forEach(row => {
-                    const td = document.createElement('td');
-                    td.textContent = '-';
-                    row.insertBefore(td, row.lastElementChild);
-                });
-                
-                addNotification('Report', `Column "${columnName}" added.`, 'success');
-            }
-        }
-
-        function removeSelectedRow() {
-            addNotification('Report', 'Please click the delete button on the row you want to remove.', 'info');
-        }
-
-        function printReportContent() {
-            window.print();
-        }
-
-        function exportToPdfReport() {
-            addNotification('Report', 'PDF export feature would be implemented here.', 'info');
-        }
-
-        function loadClientLogo() {
-            const input = getEl('client-logo-input');
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    clientLogo = e.target.result;
-                    getEl('client-logo').src = clientLogo;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function loadCompanyLogo() {
-            const input = getEl('company-logo-input');
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    companyLogo = e.target.result;
-                    getEl('company-logo').src = companyLogo;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Cost Estimation Functions
-        function loadClientLogoEstimation() {
-            const input = getEl('client-logo-estimation-input');
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    getEl('client-logo-estimation').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function loadCompanyLogoEstimation() {
-            const input = getEl('company-logo-estimation-input');
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    getEl('company-logo-estimation').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function updateBOQDetails() {
-            const select = getEl('boq-ref-select');
-            const selectedRef = select.value;
-            const boqItem = boqData.find(item => item.ref === selectedRef);
-            
-            if (boqItem) {
-                getEl('boq-desc').value = boqItem.description;
-                getEl('boq-unit').value = boqItem.unit;
-                getEl('boq-rate').value = boqItem.rate.toFixed(2);
-                calculateBOQQuantityAndAmount();
-            }
-        }
-
-        function calculateBOQQuantityAndAmount() {
-            const nr = parseFloat(getEl('boq-nr').value) || 0;
-            const length = parseFloat(getEl('boq-length').value) || 0;
-            const width = parseFloat(getEl('boq-width').value) || 0;
-            const height = parseFloat(getEl('boq-height').value) || 0;
-            const rate = parseFloat(getEl('boq-rate').value) || 0;
-            
-            let totalQty = 0;
-            const unit = getEl('boq-unit').value;
-            
-            if (unit === 'm³' && height > 0) {
-                totalQty = nr * length * width * height;
-            } else if (unit === 'm²') {
-                totalQty = nr * length * width;
-            } else if (unit === 'm') {
-                totalQty = nr * length;
-            } else {
-                totalQty = nr;
-            }
-            
-            const amount = totalQty * rate;
-            
-            getEl('boq-total-qty').value = totalQty.toFixed(2);
-            getEl('boq-amount').value = amount.toFixed(2);
-        }
-
-        function insertBOQRowFromForm() {
-            const boqRef = getEl('boq-ref-select').value;
-            const description = getEl('boq-desc').value;
-            const unit = getEl('boq-unit').value;
-            const nr = getEl('boq-nr').value;
-            const length = getEl('boq-length').value;
-            const width = getEl('boq-width').value;
-            const height = getEl('boq-height').value;
-            const totalQty = getEl('boq-total-qty').value;
-            const rate = getEl('boq-rate').value;
-            const amount = getEl('boq-amount').value;
-            const remarks = getEl('boq-remarks').value;
-            
-            const table = getEl('cost-estimation-table').querySelector('tbody');
-            const row = table.insertRow();
-            row.innerHTML = `
-                <td>${boqRef}</td>
-                <td>${description}</td>
-                <td>${unit}</td>
-                <td>${nr}</td>
-                <td>${length}</td>
-                <td>${width}</td>
-                <td>${height}</td>
-                <td>${totalQty}</td>
-                <td>${rate}</td>
-                <td>QAR ${amount}</td>
-                <td>${remarks}</td>
-                <td><button class="btn-danger" onclick="deleteTableRow(this)">Delete</button></td>
-            `;
-            
-            updateTotalAmount();
-            clearBOQForm();
-            addNotification('Cost Estimation', 'BOQ item added to estimation.', 'success');
-        }
-
-        function updateTotalAmount() {
-            const table = getEl('cost-estimation-table');
-            const rows = table.querySelectorAll('tbody tr');
-            let total = 0;
-            
-            rows.forEach(row => {
-                const amountText = row.cells[9].textContent.replace('QAR ', '');
-                const amount = parseFloat(amountText) || 0;
-                total += amount;
-            });
-            
-            getEl('total-amount-cell').textContent = `QAR ${total.toFixed(2)}`;
-        }
-
-        function clearBOQForm() {
-            getEl('boq-nr').value = '';
-            getEl('boq-length').value = '';
-            getEl('boq-width').value = '';
-            getEl('boq-height').value = '';
-            getEl('boq-total-qty').value = '';
-            getEl('boq-amount').value = '';
-            getEl('boq-remarks').value = '';
-        }
-
-        function downloadBOQTemplate() {
-            const csvContent = "BOQ Ref,Description,Unit,Rate\n" +
-                boqData.map(item => `${item.ref},"${item.description}",${item.unit},${item.rate}`).join('\n');
-            
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'BOQ_Template.csv';
-            link.click();
-            
-            addNotification('Cost Estimation', 'BOQ template downloaded.', 'success');
-        }
-
-        function printCostEstimation() {
-            window.print();
-        }
-
-        function exportCostEstimationPDF() {
-            addNotification('Cost Estimation', 'PDF export feature would be implemented here.', 'info');
-        }
-
-        // AI Analysis Functions
-        function handleAIAnalysis() {
-            const fileInput = getEl('ai-image-upload');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                addNotification('AI', 'Please upload an image first.', 'warning');
-                return;
-            }
-            
-            getEl('ai-results-card').style.display = 'block';
-            getEl('ai-spinner').style.display = 'block';
-            getEl('ai-results-table').style.display = 'none';
-            
-            // Simulate AI processing
-            setTimeout(() => {
-                const resultsHTML = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Image</th>
-                                <th>Defect Type</th>
-                                <th>Severity</th>
-                                <th>Location</th>
-                                <th>Recommendation</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><img src="${URL.createObjectURL(file)}" style="max-width: 100px; max-height: 60px; object-fit: cover;"></td>
-                                <td>Pothole</td>
-                                <td>High</td>
-                                <td>Center-left</td>
-                                <td>Immediate repair required</td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td>Surface Cracking</td>
-                                <td>Medium</td>
-                                <td>Right edge</td>
-                                <td>Monitor and seal</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                `;
-                
-                getEl('ai-spinner').style.display = 'none';
-                getEl('ai-results-table').innerHTML = resultsHTML;
-                getEl('ai-results-table').style.display = 'block';
-                
-                addNotification('AI', 'Image analysis completed.', 'success');
-            }, 2000);
-        }
-
-        function exportAiResultsToCsv() {
-            addNotification('AI', 'CSV export feature would be implemented here.', 'info');
-        }
-
-        function exportAiResultsToPdf() {
-            addNotification('AI', 'PDF export feature would be implemented here.', 'info');
-        }
-
-        // Drawing Functions
-        function initializeDrawingCanvas() {
-            const canvas = getEl('drawing-canvas');
-            const container = getEl('drawing-canvas-container');
-            
-            if (!canvas || !container) return;
-            
-            drawingCanvas = canvas;
-            drawingCtx = canvas.getContext('2d');
-            
-            // Set canvas size
-            canvas.width = container.clientWidth - 20;
-            canvas.height = 500;
-            
-            // Event listeners
+            // Set up event listeners
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseout', stopDrawing);
+
+            console.log('Drawing canvas initialized');
         }
 
-        function setDrawingTool(tool) {
+        function selectTool(tool) {
             currentTool = tool;
-            document.querySelectorAll('#drawing-toolbar button').forEach(btn => {
+            document.querySelectorAll('.tool-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            getEl(`tool-${tool}`).classList.add('active');
-        }
-
-        function setDrawingColor(color) {
-            strokeColor = color;
-        }
-
-        function setDrawingWidth(width) {
-            strokeWidth = parseInt(width);
+            document.querySelector(`[data-tool="${tool}"]`).classList.add('active');
         }
 
         function startDrawing(e) {
             isDrawing = true;
-            const rect = drawingCanvas.getBoundingClientRect();
+            const rect = e.target.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
-            if (currentTool === 'pen') {
-                drawingCtx.beginPath();
-                drawingCtx.moveTo(x, y);
+
+            if (currentTool === 'line' || currentTool === 'rectangle' || currentTool === 'circle') {
+                drawingContext.beginPath();
+                drawingContext.moveTo(x, y);
             }
         }
 
         function draw(e) {
             if (!isDrawing) return;
             
-            const rect = drawingCanvas.getBoundingClientRect();
+            const rect = e.target.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
-            drawingCtx.strokeStyle = strokeColor;
-            drawingCtx.lineWidth = strokeWidth;
-            drawingCtx.lineCap = 'round';
-            
-            if (currentTool === 'pen') {
-                drawingCtx.lineTo(x, y);
-                drawingCtx.stroke();
+
+            const strokeColor = document.getElementById('stroke-color').value;
+            const lineWidth = document.getElementById('line-width').value;
+
+            drawingContext.strokeStyle = strokeColor;
+            drawingContext.lineWidth = lineWidth;
+
+            if (currentTool === 'line') {
+                drawingContext.lineTo(x, y);
+                drawingContext.stroke();
             }
         }
 
@@ -1976,444 +1644,301 @@
             isDrawing = false;
         }
 
-        function clearDrawingCanvas() {
-            drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-            addNotification('Drawing', 'Canvas cleared.', 'info');
+        function clearDrawing() {
+            if (drawingContext) {
+                const canvas = document.getElementById('drawing-canvas');
+                drawingContext.clearRect(0, 0, canvas.width, canvas.height);
+            }
         }
 
-        function loadDrawingImage(event) {
+        function importCAD(event) {
             const file = event.target.files[0];
             if (!file) return;
             
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-                    drawingCtx.drawImage(img, 0, 0, drawingCanvas.width, drawingCanvas.height);
-                    addNotification('Drawing', 'Image imported to canvas.', 'success');
+            console.log('Importing CAD file:', file.name);
+            alert('CAD file import functionality would be implemented here');
+        }
+
+        function exportCAD() {
+            console.log('Exporting CAD drawing');
+            alert('CAD export functionality would be implemented here');
+        }
+
+        function insertCADElement() {
+            console.log('Inserting CAD element');
+            alert('CAD element insertion functionality would be implemented here');
+        }
+
+        // Inspection Functions
+        function saveInspection() {
+            const inspection = {
+                id: 'INS-' + String(inspections.length + 1).padStart(3, '0'),
+                assetName: document.getElementById('asset-name').value,
+                type: document.getElementById('inspection-type').value,
+                condition: document.getElementById('condition-rating').value,
+                notes: document.getElementById('inspection-notes').value,
+                actions: document.getElementById('recommended-actions').value,
+                priority: document.getElementById('priority-level').value,
+                date: new Date().toLocaleDateString(),
+                inspector: 'Current User'
+            };
+
+            inspections.push(inspection);
+            updateInspectionsTable();
+            
+            // Clear form
+            document.getElementById('asset-name').value = '';
+            document.getElementById('inspection-notes').value = '';
+            document.getElementById('recommended-actions').value = '';
+            
+            console.log('Inspection saved:', inspection);
+            alert('Inspection report saved successfully!');
+        }
+
+        function updateInspectionsTable() {
+            const tbody = document.getElementById('inspections-table');
+            if (inspections.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No inspections found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = inspections.map(inspection => `
+                <tr>
+                    <td>${inspection.id}</td>
+                    <td>${inspection.assetName}</td>
+                    <td>${inspection.type}</td>
+                    <td><span style="color: var(--success-color);">${inspection.condition}</span></td>
+                    <td><span style="color: var(--warning-color);">${inspection.priority}</span></td>
+                    <td>${inspection.date}</td>
+                    <td>
+                        <button class="btn btn-info" onclick="viewInspection('${inspection.id}')">View</button>
+                        <button class="btn btn-warning" onclick="editInspection('${inspection.id}')">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function viewInspection(id) {
+            const inspection = inspections.find(i => i.id === id);
+            if (inspection) {
+                alert(`Inspection Details:\n\nAsset: ${inspection.assetName}\nCondition: ${inspection.condition}\nNotes: ${inspection.notes}`);
+            }
+        }
+
+        function editInspection(id) {
+            console.log('Editing inspection:', id);
+            alert('Edit inspection functionality would be implemented here');
+        }
+
+        // Cost Estimation Functions
+        function addEstimationItem() {
+            const description = prompt('Enter item description:');
+            const unit = prompt('Enter unit (e.g., m², tons, pieces):');
+            const quantity = parseFloat(prompt('Enter quantity:')) || 0;
+            const rate = parseFloat(prompt('Enter rate per unit:')) || 0;
+
+            if (description && unit) {
+                const item = {
+                    id: costItems.length + 1,
+                    description,
+                    unit,
+                    quantity,
+                    rate,
+                    amount: quantity * rate
                 };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
 
-        function saveDrawing() {
-            const imageData = drawingCanvas.toDataURL();
-            const drawings = DB.get('drawings');
-            const newDrawing = {
-                id: generateId(),
-                projectId: currentProjectId,
-                name: `Drawing ${new Date().toLocaleString()}`,
-                imageData: imageData,
-                createdAt: new Date().toISOString()
-            };
-            drawings.push(newDrawing);
-            DB.set('drawings', drawings);
-            addNotification('Drawing', 'Drawing saved.', 'success');
-        }
-
-        function exportDrawing(format) {
-            const link = document.createElement('a');
-            
-            if (format === 'png') {
-                link.download = `drawing_${Date.now()}.png`;
-                link.href = drawingCanvas.toDataURL('image/png');
-                link.click();
-                addNotification('Drawing', 'Drawing exported as PNG.', 'success');
-            } else if (format === 'dwg') {
-                addNotification('Drawing', 'DWG export would require specialized CAD libraries.', 'info');
-            } else if (format === 'json') {
-                const data = { vectorData: currentDrawingData };
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                link.href = URL.createObjectURL(blob);
-                link.download = `drawing_${Date.now()}.json`;
-                link.click();
-                addNotification('Drawing', 'Drawing exported as JSON.', 'success');
+                costItems.push(item);
+                updateCostTable();
             }
         }
 
-        // Note Functions
-        function handleSaveNote(e) {
-            e.preventDefault();
-            const title = getEl('note-title').value;
-            const content = getEl('note-content').value;
-            const tags = getEl('note-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
-            
-            const notes = DB.get('notes');
-            const newNote = {
-                id: editingNoteId || generateId(),
-                projectId: currentProjectId,
-                title,
-                content,
-                tags,
-                createdAt: editingNoteId ? notes.find(n => n.id === editingNoteId)?.createdAt : new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+        function updateCostTable() {
+            const tbody = document.getElementById('cost-items-body');
+            const totalElement = document.getElementById('total-cost');
+
+            if (costItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No items added yet</td></tr>';
+                totalElement.textContent = '$0.00';
+                return;
+            }
+
+            tbody.innerHTML = costItems.map(item => `
+                <tr>
+                    <td>${item.description}</td>
+                    <td>${item.unit}</td>
+                    <td>${item.quantity}</td>
+                    <td>$${item.rate.toFixed(2)}</td>
+                    <td>$${item.amount.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="removeEstimationItem(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            const total = costItems.reduce((sum, item) => sum + item.amount, 0);
+            totalElement.textContent = `$${total.toFixed(2)}`;
+        }
+
+        function removeEstimationItem(id) {
+            costItems = costItems.filter(item => item.id !== id);
+            updateCostTable();
+        }
+
+        function saveEstimation() {
+            const projectName = document.getElementById('project-name').value;
+            const projectType = document.getElementById('project-type').value;
+
+            if (!projectName) {
+                alert('Please enter a project name');
+                return;
+            }
+
+            const estimation = {
+                projectName,
+                projectType,
+                items: costItems,
+                total: costItems.reduce((sum, item) => sum + item.amount, 0),
+                date: new Date().toISOString()
             };
-            
-            if (editingNoteId) {
-                const index = notes.findIndex(n => n.id === editingNoteId);
-                notes[index] = newNote;
-                addNotification('Note', 'Note updated.', 'success');
+
+            console.log('Estimation saved:', estimation);
+            alert('Cost estimation saved successfully!');
+        }
+
+        function exportEstimation() {
+            console.log('Exporting estimation to PDF');
+            alert('PDF export functionality would be implemented here');
+        }
+
+        function clearEstimation() {
+            if (confirm('Are you sure you want to clear all items?')) {
+                costItems = [];
+                updateCostTable();
+                document.getElementById('project-name').value = '';
+            }
+        }
+
+        // Settings Functions
+        function accessAdminPanel() {
+            const password = document.getElementById('admin-password').value;
+            const adminPassword = 'Ahmet169633%';
+
+            if (password === adminPassword) {
+                document.getElementById('admin-panel').style.display = 'block';
+                console.log('Admin panel access granted');
+                alert('Admin panel access granted');
             } else {
-                notes.push(newNote);
-                addNotification('Note', 'Note created.', 'success');
-            }
-            
-            DB.set('notes', notes);
-            hideModal('note-modal');
-            getEl('note-form').reset();
-            editingNoteId = null;
-            loadNotes();
-        }
-
-        function loadNotes() {
-            const notes = DB.get('notes').filter(note => note.projectId === currentProjectId);
-            const container = getEl('notes-list');
-            container.innerHTML = '';
-            
-            if (notes.length === 0) {
-                container.innerHTML = '<p>No notes yet. Add one to get started.</p>';
-                return;
-            }
-            
-            notes.forEach(note => {
-                const noteDiv = document.createElement('div');
-                noteDiv.className = 'note-entry';
-                noteDiv.innerHTML = `
-                    <h3>${note.title}</h3>
-                    <div class="note-meta">
-                        Created: ${new Date(note.createdAt).toLocaleString()}
-                        ${note.tags.length > 0 ? `| Tags: ${note.tags.map(tag => `<span class="tag-pill">${tag}</span>`).join('')}` : ''}
-                    </div>
-                    <div>${note.content}</div>
-                    <div style="margin-top: 10px;">
-                        <button class="btn" onclick="editNote('${note.id}')">Edit</button>
-                        <button class="btn-danger" onclick="deleteNote('${note.id}')">Delete</button>
-                    </div>
-                `;
-                container.appendChild(noteDiv);
-            });
-        }
-
-        function editNote(noteId) {
-            const notes = DB.get('notes');
-            const note = notes.find(n => n.id === noteId);
-            
-            if (note) {
-                editingNoteId = noteId;
-                getEl('note-modal-title').textContent = 'Edit Note';
-                getEl('note-title').value = note.title;
-                getEl('note-content').value = note.content;
-                getEl('note-tags').value = note.tags.join(', ');
-                showModal('note-modal');
+                alert('Invalid admin password');
             }
         }
 
-        function deleteNote(noteId) {
-            if (!confirm('Are you sure you want to delete this note?')) return;
-            
-            let notes = DB.get('notes');
-            notes = notes.filter(n => n.id !== noteId);
-            DB.set('notes', notes);
-            loadNotes();
-            addNotification('Note', 'Note deleted.', 'danger');
-        }
-
-        function filterNotes() {
-            const filterTags = getEl('note-filter-tags').value.toLowerCase().split(',').map(tag => tag.trim());
-            const notes = DB.get('notes').filter(note => note.projectId === currentProjectId);
-            
-            const filteredNotes = notes.filter(note => {
-                if (filterTags.length === 0 || filterTags[0] === '') return true;
-                return filterTags.some(filterTag => 
-                    note.tags.some(noteTag => noteTag.toLowerCase().includes(filterTag))
-                );
-            });
-            
-            const container = getEl('notes-list');
-            container.innerHTML = '';
-            
-            if (filteredNotes.length === 0) {
-                container.innerHTML = '<p>No notes found matching your filter.</p>';
-                return;
-            }
-            
-            filteredNotes.forEach(note => {
-                const noteDiv = document.createElement('div');
-                noteDiv.className = 'note-entry';
-                noteDiv.innerHTML = `
-                    <h3>${note.title}</h3>
-                    <div class="note-meta">
-                        Created: ${new Date(note.createdAt).toLocaleString()}
-                        ${note.tags.length > 0 ? `| Tags: ${note.tags.map(tag => `<span class="tag-pill">${tag}</span>`).join('')}` : ''}
-                    </div>
-                    <div>${note.content}</div>
-                    <div style="margin-top: 10px;">
-                        <button class="btn" onclick="editNote('${note.id}')">Edit</button>
-                        <button class="btn-danger" onclick="deleteNote('${note.id}')">Delete</button>
-                    </div>
-                `;
-                container.appendChild(noteDiv);
-            });
-        }
-
-        // Project Management
-        function handleSaveProject(e) {
-            e.preventDefault();
-            const projectName = getEl('project-name-input').value;
-            saveCurrentProject(projectName);
-            hideModal('save-project-modal');
-            getEl('save-project-form').reset();
-        }
-
-        function saveCurrentProject(projectName = null) {
-            const projects = DB.get('projects');
-            const name = projectName || `Project ${new Date().toLocaleString()}`;
-            
-            const projectData = {
-                id: currentProjectId,
-                name: name,
-                createdAt: new Date().toISOString(),
-                data: {
-                    contracts: DB.get('contracts'),
-                    notes: DB.get('notes').filter(n => n.projectId === currentProjectId),
-                    drawings: DB.get('drawings').filter(d => d.projectId === currentProjectId),
-                    mapData: DB.get('mapData')
-                }
+        function saveAPIConfig() {
+            apiConfig = {
+                roboflow: document.getElementById('roboflow-key').value,
+                telegram: document.getElementById('telegram-token').value,
+                weather: document.getElementById('weather-key').value
             };
-            
-            const existingIndex = projects.findIndex(p => p.id === currentProjectId);
-            if (existingIndex !== -1) {
-                projects[existingIndex] = projectData;
-                addNotification('Project', `Project "${name}" updated.`, 'success');
-            } else {
-                projects.push(projectData);
-                addNotification('Project', `Project "${name}" saved.`, 'success');
-            }
-            
-            DB.set('projects', projects);
-            getEl('app-main-title').textContent = name;
+
+            localStorage.setItem('apiConfig', JSON.stringify(apiConfig));
+            console.log('API configuration saved');
+            alert('API configuration saved successfully');
         }
 
-        function createNewProject() {
-            currentProjectId = generateId();
-            localStorage.setItem('currentProjectId', currentProjectId);
-            
-            // Clear current data
-            getEl('report-table').querySelector('tbody').innerHTML = '';
-            getEl('cost-estimation-table').querySelector('tbody').innerHTML = '';
-            if (drawingCanvas) clearDrawingCanvas();
-            
-            getEl('app-main-title').textContent = 'New Project';
-            addNotification('Project', 'New project created.', 'success');
+        // Modal Functions
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
         }
 
-        function loadProjectsList() {
-            const projects = DB.get('projects');
-            const container = getEl('projects-list');
-            container.innerHTML = '';
-            
-            if (projects.length === 0) {
-                container.innerHTML = '<p>No projects saved yet. Create a new one or save your current work.</p>';
-                return;
-            }
-            
-            projects.forEach(project => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span class="project-name" onclick="loadProject('${project.id}')">${project.name}</span>
-                    <button class="btn-danger" onclick="deleteProject('${project.id}')">Delete</button>
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // AI Defect Analysis
+        function analyzeDefects(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+
+            const resultsContainer = document.getElementById('results-container');
+            const analysisResults = document.getElementById('analysis-results');
+
+            analysisResults.style.display = 'block';
+            resultsContainer.innerHTML = '<div class="spinner"></div><p>Analyzing images...</p>';
+
+            // Simulate AI analysis
+            setTimeout(() => {
+                resultsContainer.innerHTML = `
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Defect Type</th>
+                                    <th>Confidence</th>
+                                    <th>Severity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${files[0].name}</td>
+                                    <td>Pothole</td>
+                                    <td>92%</td>
+                                    <td><span style="color: var(--danger-color);">High</span></td>
+                                </tr>
+                                <tr>
+                                    <td>${files[0].name}</td>
+                                    <td>Crack</td>
+                                    <td>78%</td>
+                                    <td><span style="color: var(--warning-color);">Medium</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 `;
-                container.appendChild(li);
-            });
-        }
-
-        function loadProject(projectId) {
-            const projects = DB.get('projects');
-            const project = projects.find(p => p.id === projectId);
-            
-            if (project) {
-                currentProjectId = projectId;
-                localStorage.setItem('currentProjectId', currentProjectId);
-                getEl('app-main-title').textContent = project.name;
-                
-                // Load project data
-                if (project.data) {
-                    if (project.data.contracts) DB.set('contracts', project.data.contracts);
-                    if (project.data.mapData) DB.set('mapData', project.data.mapData);
-                }
-                
-                addNotification('Project', `Project "${project.name}" loaded.`, 'success');
-                showAppPage('dashboard-page');
-            }
-        }
-
-        function deleteProject(projectId) {
-            if (!confirm('Are you sure you want to delete this project?')) return;
-            
-            let projects = DB.get('projects');
-            projects = projects.filter(p => p.id !== projectId);
-            DB.set('projects', projects);
-            loadProjectsList();
-            addNotification('Project', 'Project deleted.', 'danger');
-        }
-
-        function exportAllProjects() {
-            const projects = DB.get('projects');
-            const blob = new Blob([JSON.stringify(projects, null, 2)], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'all_projects.json';
-            link.click();
-            addNotification('Project', 'All projects exported.', 'success');
-        }
-
-        function importAllProjects(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const projects = JSON.parse(e.target.result);
-                    DB.set('projects', projects);
-                    loadProjectsList();
-                    addNotification('Project', 'Projects imported successfully.', 'success');
-                } catch (error) {
-                    addNotification('Project', 'Error importing projects.', 'error');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // Notification Functions
-        function addNotification(type, message, severity = 'info') {
-            const notifications = DB.get('notifications');
-            const newNotification = {
-                id: generateId(),
-                date: new Date().toLocaleString(),
-                type,
-                message,
-                severity,
-                projectId: currentProjectId
-            };
-            notifications.unshift(newNotification);
-            
-            // Keep only last 100 notifications
-            if (notifications.length > 100) {
-                notifications.splice(100);
-            }
-            
-            DB.set('notifications', notifications);
-            updateDashboardStats();
-        }
-
-        function loadNotifications() {
-            const notifications = DB.get('notifications');
-            const tbody = getEl('notifications-table-body');
-            tbody.innerHTML = '';
-            
-            notifications.forEach(notification => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${notification.date}</td>
-                    <td>${notification.type}</td>
-                    <td>${notification.message}</td>
-                    <td><span class="tag-pill" style="background-color: ${getSeverityColor(notification.severity)}">${notification.severity}</span></td>
-                `;
-            });
-        }
-
-        function getSeverityColor(severity) {
-            switch (severity) {
-                case 'error': case 'danger': return '#c0392b';
-                case 'warning': return '#f39c12';
-                case 'success': return '#27ae60';
-                default: return '#3498db';
-            }
+                console.log('AI analysis completed');
+            }, 3000);
         }
 
         // Utility Functions
-        function focusAssetInput() {
-            showAppPage('inspection-page');
-            setTimeout(() => {
-                getEl('asset').focus();
-            }, 100);
+        function showProfile() {
+            alert('Profile functionality would be implemented here');
         }
 
-        function openCamera() {
-            addNotification('Camera', 'Camera feature would be implemented here.', 'info');
+        function showSettings() {
+            showPage('settings');
         }
 
-        function open360Viewer() {
-            showModal('marzipano-viewer-modal');
-            addNotification('360 Viewer', '360° viewer opened.', 'info');
+        function logout() {
+            alert('Logout functionality would be implemented here');
         }
 
-        // Event Listeners Setup
-        function setupEventListeners() {
-            // BOQ calculation listeners
-            ['boq-nr', 'boq-length', 'boq-width', 'boq-height'].forEach(id => {
-                const el = getEl(id);
-                if (el) el.addEventListener('input', calculateBOQQuantityAndAmount);
-            });
-
-            // BOQ select change
-            const boqSelect = getEl('boq-ref-select');
-            if (boqSelect) boqSelect.addEventListener('change', updateBOQDetails);
-
-            // Manual location inputs
-            ['manual-lat', 'manual-lng'].forEach(id => {
-                const el = getEl(id);
-                if (el) el.addEventListener('input', () => {
-                    currentLatitude = parseFloat(getEl('manual-lat').value);
-                    currentLongitude = parseFloat(getEl('manual-lng').value);
-                    updateLocationDisplay();
-                    updateReportMap();
-                });
-            });
-
-            // Photo input
-            const photoInput = getEl('photo-input');
-            if (photoInput) {
-                photoInput.addEventListener('change', (e) => {
-                    const files = e.target.files;
-                    const preview = getEl('photo-previews');
-                    preview.innerHTML = '';
-                    
-                    Array.from(files).forEach(file => {
-                        const img = document.createElement('img');
-                        img.src = URL.createObjectURL(file);
-                        img.style.maxHeight = '60px';
-                        img.style.borderRadius = '5px';
-                        img.style.cursor = 'pointer';
-                        preview.appendChild(img);
-                    });
-                });
-            }
-
-            // Set today's date
-            const dateInput = getEl('display-date');
-            if (dateInput) {
-                dateInput.value = new Date().toISOString().split('T')[0];
-            }
+        function createContract() {
+            alert('Contract creation functionality would be implemented here');
         }
 
-        // Initialize Application
+        // App Initialization
         function initializeApp() {
-            console.log('Engineering Platform loaded successfully');
-            
-            DB.init();
-            setupEventListeners();
-            updateBOQDetails();
-            updateDashboardStats();
-            
             console.log('Engineering Platform initialized successfully');
         }
 
-        // Run when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Engineering Platform loaded successfully');
+            initAuth();
+
+            // Close modals when clicking outside
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.classList.remove('active');
+                }
+
+                // Close user dropdown when clicking outside
+                if (!e.target.closest('.user-menu')) {
+                    document.getElementById('user-dropdown').classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>
