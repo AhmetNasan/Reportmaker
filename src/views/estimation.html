@@ -1,0 +1,315 @@
+<div id="estimation-inspection-page" class="page">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">Enhanced Estimation & Inspection System</h1>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" onclick="exportProject()">
+                    <i class="fas fa-save"></i> Export Project
+                </button>
+                <input type="file" id="project-import-input" accept=".json" style="display: none;" onchange="importProject(event)">
+                <button class="btn btn-success" onclick="document.getElementById('project-import-input').click()">
+                    <i class="fas fa-upload"></i> Import Project
+                </button>
+                <button class="btn btn-info" onclick="printReport()">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'inspection-tab')">Inspection Report</button>
+            <button class="tab-button" onclick="openTab(event, 'cost-tab')">Cost Estimation</button>
+            <button class="tab-button" onclick="openTab(event, 'map-tab')">Project Map</button>
+        </div>
+
+        <!-- Inspection Tab -->
+        <div id="inspection-tab" class="tab-content active">
+            <div class="estimation-form-grid">
+                <div class="estimation-card">
+                    <h3>Asset Information</h3>
+                    <div class="form-group">
+                        <label class="form-label">Asset Description</label>
+                        <input type="text" id="asset-description" class="form-input" list="asset-options" placeholder="Enter asset description">
+                        <datalist id="asset-options">
+                            <option value="Bridge A-123">
+                            <option value="Highway Section B-456">
+                            <option value="Culvert C-789">
+                            <option value="Retaining Wall D-101">
+                            <option value="Pavement Section E-202">
+                        </datalist>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="asset-status" class="form-select">
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Poor">Poor</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Recommendation</label>
+                        <textarea id="asset-recommendation" class="form-textarea" placeholder="Enter maintenance recommendations"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" id="asset-quantity" class="form-input" placeholder="Enter quantity">
+                        <button class="btn btn-info mt-2" onclick="showQuantityCalculator()">
+                            <i class="fas fa-calculator"></i> Calculate Quantity
+                        </button>
+                    </div>
+                </div>
+
+                <div class="estimation-card">
+                    <h3>Photo Documentation</h3>
+                    <div class="drop-zone" onclick="document.getElementById('photo-input').click()">
+                        <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                        <p>Drag & Drop or Click to Add Photos</p>
+                        <div class="drop-zone-buttons">
+                            <button class="icon-button" onclick="event.stopPropagation(); document.getElementById('photo-input').click()" title="Choose from Gallery">
+                                <i class="fas fa-images"></i>
+                            </button>
+                            <button class="icon-button" onclick="event.stopPropagation(); openCamera()" title="Open Camera">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="file" id="photo-input" multiple accept="image/*" style="display: none;" onchange="handlePhotos(event)">
+                    <div id="photo-previews" class="photo-previews"></div>
+                </div>
+
+                <div class="estimation-card">
+                    <h3>GPS Location</h3>
+                    <div class="location-mode-switcher">
+                        <button id="auto-location" class="location-mode-btn active" onclick="switchLocationMode('auto')">Automatic</button>
+                        <button id="manual-location" class="location-mode-btn" onclick="switchLocationMode('manual')">Manual</button>
+                    </div>
+                    <div id="auto-location-panel">
+                        <button class="btn btn-success w-100 mb-2" onclick="getCurrentLocation()">
+                            <i class="fas fa-map-marker-alt"></i> Get Current GPS
+                        </button>
+                    </div>
+                    <div id="manual-location-panel" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Latitude</label>
+                            <input type="number" id="manual-lat" class="form-input" step="any" placeholder="25.2854">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Longitude</label>
+                            <input type="number" id="manual-lng" class="form-input" step="any" placeholder="51.5310">
+                        </div>
+                    </div>
+                    <div class="gps-info">
+                        <div class="gps-coordinate">
+                            <strong>Latitude:</strong> <span id="current-lat">N/A</span>
+                        </div>
+                        <div class="gps-coordinate">
+                            <strong>Longitude:</strong> <span id="current-lng">N/A</span>
+                        </div>
+                    </div>
+                    <div id="mini-map" class="map-container" style="height: 200px;"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="addInspectionRow()">
+                <i class="fas fa-plus"></i> Add to Inspection Report
+            </button>
+
+            <!-- Inspection Table -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3>Inspection Report</h3>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-success" onclick="exportInspectionCSV()">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                        <button class="btn btn-warning" onclick="exportInspectionKML()">
+                            <i class="fas fa-map"></i> Export KML
+                        </button>
+                        <button class="btn btn-info" onclick="printInspectionReport()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="table" id="inspection-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Asset</th>
+                                <th>Status</th>
+                                <th>Recommendation</th>
+                                <th>Quantity</th>
+                                <th>Photos</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inspection-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cost Estimation Tab -->
+        <div id="cost-tab" class="tab-content">
+            <div class="boq-entry-card">
+                <h3>BOQ Item Entry</h3>
+                <div class="boq-form-grid">
+                    <div class="form-group">
+                        <label class="form-label">BOQ Reference</label>
+                        <div class="boq-ref-group">
+                            <input type="search" id="boq-search" class="form-input" placeholder="Search BOQ..." onkeyup="filterBOQ()">
+                            <select id="boq-select" class="form-select" onchange="updateBOQDetails()">
+                                <option value="">Select BOQ Item</option>
+                                <option value="A1.1" data-desc="Excavation" data-unit="m³" data-rate="15.00">A1.1 - Excavation</option>
+                                <option value="A1.2" data-desc="Backfilling" data-unit="m³" data-rate="10.00">A1.2 - Backfilling</option>
+                                <option value="B2.1" data-desc="Concrete Paving" data-unit="m²" data-rate="75.00">B2.1 - Concrete Paving</option>
+                                <option value="B2.2" data-desc="Asphalt Layer" data-unit="m²" data-rate="50.00">B2.2 - Asphalt Layer</option>
+                                <option value="C3.1" data-desc="Kerb Installation" data-unit="m.l" data-rate="25.00">C3.1 - Kerb Installation</option>
+                                <option value="C3.2" data-desc="Interlock Paving" data-unit="m²" data-rate="40.00">C3.2 - Interlock Paving</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" id="boq-description" class="form-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Unit</label>
+                        <input type="text" id="boq-unit" class="form-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">NR</label>
+                        <input type="number" id="boq-nr" class="form-input" value="1" onchange="calculateBOQTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Length (m)</label>
+                        <input type="number" id="boq-length" class="form-input" onchange="calculateBOQTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Width (m)</label>
+                        <input type="number" id="boq-width" class="form-input" onchange="calculateBOQTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Height (m)</label>
+                        <input type="number" id="boq-height" class="form-input" onchange="calculateBOQTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Total Quantity</label>
+                        <input type="text" id="boq-total-qty" class="form-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rate</label>
+                        <input type="number" id="boq-rate" class="form-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Amount (QR)</label>
+                        <input type="text" id="boq-amount" class="form-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Remarks</label>
+                        <input type="text" id="boq-remarks" class="form-input">
+                    </div>
+                </div>
+
+                <div class="most-used-boq">
+                    <h4>Most Used BOQ References</h4>
+                    <ul class="most-used-boq-list" id="most-used-list">
+                        <li onclick="selectBOQ('A1.1')">A1.1 (5)</li>
+                        <li onclick="selectBOQ('B2.1')">B2.1 (3)</li>
+                        <li onclick="selectBOQ('C3.1')">C3.1 (2)</li>
+                    </ul>
+                </div>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-success" onclick="addBOQRow()">
+                        <i class="fas fa-plus"></i> Add Item
+                    </button>
+                    <button class="btn btn-warning" onclick="showQuantityCalculator('boq')">
+                        <i class="fas fa-calculator"></i> Calculate Quantity
+                    </button>
+                    <button class="btn btn-info" onclick="downloadBOQTemplate()">
+                        <i class="fas fa-download"></i> Download Template
+                    </button>
+                    <input type="file" id="boq-csv-input" accept=".csv" style="display: none;" onchange="importBOQCSV(event)">
+                    <button class="btn btn-primary" onclick="document.getElementById('boq-csv-input').click()">
+                        <i class="fas fa-upload"></i> Import CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cost Estimation Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Cost Estimation</h3>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-success" onclick="exportCostCSV()">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                        <button class="btn btn-info" onclick="printCostReport()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="table" id="cost-table">
+                        <thead>
+                            <tr>
+                                <th>BOQ Ref.</th>
+                                <th>Description</th>
+                                <th>Unit</th>
+                                <th>NR</th>
+                                <th>Length</th>
+                                <th>Width</th>
+                                <th>Height</th>
+                                <th>Total Qty</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                                <th>Remarks</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cost-tbody">
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="9" style="text-align: right; font-weight: bold;">Total Amount:</td>
+                                <td id="total-amount" style="font-weight: bold;">QR 0.00</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Tab -->
+        <div id="map-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Project Map</h3>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" onclick="centerMapOnUser()">
+                            <i class="fas fa-map-marker-alt"></i> My Location
+                        </button>
+                        <button class="btn btn-success" onclick="fitMapToMarkers()">
+                            <i class="fas fa-expand-arrows-alt"></i> Fit All
+                        </button>
+                        <button class="btn btn-warning" onclick="clearMapMarkers()">
+                            <i class="fas fa-trash"></i> Clear Markers
+                        </button>
+                        <input type="file" id="map-import" accept=".kml,.csv" style="display: none;" onchange="importMapData(event)">
+                        <button class="btn btn-info" onclick="document.getElementById('map-import').click()">
+                            <i class="fas fa-upload"></i> Import KML/CSV
+                        </button>
+                    </div>
+                </div>
+                <div id="project-map" class="map-container" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
