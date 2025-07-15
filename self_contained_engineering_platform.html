@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Contained Engineering Project Platform</title>
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --background-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Font Awesome Icons (embedded) */
+        .fas {
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+        }
+
+        .fa-home:before { content: "🏠"; }
+        .fa-file-contract:before { content: "📄"; }
+        .fa-project-diagram:before { content: "📊"; }
+        .fa-chart-bar:before { content: "📈"; }
+        .fa-map:before { content: "🗺️"; }
+        .fa-robot:before { content: "🤖"; }
+        .fa-cogs:before { content: "⚙️"; }
+        .fa-plus:before { content: "➕"; }
+        .fa-download:before { content: "⬇️"; }
+        .fa-edit:before { content: "✏️"; }
+        .fa-trash:before { content: "🗑️"; }
+        .fa-times:before { content: "❌"; }
+        .fa-check-circle:before { content: "✅"; }
+        .fa-exclamation-circle:before { content: "⚠️"; }
+        .fa-info-circle:before { content: "ℹ️"; }
+        .fa-hashtag:before { content: "#"; }
+        .fa-user:before { content: "👤"; }
+        .fa-dollar-sign:before { content: "$"; }
+        .fa-calendar:before { content: "📅"; }
+        .fa-flag:before { content: "🏁"; }
+        .fa-clock:before { content: "⏰"; }
+        .fa-moon:before { content: "🌙"; }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 80px);
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: none;
+            color: var(--text-color);
+            text-align: left;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        .nav-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .nav-btn i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Page Headers */
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a252f;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .table tr:hover {
+            background: var(--background-color);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Contract Cards */
+        .contracts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .contract-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .contract-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .contract-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .contract-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .contract-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .contract-info-item i {
+            width: 20px;
+            color: var(--secondary-color);
+        }
+
+        .contract-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .contract-actions .btn {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+
+        /* Map Container */
+        .map-container {
+            height: 400px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: #e8f4f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            font-size: 1.2rem;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--success-color);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            min-width: 300px;
+        }
+
+        .notification.error {
+            border-left-color: var(--accent-color);
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .notification.info {
+            border-left-color: var(--secondary-color);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Status Indicators */
+        .status-active {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .status-pending {
+            color: var(--warning-color);
+            font-weight: 600;
+        }
+
+        .status-completed {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .contracts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .nav-item {
+                margin-bottom: 0;
+            }
+
+            .nav-btn {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+
+        /* Additional Enhancements */
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .progress-bar {
+            background: var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--success-color), var(--secondary-color));
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge.success {
+            background: var(--success-color);
+        }
+
+        .badge.warning {
+            background: var(--warning-color);
+        }
+
+        .badge.danger {
+            background: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 id="app-title">🏗️ Engineering Project Platform</h1>
+            <div class="header-actions">
+                <select id="language-select" class="form-select" style="width: auto;">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                </select>
+                <button class="btn btn-outline" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                    Theme
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <aside class="sidebar">
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <button class="nav-btn active" onclick="showPage('dashboard')">
+                            <i class="fas fa-home"></i>
+                            Dashboard
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-btn" onclick="showPage('contracts')">
+                            <i class="fas fa-file-contract"></i>
+                            Contracts
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-btn" onclick="showPage('projects')">
+                            <i class="fas fa-project-diagram"></i>
+                            Projects
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-btn" onclick="showPage('reports')">
+                            <i class="fas fa-chart-bar"></i>
+                            Reports
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-btn" onclick="showPage('map')">
+                            <i class="fas fa-map"></i>
+                            GIS Mapping
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-btn" onclick="showPage('ai')">
+                            <i class="fas fa-robot"></i>
+                            AI Analysis
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-btn" onclick="showPage('settings')">
+                            <i class="fas fa-cogs"></i>
+                            Settings
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page active">
+                <div class="page-header">
+                    <h2 class="page-title">Dashboard Overview</h2>
+                    <p class="page-subtitle">Welcome to your engineering project management dashboard</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-contracts">0</div>
+                        <div class="stat-label">Total Contracts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="active-projects">0</div>
+                        <div class="stat-label">Active Projects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="completed-tasks">0</div>
+                        <div class="stat-label">Completed Tasks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-value">$0</div>
+                        <div class="stat-label">Total Value</div>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🚀 Platform Features</h3>
+                    <ul class="feature-list">
+                        <li>Contract Management & Tracking</li>
+                        <li>Project Portfolio Management</li>
+                        <li>Advanced Reporting & Analytics</li>
+                        <li>GIS Mapping & Geospatial Analysis</li>
+                        <li>AI-Powered Insights</li>
+                        <li>Real-time Collaboration Tools</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Activity</h3>
+                    </div>
+                    <div id="recent-activity">
+                        <div class="empty-state">
+                            <i class="fas fa-clock"></i>
+                            <h3>No Recent Activity</h3>
+                            <p>Your recent activities will appear here</p>
+                            <button class="btn btn-primary" onclick="showPage('contracts')">
+                                <i class="fas fa-plus"></i>
+                                Create Your First Contract
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contracts Page -->
+            <div id="contracts-page" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">Contract Management</h2>
+                    <p class="page-subtitle">Manage your engineering contracts and agreements</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Contract Actions</h3>
+                        <div>
+                            <button class="btn btn-primary" onclick="showModal('contract-modal')">
+                                <i class="fas fa-plus"></i>
+                                New Contract
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportContracts()">
+                                <i class="fas fa-download"></i>
+                                Export All
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" class="form-input" placeholder="🔍 Search contracts..." id="contract-search" onkeyup="filterContracts()">
+                        </div>
+                        <div class="form-group">
+                            <select class="form-select" id="contract-status-filter" onchange="filterContracts()">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="contracts-container" class="contracts-grid">
+                    <!-- Contracts will be loaded here -->
+                </div>
+
+                <div id="contracts-empty" class="empty-state" style="display: none;">
+                    <i class="fas fa-file-contract"></i>
+                    <h3>No Contracts Found</h3>
+                    <p>Start by creating your first engineering contract</p>
+                    <button class="btn btn-primary" onclick="showModal('contract-modal')">
+                        <i class="fas fa-plus"></i>
+                        Create Contract
+                    </button>
+                </div>
+            </div>
+
+            <!-- Projects Page -->
+            <div id="projects-page" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">Project Portfolio</h2>
+                    <p class="page-subtitle">Manage your engineering projects and deliverables</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Project Actions</h3>
+                        <button class="btn btn-primary" onclick="showModal('project-modal')">
+                            <i class="fas fa-plus"></i>
+                            New Project
+                        </button>
+                    </div>
+                    
+                    <div id="projects-container">
+                        <div class="empty-state">
+                            <i class="fas fa-project-diagram"></i>
+                            <h3>No Projects Yet</h3>
+                            <p>Create your first project to get started with project management</p>
+                            <button class="btn btn-primary" onclick="showModal('project-modal')">
+                                <i class="fas fa-plus"></i>
+                                Create Project
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div id="reports-page" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">Reports & Analytics</h2>
+                    <p class="page-subtitle">Generate detailed reports and performance analytics</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Report Generator</h3>
+                    </div>
+                    <div class="empty-state">
+                        <i class="fas fa-chart-bar"></i>
+                        <h3>Advanced Reports Coming Soon</h3>
+                        <p>Comprehensive reporting and analytics features will be available here</p>
+                        <button class="btn btn-primary" onclick="generateSampleReport()">
+                            <i class="fas fa-chart-bar"></i>
+                            Generate Sample Report
+                        </button>
+                    </div>
+                    <div id="sample-report" style="display: none;">
+                        <h4>📊 Sample Project Report</h4>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%"></div>
+                        </div>
+                        <p>Project completion: 75%</p>
+                        <div class="form-row">
+                            <div class="stat-card">
+                                <div class="stat-number">12</div>
+                                <div class="stat-label">Active Tasks</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">8</div>
+                                <div class="stat-label">Completed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Page -->
+            <div id="map-page" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">GIS Mapping</h2>
+                    <p class="page-subtitle">Interactive mapping and geospatial analysis tools</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Interactive Map</h3>
+                        <div>
+                            <button class="btn btn-secondary" onclick="exportMap()">
+                                <i class="fas fa-download"></i>
+                                Export Map
+                            </button>
+                        </div>
+                    </div>
+                    <div id="map" class="map-container">
+                        <div>
+                            <h3>🗺️ Interactive Map</h3>
+                            <p>GIS mapping functionality will be available here</p>
+                            <button class="btn btn-primary" onclick="initializeMap()">
+                                <i class="fas fa-map"></i>
+                                Initialize Map
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Page -->
+            <div id="ai-page" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">AI Analysis</h2>
+                    <p class="page-subtitle">Intelligent analysis and automated insights</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">AI Tools</h3>
+                    </div>
+                    <div class="empty-state">
+                        <i class="fas fa-robot"></i>
+                        <h3>AI Features Coming Soon</h3>
+                        <p>Advanced AI analysis tools for project optimization and insights</p>
+                        <button class="btn btn-primary" onclick="runAIAnalysis()">
+                            <i class="fas fa-robot"></i>
+                            Run Sample Analysis
+                        </button>
+                    </div>
+                    <div id="ai-results" style="display: none;">
+                        <h4>🤖 AI Analysis Results</h4>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Project Optimization Suggestions</h5>
+                                <span class="badge success">AI Powered</span>
+                            </div>
+                            <ul class="feature-list">
+                                <li>Optimize resource allocation for 15% efficiency gain</li>
+                                <li>Identify potential risks in timeline planning</li>
+                                <li>Suggest cost-saving opportunities</li>
+                                <li>Predict project completion timeline</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings-page" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">Settings</h2>
+                    <p class="page-subtitle">Configure your application preferences</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Application Settings</h3>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">🎨 Theme</label>
+                        <select class="form-select" id="theme-select" onchange="setTheme(this.value)">
+                            <option value="light">Light Mode</option>
+                            <option value="dark">Dark Mode</option>
+                            <option value="auto">Auto (System)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">🌐 Language</label>
+                        <select class="form-select" id="language-setting">
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">💾 Data Management</label>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-secondary" onclick="exportAllData()">
+                                <i class="fas fa-download"></i>
+                                Export All Data
+                            </button>
+                            <button class="btn btn-warning" onclick="importData()">
+                                <i class="fas fa-upload"></i>
+                                Import Data
+                            </button>
+                            <button class="btn btn-danger" onclick="clearAllData()">
+                                <i class="fas fa-trash"></i>
+                                Clear All Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">About</h3>
+                    </div>
+                    <p><strong>Version:</strong> 1.0.0</p>
+                    <p><strong>Build:</strong> Self-Contained</p>
+                    <p><strong>Features:</strong> Contract Management, Project Tracking, GIS Mapping, AI Analysis</p>
+                    <p><strong>Developer:</strong> Engineering Solutions Team</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Contract Modal -->
+    <div id="contract-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">📄 New Contract</h3>
+                <button class="modal-close" onclick="hideModal('contract-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="contract-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Contract Title *</label>
+                            <input type="text" class="form-input" id="contract-title" required placeholder="e.g., Bridge Construction Project">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contract Number *</label>
+                            <input type="text" class="form-input" id="contract-number" required placeholder="e.g., ENG-2024-001">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Client Name *</label>
+                            <input type="text" class="form-input" id="contract-client" required placeholder="e.g., ABC Construction Ltd">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contract Value *</label>
+                            <input type="number" class="form-input" id="contract-value" step="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Start Date *</label>
+                            <input type="date" class="form-input" id="contract-start" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">End Date *</label>
+                            <input type="date" class="form-input" id="contract-end" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" id="contract-status">
+                            <option value="pending">Pending</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="contract-description" rows="3" placeholder="Enter contract details and requirements..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('contract-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveContract()">
+                    <i class="fas fa-check"></i>
+                    Save Contract
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="project-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">📊 New Project</h3>
+                <button class="modal-close" onclick="hideModal('project-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="project-form">
+                    <div class="form-group">
+                        <label class="form-label">Project Name *</label>
+                        <input type="text" class="form-input" id="project-name" required placeholder="e.g., Highway Extension Project">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Project Type</label>
+                        <select class="form-select" id="project-type">
+                            <option value="construction">🏗️ Construction</option>
+                            <option value="design">🎨 Design</option>
+                            <option value="consulting">💼 Consulting</option>
+                            <option value="maintenance">🔧 Maintenance</option>
+                            <option value="inspection">🔍 Inspection</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="project-description" rows="3" placeholder="Enter project scope and objectives..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('project-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveProject()">
+                    <i class="fas fa-check"></i>
+                    Save Project
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        let currentPage = 'dashboard';
+        let contracts = [];
+        let projects = [];
+        let editingContract = null;
+        let editingProject = null;
+        let theme = 'light';
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            loadData();
+            updateDashboard();
+            loadContracts();
+            loadProjects();
+            loadSettings();
+            
+            // Add welcome message
+            setTimeout(() => {
+                showNotification('Welcome to Engineering Project Platform! 🚀', 'success');
+            }, 1000);
+        }
+
+        // Data Management
+        function loadData() {
+            contracts = JSON.parse(localStorage.getItem('contracts') || '[]');
+            projects = JSON.parse(localStorage.getItem('projects') || '[]');
+        }
+
+        function saveData() {
+            localStorage.setItem('contracts', JSON.stringify(contracts));
+            localStorage.setItem('projects', JSON.stringify(projects));
+        }
+
+        function loadSettings() {
+            theme = localStorage.getItem('theme') || 'light';
+            document.getElementById('theme-select').value = theme;
+        }
+
+        function saveSettings() {
+            localStorage.setItem('theme', theme);
+        }
+
+        // Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId + '-page').classList.add('active');
+            
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentPage = pageId;
+        }
+
+        // Modal Management
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            clearForm(modalId);
+        }
+
+        function clearForm(modalId) {
+            const form = document.querySelector(`#${modalId} form`);
+            if (form) {
+                form.reset();
+            }
+            editingContract = null;
+            editingProject = null;
+            
+            // Reset modal titles
+            if (modalId === 'contract-modal') {
+                document.querySelector('#contract-modal .modal-title').textContent = '📄 New Contract';
+            } else if (modalId === 'project-modal') {
+                document.querySelector('#project-modal .modal-title').textContent = '📊 New Project';
+            }
+        }
+
+        // Contract Management
+        function saveContract() {
+            const title = document.getElementById('contract-title').value.trim();
+            const number = document.getElementById('contract-number').value.trim();
+            const client = document.getElementById('contract-client').value.trim();
+            const value = parseFloat(document.getElementById('contract-value').value);
+            const startDate = document.getElementById('contract-start').value;
+            const endDate = document.getElementById('contract-end').value;
+            const status = document.getElementById('contract-status').value;
+            const description = document.getElementById('contract-description').value.trim();
+
+            if (!title || !number || !client || !value || !startDate || !endDate) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (new Date(startDate) >= new Date(endDate)) {
+                showNotification('End date must be after start date', 'error');
+                return;
+            }
+
+            const contract = {
+                id: editingContract ? editingContract.id : generateId(),
+                title,
+                number,
+                client,
+                value,
+                startDate,
+                endDate,
+                status,
+                description,
+                createdAt: editingContract ? editingContract.createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            if (editingContract) {
+                const index = contracts.findIndex(c => c.id === editingContract.id);
+                contracts[index] = contract;
+                showNotification('Contract updated successfully! ✅', 'success');
+            } else {
+                contracts.push(contract);
+                showNotification('Contract created successfully! 🎉', 'success');
+            }
+
+            saveData();
+            loadContracts();
+            updateDashboard();
+            hideModal('contract-modal');
+        }
+
+        function editContract(contractId) {
+            editingContract = contracts.find(c => c.id === contractId);
+            if (editingContract) {
+                document.getElementById('contract-title').value = editingContract.title;
+                document.getElementById('contract-number').value = editingContract.number;
+                document.getElementById('contract-client').value = editingContract.client;
+                document.getElementById('contract-value').value = editingContract.value;
+                document.getElementById('contract-start').value = editingContract.startDate;
+                document.getElementById('contract-end').value = editingContract.endDate;
+                document.getElementById('contract-status').value = editingContract.status;
+                document.getElementById('contract-description').value = editingContract.description;
+                
+                document.querySelector('#contract-modal .modal-title').textContent = '✏️ Edit Contract';
+                showModal('contract-modal');
+            }
+        }
+
+        function deleteContract(contractId) {
+            if (confirm('Are you sure you want to delete this contract? This action cannot be undone.')) {
+                const contract = contracts.find(c => c.id === contractId);
+                contracts = contracts.filter(c => c.id !== contractId);
+                saveData();
+                loadContracts();
+                updateDashboard();
+                showNotification(`Contract "${contract.title}" deleted successfully! 🗑️`, 'success');
+            }
+        }
+
+        function loadContracts() {
+            const container = document.getElementById('contracts-container');
+            const emptyState = document.getElementById('contracts-empty');
+            
+            if (contracts.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            container.innerHTML = contracts.map(contract => `
+                <div class="contract-card">
+                    <div class="contract-title">${contract.title}</div>
+                    <div class="contract-info">
+                        <div class="contract-info-item">
+                            <i class="fas fa-hashtag"></i>
+                            <span>${contract.number}</span>
+                        </div>
+                        <div class="contract-info-item">
+                            <i class="fas fa-user"></i>
+                            <span>${contract.client}</span>
+                        </div>
+                        <div class="contract-info-item">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>$${contract.value.toLocaleString()}</span>
+                        </div>
+                        <div class="contract-info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>${formatDate(contract.startDate)} - ${formatDate(contract.endDate)}</span>
+                        </div>
+                        <div class="contract-info-item">
+                            <i class="fas fa-flag"></i>
+                            <span class="status-${contract.status}">${contract.status.charAt(0).toUpperCase() + contract.status.slice(1)}</span>
+                        </div>
+                    </div>
+                    <div class="contract-actions">
+                        <button class="btn btn-primary" onclick="editContract('${contract.id}')">
+                            <i class="fas fa-edit"></i>
+                            Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteContract('${contract.id}')">
+                            <i class="fas fa-trash"></i>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterContracts() {
+            const searchTerm = document.getElementById('contract-search').value.toLowerCase();
+            const statusFilter = document.getElementById('contract-status-filter').value;
+            
+            let filteredContracts = contracts;
+            
+            if (searchTerm) {
+                filteredContracts = filteredContracts.filter(contract => 
+                    contract.title.toLowerCase().includes(searchTerm) ||
+                    contract.client.toLowerCase().includes(searchTerm) ||
+                    contract.number.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (statusFilter) {
+                filteredContracts = filteredContracts.filter(contract => 
+                    contract.status === statusFilter
+                );
+            }
+            
+            const container = document.getElementById('contracts-container');
+            const emptyState = document.getElementById('contracts-empty');
+            
+            if (filteredContracts.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            container.innerHTML = filteredContracts.map(contract => `
+                <div class="contract-card">
+                    <div class="contract-title">${contract.title}</div>
+                    <div class="contract-info">
+                        <div class="contract-info-item">
+                            <i class="fas fa-hashtag"></i>
+                            <span>${contract.number}</span>
+                        </div>
+                        <div class="contract-info-item">
+                            <i class="fas fa-user"></i>
+                            <span>${contract.client}</span>
+                        </div>
+                        <div class="contract-info-item">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>$${contract.value.toLocaleString()}</span>
+                        </div>
+                        <div class="contract-info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>${formatDate(contract.startDate)} - ${formatDate(contract.endDate)}</span>
+                        </div>
+                        <div class="contract-info-item">
+                            <i class="fas fa-flag"></i>
+                            <span class="status-${contract.status}">${contract.status.charAt(0).toUpperCase() + contract.status.slice(1)}</span>
+                        </div>
+                    </div>
+                    <div class="contract-actions">
+                        <button class="btn btn-primary" onclick="editContract('${contract.id}')">
+                            <i class="fas fa-edit"></i>
+                            Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteContract('${contract.id}')">
+                            <i class="fas fa-trash"></i>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Project Management
+        function saveProject() {
+            const name = document.getElementById('project-name').value.trim();
+            const type = document.getElementById('project-type').value;
+            const description = document.getElementById('project-description').value.trim();
+
+            if (!name) {
+                showNotification('Please enter a project name', 'error');
+                return;
+            }
+
+            const project = {
+                id: editingProject ? editingProject.id : generateId(),
+                name,
+                type,
+                description,
+                createdAt: editingProject ? editingProject.createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            if (editingProject) {
+                const index = projects.findIndex(p => p.id === editingProject.id);
+                projects[index] = project;
+                showNotification('Project updated successfully! ✅', 'success');
+            } else {
+                projects.push(project);
+                showNotification('Project created successfully! 🎉', 'success');
+            }
+
+            saveData();
+            loadProjects();
+            updateDashboard();
+            hideModal('project-modal');
+        }
+
+        function editProject(projectId) {
+            editingProject = projects.find(p => p.id === projectId);
+            if (editingProject) {
+                document.getElementById('project-name').value = editingProject.name;
+                document.getElementById('project-type').value = editingProject.type;
+                document.getElementById('project-description').value = editingProject.description;
+                
+                document.querySelector('#project-modal .modal-title').textContent = '✏️ Edit Project';
+                showModal('project-modal');
+            }
+        }
+
+        function deleteProject(projectId) {
+            if (confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+                const project = projects.find(p => p.id === projectId);
+                projects = projects.filter(p => p.id !== projectId);
+                saveData();
+                loadProjects();
+                updateDashboard();
+                showNotification(`Project "${project.name}" deleted successfully! 🗑️`, 'success');
+            }
+        }
+
+        function loadProjects() {
+            const container = document.getElementById('projects-container');
+            
+            if (projects.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-project-diagram"></i>
+                        <h3>No Projects Yet</h3>
+                        <p>Create your first project to get started with project management</p>
+                        <button class="btn btn-primary" onclick="showModal('project-modal')">
+                            <i class="fas fa-plus"></i>
+                            Create Project
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = projects.map(project => `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">${project.name}</h3>
+                        <div>
+                            <button class="btn btn-primary" onclick="editProject('${project.id}')">
+                                <i class="fas fa-edit"></i>
+                                Edit
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteProject('${project.id}')">
+                                <i class="fas fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                    <p><strong>Type:</strong> ${getProjectTypeIcon(project.type)} ${project.type.charAt(0).toUpperCase() + project.type.slice(1)}</p>
+                    <p><strong>Description:</strong> ${project.description || 'No description provided'}</p>
+                    <p><strong>Created:</strong> ${formatDate(project.createdAt)}</p>
+                    <p><strong>Last Updated:</strong> ${formatDate(project.updatedAt)}</p>
+                </div>
+            `).join('');
+        }
+
+        function getProjectTypeIcon(type) {
+            const icons = {
+                'construction': '🏗️',
+                'design': '🎨',
+                'consulting': '💼',
+                'maintenance': '🔧',
+                'inspection': '🔍'
+            };
+            return icons[type] || '📊';
+        }
+
+        // Dashboard
+        function updateDashboard() {
+            document.getElementById('total-contracts').textContent = contracts.length;
+            document.getElementById('active-projects').textContent = projects.length;
+            document.getElementById('completed-tasks').textContent = contracts.filter(c => c.status === 'completed').length;
+            
+            const totalValue = contracts.reduce((sum, contract) => sum + contract.value, 0);
+            document.getElementById('total-value').textContent = `$${totalValue.toLocaleString()}`;
+        }
+
+        // Map Functions
+        function initializeMap() {
+            const mapContainer = document.getElementById('map');
+            mapContainer.innerHTML = `
+                <div style="padding: 2rem; text-align: center;">
+                    <h3>🗺️ Map Initialized</h3>
+                    <p>Interactive mapping features activated</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    <p style="margin-top: 1rem;">Map ready for GIS operations</p>
+                </div>
+            `;
+            showNotification('Map initialized successfully! 🗺️', 'success');
+        }
+
+        function exportMap() {
+            showNotification('Map export feature coming soon! 🚀', 'info');
+        }
+
+        // Report Functions
+        function generateSampleReport() {
+            const sampleReport = document.getElementById('sample-report');
+            sampleReport.style.display = 'block';
+            showNotification('Sample report generated! 📊', 'success');
+        }
+
+        // AI Functions
+        function runAIAnalysis() {
+            const aiResults = document.getElementById('ai-results');
+            const button = event.target;
+            
+            button.innerHTML = '<div class="loading-spinner"></div> Analyzing...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                aiResults.style.display = 'block';
+                button.innerHTML = '<i class="fas fa-robot"></i> Analysis Complete';
+                button.disabled = false;
+                showNotification('AI analysis completed! 🤖', 'success');
+            }, 2000);
+        }
+
+        // Export Functions
+        function exportContracts() {
+            const data = {
+                contracts: contracts,
+                exportDate: new Date().toISOString(),
+                version: '1.0.0'
+            };
+            
+            const jsonData = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `contracts_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('Contracts exported successfully! 📤', 'success');
+        }
+
+        function exportAllData() {
+            const data = {
+                contracts: contracts,
+                projects: projects,
+                settings: { theme: theme },
+                exportDate: new Date().toISOString(),
+                version: '1.0.0'
+            };
+            
+            const jsonData = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `engineering_platform_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('All data exported successfully! 📦', 'success');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if (data.contracts) contracts = data.contracts;
+                            if (data.projects) projects = data.projects;
+                            if (data.settings) theme = data.settings.theme || 'light';
+                            
+                            saveData();
+                            saveSettings();
+                            loadContracts();
+                            loadProjects();
+                            updateDashboard();
+                            showNotification('Data imported successfully! 📥', 'success');
+                        } catch (error) {
+                            showNotification('Error importing data. Please check the file format.', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // Settings Functions
+        function toggleTheme() {
+            theme = theme === 'light' ? 'dark' : 'light';
+            setTheme(theme);
+        }
+
+        function setTheme(newTheme) {
+            theme = newTheme;
+            document.getElementById('theme-select').value = theme;
+            saveSettings();
+            showNotification(`Theme changed to ${theme} mode! 🎨`, 'success');
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ Are you sure you want to clear all data? This action cannot be undone.')) {
+                localStorage.clear();
+                contracts = [];
+                projects = [];
+                theme = 'light';
+                updateDashboard();
+                loadContracts();
+                loadProjects();
+                showNotification('All data cleared successfully! 🧹', 'success');
+            }
+        }
+
+        // Utility Functions
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas ${getNotificationIcon(type)}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+            return icons[type] || 'fa-info-circle';
+        }
+
+        // Event Listeners
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+
+        // Initialize sample data for demo
+        function initializeSampleData() {
+            if (contracts.length === 0 && projects.length === 0) {
+                // Add sample contract
+                contracts.push({
+                    id: generateId(),
+                    title: 'Highway Bridge Construction',
+                    number: 'ENG-2024-001',
+                    client: 'State Transportation Authority',
+                    value: 2500000,
+                    startDate: '2024-01-15',
+                    endDate: '2024-12-31',
+                    status: 'active',
+                    description: 'Construction of a new highway bridge spanning 200 meters with modern safety features.',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+
+                // Add sample project
+                projects.push({
+                    id: generateId(),
+                    name: 'Urban Development Planning',
+                    type: 'design',
+                    description: 'Comprehensive urban planning project for sustainable city development.',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+
+                saveData();
+                showNotification('Sample data loaded for demonstration! 📚', 'info');
+            }
+        }
+
+        // Load sample data after a delay
+        setTimeout(initializeSampleData, 2000);
+    </script>
+</body>
+</html>
