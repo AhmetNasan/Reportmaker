@@ -26,18 +26,19 @@
 
     <style>
         :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
-            --accent-color: #ff9a9e;
+            --primary-color: #007FFF;
+            --secondary-color: #0056b3;
+            --accent-color: #007FFF;
             --text-light: #ffffff;
-            --text-dark: #271930;
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.37);
-            --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.5);
-            --border-radius: 15px;
-            --transition: all 0.3s ease;
-            --backdrop-blur: blur(20px);
+            --text-dark: #333333;
+            --bg-color: #FFF0F5;
+            --card-bg: #FFF0F5;
+            --header-bg: #007FFF;
+            --sidebar-bg: #007FFF;
+            --border-color: #007FFF;
+            --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+            --transition: all 0.2s ease;
         }
 
         * {
@@ -49,41 +50,24 @@
 
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-            color: var(--text-light);
+            background: var(--bg-color);
+            color: var(--text-dark);
             line-height: 1.6;
             overflow-x: hidden;
             position: relative;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url("https://i.postimg.cc/0jv27Qvw/20008380-645221846.jpg"), #000;
-            background-position: center;
-            background-size: cover;
-            background-attachment: fixed;
-            z-index: -1;
-            opacity: 0.3;
-        }
-
-        /* Glassmorphism Base Components */
+        /* Glassmorphism replaced with Solid design */
         .glass {
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
             transition: var(--transition);
         }
 
         .glass:hover {
-            box-shadow: var(--shadow-hover);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
             transform: translateY(-2px);
         }
 
@@ -106,16 +90,15 @@
             border-radius: var(--border-radius);
             padding: 40px;
             text-align: center;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            box-shadow: var(--shadow-glass);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-subtle);
             transition: var(--transition);
+            color: var(--text-dark);
         }
 
         .wrapper:hover {
-            box-shadow: var(--shadow-hover);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         }
 
         .auth-form {
@@ -126,13 +109,13 @@
         .auth-logo {
             font-size: 2.2rem;
             margin-bottom: 25px;
-            color: var(--text-light);
+            color: var(--primary-color);
             letter-spacing: 1px;
         }
 
         .input-field {
             position: relative;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            border-bottom: 2px solid var(--border-color);
             margin: 20px 0;
         }
 
@@ -141,7 +124,7 @@
             top: 50%;
             left: 0;
             transform: translateY(-50%);
-            color: var(--text-light);
+            color: var(--text-dark);
             font-size: 16px;
             pointer-events: none;
             transition: var(--transition);
@@ -154,7 +137,7 @@
             border: none;
             outline: none;
             font-size: 16px;
-            color: var(--text-light);
+            color: var(--text-dark);
             padding: 0 10px;
         }
 
@@ -163,11 +146,11 @@
             font-size: 0.9rem;
             top: 10px;
             transform: translateY(-150%);
-            color: #ffdde1;
+            color: var(--primary-color);
         }
 
         .auth-btn {
-            background-color: var(--text-dark);
+            background-color: var(--primary-color);
             color: var(--text-light);
             font-weight: 600;
             border: none;
@@ -181,13 +164,12 @@
         }
 
         .auth-btn:hover {
-            color: var(--text-dark);
-            background: rgba(255, 255, 255, 0.2);
-            border-color: var(--text-light);
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
         }
 
         .auth-toggle {
-            color: #ffdde1;
+            color: var(--primary-color);
             cursor: pointer;
             margin-top: 30px;
             text-decoration: none;
@@ -204,13 +186,10 @@
         }
 
         .header {
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 0 0 20px 20px;
+            background: var(--header-bg);
+            border-bottom: 2px solid var(--secondary-color);
             padding: 15px 30px;
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -218,6 +197,7 @@
             top: 0;
             z-index: 1000;
             margin-bottom: 20px;
+            color: var(--text-light);
         }
 
         .header-left {
@@ -229,10 +209,7 @@
         .logo {
             font-size: 24px;
             font-weight: bold;
-            background: linear-gradient(135deg, #ffdde1, #ff9a9e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text-light);
         }
 
         .header-actions {
@@ -242,10 +219,8 @@
         }
 
         .theme-toggle {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             font-size: 20px;
             cursor: pointer;
@@ -256,7 +231,7 @@
 
         .theme-toggle:hover {
             transform: scale(1.1);
-            box-shadow: var(--shadow-glass);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .user-menu {
@@ -279,19 +254,17 @@
 
         .user-avatar:hover {
             transform: scale(1.1);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
         }
 
         .user-dropdown {
             position: absolute;
             top: 100%;
             right: 0;
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--header-bg);
+            border: 1px solid var(--secondary-color);
             border-radius: 12px;
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
             min-width: 200px;
             display: none;
             z-index: 1001;
@@ -324,22 +297,21 @@
 
         .sidebar {
             width: 280px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--sidebar-bg);
+            border: 1px solid var(--secondary-color);
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
             overflow-y: auto;
             transition: var(--transition);
             height: fit-content;
+            color: var(--text-light);
         }
 
         .sidebar-toggle {
             display: none;
-            background: var(--secondary-color);
+            background: rgba(255, 255, 255, 0.2);
             color: var(--text-light);
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             padding: 10px;
             margin: 10px;
             border-radius: 8px;
@@ -348,14 +320,14 @@
 
         .nav-section {
             padding: 20px 0;
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .nav-section-title {
             padding: 0 20px 10px;
             font-size: 12px;
             text-transform: uppercase;
-            color: #ffdde1;
+            color: rgba(255, 255, 255, 0.7);
             font-weight: 600;
         }
 
@@ -372,8 +344,8 @@
 
         .nav-item:hover,
         .nav-item.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffdde1;
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-light);
         }
 
         .nav-item i {
@@ -402,20 +374,19 @@
         }
 
         .card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             padding: 25px;
             margin-bottom: 25px;
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
             transition: var(--transition);
+            color: var(--text-dark);
         }
 
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         }
 
         .card-header {
@@ -424,14 +395,14 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .card-title {
             font-size: 24px;
             font-weight: 600;
             margin: 0;
-            color: var(--text-light);
+            color: var(--primary-color);
         }
 
         .btn {
@@ -446,42 +417,40 @@
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            color: var(--text-light);
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            color: var(--primary-color);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
         }
 
         .btn-primary { 
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: var(--primary-color);
             color: var(--text-light);
-            border: none;
+            border: 1px solid var(--secondary-color);
         }
         .btn-success { 
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: #28a745;
             color: var(--text-light);
-            border: none;
+            border: 1px solid #1e7e34;
         }
         .btn-danger { 
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background: #dc3545;
             color: var(--text-light);
-            border: none;
+            border: 1px solid #bd2130;
         }
         .btn-warning { 
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: var(--text-light);
-            border: none;
+            background: #ffc107;
+            color: #212529;
+            border: 1px solid #e0a800;
         }
         .btn-info { 
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: #17a2b8;
             color: var(--text-light);
-            border: none;
+            border: 1px solid #117a8b;
         }
 
         .form-group {
@@ -492,7 +461,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
-            color: var(--text-light);
+            color: var(--text-dark);
         }
 
         .form-input,
@@ -500,27 +469,25 @@
         .form-textarea {
             width: 100%;
             padding: 12px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             font-size: 14px;
             transition: var(--transition);
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: var(--text-light);
+            background: #ffffff;
+            color: var(--text-dark);
         }
 
         .form-input::placeholder,
         .form-textarea::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: #999999;
         }
 
         .form-input:focus,
         .form-select:focus,
         .form-textarea:focus {
             outline: none;
-            border-color: #ffdde1;
-            box-shadow: 0 0 0 3px rgba(255, 221, 225, 0.1);
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(0, 127, 255, 0.1);
         }
 
         .form-textarea {
@@ -533,10 +500,8 @@
             height: 600px;
             border-radius: var(--border-radius);
             overflow: hidden;
-            border: 1px solid var(--glass-border);
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
+            border: 1px solid var(--border-color);
+            background: #ffffff;
         }
 
         .map-controls {
@@ -545,28 +510,24 @@
             gap: 10px;
             margin-bottom: 20px;
             padding: 15px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
         }
 
         .gps-info {
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             padding: 15px;
             margin-bottom: 20px;
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
         }
 
         .gps-info h3 {
             margin-bottom: 10px;
-            color: var(--text-light);
+            color: var(--primary-color);
         }
 
         .gps-coordinate {
@@ -576,25 +537,21 @@
         }
 
         .measurement-display {
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             padding: 10px;
             margin-top: 10px;
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
         }
 
         /* Table Styles */
         .table-container {
             overflow-x: auto;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-glass);
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-subtle);
+            background: #ffffff;
+            border: 1px solid var(--border-color);
         }
 
         .table {
@@ -606,20 +563,21 @@
         .table td {
             padding: 15px;
             text-align: left;
-            border-bottom: 1px solid var(--glass-border);
-            color: var(--text-light);
+            border-bottom: 1px solid #eeeeee;
+            color: var(--text-dark);
         }
 
         .table th {
-            background: rgba(255, 221, 225, 0.1);
-            color: var(--text-light);
+            background: #f8f9fa;
+            color: var(--primary-color);
             font-weight: 600;
             position: sticky;
             top: 0;
+            border-bottom: 2px solid var(--border-color);
         }
 
         .table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: #fcfcfc;
         }
 
         /* Modal Styles */
@@ -641,10 +599,8 @@
         }
 
         .modal-content {
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             padding: 30px;
             width: 90%;
@@ -652,7 +608,8 @@
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
+            color: var(--text-dark);
         }
 
         .modal-close {
@@ -663,12 +620,12 @@
             border: none;
             font-size: 24px;
             cursor: pointer;
-            color: var(--text-light);
+            color: var(--text-dark);
         }
 
         /* CAD Drawing Styles */
         .drawing-canvas {
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             background: white;
             cursor: crosshair;
@@ -680,30 +637,26 @@
             gap: 10px;
             margin-bottom: 20px;
             padding: 15px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
         }
 
         .tool-btn {
             padding: 10px 15px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
+            background: #ffffff;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             cursor: pointer;
             transition: var(--transition);
-            color: var(--text-light);
+            color: var(--primary-color);
         }
 
         .tool-btn.active {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: var(--primary-color);
             color: var(--text-light);
-            border: none;
+            border-color: var(--secondary-color);
         }
 
         /* Stats Cards */
@@ -715,22 +668,21 @@
         }
 
         .stat-card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: #ffffff;
+            border: 1px solid var(--border-color);
             padding: 25px;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
             text-align: center;
             position: relative;
             overflow: hidden;
             transition: var(--transition);
+            color: var(--text-dark);
         }
 
         .stat-card:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         }
 
         .stat-card::before {
@@ -740,43 +692,39 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: var(--primary-color);
         }
 
         .stat-number {
             font-size: 36px;
             font-weight: bold;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #ffdde1, #ff9a9e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary-color);
         }
 
         .stat-label {
-            color: var(--text-light);
+            color: var(--text-dark);
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .file-upload {
-            border: 2px dashed var(--glass-border);
+            border: 2px dashed var(--border-color);
             border-radius: var(--border-radius);
             padding: 40px;
             text-align: center;
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
+            background: #ffffff;
             cursor: pointer;
             transition: var(--transition);
             margin-bottom: 20px;
+            color: var(--text-dark);
         }
 
         .file-upload:hover {
-            border-color: #ffdde1;
+            border-color: var(--secondary-color);
             transform: translateY(-2px);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
         }
 
         .activity-item {
@@ -784,19 +732,18 @@
             align-items: center;
             gap: 10px;
             padding: 10px 0;
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px solid #eeeeee;
         }
 
         /* Background Settings */
         .background-settings {
             margin-top: 30px;
             padding: 20px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
+            color: var(--text-dark);
         }
 
         .background-options {
@@ -808,22 +755,23 @@
 
         .background-option {
             padding: 15px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--border-color);
             border-radius: 10px;
             cursor: pointer;
             transition: var(--transition);
             text-align: center;
-            background: var(--glass-bg);
+            background: #ffffff;
+            color: var(--text-dark);
         }
 
         .background-option:hover {
-            border-color: #ffdde1;
+            border-color: var(--secondary-color);
             transform: translateY(-2px);
         }
 
         .background-option.active {
-            border-color: #ffdde1;
-            background: rgba(255, 221, 225, 0.1);
+            border-color: var(--primary-color);
+            background: rgba(0, 127, 255, 0.1);
         }
 
         /* Timeline Styles */
@@ -839,7 +787,7 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            background: var(--primary-color);
         }
 
         .timeline-item {
@@ -847,12 +795,11 @@
             margin-bottom: 30px;
             margin-left: 60px;
             padding: 20px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: #ffffff;
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-subtle);
+            color: var(--text-dark);
         }
 
         .timeline-item::before {
@@ -863,8 +810,8 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border: 3px solid var(--text-light);
+            background: var(--primary-color);
+            border: 3px solid #ffffff;
         }
 
         /* File Manager Styles */
@@ -877,25 +824,24 @@
 
         .file-item {
             padding: 20px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            background: #ffffff;
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             text-align: center;
             cursor: pointer;
             transition: var(--transition);
+            color: var(--text-dark);
         }
 
         .file-item:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-glass);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         }
 
         .file-icon {
             font-size: 48px;
             margin-bottom: 10px;
-            color: #ffdde1;
+            color: var(--primary-color);
         }
 
         /* Responsive Design */
@@ -1033,8 +979,8 @@
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid var(--glass-border);
-            border-top: 4px solid #ffdde1;
+            border: 4px solid #eeeeee;
+            border-top: 4px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 20px auto;
@@ -1251,21 +1197,21 @@
                                 <i class="fas fa-check-circle" style="color: #2ecc71;"></i>
                                 <div>
                                     <strong>Bridge inspection completed</strong> for Highway A-123
-                                    <br><small style="color: #ffdde1;">5 minutes ago</small>
+                                    <br><small style="color: #666666;">5 minutes ago</small>
                                 </div>
                             </div>
                             <div class="activity-item">
                                 <i class="fas fa-robot" style="color: #3498db;"></i>
                                 <div>
                                     <strong>AI defect analysis</strong> detected 3 potential issues
-                                    <br><small style="color: #ffdde1;">12 minutes ago</small>
+                                    <br><small style="color: #666666;">12 minutes ago</small>
                                 </div>
                             </div>
                             <div class="activity-item">
                                 <i class="fas fa-truck" style="color: #f39c12;"></i>
                                 <div>
                                     <strong>Material delivery</strong> scheduled for Site B
-                                    <br><small style="color: #ffdde1;">1 hour ago</small>
+                                    <br><small style="color: #666666;">1 hour ago</small>
                                 </div>
                             </div>
                         </div>
@@ -1581,22 +1527,22 @@
                             <div class="timeline-item">
                                 <h4>Project Initiation</h4>
                                 <p>Project kick-off meeting and initial planning phase</p>
-                                <small style="color: #ffdde1;">January 15, 2024</small>
+                                <small style="color: #666666;">January 15, 2024</small>
                             </div>
                             <div class="timeline-item">
                                 <h4>Design Phase</h4>
                                 <p>Architectural and engineering design development</p>
-                                <small style="color: #ffdde1;">February 1, 2024</small>
+                                <small style="color: #666666;">February 1, 2024</small>
                             </div>
                             <div class="timeline-item">
                                 <h4>Permitting</h4>
                                 <p>Obtaining necessary permits and approvals</p>
-                                <small style="color: #ffdde1;">March 15, 2024</small>
+                                <small style="color: #666666;">March 15, 2024</small>
                             </div>
                             <div class="timeline-item">
                                 <h4>Construction Start</h4>
                                 <p>Ground breaking and construction commencement</p>
-                                <small style="color: #ffdde1;">April 1, 2024</small>
+                                <small style="color: #666666;">April 1, 2024</small>
                             </div>
                         </div>
                     </div>
@@ -1897,14 +1843,14 @@
                                 <i class="fas fa-info-circle" style="color: #3498db;"></i>
                                 <div>
                                     <strong>System Update</strong> - New features available
-                                    <br><small style="color: #ffdde1;">2 hours ago</small>
+                                    <br><small style="color: #666666;">2 hours ago</small>
                                 </div>
                             </div>
                             <div class="activity-item">
                                 <i class="fas fa-exclamation-triangle" style="color: #f39c12;"></i>
                                 <div>
                                     <strong>Inspection Due</strong> - Bridge A-123 inspection overdue
-                                    <br><small style="color: #ffdde1;">5 hours ago</small>
+                                    <br><small style="color: #666666;">5 hours ago</small>
                                 </div>
                             </div>
                         </div>
@@ -2258,9 +2204,15 @@
             if (body.getAttribute('data-theme') === 'dark') {
                 body.removeAttribute('data-theme');
                 themeToggle.className = 'fas fa-moon';
+                document.documentElement.style.setProperty('--card-bg', '#FFF0F5');
+                document.documentElement.style.setProperty('--bg-color', '#FFF0F5');
+                document.documentElement.style.setProperty('--text-dark', '#333333');
             } else {
                 body.setAttribute('data-theme', 'dark');
                 themeToggle.className = 'fas fa-sun';
+                document.documentElement.style.setProperty('--card-bg', '#1a1a1a');
+                document.documentElement.style.setProperty('--bg-color', '#121212');
+                document.documentElement.style.setProperty('--text-dark', '#e1e1e1');
             }
         }
 
@@ -2270,20 +2222,21 @@
             const options = document.querySelectorAll('.background-option');
             
             options.forEach(option => option.classList.remove('active'));
-            document.querySelector(`[data-bg="${theme}"]`).classList.add('active');
+            const option = document.querySelector(`[data-bg="${theme}"]`);
+            if (option) option.classList.add('active');
             
             switch(theme) {
                 case 'gradient':
-                    body.style.background = 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)';
+                    body.style.background = '#FFF0F5';
                     break;
                 case 'nature':
-                    body.style.background = 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)';
+                    body.style.background = '#e3f2fd';
                     break;
                 case 'urban':
-                    body.style.background = 'linear-gradient(135deg, #636e72 0%, #2d3436 100%)';
+                    body.style.background = '#f5f5f5';
                     break;
                 case 'minimal':
-                    body.style.background = 'linear-gradient(135deg, #ddd6fe 0%, #e0e7ff 100%)';
+                    body.style.background = '#ffffff';
                     break;
             }
             
@@ -2914,7 +2867,7 @@
                 <div class="timeline-item">
                     <h4>${event.title}</h4>
                     <p>${event.description}</p>
-                    <small style="color: #ffdde1;">${event.date}</small>
+                    <small style="color: #666666;">${event.date}</small>
                 </div>
             `).join('');
             
@@ -3739,7 +3692,7 @@
                 <head>
                     <title>QNAS - Qatar Navigation Analysis System</title>
                     <style>
-                        body { font-family: 'Open Sans', sans-serif; padding: 20px; background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); }
+                        body { font-family: 'Open Sans', sans-serif; padding: 20px; background: #FFF0F5; }
                         .container { background: rgba(255,255,255,0.1); backdrop-filter: blur(20px); padding: 30px; border-radius: 15px; }
                         h1 { color: #fff; text-align: center; }
                         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
@@ -3777,7 +3730,7 @@
                         </div>
                         <div style="text-align: center; margin-top: 30px;">
                             <p style="color: #fff;">Powered by Qatar Navigation Authority</p>
-                            <p style="color: #ffdde1; font-size: 14px;">API Key: ba80a013eb****</p>
+                            <p style="color: #666666; font-size: 14px;">API Key: ba80a013eb****</p>
                         </div>
                     </div>
                 </body>
@@ -3821,7 +3774,7 @@
                             <li>Recommended route adjustments for ${regionNames[qatarRegion]} region</li>
                             <li>Real-time Qatar traffic data incorporated</li>
                         </ul>
-                        <p style="margin-top: 10px; font-size: 12px; color: #ffdde1;">
+                        <p style="margin-top: 10px; font-size: 12px; color: #666666;">
                             Data source: Qatar Navigation Authority | Last updated: ${new Date().toLocaleString()}
                         </p>
                     </div>
@@ -4251,17 +4204,17 @@
             if (fileUpload) {
                 fileUpload.addEventListener('dragover', (e) => {
                     e.preventDefault();
-                    fileUpload.style.borderColor = '#ffdde1';
+                    fileUpload.style.borderColor = '#007FFF';
                 });
 
                 fileUpload.addEventListener('dragleave', (e) => {
                     e.preventDefault();
-                    fileUpload.style.borderColor = 'var(--glass-border)';
+                    fileUpload.style.borderColor = 'var(--border-color)';
                 });
 
                 fileUpload.addEventListener('drop', (e) => {
                     e.preventDefault();
-                    fileUpload.style.borderColor = 'var(--glass-border)';
+                    fileUpload.style.borderColor = 'var(--border-color)';
                     
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
