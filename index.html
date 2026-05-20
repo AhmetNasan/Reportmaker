@@ -173,6 +173,11 @@
             cursor: pointer;
             margin-top: 30px;
             text-decoration: none;
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: inherit;
+            font-family: inherit;
         }
 
         .auth-toggle:hover {
@@ -250,6 +255,8 @@
             font-weight: bold;
             cursor: pointer;
             transition: var(--transition);
+            border: none;
+            padding: 0;
         }
 
         .user-avatar:hover {
@@ -1036,7 +1043,7 @@
                     <label for="auth-name">Full Name</label>
                 </div>
                 <button type="submit" id="auth-submit" class="auth-btn">Sign In</button>
-                <div id="auth-toggle" class="auth-toggle">Don't have an account? Sign up</div>
+                <button type="button" id="auth-toggle" class="auth-toggle">Don't have an account? Sign up</button>
             </form>
         </div>
     </div>
@@ -1046,19 +1053,19 @@
         <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="logo">Engineering Platform</div>
             </div>
             <div class="header-actions">
-                <button class="theme-toggle" onclick="toggleTheme()">
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
                     <i class="fas fa-moon"></i>
                 </button>
                 <div class="user-menu">
-                    <div class="user-avatar" onclick="toggleUserMenu()">
+                    <button type="button" class="user-avatar" onclick="toggleUserMenu()" aria-label="User menu">
                         <span id="user-initial">U</span>
-                    </div>
+                    </button>
                     <div id="user-dropdown" class="user-dropdown">
                         <div class="user-dropdown-item" onclick="showProfile()">
                             <i class="fas fa-user"></i> Profile
