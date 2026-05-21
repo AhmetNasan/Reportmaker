@@ -1046,19 +1046,19 @@
         <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="logo">Engineering Platform</div>
             </div>
             <div class="header-actions">
-                <button class="theme-toggle" onclick="toggleTheme()">
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
                     <i class="fas fa-moon"></i>
                 </button>
                 <div class="user-menu">
-                    <div class="user-avatar" onclick="toggleUserMenu()">
+                    <button class="user-avatar" onclick="toggleUserMenu()" aria-label="User menu" aria-expanded="false" style="border: none; outline: none; font-family: inherit;">
                         <span id="user-initial">U</span>
-                    </div>
+                    </button>
                     <div id="user-dropdown" class="user-dropdown">
                         <div class="user-dropdown-item" onclick="showProfile()">
                             <i class="fas fa-user"></i> Profile
@@ -2130,18 +2130,30 @@
         function handleAuth(e) {
             e.preventDefault();
             
+            const submitBtn = document.getElementById('auth-submit');
+            const originalText = submitBtn.textContent;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing In...';
+
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value;
             
-            // Simulate authentication
-            currentUser = {
-                email: email,
-                name: name || email.split('@')[0],
-                id: Date.now()
-            };
-            
-            showMainApp();
+            // Simulate authentication delay for better UX
+            setTimeout(() => {
+                currentUser = {
+                    email: email,
+                    name: name || email.split('@')[0],
+                    id: Date.now()
+                };
+
+                showMainApp();
+
+                // Reset button state (for when they logout and come back)
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }, 800);
         }
 
         function showMainApp() {
@@ -2194,7 +2206,10 @@
         }
 
         function toggleUserMenu() {
-            document.getElementById('user-dropdown').classList.toggle('active');
+            const dropdown = document.getElementById('user-dropdown');
+            const avatarBtn = document.querySelector('.user-avatar');
+            const isActive = dropdown.classList.toggle('active');
+            avatarBtn.setAttribute('aria-expanded', isActive);
         }
 
         function toggleTheme() {
@@ -4187,7 +4202,12 @@
                 }
 
                 if (!e.target.closest('.user-menu')) {
-                    document.getElementById('user-dropdown').classList.remove('active');
+                    const dropdown = document.getElementById('user-dropdown');
+                    const avatarBtn = document.querySelector('.user-avatar');
+                    if (dropdown.classList.contains('active')) {
+                        dropdown.classList.remove('active');
+                        avatarBtn.setAttribute('aria-expanded', 'false');
+                    }
                 }
             });
 
