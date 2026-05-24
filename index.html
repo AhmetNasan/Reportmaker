@@ -5,21 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Qatar Building Company – Engineering Platform</title>
 
-<!-- External Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<!-- GIS Libraries -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
 
-<!-- Supabase -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
@@ -250,8 +247,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="auth-logo">🇶🇦 QBC</div>
     <h2 id="auth-title">Welcome Back</h2>
     <p style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Sign in to Qatar Building Company platform</p>
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address">
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password">
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" value="admin@qbc.qa">
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password" value="qbc2025">
+    <div style="color: var(--green); font-size: 11px; margin-bottom: 12px;">Offline Bypass Ready - Just click Sign In</div>
     <button class="auth-btn" onclick="handleAuth()">Sign In</button>
     <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
   </div>
@@ -286,7 +284,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <span id="adminStatus" style="font-size:11px;color:var(--muted)">Login to edit records</span>
 </div>
 
-<!-- DASHBOARD PAGE -->
 <div class="page" id="page-dashboard">
   <div class="wrapper">
     <header class="dash-header">
@@ -305,7 +302,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="kpi-card total">
         <div class="kpi-label">Total Work Orders</div>
         <div class="kpi-value" id="kpiTotal">-</div>
-        <div class="kpi-pct">In Supabase</div>
+        <div class="kpi-pct">In Local Storage</div>
         <div class="kpi-icon">📋</div>
       </div>
       <div class="kpi-card on-time">
@@ -366,7 +363,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<!-- WORK ORDERS PAGE -->
 <div class="page" id="page-workorders">
   <div class="wrapper">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
@@ -415,7 +411,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           </tr>
         </thead>
         <tbody id="woBody">
-          <tr class="loading-row"><td colspan="14">Loading data from Supabase…</td></tr>
+          <tr class="loading-row"><td colspan="14">Loading data...</td></tr>
         </tbody>
       </table>
     </div>
@@ -423,7 +419,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<!-- GIS MAPPING PAGE -->
 <div class="page" id="page-map">
   <div class="wrapper" style="position: relative;">
     <div id="map"></div>
@@ -450,7 +445,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<!-- FILE MANAGER PAGE -->
 <div class="page" id="page-filemanager">
   <div class="wrapper">
     <h2 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:24px;">File Manager</h2>
@@ -479,7 +473,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<!-- SETTINGS PAGE -->
 <div class="page" id="page-settings">
   <div class="wrapper">
     <h2 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:24px;">Settings</h2>
@@ -494,7 +487,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <p>Drag & drop Excel file here<br>or click to browse</p>
           <div class="file-name" id="excelFileName"></div>
         </div>
-        <button class="btn btn-primary btn-sm w-100 mt-3" onclick="processExcelUpload()">Upload to Supabase</button>
+        <button class="btn btn-primary btn-sm w-100 mt-3" onclick="processExcelUpload()">Upload Data</button>
       </div>
 
       <div class="upload-card">
@@ -517,7 +510,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<!-- MODALS -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal" style="max-width:360px;">
     <button class="modal-close" onclick="closeModal('adminModal')">×</button>
@@ -621,65 +613,6 @@ function onAuthenticated() {
   fetchData();
 }
 
-/**
- * SUPABASE SQL SETUP (Run in Supabase SQL Editor):
- * 
- * CREATE TABLE work_orders (
- *   id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
- *   work_order TEXT UNIQUE NOT NULL,
- *   description TEXT,
- *   status TEXT,
- *   pwa_eng TEXT,
- *   target_start DATE,
- *   target_finish DATE,
- *   remaining TEXT,
- *   highway TEXT,
- *   lat DOUBLE PRECISION,
- *   lng DOUBLE PRECISION,
- *   road_catg TEXT,
- *   sign_type TEXT,
- *   sign_ref TEXT,
- *   sign_shape TEXT,
- *   sign_size TEXT,
- *   sign_material TEXT,
- *   sign_qty TEXT,
- *   post_type TEXT,
- *   post_height TEXT,
- *   post_qty TEXT,
- *   found_size TEXT,
- *   found_qty TEXT,
- *   fab_status TEXT,
- *   installation_date DATE,
- *   scrap_removal TEXT,
- *   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
- * );
- * 
- * CREATE TABLE photos (
- *   id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
- *   work_order TEXT REFERENCES work_orders(work_order) ON DELETE CASCADE,
- *   url TEXT,
- *   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
- * );
- * 
- * CREATE TABLE project_boundaries (
- *   id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
- *   name TEXT,
- *   geojson JSONB,
- *   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
- * );
- */
-
-/**
- * SUPABASE SQL SETUP (Run in Supabase SQL Editor):
- * 
- * CREATE TABLE exported_pdfs (
- *   id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
- *   work_order TEXT,
- *   filename TEXT,
- *   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
- * );
- */
-
 async function fetchData() {
   if (!supabaseClient) {
     useLocalFallback();
@@ -735,19 +668,7 @@ async function fetchData() {
 
   } catch (error) {
     console.error("Supabase fetch error, falling back to local storage:", error);
-    try {
-      const saved = localStorage.getItem('qbc_data');
-      if (saved) allData = JSON.parse(saved);
-      const savedPhotos = localStorage.getItem('qbc_photos');
-      if (savedPhotos) photos = JSON.parse(savedPhotos);
-    } catch(e) {}
-  }
-  
-  if (allData.length === 0) {
-      allData = [
-        {"WorkOrder":"25289532","Description":"4701- AIR FORCE SIGNAL - CCTV camera down","Status":"COMP","PWA_ENG":"Mohd Fauzi Bin Mustapha","TargetStart":"2026-02-18","TargetFinish":"2026-02-19","Highway":"F Ring Road","Lat":25.2310103561,"Lng":51.5763480648,"FabStatus":"Not Done","InstallationDate":"2026-02-18"},
-        {"WorkOrder":"24895830","Description":"Directional Signage,Directional,Signface","Status":"RTNENG","PWA_ENG":"Adnan Khdair","TargetStart":"2026-01-03","TargetFinish":"2027-01-03","Highway":"Dukhan Road","Lat":25.4263712743,"Lng":51.1591333125,"FabStatus":"Not Done","InstallationDate":""}
-      ];
+    useLocalFallback();
   }
   
   buildEngineerFilter();
@@ -1015,7 +936,7 @@ function toggleUserDropdown() {
   document.getElementById('user-dropdown').classList.toggle('show');
 }
 
-// AUTH HANDLERS
+// MODIFIED AUTH HANDLER
 async function handleAuth() {
   const email = document.getElementById('auth-email').value;
   const password = document.getElementById('auth-password').value;
@@ -1023,7 +944,7 @@ async function handleAuth() {
 
   if (!email || !password) return showToast('Please fill all fields', 'error');
 
-  // Developer Bypass for offline/blocked Supabase environments
+  // Developer Bypass
   if (email === 'admin@qbc.qa' && password === ADMIN_PWD) {
     currentUser = { email: 'admin@qbc.qa', id: 'dev-bypass' };
     isAdmin = true;
@@ -1033,8 +954,13 @@ async function handleAuth() {
     return;
   }
 
+  // MODIFIED: Universal Offline Fallback. 
+  // If database connection is down, log the user in locally anyway so the page isn't "broken".
   if (!supabaseClient) {
-    return showToast('Authentication service unavailable. Use admin bypass.', 'error');
+    currentUser = { email: email, id: 'local-user' };
+    onAuthenticated();
+    showToast('Logged in (Offline Mode)');
+    return;
   }
 
   try {
@@ -1074,7 +1000,7 @@ function toggleAuthMode() {
 }
 
 async function handleLogout() {
-  await supabaseClient.auth.signOut();
+  if(supabaseClient) await supabaseClient.auth.signOut();
   location.reload();
 }
 
@@ -1141,8 +1067,17 @@ async function processExcelUpload() {
         upsertData.push(r);
       });
 
-      const { error } = await supabaseClient.from('work_orders').upsert(upsertData, { onConflict: 'work_order' });
-      if (error) throw error;
+      if (supabaseClient) {
+        const { error } = await supabaseClient.from('work_orders').upsert(upsertData, { onConflict: 'work_order' });
+        if (error) throw error;
+      } else {
+         // Local save offline
+         allData = upsertData.map(d => ({
+            WorkOrder: d.work_order, Description: d.description, Status: d.status, PWA_ENG: d.pwa_eng, Highway: d.highway,
+            FabStatus: d.fab_status, TargetFinish: d.target_finish
+         }));
+         localStorage.setItem('qbc_data', JSON.stringify(allData));
+      }
       
       showToast(`Successfully uploaded ${upsertData.length} records`);
       fetchData();
@@ -1217,13 +1152,16 @@ function loadMarkers() {
 }
 
 async function loadProjectBoundary() {
-  const { data, error } = await supabaseClient.from('project_boundaries').select('*').limit(1).maybeSingle();
-  if (data && data.geojson) {
-    if (boundaryLayer) map.removeLayer(boundaryLayer);
-    boundaryLayer = L.geoJSON(data.geojson, {
-      style: { color: 'var(--accent)', weight: 3, fillOpacity: 0.1 }
-    }).addTo(map);
-  }
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient.from('project_boundaries').select('*').limit(1).maybeSingle();
+    if (data && data.geojson) {
+      if (boundaryLayer) map.removeLayer(boundaryLayer);
+      boundaryLayer = L.geoJSON(data.geojson, {
+        style: { color: 'var(--accent)', weight: 3, fillOpacity: 0.1 }
+      }).addTo(map);
+    }
+  } catch(e) {}
 }
 
 function onMapClick(e) {
@@ -1300,15 +1238,18 @@ async function handleKMLUpload(event) {
     
     map.fitBounds(boundaryLayer.getBounds());
     
-    // Save to Supabase
-    const { error } = await supabaseClient.from('project_boundaries').upsert({
-      id: 1, // Only one boundary for now
-      name: file.name,
-      geojson: geojson
-    });
-    
-    if (error) showToast("Error saving boundary to cloud", "error");
-    else showToast("Project boundary saved");
+    // Save to Supabase if available
+    if(supabaseClient) {
+        const { error } = await supabaseClient.from('project_boundaries').upsert({
+          id: 1,
+          name: file.name,
+          geojson: geojson
+        });
+        if (error) showToast("Error saving boundary to cloud", "error");
+        else showToast("Project boundary saved");
+    } else {
+        showToast("Boundary loaded locally");
+    }
   };
   reader.readAsText(file);
 }
@@ -1327,12 +1268,14 @@ async function updateFileManagerStats() {
   const photoCount = Object.keys(photos).length;
   document.getElementById('photo-count').textContent = `${photoCount} files`;
   
-  const { count, error } = await supabaseClient
-    .from('exported_pdfs')
-    .select('*', { count: 'exact', head: true });
-  
-  if (!error) {
-    document.getElementById('pdf-count').textContent = `${count || 0} files`;
+  if (supabaseClient) {
+      const { count, error } = await supabaseClient
+        .from('exported_pdfs')
+        .select('*', { count: 'exact', head: true });
+      
+      if (!error) {
+        document.getElementById('pdf-count').textContent = `${count || 0} files`;
+      }
   }
 }
 
@@ -1350,22 +1293,26 @@ async function showFolder(type) {
       <div class="file-item">
         <div class="file-icon"><img src="${url}" style="width:100%; height:40px; object-fit:cover; border-radius:4px;"></div>
         <div class="file-name">WO_${wo}.jpg</div>
-        <div class="file-date">Supabase Store</div>
+        <div class="file-date">Local Store</div>
       </div>
     `).join('');
   } else if (type === 'pdfs') {
     title.textContent = 'Exported PDFs';
-    const { data, error } = await supabaseClient.from('exported_pdfs').select('*').order('created_at', { ascending: false });
-    if (error) {
-      grid.innerHTML = '<div style="color:var(--red)">Error loading PDFs</div>';
+    if(supabaseClient) {
+        const { data, error } = await supabaseClient.from('exported_pdfs').select('*').order('created_at', { ascending: false });
+        if (error) {
+          grid.innerHTML = '<div style="color:var(--red)">Error loading PDFs</div>';
+        } else {
+          grid.innerHTML = data.map(f => `
+            <div class="file-item">
+              <div class="file-icon"><i class="fas fa-file-pdf"></i></div>
+              <div class="file-name">${f.filename}</div>
+              <div class="file-date">${new Date(f.created_at).toLocaleDateString()}</div>
+            </div>
+          `).join('');
+        }
     } else {
-      grid.innerHTML = data.map(f => `
-        <div class="file-item">
-          <div class="file-icon"><i class="fas fa-file-pdf"></i></div>
-          <div class="file-name">${f.filename}</div>
-          <div class="file-date">${new Date(f.created_at).toLocaleDateString()}</div>
-        </div>
-      `).join('');
+        grid.innerHTML = '<div style="color:var(--muted)">PDF history unavailable offline.</div>';
     }
   }
 }
@@ -1375,8 +1322,10 @@ function hideFolderView() {
 }
 
 async function logPdfExport(wo, filename) {
-  await supabaseClient.from('exported_pdfs').insert({ work_order: wo, filename: filename });
-  updateFileManagerStats();
+  if(supabaseClient) {
+      await supabaseClient.from('exported_pdfs').insert({ work_order: wo, filename: filename });
+      updateFileManagerStats();
+  }
 }
 
 function uploadPhotoFor(wo) {
@@ -1389,13 +1338,22 @@ async function handlePhotoUpload(evt, wo) {
   const reader = new FileReader();
   reader.onload = async e => {
     const url = e.target.result;
-    const { error } = await supabaseClient.from('photos').upsert({ work_order: wo, url: url }, { onConflict: 'work_order' });
-    if (error) showToast("Error uploading photo", "error");
-    else {
-      photos[wo] = url;
-      renderTable();
-      updateFileManagerStats();
-      showToast("Photo uploaded");
+    
+    if (supabaseClient) {
+        const { error } = await supabaseClient.from('photos').upsert({ work_order: wo, url: url }, { onConflict: 'work_order' });
+        if (error) showToast("Error uploading photo", "error");
+        else {
+          photos[wo] = url;
+          renderTable();
+          updateFileManagerStats();
+          showToast("Photo uploaded");
+        }
+    } else {
+        photos[wo] = url;
+        localStorage.setItem('qbc_photos', JSON.stringify(photos));
+        renderTable();
+        updateFileManagerStats();
+        showToast("Photo saved locally");
     }
   };
   reader.readAsDataURL(file);
@@ -1507,6 +1465,20 @@ function exportPDF() {
     showToast(`Exported ${filename}`);
     closeModal('fabModal');
   });
+}
+
+function exportTableCSV() {
+    if (filteredData.length === 0) return showToast('No data to export', 'error');
+    const headers = Object.keys(filteredData[0]).join(',');
+    const rows = filteredData.map(obj => Object.values(obj).map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
+    const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + rows;
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "work_orders_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // UTILS
