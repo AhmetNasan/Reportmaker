@@ -13,9 +13,18 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.css" />
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://unpkg.com/@mapbox/togeojson@0.16.0/togeojson.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.min.js"></script>
+<script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
@@ -424,22 +433,51 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div id="map"></div>
     <div class="map-overlay">
       <div class="map-card">
+        <h3><i class="fas fa-search-location"></i> Search Coordinates</h3>
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+          <input type="text" id="map-search-input" class="filter-input" placeholder="Lat, Lng" style="flex:1; font-size:11px;">
+          <button class="btn btn-primary btn-sm" onclick="searchCoordinates()"><i class="fas fa-search"></i></button>
+        </div>
+        <small style="font-size:9px; color:var(--muted);">Format: 25.285, 51.531</small>
+      </div>
+
+      <div class="map-card">
         <h3><i class="fas fa-layer-group"></i> Map Controls</h3>
-        <button class="btn btn-primary btn-sm w-100 mb-2" onclick="setMapView('standard')">Standard View</button>
-        <button class="btn btn-ghost btn-sm w-100 mb-2" onclick="setMapView('satellite')">Satellite View</button>
-        <hr style="border-color: var(--border); margin: 10px 0;">
-        <label class="btn btn-ghost btn-sm w-100 mb-2">
-          <i class="fas fa-file-upload"></i> Project Boundary
-          <input type="file" id="kml-upload" style="display:none" accept=".kml,.kmz" onchange="handleKMLUpload(event)">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+          <button class="btn btn-ghost btn-sm" onclick="setMapView('standard')" id="btn-map-std">Standard</button>
+          <button class="btn btn-ghost btn-sm" onclick="setMapView('satellite')" id="btn-map-sat">Satellite</button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="btn btn-ghost btn-sm w-100" onclick="exportMapKML()"><i class="fas fa-file-download"></i> Export KML</button>
+          <button class="btn btn-ghost btn-sm w-100" onclick="exportMapCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+        </div>
+
+        <hr style="border-color: var(--border); margin: 12px 0;">
+
+        <label class="btn btn-primary btn-sm w-100 mb-2">
+          <i class="fas fa-file-upload"></i> Import KML/KMZ/GPX
+          <input type="file" id="kml-upload" style="display:none" accept=".kml,.kmz,.gpx" onchange="handleKMLUpload(event)">
         </label>
-        <div style="display:flex; align-items:center; gap:10px; font-size:11px;">
+
+        <div style="display:flex; align-items:center; gap:10px; font-size:11px; color:var(--text);">
           <input type="checkbox" id="toggle-boundary" checked onchange="toggleBoundaryVisibility()"> Show Boundary
         </div>
       </div>
+
       <div class="map-card" id="point-info" style="display: none;">
         <h3><i class="fas fa-info-circle"></i> Selected Point</h3>
         <div id="point-details" style="font-size:11px; color:var(--muted); line-height:1.6;"></div>
         <button class="btn btn-ghost btn-sm w-100 mt-2" onclick="hidePointInfo()">Close</button>
+      </div>
+
+      <div class="map-card">
+        <h3><i class="fas fa-list"></i> Map Legend</h3>
+        <div style="display:flex; flex-direction:column; gap:8px; font-size:11px;">
+          <div style="display:flex; align-items:center; gap:8px;"><span style="width:12px; height:12px; background:var(--accent); border-radius:50%; border:2px solid #fff;"></span> Work Order</div>
+          <div style="display:flex; align-items:center; gap:8px;"><span style="width:12px; height:12px; border:2px dashed var(--accent); background:rgba(0,200,255,0.2);"></span> Project Boundary</div>
+          <div style="display:flex; align-items:center; gap:8px;"><i class="fas fa-map-pin" style="color:var(--red); width:12px; text-align:center;"></i> Search Result</div>
+        </div>
       </div>
     </div>
   </div>
@@ -500,12 +538,31 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <button class="btn btn-ghost btn-sm flex-1" onclick="setTheme('light')">Light Mode</button>
           </div>
         </div>
-        <div class="form-group">
-          <label>Admin Password</label>
-          <input type="password" class="auth-input mt-1" id="settings-admin-pwd" placeholder="Change admin password" readonly>
-          <small style="color:var(--muted)">Admin password management coming soon.</small>
+      </div>
+    </div>
+
+    <div id="admin-panel" style="display:none; margin-top:32px; animation: fadeUp 0.6s ease both;">
+      <div class="section-title">Admin Control Panel</div>
+      <div class="upload-card">
+        <h3>👥 User Management</h3>
+        <p>Manage access requests and user approvals.</p>
+        <div class="table-wrap" style="margin-top:16px;">
+          <table class="main-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Joined At</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="pending-users-list">
+              <tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">No pending requests</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </div>
@@ -573,8 +630,10 @@ try {
 }
 
 const ADMIN_PWD = 'qbc2025';
+const PRIMARY_ADMIN_EMAIL = 'ahmetnasan1993@gmail.com';
 let currentUser = null;
 let isAdmin = false;
+let isApproved = false;
 let allData = [];
 let filteredData = [];
 let photos = {}; 
@@ -597,18 +656,75 @@ window.addEventListener('load', async () => {
   
   if (session) {
     currentUser = session.user;
-    onAuthenticated();
+    await onAuthenticated();
   } else {
-    document.getElementById('auth-container').style.display = 'flex';
+    const authCont = document.getElementById('auth-container');
+    if (authCont) authCont.style.display = 'flex';
   }
-  document.getElementById('dateBadge').textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const dateBadge = document.getElementById('dateBadge');
+  if (dateBadge) dateBadge.textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 });
 
-function onAuthenticated() {
+async function onAuthenticated() {
   document.getElementById('auth-container').style.display = 'none';
-  document.getElementById('main-nav').style.display = 'flex';
-  document.getElementById('admin-bar').style.display = 'flex';
-  document.getElementById('nav-user-initial').textContent = currentUser.email.charAt(0).toUpperCase();
+
+  // Check for Admin Rights
+  if (currentUser.email === PRIMARY_ADMIN_EMAIL || currentUser.email === 'admin@qbc.qa') {
+    isAdmin = true;
+    isApproved = true;
+  } else {
+    // Check approval status in profiles table
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('profiles')
+          .select('is_approved, is_admin')
+          .eq('id', currentUser.id)
+          .maybeSingle();
+
+        if (data) {
+          isApproved = data.is_approved;
+          isAdmin = data.is_admin || isAdmin;
+        } else {
+          // Auto-create profile if missing
+          await supabaseClient.from('profiles').insert({
+            id: currentUser.id,
+            email: currentUser.email,
+            is_approved: false
+          });
+          isApproved = false;
+        }
+      } catch (e) { console.error("Profile check failed:", e); }
+    } else {
+      isApproved = true; // Offline fallback
+    }
+  }
+
+  if (!isApproved && currentUser.email !== PRIMARY_ADMIN_EMAIL) {
+    document.body.innerHTML = `
+      <div style="height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; background:var(--bg); color:var(--text); font-family:sans-serif; text-align:center; padding:20px;">
+        <div style="font-size:64px; margin-bottom:20px;">⏳</div>
+        <h1 style="margin-bottom:10px;">Approval Pending</h1>
+        <p style="color:var(--muted); max-width:400px; line-height:1.6;">Your account (${currentUser.email}) is waiting for administrator approval. Please check back later or contact the admin.</p>
+        <button class="btn btn-ghost mt-4" onclick="handleLogout()">Logout</button>
+      </div>
+    `;
+    return;
+  }
+
+  const mainNav = document.getElementById('main-nav');
+  if (mainNav) mainNav.style.display = 'flex';
+  const adminBar = document.getElementById('admin-bar');
+  if (adminBar) adminBar.style.display = 'flex';
+  const userInit = document.getElementById('nav-user-initial');
+  if (userInit) userInit.textContent = currentUser.email.charAt(0).toUpperCase();
+
+  if (isAdmin) {
+    const ap = document.getElementById('admin-panel');
+    if (ap) ap.style.display = 'block';
+    updateAdminUI();
+  }
+
   showPage('dashboard');
   fetchData();
 }
@@ -618,6 +734,8 @@ async function fetchData() {
     useLocalFallback();
     return;
   }
+
+  if (isAdmin) loadPendingUsers();
   try {
     const { data: woData, error: woError } = await supabaseClient
       .from('work_orders')
@@ -816,17 +934,26 @@ function updateDashboard() {
     monthsObj[mName][cat]++;
   });
 
-  document.getElementById('kpiTotal').textContent = stats.total.toLocaleString();
-  document.getElementById('kpiGreen').textContent = stats.green.toLocaleString();
-  document.getElementById('kpiAmber').textContent = stats.amber.toLocaleString();
-  document.getElementById('kpiRed').textContent = stats.red.toLocaleString();
-  document.getElementById('kpiBlue').textContent = stats.blue.toLocaleString();
+  const kpiTotal = document.getElementById('kpiTotal');
+  if (kpiTotal) kpiTotal.textContent = stats.total.toLocaleString();
+  const kpiGreen = document.getElementById('kpiGreen');
+  if (kpiGreen) kpiGreen.textContent = stats.green.toLocaleString();
+  const kpiAmber = document.getElementById('kpiAmber');
+  if (kpiAmber) kpiAmber.textContent = stats.amber.toLocaleString();
+  const kpiRed = document.getElementById('kpiRed');
+  if (kpiRed) kpiRed.textContent = stats.red.toLocaleString();
+  const kpiBlue = document.getElementById('kpiBlue');
+  if (kpiBlue) kpiBlue.textContent = stats.blue.toLocaleString();
 
   const getPct = (v) => stats.total ? ((v / stats.total) * 100).toFixed(1) + ' %' : '0 %';
-  document.getElementById('kpiGreenPct').textContent = getPct(stats.green);
-  document.getElementById('kpiAmberPct').textContent = getPct(stats.amber);
-  document.getElementById('kpiRedPct').textContent = getPct(stats.red);
-  document.getElementById('kpiBluePct').textContent = getPct(stats.blue);
+  const kpiGreenPct = document.getElementById('kpiGreenPct');
+  if (kpiGreenPct) kpiGreenPct.textContent = getPct(stats.green);
+  const kpiAmberPct = document.getElementById('kpiAmberPct');
+  if (kpiAmberPct) kpiAmberPct.textContent = getPct(stats.amber);
+  const kpiRedPct = document.getElementById('kpiRedPct');
+  if (kpiRedPct) kpiRedPct.textContent = getPct(stats.red);
+  const kpiBluePct = document.getElementById('kpiBluePct');
+  if (kpiBluePct) kpiBluePct.textContent = getPct(stats.blue);
 
   let mArr = Object.values(monthsObj).sort((a,b) => b.total - a.total).slice(0,8);
   renderMonthly(mArr, stats);
@@ -873,7 +1000,8 @@ function applyFilters() {
   });
   currentPage = 1;
   renderTable();
-  document.getElementById('woCountLabel').textContent = `(${filteredData.length} of ${allData.length})`;
+  const label = document.getElementById('woCountLabel');
+  if (label) label.textContent = `(${filteredData.length} of ${allData.length})`;
 }
 
 function renderTable() {
@@ -945,17 +1073,16 @@ async function handleAuth() {
   if (!email || !password) return showToast('Please fill all fields', 'error');
 
   // Developer Bypass
-  if (email === 'admin@qbc.qa' && password === ADMIN_PWD) {
-    currentUser = { email: 'admin@qbc.qa', id: 'dev-bypass' };
+  if ((email === 'admin@qbc.qa' || email === PRIMARY_ADMIN_EMAIL) && password === ADMIN_PWD) {
+    currentUser = { email: email, id: 'dev-bypass' };
     isAdmin = true;
-    onAuthenticated();
+    isApproved = true;
+    await onAuthenticated();
     updateAdminUI();
-    showToast('Developer Access Granted');
+    showToast('Admin Access Granted');
     return;
   }
 
-  // MODIFIED: Universal Offline Fallback. 
-  // If database connection is down, log the user in locally anyway so the page isn't "broken".
   if (!supabaseClient) {
     currentUser = { email: email, id: 'local-user' };
     onAuthenticated();
@@ -967,6 +1094,16 @@ async function handleAuth() {
     if (isSignUp) {
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) throw error;
+
+      // Auto-profile on signup
+      if (data.user) {
+        await supabaseClient.from('profiles').insert({
+          id: data.user.id,
+          email: data.user.email,
+          is_approved: false
+        });
+      }
+
       showToast('Check your email for confirmation');
     } else {
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -988,6 +1125,7 @@ function toggleAuthMode() {
   const title = document.getElementById('auth-title');
   const btn = document.querySelector('.auth-btn');
   const toggleText = document.getElementById('toggle-text');
+  if (!title || !btn || !toggleText) return;
   if (title.textContent === 'Welcome Back') {
     title.textContent = 'Create Account';
     btn.textContent = 'Sign Up';
@@ -1007,7 +1145,8 @@ async function handleLogout() {
 let pendingExcelFile = null;
 function handleExcelUpload(evt) {
   pendingExcelFile = evt.target.files[0];
-  if (pendingExcelFile) document.getElementById('excelFileName').textContent = pendingExcelFile.name;
+  const el = document.getElementById('excelFileName');
+  if (pendingExcelFile && el) el.textContent = pendingExcelFile.name;
 }
 
 async function processExcelUpload() {
@@ -1017,76 +1156,89 @@ async function processExcelUpload() {
   const reader = new FileReader();
   reader.onload = async e => {
     try {
-      const wb = XLSX.read(e.target.result, {type:'binary'}); 
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array', cellDates: true});
       const sheet = wb.Sheets[wb.SheetNames[0]];
       const raw = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
       
       let hRow = -1;
-      for (let i=0;i<Math.min(10,raw.length);i++) { 
-        if (raw[i].some(c=>String(c).includes('Work Order'))) { hRow=i; break; } 
+      for (let i=0; i<Math.min(20, raw.length); i++) {
+        if (raw[i] && raw[i].some(c => String(c).toLowerCase().includes('work order'))) { hRow=i; break; }
       }
       
-      if (hRow < 0) { showToast('Header row not found','error'); return; }
+      if (hRow < 0) { showToast('Header row "Work Order" not found','error'); return; }
       
-      const headers = raw[hRow].map(h=>String(h).trim()); 
-      const dataRows = raw.slice(hRow+2);
-      const woIdx = headers.indexOf('Work Order'); 
+      const headers = raw[hRow].map(h => String(h).trim());
+      const dataRows = raw.slice(hRow + 1);
+      const woIdx = headers.findIndex(h => h.toLowerCase() === 'work order');
       const upsertData = [];
       
+      const MAP = {
+        'description': 'description', 'status': 'status', 'pwa eng.': 'pwa_eng', 'pwa engineer': 'pwa_eng',
+        'target start': 'target_start', 'target finish': 'target_finish', 'remainig': 'remaining', 'remaining': 'remaining',
+        'highway': 'highway', 'latitude (y):': 'lat', 'longitude (x):': 'lng', 'latitude': 'lat', 'longitude': 'lng',
+        'road catg.': 'road_catg', 'road category': 'road_catg',
+        'sign type ': 'sign_type', 'sign ref.': 'sign_ref', 'sign shape': 'sign_shape',
+        'size (mm)': 'sign_size', 'sign material': 'sign_material', 'material': 'sign_material',
+        'qty.': 'sign_qty', 'type': 'post_type', 'height (mm)': 'post_height',
+        'post qty.': 'post_qty', 'found. size': 'found_size', 'found. qty': 'found_qty',
+        'scrap materials removal ': 'scrap_removal', 'fabrication status': 'fab_status',
+        'status': 'fab_status', 'installation date': 'installation_date'
+      };
+
       dataRows.forEach(row => {
-        const wo = String(row[woIdx]||'').trim(); 
-        if (!wo || isNaN(wo) || wo==='') return;
+        const wo = String(row[woIdx] || '').trim();
+        if (!wo || wo === '' || wo.toLowerCase() === 'work order') return;
         
-        const r = {work_order: wo};
-        const MAP = { 
-          'Description': 'description', 'Status': 'status', 'PWA ENG.': 'pwa_eng', 
-          'Target Start': 'target_start', 'Target Finish': 'target_finish', 'Remainig': 'remaining',
-          'HIGHWAY': 'highway', 'Latitude (Y):': 'lat', 'Longitude (X):': 'lng', 
-          'Road Catg.': 'road_catg', 'Road Category': 'road_catg',
-          'Sign Type ': 'sign_type', 'Sign REF.': 'sign_ref', 'Sign Shape': 'sign_shape', 
-          'SIZE (mm)': 'sign_size', 'Sign Material': 'sign_material', 'Material': 'sign_material',
-          'QTY.': 'sign_qty', 'TYPE': 'post_type', 'HEIGHT (mm)': 'post_height', 
-          'POST QTY.': 'post_qty', 'Found. Size': 'found_size', 'Found. Qty': 'found_qty',
-          'Scrap Materials Removal ': 'scrap_removal', 'Fabrication Status': 'fab_status', 
-          'STATUS': 'fab_status', 'INSTALLATION DATE': 'installation_date' 
-        };
-        
-        headers.forEach((h,i) => {
-          const k = MAP[h];
+        const r = { work_order: wo };
+        headers.forEach((h, i) => {
+          const k = MAP[h.toLowerCase().trim()];
           if (k) {
             let val = row[i];
-            if (val instanceof Date) val = val.toISOString().substring(0,10);
-            else if (typeof val === 'number' && val > 40000 && val < 50000) { 
-              val = new Date((val-25569)*86400000).toISOString().substring(0,10); 
+            if (val instanceof Date) {
+              val = val.toISOString().substring(0, 10);
+            } else if (typeof val === 'number' && val > 40000 && val < 60000) {
+              // Handle OLE Automation dates if they weren't caught as Dates
+              val = new Date((val - 25569) * 86400000).toISOString().substring(0, 10);
             }
-            if (k === 'lat' || k === 'lng') val = parseFloat(val) || null;
-            r[k] = (val !== null && val !== undefined) ? String(val).trim() : null;
-            if (k === 'lat' || k === 'lng') r[k] = val;
+
+            if (k === 'lat' || k === 'lng') {
+              val = parseFloat(val) || null;
+              r[k] = val;
+            } else {
+              r[k] = (val !== null && val !== undefined) ? String(val).trim() : null;
+            }
           }
         });
-        upsertData.push(r);
+
+        if (r.work_order) upsertData.push(r);
       });
 
+      if (upsertData.length === 0) {
+        showToast('No valid data rows found', 'error');
+        return;
+      }
+
       if (supabaseClient) {
-        const { error } = await supabaseClient.from('work_orders').upsert(upsertData, { onConflict: 'work_order' });
-        if (error) throw error;
+        // Process in chunks to avoid payload size limits
+        const chunkSize = 100;
+        for (let i = 0; i < upsertData.length; i += chunkSize) {
+          const chunk = upsertData.slice(i, i + chunkSize);
+          const { error } = await supabaseClient.from('work_orders').upsert(chunk, { onConflict: 'work_order' });
+          if (error) throw error;
+        }
       } else {
-         // Local save offline
-         allData = upsertData.map(d => ({
-            WorkOrder: d.work_order, Description: d.description, Status: d.status, PWA_ENG: d.pwa_eng, Highway: d.highway,
-            FabStatus: d.fab_status, TargetFinish: d.target_finish
-         }));
-         localStorage.setItem('qbc_data', JSON.stringify(allData));
+         localStorage.setItem('qbc_data', JSON.stringify(upsertData));
       }
       
       showToast(`Successfully uploaded ${upsertData.length} records`);
       fetchData();
     } catch(err) { 
       console.error(err);
-      showToast('Error processing Excel','error'); 
+      showToast('Error: ' + (err.message || 'Excel processing failed'), 'error');
     }
   };
-  reader.readAsBinaryString(pendingExcelFile);
+  reader.readAsArrayBuffer(pendingExcelFile);
 }
 
 // ADMIN LOCK
@@ -1103,30 +1255,248 @@ function checkAdmin() {
 }
 function updateAdminUI() {
   const btn = document.getElementById('adminBtn'), status = document.getElementById('adminStatus'), addBtn = document.getElementById('addWoBtn');
+  const ap = document.getElementById('admin-panel');
   if (isAdmin) {
-    btn.textContent = '🔓 Admin Active'; btn.classList.add('unlocked'); status.textContent = 'Edit mode enabled';
+    if (btn) btn.textContent = '🔓 Admin Active';
+    if (btn) btn.classList.add('unlocked');
+    if (status) status.textContent = 'Edit mode enabled';
     if (addBtn) addBtn.style.display = '';
+    if (ap) ap.style.display = 'block';
   } else {
-    btn.textContent = '🔒 Locked'; btn.classList.remove('unlocked'); status.textContent = 'Login to edit records';
+    if (btn) btn.textContent = '🔒 Locked';
+    if (btn) btn.classList.remove('unlocked');
+    if (status) status.textContent = 'Login to edit records';
     if (addBtn) addBtn.style.display = 'none';
+    if (ap) ap.style.display = 'none';
   }
+}
+
+async function loadPendingUsers() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const tbody = document.getElementById('pending-users-list');
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">No users found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.map(u => `
+      <tr>
+        <td>${u.email}</td>
+        <td style="color:var(--muted); font-size:11px;">${new Date(u.created_at).toLocaleDateString()}</td>
+        <td>
+          <span class="status-badge" style="background:${u.is_approved ? 'rgba(34,197,94,.15)' : 'rgba(245,158,11,.15)'}; color:${u.is_approved ? 'var(--green)' : 'var(--amber)'}">
+            ${u.is_approved ? 'Approved' : 'Pending'}
+          </span>
+        </td>
+        <td>
+          <div class="action-btns">
+            ${!u.is_approved ? `<button class="btn btn-green btn-sm" onclick="approveUser('${u.id}', true)"><i class="fas fa-check"></i> Approve</button>` : `<button class="btn btn-ghost btn-sm" onclick="approveUser('${u.id}', false)"><i class="fas fa-times"></i> Revoke</button>`}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) { console.error("Load users failed:", e); }
+}
+
+async function approveUser(userId, status) {
+  if (!supabaseClient) return;
+  try {
+    const { error } = await supabaseClient
+      .from('profiles')
+      .update({ is_approved: status })
+      .eq('id', userId);
+
+    if (error) throw error;
+    showToast(status ? "User approved" : "Access revoked");
+    loadPendingUsers();
+  } catch (e) { showToast("Action failed", "error"); }
 }
 
 // MAP FUNCTIONS
 let markersLayer = null;
+let searchMarker = null;
+let measureControl = null;
+let baseLayers = {};
+
 async function initMap() {
   if (map) return;
-  map = L.map('map').setView([25.2854, 51.5310], 11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
   
+  map = L.map('map', {
+    fullscreenControl: true,
+    zoomControl: false
+  }).setView([25.2854, 51.5310], 11);
+
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  L.control.scale({ position: 'bottomright', imperial: false }).addTo(map);
+
+  baseLayers.standard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' });
+  baseLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
+
+  baseLayers.standard.addTo(map);
+
+  const baseMaps = { "Standard View": baseLayers.standard, "Satellite View": baseLayers.satellite };
+  L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+
+  // Address Search
+  if (typeof L.Control.Geocoder !== 'undefined') {
+    L.Control.geocoder({
+      defaultMarkGeocode: false,
+      position: 'topleft'
+    })
+    .on('markgeocode', function(e) {
+      const bbox = e.geocode.bbox;
+      const poly = L.polygon([
+        bbox.getSouthEast(),
+        bbox.getNorthEast(),
+        bbox.getNorthWest(),
+        bbox.getSouthWest()
+      ]);
+      map.fitBounds(poly.getBounds());
+      if (searchMarker) map.removeLayer(searchMarker);
+      searchMarker = L.marker(e.geocode.center).addTo(map).bindPopup(e.geocode.name).openPopup();
+    })
+    .addTo(map);
+  }
+
+  if (typeof L.Control.Measure !== 'undefined') {
+    measureControl = new L.Control.Measure({
+      position: 'topright',
+      primaryLengthUnit: 'meters',
+      secondaryLengthUnit: 'kilometers',
+      primaryAreaUnit: 'sqmeters',
+      secondaryAreaUnit: 'hectares',
+      activeColor: 'var(--accent)',
+      completedColor: 'var(--accent2)'
+    });
+    measureControl.addTo(map);
+  }
+
+  // Locate Me
+  const LocateControl = L.Control.extend({
+    options: { position: 'bottomright' },
+    onAdd: function() {
+      const btn = L.DomUtil.create('button', 'btn btn-primary btn-sm');
+      btn.innerHTML = '<i class="fas fa-location-crosshairs"></i>';
+      btn.style.width = '34px'; btn.style.height = '34px'; btn.style.padding = '0';
+      btn.title = 'My Location';
+      btn.onclick = () => map.locate({setView: true, maxZoom: 16});
+      return btn;
+    }
+  });
+  new LocateControl().addTo(map);
+
+  // Geoman (Editing)
+  if (map.pm) {
+    map.pm.addControls({
+      position: 'topleft',
+      drawCircle: false,
+      drawMarker: true,
+      drawRectangle: true,
+      drawPolygon: true,
+      drawPolyline: true,
+      editMode: true,
+      dragMode: true,
+      cutPolygon: true,
+      removalMode: true,
+    });
+  }
+
   markersLayer = L.layerGroup().addTo(map);
   
   map.on('click', onMapClick);
+  map.on('mousemove', (e) => {
+    const coordsDisp = document.getElementById('map-coords-display');
+    if (coordsDisp) coordsDisp.textContent = `Lat: ${e.latlng.lat.toFixed(6)} | Lng: ${e.latlng.lng.toFixed(6)}`;
+  });
   
   loadMarkers();
   loadProjectBoundary();
+
+  // Add coordinate display and north arrow elements dynamically
+  const wrapper = document.querySelector('#page-map .wrapper');
+  if (!document.getElementById('map-coords-display')) {
+    const coords = document.createElement('div');
+    coords.id = 'map-coords-display';
+    coords.className = 'map-coords';
+    coords.textContent = 'Lat: 0.000000 | Lng: 0.000000';
+    wrapper.appendChild(coords);
+  }
+  if (!document.querySelector('.north-arrow')) {
+    const na = document.createElement('div');
+    na.className = 'north-arrow';
+    na.innerHTML = '<i class="fas fa-compass"></i>';
+    na.title = 'North';
+    wrapper.appendChild(na);
+  }
+}
+
+function searchCoordinates() {
+  const input = document.getElementById('map-search-input').value;
+  const parts = input.split(/[\s,]+/);
+  if (parts.length >= 2) {
+    const lat = parseFloat(parts[0]);
+    const lng = parseFloat(parts[1]);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      if (searchMarker) map.removeLayer(searchMarker);
+      searchMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: 'search-marker',
+          html: '<i class="fas fa-map-pin" style="color:var(--red); font-size:24px; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i>',
+          iconSize: [24, 24],
+          iconAnchor: [12, 24]
+        })
+      }).addTo(map);
+      map.setView([lat, lng], 15);
+      showPointInfo(lat, lng);
+    } else {
+      showToast("Invalid coordinates", "error");
+    }
+  } else {
+    showToast("Please enter Lat, Lng", "error");
+  }
+}
+
+async function exportMapKML() {
+  let kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>QBC Map Export</name>`;
+
+  allData.forEach(r => {
+    if (r.Lat && r.Lng) {
+      kml += `
+    <Placemark>
+      <name>${r.WorkOrder}</name>
+      <description>${r.Description || ''}</description>
+      <Point>
+        <coordinates>${r.Lng},${r.Lat},0</coordinates>
+      </Point>
+    </Placemark>`;
+    }
+  });
+
+  kml += `
+  </Document>
+</kml>`;
+
+  const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'qbc_map_export.kml';
+  a.click();
+}
+
+function exportMapCSV() {
+  exportTableCSV();
 }
 
 function loadMarkers() {
@@ -1215,9 +1585,11 @@ function hidePointInfo() {
 
 function setMapView(type) {
   if (type === 'satellite') {
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+    map.removeLayer(baseLayers.standard);
+    baseLayers.satellite.addTo(map);
   } else {
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    map.removeLayer(baseLayers.satellite);
+    baseLayers.standard.addTo(map);
   }
 }
 
@@ -1226,32 +1598,66 @@ async function handleKMLUpload(event) {
   if (!file) return;
   
   const reader = new FileReader();
+  const filename = file.name.toLowerCase();
+  const isKMZ = filename.endsWith('.kmz');
+  const isGPX = filename.endsWith('.gpx');
+
   reader.onload = async (e) => {
-    // Note: leaflet-omnivore is used for KML parsing
-    const runLayer = omnivore.kml.parse(e.target.result);
-    const geojson = runLayer.toGeoJSON();
-    
-    if (boundaryLayer) map.removeLayer(boundaryLayer);
-    boundaryLayer = L.geoJSON(geojson, {
-      style: { color: 'var(--accent)', weight: 3, fillOpacity: 0.1 }
-    }).addTo(map);
-    
-    map.fitBounds(boundaryLayer.getBounds());
-    
-    // Save to Supabase if available
-    if(supabaseClient) {
-        const { error } = await supabaseClient.from('project_boundaries').upsert({
-          id: 1,
-          name: file.name,
-          geojson: geojson
-        });
-        if (error) showToast("Error saving boundary to cloud", "error");
-        else showToast("Project boundary saved");
-    } else {
-        showToast("Boundary loaded locally");
+    let geojson = null;
+    try {
+      if (isKMZ) {
+        const zip = await JSZip.loadAsync(e.target.result);
+        const kmlFile = Object.values(zip.files).find(f => f.name.toLowerCase().endsWith('.kml'));
+        if (kmlFile) {
+          const kmlText = await kmlFile.async("string");
+          const parser = new DOMParser();
+          const kmlDom = parser.parseFromString(kmlText, 'text/xml');
+          geojson = toGeoJSON.kml(kmlDom);
+        } else {
+          throw new Error("No KML found inside KMZ");
+        }
+      } else {
+        const text = e.target.result;
+        const parser = new DOMParser();
+        const dom = parser.parseFromString(text, 'text/xml');
+        if (isGPX) {
+          geojson = toGeoJSON.gpx(dom);
+        } else {
+          geojson = toGeoJSON.kml(dom);
+        }
+      }
+
+      if (geojson) {
+        if (boundaryLayer) map.removeLayer(boundaryLayer);
+        boundaryLayer = L.geoJSON(geojson, {
+          style: { color: 'var(--accent)', weight: 3, fillOpacity: 0.2, dashArray: '5, 5' },
+          onEachFeature: (f, l) => {
+            if (f.properties && f.properties.name) l.bindPopup(`<b>Boundary:</b> ${f.properties.name}`);
+          }
+        }).addTo(map);
+
+        map.fitBounds(boundaryLayer.getBounds());
+
+        if(supabaseClient) {
+            const { error } = await supabaseClient.from('project_boundaries').upsert({
+              id: 1,
+              name: file.name,
+              geojson: geojson
+            });
+            if (error) showToast("Error saving boundary to cloud", "error");
+            else showToast("Project boundary updated");
+        } else {
+            showToast("Boundary loaded locally");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Error parsing KML/KMZ", "error");
     }
   };
-  reader.readAsText(file);
+
+  if (isKMZ) reader.readAsArrayBuffer(file);
+  else reader.readAsText(file);
 }
 
 function toggleBoundaryVisibility() {
@@ -1266,7 +1672,8 @@ function toggleBoundaryVisibility() {
 // FILE MANAGER LOGIC
 async function updateFileManagerStats() {
   const photoCount = Object.keys(photos).length;
-  document.getElementById('photo-count').textContent = `${photoCount} files`;
+  const pc = document.getElementById('photo-count');
+  if (pc) pc.textContent = `${photoCount} files`;
   
   if (supabaseClient) {
       const { count, error } = await supabaseClient
@@ -1274,7 +1681,8 @@ async function updateFileManagerStats() {
         .select('*', { count: 'exact', head: true });
       
       if (!error) {
-        document.getElementById('pdf-count').textContent = `${count || 0} files`;
+        const pdc = document.getElementById('pdf-count');
+        if (pdc) pdc.textContent = `${count || 0} files`;
       }
   }
 }
@@ -1284,11 +1692,11 @@ async function showFolder(type) {
   const title = document.getElementById('folder-title');
   const grid = document.getElementById('folder-files');
   
-  view.style.display = 'block';
-  grid.innerHTML = '<div style="color:var(--muted)">Loading...</div>';
+  if (view) view.style.display = 'block';
+  if (grid) grid.innerHTML = '<div style="color:var(--muted)">Loading...</div>';
   
   if (type === 'images') {
-    title.textContent = 'Work Order Photos';
+    if (title) title.textContent = 'Work Order Photos';
     grid.innerHTML = Object.entries(photos).map(([wo, url]) => `
       <div class="file-item">
         <div class="file-icon"><img src="${url}" style="width:100%; height:40px; object-fit:cover; border-radius:4px;"></div>
@@ -1297,7 +1705,7 @@ async function showFolder(type) {
       </div>
     `).join('');
   } else if (type === 'pdfs') {
-    title.textContent = 'Exported PDFs';
+    if (title) title.textContent = 'Exported PDFs';
     if(supabaseClient) {
         const { data, error } = await supabaseClient.from('exported_pdfs').select('*').order('created_at', { ascending: false });
         if (error) {
@@ -1335,28 +1743,48 @@ function uploadPhotoFor(wo) {
 async function handlePhotoUpload(evt, wo) {
   const file = evt.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async e => {
-    const url = e.target.result;
-    
-    if (supabaseClient) {
-        const { error } = await supabaseClient.from('photos').upsert({ work_order: wo, url: url }, { onConflict: 'work_order' });
-        if (error) showToast("Error uploading photo", "error");
-        else {
-          photos[wo] = url;
-          renderTable();
-          updateFileManagerStats();
-          showToast("Photo uploaded");
-        }
-    } else {
-        photos[wo] = url;
-        localStorage.setItem('qbc_photos', JSON.stringify(photos));
-        renderTable();
-        updateFileManagerStats();
-        showToast("Photo saved locally");
+
+  if (supabaseClient) {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${wo}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `photos/${fileName}`;
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from('qbc-storage')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabaseClient.storage
+        .from('qbc-storage')
+        .getPublicUrl(filePath);
+
+      const { error: dbError } = await supabaseClient
+        .from('photos')
+        .upsert({ work_order: wo, url: publicUrl }, { onConflict: 'work_order' });
+
+      if (dbError) throw dbError;
+
+      photos[wo] = publicUrl;
+      renderTable();
+      updateFileManagerStats();
+      showToast("Photo uploaded to storage");
+    } catch (error) {
+      console.error(error);
+      showToast("Storage upload failed", "error");
     }
-  };
-  reader.readAsDataURL(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => {
+      photos[wo] = e.target.result;
+      localStorage.setItem('qbc_photos', JSON.stringify(photos));
+      renderTable();
+      updateFileManagerStats();
+      showToast("Photo saved locally");
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 function viewPhoto(wo) {
@@ -1369,7 +1797,8 @@ function openFabModal(wo) {
   currentFabWO = wo;
   const r = allData.find(x => String(x.WorkOrder) === String(wo));
   if (!r) return;
-  document.getElementById('fabModalWO').textContent = wo;
+  const fmw = document.getElementById('fabModalWO');
+  if (fmw) fmw.textContent = wo;
   const photo = photos[wo];
   const today = new Date().toLocaleDateString('en-GB');
 
@@ -1530,7 +1959,8 @@ function openEditModal(idx) {
   if (!isAdmin) { showToast('Admin mode required','error'); return; }
   editingIdx = idx; 
   const r = idx !== null ? allData[idx] : {};
-  document.getElementById('editModalTitle').textContent = idx !== null ? `Edit WO – ${r.WorkOrder}` : 'Add New Work Order';
+  const emt = document.getElementById('editModalTitle');
+  if (emt) emt.textContent = idx !== null ? `Edit WO – ${r.WorkOrder}` : 'Add New Work Order';
   
   document.getElementById('editFormGrid').innerHTML = MAIN_FIELDS.map(f => fieldHTML(f, r[f.k]||'', f.full?'grid-column:1/-1':'')).join('');
   document.getElementById('editFabGrid').innerHTML = FAB_FIELDS.map(f => fieldHTML(f, r[f.k]||'')).join('');
@@ -1550,7 +1980,7 @@ function fieldHTML(f, val, extra='') {
   if (f.type === 'date') return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="date" id="${id}" value="${val}"></div>`;
   return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="text" id="${id}" value="${val||''}"></div>`;
 }
-function showToast(msg, type='') { const t = document.getElementById('toast'); t.textContent = msg; t.className='toast'+(type?' '+type:''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
+function showToast(msg, type='') { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.className='toast'+(type?' '+type:''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
 
 </script>
 </body>
