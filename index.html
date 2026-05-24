@@ -228,9 +228,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 /* ─── MAP ─── */
 #page-map .wrapper { padding: 0; max-width: none; height: calc(100vh - var(--header-h)); }
 #map { width: 100%; height: 100%; z-index: 1; }
-.map-overlay { position: absolute; top: 80px; left: 20px; z-index: 10; display: flex; flex-direction: column; gap: 10px; }
-.map-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 250px; }
+.map-overlay { position: absolute; top: 80px; right: 60px; z-index: 10; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.map-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 260px; pointer-events: auto; }
 .map-card h3 { font-size: 12px; margin-bottom: 10px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+.map-coords { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 4px; font-size: 10px; color: #fff; z-index: 10; pointer-events: none; }
+.north-arrow { position: absolute; top: 20px; right: 20px; font-size: 24px; color: var(--accent); z-index: 10; background: var(--surface); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
 
 /* ─── FILE MANAGER ─── */
 .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; margin-top: 20px; }
@@ -518,14 +520,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="upload-grid">
       <div class="upload-card">
         <h3>📊 Data Management</h3>
-        <p>Update Work Orders from Excel. Admin password required.</p>
+        <p>Update Work Orders from CSV. Use the template for best results.</p>
         <div class="drop-zone" id="excelDrop">
-          <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="handleExcelUpload(event)">
-          <div class="drop-icon">📂</div>
-          <p>Drag & drop Excel file here<br>or click to browse</p>
+          <input type="file" id="excelFile" accept=".csv" onchange="handleExcelUpload(event)">
+          <div class="drop-icon">📄</div>
+          <p>Drag & drop CSV file here<br>or click to browse</p>
           <div class="file-name" id="excelFileName"></div>
         </div>
-        <button class="btn btn-primary btn-sm w-100 mt-3" onclick="processExcelUpload()">Upload Data</button>
+        <div style="display:flex; gap:8px; margin-top:16px;">
+          <button class="btn btn-ghost btn-sm flex-1" onclick="downloadCSVTemplate()"><i class="fas fa-download"></i> Template</button>
+          <button class="btn btn-primary btn-sm flex-1" onclick="processExcelUpload()"><i class="fas fa-upload"></i> Upload</button>
+        </div>
       </div>
 
       <div class="upload-card">
@@ -682,7 +687,18 @@ async function onAuthenticated() {
           .eq('id', currentUser.id)
           .maybeSingle();
 
-        if (data) {
+        if (error) {
+           console.error("Profile fetch error:", error);
+           // Handle case where table doesn't exist or other DB error
+           if (error.code === 'PGRST116' || error.message.includes('not found')) {
+              await supabaseClient.from('profiles').insert({
+                id: currentUser.id,
+                email: currentUser.email,
+                is_approved: false
+              });
+           }
+           isApproved = false;
+        } else if (data) {
           isApproved = data.is_approved;
           isAdmin = data.is_admin || isAdmin;
         } else {
@@ -694,7 +710,10 @@ async function onAuthenticated() {
           });
           isApproved = false;
         }
-      } catch (e) { console.error("Profile check failed:", e); }
+      } catch (e) {
+        console.error("Profile check failed:", e);
+        isApproved = false;
+      }
     } else {
       isApproved = true; // Offline fallback
     }
@@ -1156,52 +1175,44 @@ async function processExcelUpload() {
   const reader = new FileReader();
   reader.onload = async e => {
     try {
-      const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data, {type:'array', cellDates: true});
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const raw = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
+      const text = e.target.result;
+      // Simple CSV parsing (handles quotes and commas within quotes)
+      const rows = text.split(/\r?\n/).map(row => {
+        const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+        return matches ? matches.map(m => m.replace(/^"|"$/g, '').trim()) : [];
+      }).filter(r => r.length > 0);
+
+      if (rows.length < 2) { showToast('CSV file is empty or invalid', 'error'); return; }
+
+      const headers = rows[0].map(h => h.toLowerCase().trim());
+      const dataRows = rows.slice(1);
+      const woIdx = headers.findIndex(h => h === 'work order' || h === 'workorder');
       
-      let hRow = -1;
-      for (let i=0; i<Math.min(20, raw.length); i++) {
-        if (raw[i] && raw[i].some(c => String(c).toLowerCase().includes('work order'))) { hRow=i; break; }
-      }
-      
-      if (hRow < 0) { showToast('Header row "Work Order" not found','error'); return; }
-      
-      const headers = raw[hRow].map(h => String(h).trim());
-      const dataRows = raw.slice(hRow + 1);
-      const woIdx = headers.findIndex(h => h.toLowerCase() === 'work order');
+      if (woIdx < 0) { showToast('Column "Work Order" not found', 'error'); return; }
+
       const upsertData = [];
-      
       const MAP = {
-        'description': 'description', 'status': 'status', 'pwa eng.': 'pwa_eng', 'pwa engineer': 'pwa_eng',
-        'target start': 'target_start', 'target finish': 'target_finish', 'remainig': 'remaining', 'remaining': 'remaining',
-        'highway': 'highway', 'latitude (y):': 'lat', 'longitude (x):': 'lng', 'latitude': 'lat', 'longitude': 'lng',
-        'road catg.': 'road_catg', 'road category': 'road_catg',
-        'sign type ': 'sign_type', 'sign ref.': 'sign_ref', 'sign shape': 'sign_shape',
-        'size (mm)': 'sign_size', 'sign material': 'sign_material', 'material': 'sign_material',
-        'qty.': 'sign_qty', 'type': 'post_type', 'height (mm)': 'post_height',
-        'post qty.': 'post_qty', 'found. size': 'found_size', 'found. qty': 'found_qty',
-        'scrap materials removal ': 'scrap_removal', 'fabrication status': 'fab_status',
-        'status': 'fab_status', 'installation date': 'installation_date'
+        'description': 'description', 'status': 'status', 'pwa engineer': 'pwa_eng', 'engineer': 'pwa_eng',
+        'target start': 'target_start', 'target finish': 'target_finish', 'remaining': 'remaining',
+        'highway': 'highway', 'latitude': 'lat', 'longitude': 'lng', 'lat': 'lat', 'lng': 'lng',
+        'road category': 'road_catg', 'road catg': 'road_catg',
+        'sign type': 'sign_type', 'sign ref': 'sign_ref', 'sign shape': 'sign_shape',
+        'sign size': 'sign_size', 'sign material': 'sign_material',
+        'sign qty': 'sign_qty', 'post type': 'post_type', 'post height': 'post_height',
+        'post qty': 'post_qty', 'found size': 'found_size', 'found qty': 'found_qty',
+        'scrap removal': 'scrap_removal', 'fab status': 'fab_status',
+        'installation date': 'installation_date'
       };
 
       dataRows.forEach(row => {
         const wo = String(row[woIdx] || '').trim();
-        if (!wo || wo === '' || wo.toLowerCase() === 'work order') return;
+        if (!wo || wo === '') return;
         
         const r = { work_order: wo };
         headers.forEach((h, i) => {
-          const k = MAP[h.toLowerCase().trim()];
+          const k = MAP[h];
           if (k) {
             let val = row[i];
-            if (val instanceof Date) {
-              val = val.toISOString().substring(0, 10);
-            } else if (typeof val === 'number' && val > 40000 && val < 60000) {
-              // Handle OLE Automation dates if they weren't caught as Dates
-              val = new Date((val - 25569) * 86400000).toISOString().substring(0, 10);
-            }
-
             if (k === 'lat' || k === 'lng') {
               val = parseFloat(val) || null;
               r[k] = val;
@@ -1210,7 +1221,6 @@ async function processExcelUpload() {
             }
           }
         });
-
         if (r.work_order) upsertData.push(r);
       });
 
@@ -1238,7 +1248,11 @@ async function processExcelUpload() {
       showToast('Error: ' + (err.message || 'Excel processing failed'), 'error');
     }
   };
-  reader.readAsArrayBuffer(pendingExcelFile);
+  if (pendingExcelFile.name.toLowerCase().endsWith('.csv')) {
+    reader.readAsText(pendingExcelFile);
+  } else {
+    reader.readAsArrayBuffer(pendingExcelFile);
+  }
 }
 
 // ADMIN LOCK
@@ -1660,6 +1674,18 @@ async function handleKMLUpload(event) {
   else reader.readAsText(file);
 }
 
+function handleExcelUpload(evt) {
+  pendingExcelFile = evt.target.files[0];
+  const el = document.getElementById('excelFileName');
+  if (pendingExcelFile && el) {
+    el.textContent = pendingExcelFile.name;
+    // Auto-switch reader type based on file extension
+    if (pendingExcelFile.name.toLowerCase().endsWith('.csv')) {
+      // Logic handled in processExcelUpload
+    }
+  }
+}
+
 function toggleBoundaryVisibility() {
   if (!boundaryLayer) return;
   if (document.getElementById('toggle-boundary').checked) {
@@ -1746,15 +1772,32 @@ async function handlePhotoUpload(evt, wo) {
 
   if (supabaseClient) {
     try {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("File too large (Max 5MB)", "error");
+        return;
+      }
+
       const fileExt = file.name.split('.').pop();
-      const fileName = `${wo}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileName = `${wo}_${Date.now()}.${fileExt}`;
       const filePath = `photos/${fileName}`;
 
       const { error: uploadError } = await supabaseClient.storage
         .from('qbc-storage')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Storage Error:", uploadError);
+        if (uploadError.message.includes('bucket not found')) {
+           showToast("Error: Storage bucket 'qbc-storage' not found", "error");
+        } else {
+           showToast(`Upload failed: ${uploadError.message}`, "error");
+        }
+        return;
+      }
 
       const { data: { publicUrl } } = supabaseClient.storage
         .from('qbc-storage')
@@ -1764,15 +1807,19 @@ async function handlePhotoUpload(evt, wo) {
         .from('photos')
         .upsert({ work_order: wo, url: publicUrl }, { onConflict: 'work_order' });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error("DB Error:", dbError);
+        showToast(`DB Error: ${dbError.message}`, "error");
+        return;
+      }
 
       photos[wo] = publicUrl;
       renderTable();
       updateFileManagerStats();
-      showToast("Photo uploaded to storage");
+      showToast("Photo uploaded successfully");
     } catch (error) {
-      console.error(error);
-      showToast("Storage upload failed", "error");
+      console.error("Unexpected Error:", error);
+      showToast("Unexpected error during upload", "error");
     }
   } else {
     const reader = new FileReader();
@@ -1896,14 +1943,39 @@ function exportPDF() {
   });
 }
 
+function downloadCSVTemplate() {
+  const headers = [
+    "Work Order", "Description", "Status", "PWA Engineer", "Target Start", "Target Finish",
+    "Remaining", "Highway", "Latitude", "Longitude", "Road Category", "Sign Type",
+    "Sign Ref", "Sign Shape", "Sign Size", "Sign Material", "Sign Qty", "Post Type",
+    "Post Height", "Post Qty", "Found Size", "Found Qty", "Fab Status", "Installation Date", "Scrap Removal"
+  ];
+  const sample = [
+    "WO12345", "Sample Description", "INPRG", "Engineer Name", "2024-01-01", "2024-01-10",
+    "5", "Dukhan Road", "25.285", "51.531", "Main Road", "Regulatory",
+    "R-101", "Circle", "600mm", "Aluminum", "1", "Steel",
+    "2000", "1", "400x400x600", "1", "Not Done", "", "No"
+  ];
+  const csvContent = headers.join(",") + "\n" + sample.join(",");
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "qbc_work_order_template.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 function exportTableCSV() {
     if (filteredData.length === 0) return showToast('No data to export', 'error');
     const headers = Object.keys(filteredData[0]).join(',');
     const rows = filteredData.map(obj => Object.values(obj).map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
-    const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + rows;
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = headers + "\n" + rows;
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.setAttribute("href", url);
     link.setAttribute("download", "work_orders_export.csv");
     document.body.appendChild(link);
     link.click();
