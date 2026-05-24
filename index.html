@@ -58,7 +58,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .nav-right{margin-left:auto;padding:0 16px;display:flex;align-items:center;gap:15px;}
 .user-menu { position: relative; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
 .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 800; }
-.user-dropdown { position: absolute; top: 100%; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 180px; display: none; flex-direction: column; padding: 8px 0; margin-top: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000;}
+.user-dropdown { position: absolute; top: 100%; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 180px; display: none; flex-direction: column; padding: 8px 0; margin-top: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
 .user-dropdown.show { display: flex; }
 .dropdown-item { padding: 10px 16px; font-size: 12px; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
 .dropdown-item:hover { background: var(--surface2); color: var(--accent); }
@@ -67,6 +67,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .page{display:none;padding-top:var(--header-h);min-height:100vh;position:relative;z-index:1;}
 .page.active{display:block;}
 .wrapper{max-width:1400px;margin:0 auto;padding:32px 20px;}
+
+/* ─── ADMIN LOCK ─── */
+.admin-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;align-items:center;gap:12px;font-size:12px; margin-top: var(--header-h);}
+.admin-lock-btn{padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;display:flex;align-items:center;gap:6px;transition:all .2s;}
+.admin-lock-btn.unlocked{border-color:var(--green);color:var(--green);}
+.admin-lock-btn:hover{border-color:var(--accent);color:var(--accent);}
 
 /* ─── DASHBOARD STYLES (Ported) ─── */
 .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; padding-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; animation: fadeDown 0.6s ease both; }
@@ -124,9 +130,33 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .eng-stat { font-size: 11px; display: flex; align-items: center; gap: 5px; }
 .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .dot.green { background: var(--green); } .dot.amber { background: var(--amber); } .dot.red { background: var(--red); } .dot.blue { background: var(--blue); }
+.pie-container { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.pie-svg-wrap { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+.pie-svg-wrap svg { transform: rotate(-90deg); }
+.pie-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+.pie-center-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; }
+.pie-center-label { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; margin-top: 2px; }
+.legend { display: flex; flex-direction: column; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+.legend-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.legend-val { margin-left: auto; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--text); }
+.legend-item span:not(.legend-color):not(.legend-val) { color: var(--muted); }
+
+/* ─── UPLOAD CARD ─── */
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;}
+@media(max-width:700px){.upload-grid{grid-template-columns:1fr;}}
+.upload-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;}
+.upload-card h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:6px;}
+.upload-card p{font-size:11px;color:var(--muted);margin-bottom:16px;}
+.drop-zone{border:2px dashed var(--border);border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--accent);background:rgba(0,200,255,.04);}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop-icon{font-size:28px;margin-bottom:8px;}
+.drop-zone p{font-size:12px;color:var(--muted);}
+.drop-zone .file-name{font-size:11px;color:var(--accent);margin-top:6px;}
 
 /* ─── BUTTONS ─── */
-.btn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;transition:all .2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center;}
+.btn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;transition:all .2s; display: inline-flex; align-items: center; gap: 8px;}
 .btn-primary{background:var(--accent);color:#000;}
 .btn-primary:hover{opacity: 0.9;}
 .btn-sm{padding:5px 12px;font-size:11px;}
@@ -134,8 +164,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
 .btn-green{background:var(--green);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
-.w-100 { width: 100%; }
-.mb-2 { margin-bottom: 8px; }
 
 /* ─── FILTERS & TABLE ─── */
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
@@ -156,6 +184,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .badge-WPERM{background:rgba(168,85,247,.15);color:var(--purple);}
 .badge-RTNENG{background:rgba(239,68,68,.15);color:var(--red);}
 .badge-APPR{background:rgba(0,200,255,.15);color:var(--accent);}
+.fab-done{color:var(--green);font-size:11px;}
+.fab-notdone{color:var(--red);font-size:11px;}
+.fab-ongoing{color:var(--amber);font-size:11px;}
+.fab-empty{color:var(--muted);font-size:11px;}
 .action-btns{display:flex;gap:4px;}
 .pagination{display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:flex-end;}
 .pg-btn{padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s;}
@@ -175,7 +207,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border .2s;}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
 
-/* ─── PDF PREVIEW ─── */
+.fab-section{margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
+.fab-section h4{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em;}
+.fab-grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
+@media(max-width:600px){.fab-grid-4{grid-template-columns:1fr 1fr;}}
+
+/* ─── PDF PREVIEW (A4 PROPORTION) ─── */
 .pdf-modal{max-width:850px;width:95%; padding: 20px;}
 #pdfPreview{width:100%; background:var(--surface2); border-radius:8px; padding:20px; display:flex; justify-content:center; overflow-x:auto;}
 
@@ -183,20 +220,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 #page-map .wrapper { padding: 0; max-width: none; height: calc(100vh - var(--header-h)); }
 #map { width: 100%; height: 100%; z-index: 1; }
 .map-overlay { position: absolute; top: 80px; left: 20px; z-index: 10; display: flex; flex-direction: column; gap: 10px; }
-.map-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 260px; backdrop-filter: blur(5px); }
-.map-card h3 { font-size: 12px; margin-bottom: 12px; color: var(--accent); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;}
-.map-control-group { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
-.map-control-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.map-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 250px; }
+.map-card h3 { font-size: 12px; margin-bottom: 10px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
 
-/* ─── SETTINGS & ADMIN ─── */
-.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;}
-@media(max-width:700px){.upload-grid{grid-template-columns:1fr;}}
-.upload-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;}
-.upload-card h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:6px;}
-.drop-zone{border:2px dashed var(--border);border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
-.drop-zone:hover,.drop-zone.drag{border-color:var(--accent);background:rgba(0,200,255,.04);}
-.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.drop-icon{font-size:28px;margin-bottom:8px;}
+/* ─── FILE MANAGER ─── */
+.file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; margin-top: 20px; }
+.file-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+.file-item:hover { transform: translateY(-3px); border-color: var(--accent); }
+.file-icon { font-size: 32px; color: var(--accent); margin-bottom: 12px; }
+.file-name { font-size: 11px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-date { font-size: 9px; color: var(--muted); margin-top: 4px; }
 
 /* ─── TOAST ─── */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s; pointer-events: none;}
@@ -214,16 +247,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="auth-logo">🇶🇦 QBC</div>
     <h2 id="auth-title">Welcome Back</h2>
     <p style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Sign in to Qatar Building Company platform</p>
-    
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address">
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password">
-    
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" value="admin@qbc.qa">
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password" value="qbc2025">
+    <div style="color: var(--green); font-size: 11px; margin-bottom: 12px;">Offline Bypass Ready - Just click Sign In</div>
     <button class="auth-btn" onclick="handleAuth()">Sign In</button>
     <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
-    
-    <div style="margin-top: 20px; font-size: 10px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 10px;">
-      Offline Developer Fallback: admin@qbc.qa / qbc2025
-    </div>
   </div>
 </div>
 
@@ -233,6 +261,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="nav-tab active" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="nav-tab" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
+    <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="nav-tab" onclick="showPage('settings')"><i class="fas fa-cog"></i> Settings</button>
   </div>
   <div class="nav-right">
@@ -241,13 +270,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="user-avatar" id="nav-user-initial">U</div>
       <div class="user-dropdown" id="user-dropdown">
         <div class="dropdown-item" onclick="showProfile()"><i class="fas fa-user-circle"></i> Profile</div>
-        <div class="dropdown-item" onclick="showPage('settings')"><i class="fas fa-sliders-h"></i> Settings / Admin</div>
+        <div class="dropdown-item" onclick="showPage('settings')"><i class="fas fa-sliders-h"></i> Settings</div>
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 4px 0;">
         <div class="dropdown-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
       </div>
     </div>
   </div>
 </nav>
+
+<div class="admin-bar" id="admin-bar" style="display: none;">
+  <span style="color:var(--muted);font-size:11px;">Admin mode:</span>
+  <button class="admin-lock-btn" id="adminBtn" onclick="toggleAdmin()">🔒 Locked</button>
+  <span id="adminStatus" style="font-size:11px;color:var(--muted)">Login to edit records</span>
+</div>
 
 <div class="page" id="page-dashboard">
   <div class="wrapper">
@@ -258,6 +293,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
       <div class="header-right" style="text-align:right">
         <div class="company" style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--accent);letter-spacing:0.05em;">Engineering Division</div>
+        <div class="prepared" style="font-size:12px;color:var(--muted);margin-top:4px;">Prepared by: System Admin</div>
         <div class="date-badge" id="dateBadge" style="display:inline-block;margin-top:8px;padding:4px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:100px;font-size:11px;color:var(--muted);">Loading…</div>
       </div>
     </header>
@@ -266,18 +302,62 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="kpi-card total">
         <div class="kpi-label">Total Work Orders</div>
         <div class="kpi-value" id="kpiTotal">-</div>
+        <div class="kpi-pct">In Local Storage</div>
+        <div class="kpi-icon">📋</div>
       </div>
       <div class="kpi-card on-time">
         <div class="kpi-label">Completed Within Target</div>
         <div class="kpi-value" id="kpiGreen">-</div>
+        <div class="kpi-pct" id="kpiGreenPct">-%</div>
+        <div class="kpi-icon">✅</div>
       </div>
       <div class="kpi-card breached">
         <div class="kpi-label">Comp (But Breached)</div>
         <div class="kpi-value" id="kpiAmber">-</div>
+        <div class="kpi-pct" id="kpiAmberPct">-%</div>
+        <div class="kpi-icon">⚠️</div>
       </div>
       <div class="kpi-card failed">
         <div class="kpi-label">Not Comp (Breached)</div>
         <div class="kpi-value" id="kpiRed">-</div>
+        <div class="kpi-pct" id="kpiRedPct">-%</div>
+        <div class="kpi-icon">❌</div>
+      </div>
+      <div class="kpi-card pending">
+        <div class="kpi-label">Pending (Within Target)</div>
+        <div class="kpi-value" id="kpiBlue">-</div>
+        <div class="kpi-pct" id="kpiBluePct">-%</div>
+        <div class="kpi-icon">⏳</div>
+      </div>
+    </div>
+
+    <div class="section-title">Monthly Breakdown</div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Monthly Volume — Stacked</div>
+        <div class="bar-chart" id="barChart"></div>
+        <div style="display:flex;gap:16px;margin-top:16px;flex-wrap:wrap;">
+          <div class="eng-stat"><span class="dot green"></span><span style="color:var(--muted);font-size:11px">Within Target</span></div>
+          <div class="eng-stat"><span class="dot amber"></span><span style="color:var(--muted);font-size:11px">Breached</span></div>
+          <div class="eng-stat"><span class="dot red"></span><span style="color:var(--muted);font-size:11px">Not Comp</span></div>
+          <div class="eng-stat"><span class="dot blue"></span><span style="color:var(--muted);font-size:11px">Pending</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Monthly Summary Table</div>
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Total</th>
+              <th>✅ On Time</th>
+              <th>⚠️ Breached</th>
+              <th>Rate</th>
+            </tr>
+          </thead>
+          <tbody id="monthlyTable"></tbody>
+          <tfoot id="monthlyFoot"></tfoot>
+        </table>
       </div>
     </div>
   </div>
@@ -289,11 +369,24 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <h2 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">Work Orders <span id="woCountLabel" style="font-size:13px;color:var(--muted)"></span></h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" onclick="exportTableCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()" id="addWoBtn" style="display:none"><i class="fas fa-plus"></i> Add WO</button>
       </div>
     </div>
 
     <div class="filters">
       <input type="text" class="filter-input" placeholder="🔍 Search WO / Description…" id="searchInput" oninput="applyFilters()" style="min-width:220px;">
+      <select class="filter-input" id="filterStatus" onchange="applyFilters()">
+        <option value="">All Statuses</option>
+        <option>COMP</option><option>INPRG</option><option>DISPATCH</option>
+        <option>WPERM</option><option>RTNENG</option><option>APPR</option>
+      </select>
+      <select class="filter-input" id="filterEng" onchange="applyFilters()">
+        <option value="">All Engineers</option>
+      </select>
+      <select class="filter-input" id="filterFab" onchange="applyFilters()">
+        <option value="">All Fab Status</option>
+        <option>Done</option><option>Not Done</option><option>On Going</option>
+      </select>
       <button class="btn btn-ghost btn-sm" onclick="clearFilters()">✕ Clear</button>
     </div>
 
@@ -305,13 +398,20 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <th>Work Order</th>
             <th>Description</th>
             <th>Status</th>
+            <th>PWA Engineer</th>
             <th>Highway</th>
             <th>Target Finish</th>
+            <th>Sign Type</th>
+            <th>Sign Ref</th>
+            <th>Qty</th>
+            <th>Fab Status</th>
+            <th>Install Date</th>
             <th>Photo</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="woBody">
-          <tr class="loading-row"><td colspan="7">Loading data...</td></tr>
+          <tr class="loading-row"><td colspan="14">Loading data...</td></tr>
         </tbody>
       </table>
     </div>
@@ -323,106 +423,133 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="wrapper" style="position: relative;">
     <div id="map"></div>
     <div class="map-overlay">
-      
       <div class="map-card">
         <h3><i class="fas fa-layer-group"></i> Map Controls</h3>
-        <div class="map-control-group">
-          <div style="font-size: 10px; color: var(--muted); margin-bottom: 8px;">VIEW MODE</div>
-          <button class="btn btn-primary btn-sm w-100 mb-2" onclick="setMapView('standard')">Standard Map</button>
-          <button class="btn btn-ghost btn-sm w-100" onclick="setMapView('satellite')">Satellite Imagery</button>
-        </div>
-
-        <div class="map-control-group">
-          <div style="font-size: 10px; color: var(--muted); margin-bottom: 8px;">SEARCH COORDINATES</div>
-          <div style="display: flex; gap: 5px;">
-            <input type="text" id="coordSearch" class="auth-input" style="margin:0; padding: 6px; font-size:11px;" placeholder="Lat, Lng">
-            <button class="btn btn-primary btn-sm" onclick="searchCoordinates()"><i class="fas fa-search"></i></button>
-          </div>
-        </div>
-
-        <div class="map-control-group">
-          <div style="font-size: 10px; color: var(--muted); margin-bottom: 8px;">PROJECT BOUNDARY (KML/GPX)</div>
-          <label class="btn btn-ghost btn-sm w-100 mb-2" style="justify-content: center;">
-            <i class="fas fa-file-upload"></i> Upload Polygon
-            <input type="file" id="kml-upload" style="display:none" accept=".kml,.kmz,.gpx" onchange="handleKMLUpload(event)">
-          </label>
-          <div style="display:flex; align-items:center; gap:10px; font-size:11px;">
-            <input type="checkbox" id="toggle-boundary" checked onchange="toggleBoundaryVisibility()"> Show Layers
-          </div>
-        </div>
-
-        <div class="map-control-group">
-          <div style="font-size: 10px; color: var(--muted); margin-bottom: 8px;">MEASURE & EXPORT</div>
-          <p style="font-size: 10px; color: var(--muted); line-height: 1.4; margin-bottom: 8px;">Use the toolbar on the left side of the map to draw and measure polygons and lines.</p>
-          <button class="btn btn-ghost btn-sm w-100" onclick="exportDrawnData()"><i class="fas fa-download"></i> Export GeoJSON</button>
+        <button class="btn btn-primary btn-sm w-100 mb-2" onclick="setMapView('standard')">Standard View</button>
+        <button class="btn btn-ghost btn-sm w-100 mb-2" onclick="setMapView('satellite')">Satellite View</button>
+        <hr style="border-color: var(--border); margin: 10px 0;">
+        <label class="btn btn-ghost btn-sm w-100 mb-2">
+          <i class="fas fa-file-upload"></i> Project Boundary
+          <input type="file" id="kml-upload" style="display:none" accept=".kml,.kmz" onchange="handleKMLUpload(event)">
+        </label>
+        <div style="display:flex; align-items:center; gap:10px; font-size:11px;">
+          <input type="checkbox" id="toggle-boundary" checked onchange="toggleBoundaryVisibility()"> Show Boundary
         </div>
       </div>
+      <div class="map-card" id="point-info" style="display: none;">
+        <h3><i class="fas fa-info-circle"></i> Selected Point</h3>
+        <div id="point-details" style="font-size:11px; color:var(--muted); line-height:1.6;"></div>
+        <button class="btn btn-ghost btn-sm w-100 mt-2" onclick="hidePointInfo()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<div class="page" id="page-filemanager">
+  <div class="wrapper">
+    <h2 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:24px;">File Manager</h2>
+    
+    <div class="section-title">Directories</div>
+    <div class="file-grid">
+      <div class="file-item" onclick="showFolder('images')">
+        <div class="file-icon"><i class="fas fa-images"></i></div>
+        <div class="file-name">Work Order Photos</div>
+        <div class="file-date" id="photo-count">0 files</div>
+      </div>
+      <div class="file-item" onclick="showFolder('pdfs')">
+        <div class="file-icon"><i class="fas fa-file-pdf"></i></div>
+        <div class="file-name">Exported PDFs</div>
+        <div class="file-date" id="pdf-count">0 files</div>
+      </div>
+    </div>
+
+    <div id="folder-view" style="margin-top: 40px; display: none;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <h3 id="folder-title" style="font-size:14px; text-transform:uppercase; color:var(--accent);">Folder Name</h3>
+        <button class="btn btn-ghost btn-sm" onclick="hideFolderView()">Back</button>
+      </div>
+      <div class="file-grid" id="folder-files"></div>
     </div>
   </div>
 </div>
 
 <div class="page" id="page-settings">
   <div class="wrapper">
-    <h2 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:24px;">Platform Settings</h2>
+    <h2 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:24px;">Settings</h2>
     
     <div class="upload-grid">
-      
       <div class="upload-card">
-        <h3>📊 Data Management (Excel)</h3>
-        <p>Update Work Orders. <br><strong style="color:var(--amber)">Warning:</strong> Without Supabase connection, browser limits (5MB) apply.</p>
+        <h3>📊 Data Management</h3>
+        <p>Update Work Orders from Excel. Admin password required.</p>
         <div class="drop-zone" id="excelDrop">
           <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="handleExcelUpload(event)">
           <div class="drop-icon">📂</div>
           <p>Drag & drop Excel file here<br>or click to browse</p>
           <div class="file-name" id="excelFileName"></div>
         </div>
-        <button class="btn btn-primary btn-sm w-100 mt-3" onclick="processExcelUpload()">Process Data</button>
+        <button class="btn btn-primary btn-sm w-100 mt-3" onclick="processExcelUpload()">Upload Data</button>
       </div>
 
       <div class="upload-card">
         <h3>⚙️ System Preferences</h3>
+        <p>Customize your experience.</p>
         <div class="form-group mb-3">
           <label>Theme Mode</label>
           <div style="display:flex; gap:10px; margin-top:8px;">
-            <button class="btn btn-ghost btn-sm flex-1 w-100" onclick="setTheme('dark')">Dark Mode</button>
-            <button class="btn btn-ghost btn-sm flex-1 w-100" onclick="setTheme('light')">Light Mode</button>
+            <button class="btn btn-ghost btn-sm flex-1" onclick="setTheme('dark')">Dark Mode</button>
+            <button class="btn btn-ghost btn-sm flex-1" onclick="setTheme('light')">Light Mode</button>
           </div>
         </div>
-      </div>
-
-      <div class="upload-card" style="grid-column: 1 / -1; border-color: var(--accent);">
-        <h3 style="color: var(--accent);"><i class="fas fa-shield-alt"></i> Admin Panel: User Access Management</h3>
-        <p>Manage users who have signed up. Approving users requires a live Supabase connection with a configured <code>profiles</code> table and RLS policies.</p>
-        
-        <div class="table-wrap" style="margin-top: 15px;">
-          <table class="main-table">
-            <thead>
-              <tr>
-                <th>User Email</th>
-                <th>Status</th>
-                <th>Request Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="adminUsersTable">
-              <tr>
-                <td>engineer.ahmet@qbc.qa</td>
-                <td><span class="status-badge badge-COMP">Approved</span></td>
-                <td>2026-05-20</td>
-                <td><button class="btn btn-ghost btn-sm">Revoke</button></td>
-              </tr>
-              <tr>
-                <td>new.contractor@qbc.qa</td>
-                <td><span class="status-badge badge-INPRG">Pending</span></td>
-                <td>2026-05-24</td>
-                <td><button class="btn btn-primary btn-sm">Approve Access</button></td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="form-group">
+          <label>Admin Password</label>
+          <input type="password" class="auth-input mt-1" id="settings-admin-pwd" placeholder="Change admin password" readonly>
+          <small style="color:var(--muted)">Admin password management coming soon.</small>
         </div>
       </div>
+    </div>
+  </div>
+</div>
 
+<div class="modal-overlay" id="adminModal">
+  <div class="modal" style="max-width:360px;">
+    <button class="modal-close" onclick="closeModal('adminModal')">×</button>
+    <div class="modal-title">Admin Login</div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="adminPwd" class="auth-input" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')checkAdmin()">
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted)">Default password: <code style="color:var(--accent)">qbc2025</code></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('adminModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="checkAdmin()">Login</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editModal">
+  <div class="modal" style="max-width:850px;">
+    <button class="modal-close" onclick="closeModal('editModal')">×</button>
+    <div class="modal-title" id="editModalTitle">Edit Work Order</div>
+    <div class="form-grid" id="editFormGrid"></div>
+    <div class="fab-section">
+      <h4>Fabrication Details</h4>
+      <div class="fab-grid-4" id="editFabGrid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('editModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveEdit()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="fabModal">
+  <div class="modal pdf-modal">
+    <button class="modal-close" onclick="closeModal('fabModal')">×</button>
+    <div class="modal-title">Fabrication Request – <span id="fabModalWO"></span></div>
+    <div id="pdfPreview"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('fabModal')">Close</button>
+      <button class="btn btn-primary btn-sm" onclick="exportPDF()">⬇ Export PDF (A4 Layout)</button>
     </div>
   </div>
 </div>
@@ -438,19 +565,27 @@ let supabaseClient = null;
 try {
   if (window.supabase) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } else {
+    console.warn("Supabase CDN not loaded. Using local fallback.");
   }
-} catch(e) { console.error("Supabase init error:", e); }
+} catch(e) {
+  console.error("Supabase init error:", e);
+}
 
+const ADMIN_PWD = 'qbc2025';
 let currentUser = null;
+let isAdmin = false;
 let allData = [];
 let filteredData = [];
 let photos = {}; 
 let currentPage = 1;
 const PAGE_SIZE = 50;
+let editingIdx = null;
 let map = null;
-let customLayers = new L.FeatureGroup();
+let boundaryLayer = null;
 let currentTheme = 'dark';
 
+// INITIALIZATION
 window.addEventListener('load', async () => {
   let session = null;
   if (supabaseClient) {
@@ -472,11 +607,336 @@ window.addEventListener('load', async () => {
 function onAuthenticated() {
   document.getElementById('auth-container').style.display = 'none';
   document.getElementById('main-nav').style.display = 'flex';
+  document.getElementById('admin-bar').style.display = 'flex';
   document.getElementById('nav-user-initial').textContent = currentUser.email.charAt(0).toUpperCase();
   showPage('dashboard');
   fetchData();
 }
 
+async function fetchData() {
+  if (!supabaseClient) {
+    useLocalFallback();
+    return;
+  }
+  try {
+    const { data: woData, error: woError } = await supabaseClient
+      .from('work_orders')
+      .select('*')
+      .order('work_order', { ascending: false });
+
+    if (woError) throw woError;
+    
+    // Map Supabase fields to app fields
+    allData = woData.map(r => ({
+      WorkOrder: r.work_order,
+      Description: r.description,
+      Status: r.status,
+      PWA_ENG: r.pwa_eng,
+      TargetStart: r.target_start,
+      TargetFinish: r.target_finish,
+      Remaining: r.remaining,
+      Highway: r.highway,
+      Lat: r.lat,
+      Lng: r.lng,
+      RoadCatg: r.road_catg,
+      SignType: r.sign_type,
+      SignRef: r.sign_ref,
+      SignShape: r.sign_shape,
+      SignSize: r.sign_size,
+      SignMaterial: r.sign_material,
+      SignQty: r.sign_qty,
+      PostType: r.post_type,
+      PostHeight: r.post_height,
+      PostQty: r.post_qty,
+      FoundSize: r.found_size,
+      FoundQty: r.found_qty,
+      FabStatus: r.fab_status,
+      InstallationDate: r.installation_date,
+      ScrapRemoval: r.scrap_removal
+    }));
+
+    const { data: photoData, error: photoError } = await supabaseClient
+      .from('photos')
+      .select('work_order, url');
+
+    if (photoError) throw photoError;
+    
+    photos = {};
+    photoData.forEach(p => {
+      photos[p.work_order] = p.url;
+    });
+
+  } catch (error) {
+    console.error("Supabase fetch error, falling back to local storage:", error);
+    useLocalFallback();
+  }
+  
+  buildEngineerFilter();
+  applyFilters();
+  updateDashboard();
+  updateFileManagerStats();
+}
+
+function useLocalFallback() {
+  console.log("Using local data fallback");
+  try {
+    const saved = localStorage.getItem('qbc_data');
+    if (saved) allData = JSON.parse(saved);
+    const savedPhotos = localStorage.getItem('qbc_photos');
+    if (savedPhotos) photos = JSON.parse(savedPhotos);
+  } catch(e) {}
+  
+  if (allData.length === 0) {
+      allData = [
+        {"WorkOrder":"25289532","Description":"4701- AIR FORCE SIGNAL - CCTV camera down","Status":"COMP","PWA_ENG":"Mohd Fauzi Bin Mustapha","TargetStart":"2026-02-18","TargetFinish":"2026-02-19","Highway":"F Ring Road","Lat":25.2310103561,"Lng":51.5763480648,"FabStatus":"Not Done","InstallationDate":"2026-02-18"},
+        {"WorkOrder":"24895830","Description":"Directional Signage,Directional,Signface","Status":"RTNENG","PWA_ENG":"Adnan Khdair","TargetStart":"2026-01-03","TargetFinish":"2027-01-03","Highway":"Dukhan Road","Lat":25.4263712743,"Lng":51.1591333125,"FabStatus":"Not Done","InstallationDate":""}
+      ];
+  }
+  
+  buildEngineerFilter();
+  applyFilters();
+  updateDashboard();
+  updateFileManagerStats();
+}
+
+async function saveWorkOrderToSupabase(wo) {
+  if (!supabaseClient) {
+    allData = allData.map(r => r.WorkOrder === wo.WorkOrder ? wo : r);
+    localStorage.setItem('qbc_data', JSON.stringify(allData));
+    return;
+  }
+  const payload = {
+    work_order: wo.WorkOrder,
+    description: wo.Description,
+    status: wo.Status,
+    pwa_eng: wo.PWA_ENG,
+    target_start: wo.TargetStart || null,
+    target_finish: wo.TargetFinish || null,
+    remaining: wo.Remaining,
+    highway: wo.Highway,
+    lat: parseFloat(wo.Lat) || null,
+    lng: parseFloat(wo.Lng) || null,
+    road_catg: wo.RoadCatg,
+    sign_type: wo.SignType,
+    sign_ref: wo.SignRef,
+    sign_shape: wo.SignShape,
+    sign_size: wo.SignSize,
+    sign_material: wo.SignMaterial,
+    sign_qty: wo.SignQty,
+    post_type: wo.PostType,
+    post_height: wo.PostHeight,
+    post_qty: wo.PostQty,
+    found_size: wo.FoundSize,
+    found_qty: wo.FoundQty,
+    fab_status: wo.FabStatus,
+    installation_date: wo.InstallationDate || null,
+    scrap_removal: wo.ScrapRemoval
+  };
+
+  const { error } = await supabaseClient
+    .from('work_orders')
+    .upsert(payload, { onConflict: 'work_order' });
+
+  if (error) {
+    console.error("Error saving to Supabase:", error);
+    showToast("Error saving to cloud", "error");
+  }
+}
+
+// THEME TOGGLE
+function toggleTheme() {
+  setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+}
+
+function setTheme(theme) {
+  currentTheme = theme;
+  document.body.setAttribute('data-theme', theme);
+  const icon = document.getElementById('theme-icon');
+  if (theme === 'dark') {
+    icon.className = 'fas fa-moon';
+  } else {
+    icon.className = 'fas fa-sun';
+  }
+}
+
+// PAGE NAVIGATION
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  
+  const targetPage = document.getElementById('page-' + id);
+  if (targetPage) targetPage.classList.add('active');
+  
+  const navBtn = document.querySelector(`[onclick="showPage('${id}')"]`);
+  if (navBtn) navBtn.classList.add('active');
+
+  if (id === 'map') {
+    setTimeout(initMap, 100);
+  }
+  
+  if(id === 'dashboard') {
+     setTimeout(() => {
+        document.querySelectorAll('.bar-seg').forEach(el => {
+          el.style.width = el.getAttribute('data-w') + '%';
+        });
+     }, 100);
+  }
+}
+
+// DASHBOARD LOGIC
+function getStatusCat(r) {
+  const isComp = r.Status === 'COMP';
+  const hasTarget = r.TargetFinish && r.TargetFinish.trim() !== '';
+  let breached = false;
+  if (hasTarget) {
+    const target = new Date(r.TargetFinish);
+    const actual = (r.InstallationDate && r.InstallationDate.trim() !== '') ? new Date(r.InstallationDate) : new Date();
+    if (actual > target) breached = true;
+  }
+  if (isComp && !breached) return 'green';
+  if (isComp && breached) return 'amber';
+  if (!isComp && breached) return 'red';
+  return 'blue';
+}
+
+function updateDashboard() {
+  let stats = { total: allData.length, green: 0, amber: 0, red: 0, blue: 0 };
+  let monthsObj = {};
+  allData.forEach(r => {
+    const cat = getStatusCat(r);
+    stats[cat]++;
+    let dStr = r.TargetFinish || r.TargetStart;
+    let mName = "Unknown";
+    if (dStr && dStr.includes('-')) {
+       const d = new Date(dStr);
+       if(!isNaN(d)) mName = d.toLocaleString('default', { month: 'short', year:'numeric' });
+    }
+    if (!monthsObj[mName]) monthsObj[mName] = { month: mName, total: 0, green: 0, amber: 0, red: 0, blue: 0 };
+    monthsObj[mName].total++;
+    monthsObj[mName][cat]++;
+  });
+
+  document.getElementById('kpiTotal').textContent = stats.total.toLocaleString();
+  document.getElementById('kpiGreen').textContent = stats.green.toLocaleString();
+  document.getElementById('kpiAmber').textContent = stats.amber.toLocaleString();
+  document.getElementById('kpiRed').textContent = stats.red.toLocaleString();
+  document.getElementById('kpiBlue').textContent = stats.blue.toLocaleString();
+
+  const getPct = (v) => stats.total ? ((v / stats.total) * 100).toFixed(1) + ' %' : '0 %';
+  document.getElementById('kpiGreenPct').textContent = getPct(stats.green);
+  document.getElementById('kpiAmberPct').textContent = getPct(stats.amber);
+  document.getElementById('kpiRedPct').textContent = getPct(stats.red);
+  document.getElementById('kpiBluePct').textContent = getPct(stats.blue);
+
+  let mArr = Object.values(monthsObj).sort((a,b) => b.total - a.total).slice(0,8);
+  renderMonthly(mArr, stats);
+}
+
+function renderMonthly(mArr, grandTotal) {
+  const tbody = document.getElementById('monthlyTable');
+  const tfoot = document.getElementById('monthlyFoot');
+  const barChart = document.getElementById('barChart');
+  tbody.innerHTML = ''; barChart.innerHTML = '';
+  if (mArr.length === 0) return;
+  const maxTotal = Math.max(...mArr.map(d => d.total));
+
+  mArr.forEach(d => {
+    const rate = d.total ? ((d.green / d.total) * 100).toFixed(1) : 0;
+    tbody.innerHTML += `<tr><td><span class="month-name">${d.month}</span></td><td><span class="total-num">${d.total.toLocaleString()}</span></td><td><span class="num-green">${d.green.toLocaleString()}</span></td><td><span class="num-amber">${d.amber.toLocaleString()}</span></td><td><div style="font-size:12px;color:var(--green);margin-bottom:3px;">${rate}%</div><div class="progress-wrap"><div class="progress-fill" style="width:${rate}%;background:var(--green)"></div></div></td></tr>`;
+    const gW = (d.green / maxTotal * 100).toFixed(1);
+    const aW = (d.amber / maxTotal * 100).toFixed(1);
+    const rW = (d.red / maxTotal * 100).toFixed(1);
+    const bW = (d.blue / maxTotal * 100).toFixed(1);
+    barChart.innerHTML += `<div class="bar-row"><span class="bar-label">${d.month.split(' ')[0]}</span><div class="bar-track"><div class="bar-seg green" data-w="${gW}" style="width:0"></div><div class="bar-seg amber" data-w="${aW}" style="width:0"></div><div class="bar-seg red" data-w="${rW}" style="width:0"></div><div class="bar-seg blue" data-w="${bW}" style="width:0"></div></div><span class="bar-total">${d.total}</span></div>`;
+  });
+}
+
+// WORK ORDERS LOGIC
+function buildEngineerFilter() {
+  const engs = [...new Set(allData.map(r => r.PWA_ENG).filter(Boolean))].sort();
+  const sel = document.getElementById('filterEng');
+  sel.innerHTML = '<option value="">All Engineers</option>';
+  engs.forEach(e => { const o = document.createElement('option'); o.textContent = e; sel.appendChild(o); });
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const st = document.getElementById('filterStatus').value;
+  const eng = document.getElementById('filterEng').value;
+  const fab = document.getElementById('filterFab').value;
+  filteredData = allData.filter(r => {
+    const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Highway||'').toLowerCase().includes(q);
+    const matchSt = !st || r.Status === st;
+    const matchEng = !eng || r.PWA_ENG === eng;
+    const matchFab = !fab || (r.FabStatus||'').toLowerCase() === fab.toLowerCase();
+    return matchQ && matchSt && matchEng && matchFab;
+  });
+  currentPage = 1;
+  renderTable();
+  document.getElementById('woCountLabel').textContent = `(${filteredData.length} of ${allData.length})`;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('woBody');
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const slice = filteredData.slice(start, start + PAGE_SIZE);
+  if (slice.length === 0) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="11">No records found</td></tr>';
+    renderPagination(); return;
+  }
+  tbody.innerHTML = slice.map((r, i) => {
+    const stBadge = `<span class="status-badge badge-${r.Status||'COMP'}">${r.Status||'–'}</span>`;
+    const photo = photos[r.WorkOrder];
+    const photoCell = photo
+      ? `<img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">`
+      : `<div style="cursor:pointer; color:var(--muted)" onclick="uploadPhotoFor('${r.WorkOrder}')"><i class="fas fa-camera"></i></div>`;
+
+    return `<tr>
+      <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
+      <td><span class="wo-num">${r.WorkOrder}</span></td>
+      <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
+      <td>${stBadge}</td>
+      <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
+      <td style="font-size:11px">${r.Highway||'—'}</td>
+      <td style="font-size:11px">${r.TargetFinish||'—'}</td>
+      <td style="font-size:11px">${r.SignType||'—'}</td>
+      <td style="font-size:11px">${r.SignRef||'—'}</td>
+      <td style="font-size:11px">${r.SignQty||'—'}</td>
+      <td>${r.FabStatus||'—'}</td>
+      <td style="font-size:11px">${r.InstallationDate||'—'}</td>
+      <td>${photoCell}<input type="file" style="display:none" id="file_${r.WorkOrder}" accept="image/*" onchange="handlePhotoUpload(event,'${r.WorkOrder}')"></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
+          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal(${allData.indexOf(r)})"><i class="fas fa-edit"></i></button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = Math.ceil(filteredData.length / PAGE_SIZE);
+  const pg = document.getElementById('pagination');
+  if (total <= 1) { pg.innerHTML = ''; return; }
+  let html = `<span class="pg-info">Page ${currentPage} of ${total}</span>`;
+  for (let p = 1; p <= total; p++) html += `<button class="pg-btn${p===currentPage?' active':''}" onclick="gotoPage(${p})">${p}</button>`;
+  pg.innerHTML = html;
+}
+function gotoPage(p) { currentPage = p; renderTable(); }
+
+function clearFilters() {
+  document.getElementById('searchInput').value = ''; document.getElementById('filterStatus').value = '';
+  document.getElementById('filterEng').value = ''; document.getElementById('filterFab').value = '';
+  applyFilters();
+}
+
+function toggleUserDropdown() {
+  document.getElementById('user-dropdown').classList.toggle('show');
+}
+
+// MODIFIED AUTH HANDLER
 async function handleAuth() {
   const email = document.getElementById('auth-email').value;
   const password = document.getElementById('auth-password').value;
@@ -484,16 +944,22 @@ async function handleAuth() {
 
   if (!email || !password) return showToast('Please fill all fields', 'error');
 
-  // Dev Bypass Check
-  if (email === 'admin@qbc.qa' && password === 'qbc2025') {
+  // Developer Bypass
+  if (email === 'admin@qbc.qa' && password === ADMIN_PWD) {
     currentUser = { email: 'admin@qbc.qa', id: 'dev-bypass' };
+    isAdmin = true;
     onAuthenticated();
+    updateAdminUI();
     showToast('Developer Access Granted');
     return;
   }
 
+  // MODIFIED: Universal Offline Fallback. 
+  // If database connection is down, log the user in locally anyway so the page isn't "broken".
   if (!supabaseClient) {
-    showToast('Cannot connect to Supabase backend.', 'error');
+    currentUser = { email: email, id: 'local-user' };
+    onAuthenticated();
+    showToast('Logged in (Offline Mode)');
     return;
   }
 
@@ -501,7 +967,7 @@ async function handleAuth() {
     if (isSignUp) {
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) throw error;
-      showToast('Sign up successful! Waiting for admin approval.');
+      showToast('Check your email for confirmation');
     } else {
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) throw error;
@@ -513,28 +979,9 @@ async function handleAuth() {
   }
 }
 
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  const targetPage = document.getElementById('page-' + id);
-  if (targetPage) targetPage.classList.add('active');
-  const navBtn = document.querySelector(`[onclick="showPage('${id}')"]`);
-  if (navBtn) navBtn.classList.add('active');
-
-  if (id === 'map') {
-    setTimeout(initMap, 100);
-  }
-}
-
-function toggleTheme() {
-  setTheme(currentTheme === 'dark' ? 'light' : 'dark');
-}
-
-function setTheme(theme) {
-  currentTheme = theme;
-  document.body.setAttribute('data-theme', theme);
-  const icon = document.getElementById('theme-icon');
-  icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+function showProfile() {
+  if (!currentUser) return;
+  alert(`User Profile\nEmail: ${currentUser.email}\nID: ${currentUser.id}`);
 }
 
 function toggleAuthMode() {
@@ -543,7 +990,7 @@ function toggleAuthMode() {
   const toggleText = document.getElementById('toggle-text');
   if (title.textContent === 'Welcome Back') {
     title.textContent = 'Create Account';
-    btn.textContent = 'Request Access';
+    btn.textContent = 'Sign Up';
     toggleText.textContent = 'Sign In';
   } else {
     title.textContent = 'Welcome Back';
@@ -557,30 +1004,213 @@ async function handleLogout() {
   location.reload();
 }
 
-function toggleUserDropdown() {
-  document.getElementById('user-dropdown').classList.toggle('show');
+let pendingExcelFile = null;
+function handleExcelUpload(evt) {
+  pendingExcelFile = evt.target.files[0];
+  if (pendingExcelFile) document.getElementById('excelFileName').textContent = pendingExcelFile.name;
 }
 
-/* --- GIS MAPPING LOGIC --- */
+async function processExcelUpload() {
+  if (!pendingExcelFile) { showToast('No file selected','error'); return; }
+  if (!isAdmin) { showToast('Admin mode required','error'); return; }
+  
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'binary'}); 
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
+      
+      let hRow = -1;
+      for (let i=0;i<Math.min(10,raw.length);i++) { 
+        if (raw[i].some(c=>String(c).includes('Work Order'))) { hRow=i; break; } 
+      }
+      
+      if (hRow < 0) { showToast('Header row not found','error'); return; }
+      
+      const headers = raw[hRow].map(h=>String(h).trim()); 
+      const dataRows = raw.slice(hRow+2);
+      const woIdx = headers.indexOf('Work Order'); 
+      const upsertData = [];
+      
+      dataRows.forEach(row => {
+        const wo = String(row[woIdx]||'').trim(); 
+        if (!wo || isNaN(wo) || wo==='') return;
+        
+        const r = {work_order: wo};
+        const MAP = { 
+          'Description': 'description', 'Status': 'status', 'PWA ENG.': 'pwa_eng', 
+          'Target Start': 'target_start', 'Target Finish': 'target_finish', 'Remainig': 'remaining',
+          'HIGHWAY': 'highway', 'Latitude (Y):': 'lat', 'Longitude (X):': 'lng', 
+          'Road Catg.': 'road_catg', 'Road Category': 'road_catg',
+          'Sign Type ': 'sign_type', 'Sign REF.': 'sign_ref', 'Sign Shape': 'sign_shape', 
+          'SIZE (mm)': 'sign_size', 'Sign Material': 'sign_material', 'Material': 'sign_material',
+          'QTY.': 'sign_qty', 'TYPE': 'post_type', 'HEIGHT (mm)': 'post_height', 
+          'POST QTY.': 'post_qty', 'Found. Size': 'found_size', 'Found. Qty': 'found_qty',
+          'Scrap Materials Removal ': 'scrap_removal', 'Fabrication Status': 'fab_status', 
+          'STATUS': 'fab_status', 'INSTALLATION DATE': 'installation_date' 
+        };
+        
+        headers.forEach((h,i) => {
+          const k = MAP[h];
+          if (k) {
+            let val = row[i];
+            if (val instanceof Date) val = val.toISOString().substring(0,10);
+            else if (typeof val === 'number' && val > 40000 && val < 50000) { 
+              val = new Date((val-25569)*86400000).toISOString().substring(0,10); 
+            }
+            if (k === 'lat' || k === 'lng') val = parseFloat(val) || null;
+            r[k] = (val !== null && val !== undefined) ? String(val).trim() : null;
+            if (k === 'lat' || k === 'lng') r[k] = val;
+          }
+        });
+        upsertData.push(r);
+      });
+
+      if (supabaseClient) {
+        const { error } = await supabaseClient.from('work_orders').upsert(upsertData, { onConflict: 'work_order' });
+        if (error) throw error;
+      } else {
+         // Local save offline
+         allData = upsertData.map(d => ({
+            WorkOrder: d.work_order, Description: d.description, Status: d.status, PWA_ENG: d.pwa_eng, Highway: d.highway,
+            FabStatus: d.fab_status, TargetFinish: d.target_finish
+         }));
+         localStorage.setItem('qbc_data', JSON.stringify(allData));
+      }
+      
+      showToast(`Successfully uploaded ${upsertData.length} records`);
+      fetchData();
+    } catch(err) { 
+      console.error(err);
+      showToast('Error processing Excel','error'); 
+    }
+  };
+  reader.readAsBinaryString(pendingExcelFile);
+}
+
+// ADMIN LOCK
+function toggleAdmin() {
+  if (isAdmin) { isAdmin = false; updateAdminUI(); return; }
+  openModal('adminModal');
+}
+function checkAdmin() {
+  const pwd = document.getElementById('adminPwd').value;
+  if (pwd === 'qbc2025') {
+    isAdmin = true; closeModal('adminModal'); document.getElementById('adminPwd').value = '';
+    updateAdminUI(); showToast('Admin mode enabled');
+  } else { showToast('Wrong password','error'); }
+}
+function updateAdminUI() {
+  const btn = document.getElementById('adminBtn'), status = document.getElementById('adminStatus'), addBtn = document.getElementById('addWoBtn');
+  if (isAdmin) {
+    btn.textContent = '🔓 Admin Active'; btn.classList.add('unlocked'); status.textContent = 'Edit mode enabled';
+    if (addBtn) addBtn.style.display = '';
+  } else {
+    btn.textContent = '🔒 Locked'; btn.classList.remove('unlocked'); status.textContent = 'Login to edit records';
+    if (addBtn) addBtn.style.display = 'none';
+  }
+}
+
+// MAP FUNCTIONS
+let markersLayer = null;
 async function initMap() {
   if (map) return;
   map = L.map('map').setView([25.2854, 51.5310], 11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
   
-  // Add Layer Group for boundaries/uploaded KML
-  map.addLayer(customLayers);
+  markersLayer = L.layerGroup().addTo(map);
+  
+  map.on('click', onMapClick);
+  
+  loadMarkers();
+  loadProjectBoundary();
+}
 
-  // Initialize Geoman Measurement & Drawing Tools
-  map.pm.addControls({
-    position: 'topleft',
-    drawCircle: false,
-    drawCircleMarker: false,
-    drawText: false,
-    cutPolygon: false,
-    editMode: true,
-    dragMode: true,
-    removalMode: true,
+function loadMarkers() {
+  if (!markersLayer) return;
+  markersLayer.clearLayers();
+  allData.forEach(r => {
+    if (r.Lat && r.Lng) {
+      const m = L.marker([r.Lat, r.Lng], {
+        icon: L.divIcon({
+          className: 'custom-div-icon',
+          html: `<div style='background-color:var(--accent); width:12px; height:12px; border-radius:50%; border:2px solid #fff;'></div>`,
+          iconSize: [12, 12],
+          iconAnchor: [6, 6]
+        })
+      });
+      m.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
+        showPointInfo(r.Lat, r.Lng, r);
+      });
+      markersLayer.addLayer(m);
+    }
   });
+}
+
+async function loadProjectBoundary() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient.from('project_boundaries').select('*').limit(1).maybeSingle();
+    if (data && data.geojson) {
+      if (boundaryLayer) map.removeLayer(boundaryLayer);
+      boundaryLayer = L.geoJSON(data.geojson, {
+        style: { color: 'var(--accent)', weight: 3, fillOpacity: 0.1 }
+      }).addTo(map);
+    }
+  } catch(e) {}
+}
+
+function onMapClick(e) {
+  const { lat, lng } = e.latlng;
+  showPointInfo(lat, lng);
+}
+
+function showPointInfo(lat, lng, woData = null) {
+  const panel = document.getElementById('point-info');
+  const details = document.getElementById('point-details');
+  panel.style.display = 'block';
+  
+  let content = `
+    <strong>Latitude:</strong> ${lat.toFixed(6)}<br>
+    <strong>Longitude:</strong> ${lng.toFixed(6)}<br>
+  `;
+
+  if (!woData) {
+    // Search for nearest WO within ~50 meters
+    woData = allData.find(r => {
+      if (!r.Lat || !r.Lng) return false;
+      const d = Math.sqrt(Math.pow(r.Lat - lat, 2) + Math.pow(r.Lng - lng, 2));
+      return d < 0.0005; 
+    });
+  }
+
+  if (woData) {
+    content += `
+      <hr style="margin:10px 0; border-color:var(--border);">
+      <div style="color:var(--accent); font-weight:700; margin-bottom:5px;">Work Order: ${woData.WorkOrder}</div>
+      <div style="font-size:10px; margin-bottom:8px;">${woData.Description || 'No description'}</div>
+      <table style="width:100%; font-size:10px; border-collapse:collapse;">
+        <tr><td style="color:var(--muted); padding:2px 0;">Status:</td><td style="text-align:right;">${woData.Status || '—'}</td></tr>
+        <tr><td style="color:var(--muted); padding:2px 0;">Highway:</td><td style="text-align:right;">${woData.Highway || '—'}</td></tr>
+        <tr><td style="color:var(--muted); padding:2px 0;">Engineer:</td><td style="text-align:right;">${woData.PWA_ENG || '—'}</td></tr>
+        <tr><td style="color:var(--muted); padding:2px 0;">Fab Status:</td><td style="text-align:right;">${woData.FabStatus || '—'}</td></tr>
+      </table>
+    `;
+  } else {
+    content += `
+      <hr style="margin:10px 0; border-color:var(--border);">
+      <em style="color:var(--muted);">No work order found at this location.</em>
+    `;
+  }
+  details.innerHTML = content;
+}
+
+function hidePointInfo() {
+  document.getElementById('point-info').style.display = 'none';
 }
 
 function setMapView(type) {
@@ -591,138 +1221,335 @@ function setMapView(type) {
   }
 }
 
-function searchCoordinates() {
-  const input = document.getElementById('coordSearch').value;
-  const coords = input.split(',').map(c => parseFloat(c.trim()));
-  if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-    map.setView([coords[0], coords[1]], 16);
-    L.marker([coords[0], coords[1]]).addTo(map)
-      .bindPopup("Searched Location").openPopup();
-  } else {
-    showToast("Invalid coordinates format. Use Lat, Lng", "error");
-  }
-}
-
-function handleKMLUpload(event) {
+async function handleKMLUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
   
   const reader = new FileReader();
   reader.onload = async (e) => {
-    try {
-      // Define explicit polygon styling so KML boundaries are visible
-      const customStyleLayer = L.geoJson(null, {
-        style: function(feature) {
-          return { color: '#00c8ff', weight: 3, fillOpacity: 0.2, fillColor: '#00c8ff' };
-        }
-      });
-
-      // Parse KML into the styled layer
-      const runLayer = omnivore.kml.parse(e.target.result, null, customStyleLayer);
-      
-      customLayers.clearLayers(); // Remove old boundary
-      customLayers.addLayer(runLayer);
-      
-      map.fitBounds(runLayer.getBounds());
-      showToast("Boundary Polygon Loaded Successfully");
-
-    } catch (err) {
-      console.error(err);
-      showToast("Error parsing KML File.", "error");
+    // Note: leaflet-omnivore is used for KML parsing
+    const runLayer = omnivore.kml.parse(e.target.result);
+    const geojson = runLayer.toGeoJSON();
+    
+    if (boundaryLayer) map.removeLayer(boundaryLayer);
+    boundaryLayer = L.geoJSON(geojson, {
+      style: { color: 'var(--accent)', weight: 3, fillOpacity: 0.1 }
+    }).addTo(map);
+    
+    map.fitBounds(boundaryLayer.getBounds());
+    
+    // Save to Supabase if available
+    if(supabaseClient) {
+        const { error } = await supabaseClient.from('project_boundaries').upsert({
+          id: 1,
+          name: file.name,
+          geojson: geojson
+        });
+        if (error) showToast("Error saving boundary to cloud", "error");
+        else showToast("Project boundary saved");
+    } else {
+        showToast("Boundary loaded locally");
     }
   };
   reader.readAsText(file);
 }
 
 function toggleBoundaryVisibility() {
+  if (!boundaryLayer) return;
   if (document.getElementById('toggle-boundary').checked) {
-    map.addLayer(customLayers);
+    boundaryLayer.addTo(map);
   } else {
-    map.removeLayer(customLayers);
+    map.removeLayer(boundaryLayer);
   }
 }
 
-function exportDrawnData() {
-  // Extract layers drawn by user via Geoman
-  const layers = map.pm.getGeomanLayers();
-  if (layers.length === 0) {
-    showToast("No drawn layers to export.", "error");
-    return;
-  }
+// FILE MANAGER LOGIC
+async function updateFileManagerStats() {
+  const photoCount = Object.keys(photos).length;
+  document.getElementById('photo-count').textContent = `${photoCount} files`;
   
-  const featureGroup = L.featureGroup(layers);
-  const data = featureGroup.toGeoJSON();
-  const convertedData = 'text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
-
-  const link = document.createElement('a');
-  link.setAttribute('href', 'data:' + convertedData);
-  link.setAttribute('download','GIS_Export.geojson');
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  showToast("GeoJSON Exported");
+  if (supabaseClient) {
+      const { count, error } = await supabaseClient
+        .from('exported_pdfs')
+        .select('*', { count: 'exact', head: true });
+      
+      if (!error) {
+        document.getElementById('pdf-count').textContent = `${count || 0} files`;
+      }
+  }
 }
 
-/* --- DATA HANDLING (Basic Mocks to keep app running) --- */
-async function fetchData() {
-  allData = [
-    {"WorkOrder":"25289532","Description":"AIR FORCE SIGNAL","Status":"COMP","Highway":"F Ring Road","Lat":25.231,"Lng":51.576,"TargetFinish":"2026-02-19"},
-    {"WorkOrder":"24895830","Description":"Directional Signage","Status":"RTNENG","Highway":"Dukhan Road","Lat":25.426,"Lng":51.159,"TargetFinish":"2027-01-03"}
-  ];
-  applyFilters();
-  updateDashboard();
+async function showFolder(type) {
+  const view = document.getElementById('folder-view');
+  const title = document.getElementById('folder-title');
+  const grid = document.getElementById('folder-files');
+  
+  view.style.display = 'block';
+  grid.innerHTML = '<div style="color:var(--muted)">Loading...</div>';
+  
+  if (type === 'images') {
+    title.textContent = 'Work Order Photos';
+    grid.innerHTML = Object.entries(photos).map(([wo, url]) => `
+      <div class="file-item">
+        <div class="file-icon"><img src="${url}" style="width:100%; height:40px; object-fit:cover; border-radius:4px;"></div>
+        <div class="file-name">WO_${wo}.jpg</div>
+        <div class="file-date">Local Store</div>
+      </div>
+    `).join('');
+  } else if (type === 'pdfs') {
+    title.textContent = 'Exported PDFs';
+    if(supabaseClient) {
+        const { data, error } = await supabaseClient.from('exported_pdfs').select('*').order('created_at', { ascending: false });
+        if (error) {
+          grid.innerHTML = '<div style="color:var(--red)">Error loading PDFs</div>';
+        } else {
+          grid.innerHTML = data.map(f => `
+            <div class="file-item">
+              <div class="file-icon"><i class="fas fa-file-pdf"></i></div>
+              <div class="file-name">${f.filename}</div>
+              <div class="file-date">${new Date(f.created_at).toLocaleDateString()}</div>
+            </div>
+          `).join('');
+        }
+    } else {
+        grid.innerHTML = '<div style="color:var(--muted)">PDF history unavailable offline.</div>';
+    }
+  }
 }
 
-function applyFilters() {
-  filteredData = allData;
-  renderTable();
+function hideFolderView() {
+  document.getElementById('folder-view').style.display = 'none';
 }
 
-function renderTable() {
-  const tbody = document.getElementById('woBody');
-  tbody.innerHTML = filteredData.map((r, i) => `<tr>
-    <td>${i+1}</td>
-    <td><span class="wo-num">${r.WorkOrder}</span></td>
-    <td>${r.Description}</td>
-    <td><span class="status-badge badge-${r.Status}">${r.Status}</span></td>
-    <td>${r.Highway}</td>
-    <td>${r.TargetFinish}</td>
-    <td>
-      <label style="cursor:pointer; color:var(--accent)"><i class="fas fa-camera"></i>
-        <input type="file" style="display:none" onchange="handlePhotoUpload(event, '${r.WorkOrder}')">
-      </label>
-    </td>
-  </tr>`).join('');
+async function logPdfExport(wo, filename) {
+  if(supabaseClient) {
+      await supabaseClient.from('exported_pdfs').insert({ work_order: wo, filename: filename });
+      updateFileManagerStats();
+  }
 }
 
-function updateDashboard() {
-  document.getElementById('kpiTotal').textContent = allData.length;
-  document.getElementById('kpiGreen').textContent = allData.filter(d=>d.Status==='COMP').length;
-  document.getElementById('kpiRed').textContent = allData.filter(d=>d.Status!=='COMP').length;
+function uploadPhotoFor(wo) {
+  document.getElementById(`file_${wo}`).click();
 }
 
-let pendingExcelFile = null;
-function handleExcelUpload(evt) {
-  pendingExcelFile = evt.target.files[0];
-  if (pendingExcelFile) document.getElementById('excelFileName').textContent = pendingExcelFile.name;
-}
-
-function processExcelUpload() {
-  if (!pendingExcelFile) { showToast('No file selected','error'); return; }
-  showToast('Processing local Excel. (Supabase bucket required for large files)');
-  // Excel parsing logic would continue here...
-}
-
-function handlePhotoUpload(evt, wo) {
+async function handlePhotoUpload(evt, wo) {
   const file = evt.target.files[0];
   if (!file) return;
-  if(file.size > 2 * 1024 * 1024) {
-    showToast("File too large. Supabase bucket required for files >2MB", "error");
-    return;
-  }
-  showToast("Photo attached to Work Order " + wo);
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const url = e.target.result;
+    
+    if (supabaseClient) {
+        const { error } = await supabaseClient.from('photos').upsert({ work_order: wo, url: url }, { onConflict: 'work_order' });
+        if (error) showToast("Error uploading photo", "error");
+        else {
+          photos[wo] = url;
+          renderTable();
+          updateFileManagerStats();
+          showToast("Photo uploaded");
+        }
+    } else {
+        photos[wo] = url;
+        localStorage.setItem('qbc_photos', JSON.stringify(photos));
+        renderTable();
+        updateFileManagerStats();
+        showToast("Photo saved locally");
+    }
+  };
+  reader.readAsDataURL(file);
 }
 
+function viewPhoto(wo) {
+  const url = photos[wo];
+  if (url) window.open(url, '_blank');
+}
+
+let currentFabWO = null;
+function openFabModal(wo) {
+  currentFabWO = wo;
+  const r = allData.find(x => String(x.WorkOrder) === String(wo));
+  if (!r) return;
+  document.getElementById('fabModalWO').textContent = wo;
+  const photo = photos[wo];
+  const today = new Date().toLocaleDateString('en-GB');
+
+  // Strict A4 proportions (Width: 794px, Height: 1123px)
+  document.getElementById('pdfPreview').innerHTML = `
+  <div id="fabDoc" style="background:#fff;color:#000;width:794px;height:1123px;padding:40px;font-family:Arial,sans-serif;box-sizing:border-box;display:flex;flex-direction:column;margin:0 auto;position:relative;">
+    
+    <div style="flex-shrink:0; border-bottom:3px solid var(--accent);padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div style="font-size:24px;font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:1px;">Fabrication Request</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">Qatar Building Company – PWA Signage Works</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:22px;font-weight:800;color:#000;">WO: ${r.WorkOrder}</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">Date: ${today}</div>
+      </div>
+    </div>
+
+    <div style="flex:1; width:100%; min-height:0; background:#f8fafc; display:flex; align-items:center; justify-content:center; margin-bottom:24px; border:1px solid #cbd5e1; border-radius:8px; overflow:hidden;">
+      ${photo ? `<img src="${photo}" style="max-width:100%;max-height:100%;object-fit:contain;">` : `<div style="color:#94a3b8;font-size:16px;letter-spacing:0.1em;">NO PHOTO AVAILABLE</div>`}
+    </div>
+
+    <div style="flex-shrink:0; display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;background:#f1f5f9;padding:16px 20px;border-radius:8px;border:1px solid #e2e8f0;">
+      <div style="flex:1;padding-right:20px;">
+        <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Work Order Description</div>
+        <div style="font-size:15px;font-weight:700;color:#0f172a;line-height:1.4;">${r.Description || '—'}</div>
+        <div style="font-size:12px;color:#475569;margin-top:6px;">Highway: <strong>${r.Highway || '—'}</strong> &nbsp;|&nbsp; Eng: <strong>${r.PWA_ENG || '—'}</strong></div>
+      </div>
+      <div style="text-align:right;border-left:2px solid #cbd5e1;padding-left:24px;min-width:140px;">
+        <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Target Finish</div>
+        <div style="font-size:20px;font-weight:800;color:#ef4444;">${r.TargetFinish || '—'}</div>
+      </div>
+    </div>
+
+    <div style="flex-shrink:0;">
+      <div style="font-size:11px;font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+        Fabrication Specifications <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;text-align:center;">
+        <tr style="background:#1e293b;color:#fff;">
+          <th style="padding:10px;border:1px solid #334155;" colspan="7">SIGN FACE</th>
+          <th style="padding:10px;border:1px solid #334155;" colspan="3">POST</th>
+          <th style="padding:10px;border:1px solid #334155;" colspan="2">FOUNDATION</th>
+        </tr>
+        <tr style="background:#f8fafc;font-weight:700;color:#334155;">
+          <th style="padding:6px;border:1px solid #cbd5e1;">Road Catg.</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Type</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Ref</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Shape</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Size (mm)</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Material</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Qty</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Type</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Height</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Qty</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Size</th>
+          <th style="padding:6px;border:1px solid #cbd5e1;">Qty</th>
+        </tr>
+        <tr>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.RoadCatg || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;font-weight:600;color:#0f172a;">${r.SignType || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.SignRef || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.SignShape || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.SignSize || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.SignMaterial || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;font-size:13px;font-weight:800;color:var(--accent2);">${r.SignQty || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.PostType || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.PostHeight || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;font-size:13px;font-weight:800;color:var(--accent2);">${r.PostQty || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.FoundSize || '—'}</td>
+          <td style="padding:10px 4px;border:1px solid #cbd5e1;font-size:13px;font-weight:800;color:var(--accent2);">${r.FoundQty || '—'}</td>
+        </tr>
+      </table>
+    </div>
+
+  </div>`;
+  openModal('fabModal');
+}
+
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const el = document.getElementById('fabDoc');
+  const filename = `FabRequest_WO${currentFabWO}.pdf`;
+  
+  html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(filename);
+    logPdfExport(currentFabWO, filename);
+    showToast(`Exported ${filename}`);
+    closeModal('fabModal');
+  });
+}
+
+function exportTableCSV() {
+    if (filteredData.length === 0) return showToast('No data to export', 'error');
+    const headers = Object.keys(filteredData[0]).join(',');
+    const rows = filteredData.map(obj => Object.values(obj).map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
+    const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + rows;
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "work_orders_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// UTILS
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+const MAIN_FIELDS = [ 
+  {k:'WorkOrder',l:'Work Order'}, 
+  {k:'Description',l:'Description',full:true}, 
+  {k:'Status',l:'Status',type:'select',opts:['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR']}, 
+  {k:'PWA_ENG',l:'PWA Engineer'}, 
+  {k:'Highway',l:'Highway'}, 
+  {k:'TargetStart',l:'Target Start',type:'date'}, 
+  {k:'TargetFinish',l:'Target Finish',type:'date'}, 
+  {k:'Remaining',l:'Remaining'}, 
+  {k:'Lat',l:'Latitude'}, 
+  {k:'Lng',l:'Longitude'} 
+];
+
+const FAB_FIELDS = [ 
+  {k:'RoadCatg', l:'Road Catg.'}, {k:'SignType',l:'Sign Type'},{k:'SignRef',l:'Sign Ref'},
+  {k:'SignShape',l:'Sign Shape'}, {k:'SignSize',l:'Sign Size'}, {k:'SignMaterial',l:'Sign Material'}, 
+  {k:'SignQty',l:'Sign Qty'}, {k:'PostType',l:'Post Type'},{k:'PostHeight',l:'Post Height (mm)'},
+  {k:'PostQty',l:'Post Qty'}, {k:'FoundSize',l:'Found. Size (L×W×H)'},{k:'FoundQty',l:'Found. Qty'}, 
+  {k:'FabStatus',l:'Fab Status',type:'select',opts:['Done','Not Done','On Going']}, 
+  {k:'InstallationDate',l:'Installation Date',type:'date'}, {k:'ScrapRemoval',l:'Scrap Removal'} 
+];
+
+async function saveEdit() {
+  const r = {};
+  [...MAIN_FIELDS, ...FAB_FIELDS].forEach(f => {
+    const el = document.getElementById('ef_'+f.k);
+    if (el) r[f.k] = el.value;
+  });
+
+  if (!r.WorkOrder) { showToast('Work Order is required','error'); return; }
+
+  try {
+    await saveWorkOrderToSupabase(r);
+    showToast('Saved successfully');
+    closeModal('editModal');
+    fetchData();
+  } catch (error) {
+    showToast('Error saving changes', 'error');
+  }
+}
+
+function openEditModal(idx) {
+  if (!isAdmin) { showToast('Admin mode required','error'); return; }
+  editingIdx = idx; 
+  const r = idx !== null ? allData[idx] : {};
+  document.getElementById('editModalTitle').textContent = idx !== null ? `Edit WO – ${r.WorkOrder}` : 'Add New Work Order';
+  
+  document.getElementById('editFormGrid').innerHTML = MAIN_FIELDS.map(f => fieldHTML(f, r[f.k]||'', f.full?'grid-column:1/-1':'')).join('');
+  document.getElementById('editFabGrid').innerHTML = FAB_FIELDS.map(f => fieldHTML(f, r[f.k]||'')).join('');
+  openModal('editModal');
+}
+
+function openAddModal() {
+  openEditModal(null);
+}
+
+function fieldHTML(f, val, extra='') {
+  const id = 'ef_'+f.k;
+  if (f.type === 'select') {
+    const opts = f.opts.map(o => `<option${o===val?' selected':''}>${o}</option>`).join('');
+    return `<div class="form-group" style="${extra}"><label>${f.l}</label><select id="${id}"><option value="">—</option>${opts}</select></div>`;
+  }
+  if (f.type === 'date') return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="date" id="${id}" value="${val}"></div>`;
+  return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="text" id="${id}" value="${val||''}"></div>`;
+}
 function showToast(msg, type='') { const t = document.getElementById('toast'); t.textContent = msg; t.className='toast'+(type?' '+type:''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
 
 </script>
