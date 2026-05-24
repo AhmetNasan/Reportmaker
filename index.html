@@ -250,6 +250,9 @@
             font-weight: bold;
             cursor: pointer;
             transition: var(--transition);
+            border: none;
+            padding: 0;
+            font: inherit;
         }
 
         .user-avatar:hover {
@@ -282,6 +285,11 @@
             align-items: center;
             gap: 10px;
             color: var(--text-light);
+            border: none;
+            background: transparent;
+            font: inherit;
+            text-align: left;
+            width: 100%;
         }
 
         .user-dropdown-item:hover {
@@ -340,6 +348,11 @@
             transition: var(--transition);
             color: var(--text-light);
             text-decoration: none;
+            border: none;
+            background: transparent;
+            font: inherit;
+            text-align: left;
+            width: 100%;
         }
 
         .nav-item:hover,
@@ -1046,29 +1059,29 @@
         <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="logo">Engineering Platform</div>
             </div>
             <div class="header-actions">
-                <button class="theme-toggle" onclick="toggleTheme()">
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark theme">
                     <i class="fas fa-moon"></i>
                 </button>
                 <div class="user-menu">
-                    <div class="user-avatar" onclick="toggleUserMenu()">
+                    <button class="user-avatar" onclick="toggleUserMenu()" aria-label="User menu" aria-haspopup="true" aria-expanded="false">
                         <span id="user-initial">U</span>
-                    </div>
+                    </button>
                     <div id="user-dropdown" class="user-dropdown">
-                        <div class="user-dropdown-item" onclick="showProfile()">
+                        <button class="user-dropdown-item" onclick="showProfile()">
                             <i class="fas fa-user"></i> Profile
-                        </div>
-                        <div class="user-dropdown-item" onclick="showSettings()">
+                        </button>
+                        <button class="user-dropdown-item" onclick="showSettings()">
                             <i class="fas fa-cog"></i> Settings
-                        </div>
-                        <div class="user-dropdown-item" onclick="logout()">
+                        </button>
+                        <button class="user-dropdown-item" onclick="logout()">
                             <i class="fas fa-sign-out-alt"></i> Logout
-                        </div>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1079,86 +1092,86 @@
             <nav id="sidebar" class="sidebar">
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
-                    <div class="nav-item active" onclick="showPage('dashboard')">
+                    <button class="nav-item active" onclick="showPage('dashboard')" aria-current="page">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
-                    </div>
-                    <div class="nav-item" onclick="showPage('projects')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('projects')">
                         <i class="fas fa-project-diagram"></i> Projects
-                    </div>
-                    <div class="nav-item" onclick="showPage('notifications')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('notifications')">
                         <i class="fas fa-bell"></i> Notifications
-                    </div>
+                    </button>
                 </div>
 
                 <div class="nav-section">
                     <div class="nav-section-title">Project Management</div>
-                    <div class="nav-item" onclick="showPage('contracts')">
+                    <button class="nav-item" onclick="showPage('contracts')">
                         <i class="fas fa-file-contract"></i> Contracts & BOQ
-                    </div>
-                    <div class="nav-item" onclick="showPage('inspection')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('inspection')">
                         <i class="fas fa-clipboard-check"></i> Inspection Reports
-                    </div>
-                    <div class="nav-item" onclick="showPage('cost-estimation')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('cost-estimation')">
                         <i class="fas fa-calculator"></i> Cost Estimation
-                    </div>
-                    <div class="nav-item" onclick="showPage('timeline')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('timeline')">
                         <i class="fas fa-timeline"></i> Project Timeline
-                    </div>
+                    </button>
                 </div>
 
                 <div class="nav-section">
                     <div class="nav-section-title">Engineering Tools</div>
-                    <div class="nav-item" onclick="showPage('map')">
+                    <button class="nav-item" onclick="showPage('map')">
                         <i class="fas fa-map-marked-alt"></i> GIS Mapping
-                    </div>
-                    <div class="nav-item" onclick="showPage('drawing')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('drawing')">
                         <i class="fas fa-drafting-compass"></i> CAD Drawing
-                    </div>
-                    <div class="nav-item" onclick="showPage('ai-defect')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('ai-defect')">
                         <i class="fas fa-robot"></i> AI Defect Analysis
-                    </div>
-                    <div class="nav-item" onclick="showPage('notebooks')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('notebooks')">
                         <i class="fas fa-book"></i> Notebooks
-                    </div>
+                    </button>
                 </div>
 
                 <div class="nav-section">
                     <div class="nav-section-title">Operations</div>
-                    <div class="nav-item" onclick="showPage('vehicle-tracking')">
+                    <button class="nav-item" onclick="showPage('vehicle-tracking')">
                         <i class="fas fa-truck"></i> Vehicle Tracking
-                    </div>
-                    <div class="nav-item" onclick="showPage('material-logistics')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('material-logistics')">
                         <i class="fas fa-boxes"></i> Material Logistics
-                    </div>
-                    <div class="nav-item" onclick="showPage('sign-fabrication')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('sign-fabrication')">
                         <i class="fas fa-sign"></i> Sign Fabrication
-                    </div>
-                    <div class="nav-item" onclick="showPage('scrap-management')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('scrap-management')">
                         <i class="fas fa-recycle"></i> Scrap Management
-                    </div>
+                    </button>
                 </div>
 
                 <div class="nav-section">
                     <div class="nav-section-title">Communication</div>
-                    <div class="nav-item" onclick="showPage('chat')">
+                    <button class="nav-item" onclick="showPage('chat')">
                         <i class="fas fa-comments"></i> Team Chat
-                    </div>
-                    <div class="nav-item" onclick="showPage('telegram')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('telegram')">
                         <i class="fab fa-telegram"></i> Telegram Integration
-                    </div>
-                    <div class="nav-item" onclick="showPage('reports')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('reports')">
                         <i class="fas fa-chart-bar"></i> Custom Reports
-                    </div>
+                    </button>
                 </div>
 
                 <div class="nav-section">
                     <div class="nav-section-title">System</div>
-                    <div class="nav-item" onclick="showPage('file-manager')">
+                    <button class="nav-item" onclick="showPage('file-manager')">
                         <i class="fas fa-folder"></i> File Manager
-                    </div>
-                    <div class="nav-item" onclick="showPage('settings')">
+                    </button>
+                    <button class="nav-item" onclick="showPage('settings')">
                         <i class="fas fa-cog"></i> Settings
-                    </div>
+                    </button>
                 </div>
             </nav>
 
@@ -2174,11 +2187,13 @@
             // Update navigation
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
+                item.removeAttribute('aria-current');
             });
 
             const navItem = document.querySelector(`[onclick="showPage('${pageId}')"]`);
             if (navItem) {
                 navItem.classList.add('active');
+                navItem.setAttribute('aria-current', 'page');
             }
 
             // Initialize page-specific functionality
@@ -2194,7 +2209,10 @@
         }
 
         function toggleUserMenu() {
-            document.getElementById('user-dropdown').classList.toggle('active');
+            const dropdown = document.getElementById('user-dropdown');
+            const avatar = document.querySelector('.user-avatar');
+            const isActive = dropdown.classList.toggle('active');
+            avatar.setAttribute('aria-expanded', isActive);
         }
 
         function toggleTheme() {
@@ -4188,6 +4206,7 @@
 
                 if (!e.target.closest('.user-menu')) {
                     document.getElementById('user-dropdown').classList.remove('active');
+                    document.querySelector('.user-avatar').setAttribute('aria-expanded', 'false');
                 }
             });
 
