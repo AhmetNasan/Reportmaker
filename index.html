@@ -1836,6 +1836,8 @@ async function handlePhotoUpload(evt, wo) {
         console.error("Storage Error:", uploadError);
         if (uploadError.message.includes('bucket not found')) {
            showToast("Error: Storage bucket 'qbc-storage' not found", "error");
+        } else if (uploadError.message.includes('row-level security')) {
+           showToast("Storage Access Denied: Check Bucket Policies", "error");
         } else {
            showToast(`Upload failed: ${uploadError.message}`, "error");
         }
@@ -1852,7 +1854,11 @@ async function handlePhotoUpload(evt, wo) {
 
       if (dbError) {
         console.error("DB Error:", dbError);
-        showToast(`DB Error: ${dbError.message}`, "error");
+        if (dbError.message.includes('row-level security')) {
+           showToast("Table Access Denied: Check Photos Table Policies", "error");
+        } else {
+           showToast(`DB Error: ${dbError.message}`, "error");
+        }
         return;
       }
 
