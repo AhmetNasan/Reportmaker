@@ -65,11 +65,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .nav-tab:hover{color:var(--text);}
 .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .nav-right{margin-left:auto;padding:0 16px;display:flex;align-items:center;gap:15px;}
-.user-menu { position: relative; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.user-menu { position: relative; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.user-menu-trigger { background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; color: inherit; font: inherit; }
 .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 800; }
 .user-dropdown { position: absolute; top: 100%; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 180px; display: none; flex-direction: column; padding: 8px 0; margin-top: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
 .user-dropdown.show { display: flex; }
-.dropdown-item { padding: 10px 16px; font-size: 12px; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+.dropdown-item { padding: 10px 16px; font-size: 12px; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s; background: none; border: none; cursor: pointer; text-align: left; width: 100%; font-family: inherit; }
 .dropdown-item:hover { background: var(--surface2); color: var(--accent); }
 
 /* ─── PAGES ─── */
@@ -277,13 +278,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
   <div class="nav-right">
     <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
-    <div class="user-menu" onclick="toggleUserDropdown()">
-      <div class="user-avatar" id="nav-user-initial">U</div>
-      <div class="user-dropdown" id="user-dropdown">
-        <div class="dropdown-item" onclick="showProfile()"><i class="fas fa-user-circle"></i> Profile</div>
-        <div class="dropdown-item" onclick="showPage('settings')"><i class="fas fa-sliders-h"></i> Settings</div>
+    <div class="user-menu">
+      <button class="user-menu-trigger" id="user-menu-button" onclick="toggleUserDropdown()" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
+        <div class="user-avatar" id="nav-user-initial">U</div>
+      </button>
+      <div class="user-dropdown" id="user-dropdown" role="menu">
+        <button class="dropdown-item" role="menuitem" onclick="showProfile()"><i class="fas fa-user-circle"></i> Profile</button>
+        <button class="dropdown-item" role="menuitem" onclick="showPage('settings')"><i class="fas fa-sliders-h"></i> Settings</button>
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 4px 0;">
-        <div class="dropdown-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+        <button class="dropdown-item" role="menuitem" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
       </div>
     </div>
   </div>
@@ -1080,8 +1083,24 @@ function clearFilters() {
 }
 
 function toggleUserDropdown() {
-  document.getElementById('user-dropdown').classList.toggle('show');
+  const dropdown = document.getElementById('user-dropdown');
+  const trigger = document.getElementById('user-menu-button');
+  const isExpanded = dropdown.classList.toggle('show');
+  trigger.setAttribute('aria-expanded', isExpanded);
 }
+
+// Global click-outside to close dropdowns
+window.addEventListener('click', (e) => {
+  const userMenu = document.querySelector('.user-menu');
+  if (userMenu && !userMenu.contains(e.target)) {
+    const dropdown = document.getElementById('user-dropdown');
+    if (dropdown && dropdown.classList.contains('show')) {
+      dropdown.classList.remove('show');
+      const trigger = document.getElementById('user-menu-button');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    }
+  }
+});
 
 // MODIFIED AUTH HANDLER
 async function handleAuth() {
