@@ -1128,12 +1128,13 @@ async function handleAuth() {
 
   try {
     if (isSignUp) {
+      console.log("Attempting Sign Up for:", email);
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) throw error;
       
       // Auto-profile on signup
       if (data.user) {
-        await supabaseClient.from('profiles').insert({ 
+        await supabaseClient.from('profiles').upsert({
           id: data.user.id, 
           email: data.user.email, 
           is_approved: false 
@@ -1142,12 +1143,15 @@ async function handleAuth() {
       
       showToast('Check your email for confirmation');
     } else {
+      console.log("Attempting Sign In for:", email);
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) throw error;
       currentUser = data.user;
+      console.log("Sign In successful:", currentUser.email);
       onAuthenticated();
     }
   } catch (error) {
+    console.error("Authentication error:", error);
     showToast(error.message, 'error');
   }
 }
@@ -1161,15 +1165,20 @@ function toggleAuthMode() {
   const title = document.getElementById('auth-title');
   const btn = document.querySelector('.auth-btn');
   const toggleText = document.getElementById('toggle-text');
+  const helperText = document.querySelector('.auth-toggle').childNodes[0];
+
   if (!title || !btn || !toggleText) return;
-  if (title.textContent === 'Welcome Back') {
+
+  if (btn.textContent === 'Sign In') {
     title.textContent = 'Create Account';
     btn.textContent = 'Sign Up';
     toggleText.textContent = 'Sign In';
+    if (helperText) helperText.textContent = 'Already have an account? ';
   } else {
     title.textContent = 'Welcome Back';
     btn.textContent = 'Sign In';
     toggleText.textContent = 'Sign Up';
+    if (helperText) helperText.textContent = "Don't have an account? ";
   }
 }
 
