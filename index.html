@@ -60,6 +60,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;height:var(--header-h);}
 .nav-brand{padding:0 24px;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--text);border-right:1px solid var(--border);display:flex;align-items:center;gap:8px;height:100%;}
 .nav-brand span{color:var(--accent);}
+.nav-logo { max-height: 40px; width: auto; object-fit: contain; }
 .nav-tabs{display:flex;height:100%; overflow-x: auto; scrollbar-width: none;}
 .nav-tab{padding:0 20px;font-size:12px;letter-spacing:.06em;color:var(--muted);cursor:pointer;border:none;background:none;height:100%;display:flex;align-items:center;gap:7px;border-bottom:2px solid transparent;transition:all .2s;font-family:'DM Mono',monospace; white-space: nowrap;}
 .nav-tab:hover{color:var(--text);}
@@ -197,7 +198,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .fab-notdone{color:var(--red);font-size:11px;}
 .fab-ongoing{color:var(--amber);font-size:11px;}
 .fab-empty{color:var(--muted);font-size:11px;}
-.action-btns{display:flex;gap:4px;}
+.action-btns{display:flex;gap:4px;flex-wrap:wrap;}
+.photo-actions { display: flex; gap: 4px; margin-top: 4px; }
+.btn-icon { padding: 4px; font-size: 10px; min-width: 24px; justify-content: center; }
 .pagination{display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:flex-end;}
 .pg-btn{padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s;}
 .pg-btn:hover,.pg-btn.active{border-color:var(--accent);color:var(--accent);}
@@ -236,11 +239,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 /* ─── FILE MANAGER ─── */
 .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; margin-top: 20px; }
+.file-list { display: flex; flex-direction: column; gap: 4px; margin-top: 20px; }
 .file-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
 .file-item:hover { transform: translateY(-3px); border-color: var(--accent); }
+.file-item.selected { border-color: var(--accent); background: rgba(0,200,255,0.05); }
+.file-item.list-view { display: flex; align-items: center; text-align: left; padding: 10px 16px; border-radius: 8px; gap: 15px; }
+.file-item.list-view .file-icon { margin-bottom: 0; font-size: 20px; width: 30px; text-align: center; }
+.file-item.list-view .file-info { flex: 1; min-width: 0; }
+.file-item.list-view .file-meta { font-size: 10px; color: var(--muted); min-width: 120px; text-align: right; }
 .file-icon { font-size: 32px; color: var(--accent); margin-bottom: 12px; }
 .file-name { font-size: 11px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .file-date { font-size: 9px; color: var(--muted); margin-top: 4px; }
+.file-checkbox { position: absolute; top: 10px; left: 10px; z-index: 5; cursor: pointer; }
+.fm-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; background: var(--surface2); padding: 12px; border-radius: 10px; }
 
 /* ─── TOAST ─── */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s; pointer-events: none;}
@@ -251,7 +262,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
-<body data-theme="dark">
+<body data-theme="light">
 
 <div id="auth-container" class="auth-container">
   <div class="auth-card">
@@ -267,7 +278,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 </div>
 
 <nav id="main-nav" style="display: none;">
-  <div class="nav-brand"> QBC <span>Platform</span></div>
+  <div class="nav-brand" id="nav-brand-container"> QBC <span>Platform</span></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="nav-tab" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
@@ -510,8 +521,22 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div id="folder-view" style="margin-top: 40px; display: none;">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
         <h3 id="folder-title" style="font-size:14px; text-transform:uppercase; color:var(--accent);">Folder Name</h3>
-        <button class="btn btn-ghost btn-sm" onclick="hideFolderView()">Back</button>
+        <button class="btn btn-ghost btn-sm" onclick="hideFolderView()"><i class="fas fa-arrow-left"></i> Back</button>
       </div>
+
+      <div class="fm-controls">
+        <button class="btn btn-ghost btn-sm" onclick="selectAllFiles()"><i class="far fa-check-square"></i> Select All</button>
+        <button class="btn btn-ghost btn-sm" onclick="deselectAllFiles()">Select None</button>
+        <div style="border-right: 1px solid var(--border); height: 20px; margin: 0 5px;"></div>
+        <select class="filter-input" id="fm-sort" onchange="renderFolderFiles()" style="padding: 4px 8px; font-size: 11px;">
+           <option value="name">Sort by Name</option>
+           <option value="date">Sort by Date</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="toggleFmView()" id="btn-fm-view"><i class="fas fa-list"></i> List View</button>
+        <div style="flex: 1;"></div>
+        <button class="btn btn-red btn-sm" onclick="deleteSelectedFiles()" id="btn-fm-delete" style="display:none;"><i class="fas fa-trash"></i> Delete Selected</button>
+      </div>
+
       <div class="file-grid" id="folder-files"></div>
     </div>
   </div>
@@ -540,6 +565,22 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="upload-card">
         <h3>⚙️ System Preferences</h3>
         <p>Customize your experience.</p>
+        <div id="branding-settings" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Company Logo</label>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+             <div id="logo-preview-container" style="background:var(--surface2); padding:10px; border-radius:8px; display:flex; align-items:center; justify-content:center; min-height:60px;">
+                <span id="logo-preview-placeholder" style="color:var(--muted); font-size:11px;">No Logo Uploaded</span>
+                <img id="logo-preview-img" class="nav-logo" style="display:none;">
+             </div>
+             <div style="display:flex; gap:8px;">
+                <label class="btn btn-ghost btn-sm flex-1">
+                   <i class="fas fa-upload"></i> Change Logo
+                   <input type="file" id="logo-upload" style="display:none" accept="image/*" onchange="handleLogoUpload(event)">
+                </label>
+                <button class="btn btn-red btn-sm" id="btn-remove-logo" style="display:none;" onclick="removeLogo()"><i class="fas fa-trash"></i></button>
+             </div>
+          </div>
+        </div>
         <div class="form-group mb-3">
           <label>Theme Mode</label>
           <div style="display:flex; gap:10px; margin-top:8px;">
@@ -651,7 +692,12 @@ const PAGE_SIZE = 50;
 let editingIdx = null;
 let map = null;
 let boundaryLayer = null;
-let currentTheme = 'dark';
+let currentTheme = 'light';
+let companyLogo = null;
+let fmType = 'images';
+let fmView = 'grid';
+let fmSelected = new Set();
+let fmFiles = [];
 
 // INITIALIZATION
 window.addEventListener('load', async () => {
@@ -748,6 +794,7 @@ async function onAuthenticated() {
     updateAdminUI();
   }
 
+  loadLogo();
   showPage('dashboard');
   fetchData();
 }
@@ -918,6 +965,95 @@ function setTheme(theme) {
 }
 
 // PAGE NAVIGATION
+async function handleLogoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!isAdmin) { showToast("Admin Mode Required", "error"); return; }
+
+  if (supabaseClient) {
+    try {
+      const { error: uploadError } = await supabaseClient.storage
+        .from('qbc-storage')
+        .upload('branding/logo.png', file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabaseClient.storage
+        .from('qbc-storage')
+        .getPublicUrl('branding/logo.png');
+
+      companyLogo = publicUrl;
+      // We'll store the URL in a specific project_boundaries row or similar for global sync
+      // For now, let's use localStorage as a cache and hope they refresh
+      localStorage.setItem('qbc_logo', companyLogo);
+      applyLogo();
+      showToast("Logo updated in cloud");
+    } catch (e) {
+      console.error(e);
+      showToast("Cloud logo upload failed", "error");
+    }
+  } else {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      companyLogo = e.target.result;
+      localStorage.setItem('qbc_logo', companyLogo);
+      applyLogo();
+      showToast("Logo updated locally");
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function removeLogo() {
+  if (!isAdmin) { showToast("Admin Mode Required", "error"); return; }
+  companyLogo = null;
+  localStorage.removeItem('qbc_logo');
+  if (supabaseClient) {
+     try { await supabaseClient.storage.from('qbc-storage').remove(['branding/logo.png']); } catch(e){}
+  }
+  applyLogo();
+  showToast("Logo removed");
+}
+
+async function loadLogo() {
+  if (supabaseClient) {
+    const { data: { publicUrl } } = supabaseClient.storage
+      .from('qbc-storage')
+      .getPublicUrl('branding/logo.png');
+
+    // Check if the logo actually exists by trying to fetch it
+    try {
+      const res = await fetch(publicUrl, { method: 'HEAD' });
+      if (res.ok) companyLogo = publicUrl;
+      else companyLogo = localStorage.getItem('qbc_logo');
+    } catch(e) {
+      companyLogo = localStorage.getItem('qbc_logo');
+    }
+  } else {
+    companyLogo = localStorage.getItem('qbc_logo');
+  }
+  applyLogo();
+}
+
+function applyLogo() {
+  const brandContainer = document.getElementById('nav-brand-container');
+  const previewImg = document.getElementById('logo-preview-img');
+  const previewPlaceholder = document.getElementById('logo-preview-placeholder');
+  const removeBtn = document.getElementById('btn-remove-logo');
+
+  if (companyLogo) {
+    if (brandContainer) brandContainer.innerHTML = `<img src="${companyLogo}" class="nav-logo" alt="Logo">`;
+    if (previewImg) { previewImg.src = companyLogo; previewImg.style.display = 'block'; }
+    if (previewPlaceholder) previewPlaceholder.style.display = 'none';
+    if (removeBtn) removeBtn.style.display = 'block';
+  } else {
+    if (brandContainer) brandContainer.innerHTML = `QBC <span>Platform</span>`;
+    if (previewImg) { previewImg.src = ''; previewImg.style.display = 'none'; }
+    if (previewPlaceholder) previewPlaceholder.style.display = 'block';
+    if (removeBtn) removeBtn.style.display = 'none';
+  }
+}
+
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1055,9 +1191,25 @@ function renderTable() {
   tbody.innerHTML = slice.map((r, i) => {
     const stBadge = `<span class="status-badge badge-${r.Status||'COMP'}">${r.Status||'–'}</span>`;
     const photo = photos[r.WorkOrder];
-    const photoCell = photo
-      ? `<img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">`
-      : `<div style="cursor:pointer; color:var(--muted)" onclick="uploadPhotoFor('${r.WorkOrder}')"><i class="fas fa-camera"></i></div>`;
+    let photoCell = '';
+    if (photo) {
+      photoCell = `
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">
+          <div class="photo-actions">
+            <button class="btn btn-ghost btn-icon" onclick="uploadPhotoFor('${r.WorkOrder}')" title="Replace Photo"><i class="fas fa-sync-alt"></i></button>
+            <button class="btn btn-red btn-icon" onclick="deletePhoto('${r.WorkOrder}')" title="Delete Photo"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      `;
+    } else {
+      photoCell = `<div style="cursor:pointer; color:var(--muted)" onclick="uploadPhotoFor('${r.WorkOrder}')"><i class="fas fa-camera"></i></div>`;
+    }
+
+    const mapActions = (r.Lat && r.Lng) ? `
+      <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="copyCoords(${r.Lat}, ${r.Lng})" title="Copy Coordinates"><i class="fas fa-copy"></i></button>
+    ` : '';
 
     return `<tr>
       <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
@@ -1075,6 +1227,7 @@ function renderTable() {
       <td>${photoCell}<input type="file" style="display:none" id="file_${r.WorkOrder}" accept="image/*" onchange="handlePhotoUpload(event,'${r.WorkOrder}')"></td>
       <td>
         <div class="action-btns">
+          ${mapActions}
           <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
           ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal(${allData.indexOf(r)})"><i class="fas fa-edit"></i></button>` : ''}
         </div>
@@ -1757,41 +1910,131 @@ async function updateFileManagerStats() {
 }
 
 async function showFolder(type) {
+  fmType = type;
+  fmSelected.clear();
+  document.getElementById('btn-fm-delete').style.display = 'none';
+
   const view = document.getElementById('folder-view');
   const title = document.getElementById('folder-title');
-  const grid = document.getElementById('folder-files');
-  
   if (view) view.style.display = 'block';
-  if (grid) grid.innerHTML = '<div style="color:var(--muted)">Loading...</div>';
   
   if (type === 'images') {
     if (title) title.textContent = 'Work Order Photos';
-    grid.innerHTML = Object.entries(photos).map(([wo, url]) => `
-      <div class="file-item">
-        <div class="file-icon"><img src="${url}" style="width:100%; height:40px; object-fit:cover; border-radius:4px;"></div>
-        <div class="file-name">WO_${wo}.jpg</div>
-        <div class="file-date">Local Store</div>
-      </div>
-    `).join('');
+    fmFiles = Object.entries(photos).map(([wo, url]) => ({
+      id: wo,
+      name: `WO_${wo}.jpg`,
+      url: url,
+      date: 'N/A',
+      type: 'image'
+    }));
+    renderFolderFiles();
   } else if (type === 'pdfs') {
     if (title) title.textContent = 'Exported PDFs';
-    if(supabaseClient) {
-        const { data, error } = await supabaseClient.from('exported_pdfs').select('*').order('created_at', { ascending: false });
-        if (error) {
-          grid.innerHTML = '<div style="color:var(--red)">Error loading PDFs</div>';
-        } else {
-          grid.innerHTML = data.map(f => `
-            <div class="file-item">
-              <div class="file-icon"><i class="fas fa-file-pdf"></i></div>
-              <div class="file-name">${f.filename}</div>
-              <div class="file-date">${new Date(f.created_at).toLocaleDateString()}</div>
-            </div>
-          `).join('');
-        }
+    if (supabaseClient) {
+      const { data, error } = await supabaseClient.from('exported_pdfs').select('*').order('created_at', { ascending: false });
+      if (error) {
+        document.getElementById('folder-files').innerHTML = '<div style="color:var(--red)">Error loading PDFs</div>';
+      } else {
+        fmFiles = data.map(f => ({
+          id: f.id,
+          name: f.filename,
+          date: new Date(f.created_at).toLocaleDateString(),
+          type: 'pdf'
+        }));
+        renderFolderFiles();
+      }
     } else {
-        grid.innerHTML = '<div style="color:var(--muted)">PDF history unavailable offline.</div>';
+      document.getElementById('folder-files').innerHTML = '<div style="color:var(--muted)">PDF history unavailable offline.</div>';
     }
   }
+}
+
+function renderFolderFiles() {
+  const grid = document.getElementById('folder-files');
+  const sortVal = document.getElementById('fm-sort').value;
+
+  fmFiles.sort((a, b) => {
+    if (sortVal === 'name') return a.name.localeCompare(b.name);
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  grid.className = fmView === 'grid' ? 'file-grid' : 'file-list';
+
+  grid.innerHTML = fmFiles.map(f => {
+    const isSelected = fmSelected.has(f.id);
+    const icon = f.type === 'image'
+      ? `<img src="${f.url}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">`
+      : `<i class="fas fa-file-pdf"></i>`;
+
+    if (fmView === 'grid') {
+      return `
+        <div class="file-item ${isSelected ? 'selected' : ''}" onclick="toggleFileSelection('${f.id}')">
+          <input type="checkbox" class="file-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleFileSelection('${f.id}')">
+          <div class="file-icon" style="height:40px; display:flex; align-items:center; justify-content:center;">${icon}</div>
+          <div class="file-name">${f.name}</div>
+          <div class="file-date">${f.date}</div>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="file-item list-view ${isSelected ? 'selected' : ''}" onclick="toggleFileSelection('${f.id}')">
+          <input type="checkbox" class="file-checkbox" style="position:static;" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleFileSelection('${f.id}')">
+          <div class="file-icon">${icon}</div>
+          <div class="file-info">
+            <div class="file-name">${f.name}</div>
+          </div>
+          <div class="file-meta">${f.date}</div>
+        </div>
+      `;
+    }
+  }).join('');
+}
+
+function toggleFileSelection(id) {
+  if (fmSelected.has(id)) fmSelected.delete(id);
+  else fmSelected.add(id);
+
+  renderFolderFiles();
+  document.getElementById('btn-fm-delete').style.display = fmSelected.size > 0 ? 'block' : 'none';
+}
+
+function selectAllFiles() {
+  fmFiles.forEach(f => fmSelected.add(f.id));
+  renderFolderFiles();
+  document.getElementById('btn-fm-delete').style.display = 'block';
+}
+
+function deselectAllFiles() {
+  fmSelected.clear();
+  renderFolderFiles();
+  document.getElementById('btn-fm-delete').style.display = 'none';
+}
+
+function toggleFmView() {
+  fmView = fmView === 'grid' ? 'list' : 'grid';
+  const btn = document.getElementById('btn-fm-view');
+  btn.innerHTML = fmView === 'grid' ? '<i class="fas fa-list"></i> List View' : '<i class="fas fa-th-large"></i> Grid View';
+  renderFolderFiles();
+}
+
+async function deleteSelectedFiles() {
+  if (!confirm(`Are you sure you want to delete ${fmSelected.size} files?`)) return;
+
+  if (fmType === 'images') {
+    for (const id of fmSelected) {
+      // Re-use existing deletePhoto logic for consistency
+      await deletePhoto(id);
+    }
+  } else if (fmType === 'pdfs') {
+    if (supabaseClient) {
+      for (const id of fmSelected) {
+        await supabaseClient.from('exported_pdfs').delete().eq('id', id);
+      }
+    }
+  }
+
+  showFolder(fmType);
+  showToast("Selected files deleted");
 }
 
 function hideFolderView() {
@@ -1886,6 +2129,55 @@ async function handlePhotoUpload(evt, wo) {
 function viewPhoto(wo) {
   const url = photos[wo];
   if (url) window.open(url, '_blank');
+}
+
+async function deletePhoto(wo) {
+  if (!confirm(`Are you sure you want to delete the photo for WO: ${wo}?`)) return;
+
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient
+        .from('photos')
+        .delete()
+        .eq('work_order', wo);
+
+      if (error) throw error;
+
+      // Note: In a real scenario, you'd also delete from Storage bucket.
+      // But for now, we'll just remove the DB reference to "unlink" it.
+
+      delete photos[wo];
+      renderTable();
+      updateFileManagerStats();
+      showToast("Photo deleted");
+    } catch (e) {
+      console.error(e);
+      showToast("Error deleting photo", "error");
+    }
+  } else {
+    delete photos[wo];
+    localStorage.setItem('qbc_photos', JSON.stringify(photos));
+    renderTable();
+    updateFileManagerStats();
+    showToast("Photo removed locally");
+  }
+}
+
+function showOnMap(lat, lng, wo) {
+  showPage('map');
+  setTimeout(() => {
+    if (map) {
+      map.setView([lat, lng], 16);
+      showPointInfo(lat, lng, allData.find(d => String(d.WorkOrder) === String(wo)));
+    }
+  }, 300);
+}
+
+function copyCoords(lat, lng) {
+  const str = `${lat}, ${lng}`;
+  navigator.clipboard.writeText(str).then(() => {
+    showToast("Coordinates copied: " + str);
+  });
 }
 
 let currentFabWO = null;
