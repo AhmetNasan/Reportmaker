@@ -1239,22 +1239,32 @@ async function processExcelUpload() {
 
       dataRows.forEach(row => {
         const wo = String(row[woIdx] || '').trim(); 
-        if (!wo || wo === '') return;
+        if (!wo) return;
         
         const r = { work_order: wo };
         headers.forEach((h, i) => {
           const k = MAP[h];
           if (k) {
             let val = row[i];
+            // Treat empty strings as null
+            if (val === undefined || val === null || String(val).trim() === '') {
+              r[k] = null;
+              return;
+            }
+
             if (k === 'lat' || k === 'lng') {
-              val = parseFloat(val) || null;
-              r[k] = val;
+              const num = parseFloat(val);
+              r[k] = isNaN(num) ? null : num;
+            } else if (k === 'target_start' || k === 'target_finish' || k === 'installation_date') {
+              // Basic date validation
+              const dateVal = String(val).trim();
+              r[k] = isNaN(Date.parse(dateVal)) ? null : dateVal;
             } else {
-              r[k] = (val !== null && val !== undefined) ? String(val).trim() : null;
+              r[k] = String(val).trim();
             }
           }
         });
-        if (r.work_order) upsertData.push(r);
+        upsertData.push(r);
       });
 
       if (upsertData.length === 0) {
