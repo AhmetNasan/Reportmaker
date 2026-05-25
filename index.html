@@ -260,7 +260,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <p style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Sign in to Qatar Building Company platform</p>
     <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" value="admin@qbc.qa">
     <input type="password" id="auth-password" class="auth-input" placeholder="Password" value="qbc2025">
-    <div style="color: var(--green); font-size: 11px; margin-bottom: 12px;">Offline Bypass Ready - Just click Sign In</div>
+    <div style="color: var(--green); font-size: 11px; margin-bottom: 12px;">Developer Bypass Ready - Admin Role Included</div>
     <button class="auth-btn" onclick="handleAuth()">Sign In</button>
     <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
   </div>
@@ -892,8 +892,12 @@ async function saveWorkOrderToSupabase(wo) {
     .upsert(payload, { onConflict: 'work_order' });
 
   if (error) {
-    console.error("Error saving to Supabase:", error);
-    showToast("Error saving to cloud", "error");
+    console.error("Supabase Save Error:", error);
+    if (error.message.includes('row-level security')) {
+       showToast("Access Denied: Check Supabase RLS Policies", "error");
+    } else {
+       showToast("Error saving to cloud", "error");
+    }
   }
 }
 
