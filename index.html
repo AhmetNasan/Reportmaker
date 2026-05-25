@@ -1128,12 +1128,13 @@ async function handleAuth() {
 
   try {
     if (isSignUp) {
+      console.log("Attempting Sign Up for:", email);
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) throw error;
       
       // Auto-profile on signup
       if (data.user) {
-        await supabaseClient.from('profiles').insert({ 
+        await supabaseClient.from('profiles').upsert({ 
           id: data.user.id, 
           email: data.user.email, 
           is_approved: false 
@@ -1142,12 +1143,15 @@ async function handleAuth() {
       
       showToast('Check your email for confirmation');
     } else {
+      console.log("Attempting Sign In for:", email);
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) throw error;
       currentUser = data.user;
+      console.log("Sign In successful:", currentUser.email);
       onAuthenticated();
     }
   } catch (error) {
+    console.error("Authentication error:", error);
     showToast(error.message, 'error');
   }
 }
@@ -1161,15 +1165,20 @@ function toggleAuthMode() {
   const title = document.getElementById('auth-title');
   const btn = document.querySelector('.auth-btn');
   const toggleText = document.getElementById('toggle-text');
+  const helperText = document.querySelector('.auth-toggle').childNodes[0];
+  
   if (!title || !btn || !toggleText) return;
-  if (title.textContent === 'Welcome Back') {
+  
+  if (btn.textContent === 'Sign In') {
     title.textContent = 'Create Account';
     btn.textContent = 'Sign Up';
     toggleText.textContent = 'Sign In';
+    if (helperText) helperText.textContent = 'Already have an account? ';
   } else {
     title.textContent = 'Welcome Back';
     btn.textContent = 'Sign In';
     toggleText.textContent = 'Sign Up';
+    if (helperText) helperText.textContent = "Don't have an account? ";
   }
 }
 
@@ -1187,25 +1196,32 @@ function handleExcelUpload(evt) {
 
 async function processExcelUpload() {
   if (!pendingExcelFile) { showToast('No file selected','error'); return; }
-  if (!isAdmin) { showToast('Admin mode required','error'); return; }
+  if (!isAdmin) { 
+    showToast('Admin mode required','error'); 
+    openModal('adminModal');
+    return; 
+  }
   
   const reader = new FileReader();
   reader.onload = async e => {
     try {
-      const text = e.target.result;
-      // Simple CSV parsing (handles quotes and commas within quotes)
-      const rows = text.split(/\r?\n/).map(row => {
-        const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-        return matches ? matches.map(m => m.replace(/^"|"$/g, '').trim()) : [];
-      }).filter(r => r.length > 0);
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      const firstSheet = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[firstSheet];
+      const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
 
-      if (rows.length < 2) { showToast('CSV file is empty or invalid', 'error'); return; }
+      if (rows.length < 2) { showToast('File is empty or invalid', 'error'); return; }
 
-      const headers = rows[0].map(h => h.toLowerCase().trim());
+      const headers = rows[0].map(h => String(h || '').toLowerCase().trim());
       const dataRows = rows.slice(1);
-      const woIdx = headers.findIndex(h => h === 'work order' || h === 'workorder');
+      const woIdx = headers.findIndex(h => h === 'work order' || h === 'workorder' || h === 'wo');
       
-      if (woIdx < 0) { showToast('Column "Work Order" not found', 'error'); return; }
+      if (woIdx < 0) { 
+        console.error("CSV Headers found:", headers);
+        showToast('Column "Work Order" not found in CSV', 'error'); 
+        return; 
+      }
 
       const upsertData = [];
       const MAP = { 
@@ -1265,11 +1281,7 @@ async function processExcelUpload() {
       showToast('Error: ' + (err.message || 'Excel processing failed'), 'error'); 
     }
   };
-  if (pendingExcelFile.name.toLowerCase().endsWith('.csv')) {
-    reader.readAsText(pendingExcelFile);
-  } else {
-    reader.readAsArrayBuffer(pendingExcelFile);
-  }
+  reader.readAsArrayBuffer(pendingExcelFile);
 }
 
 // ADMIN LOCK
