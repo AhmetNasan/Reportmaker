@@ -276,6 +276,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="nav-tab" onclick="showPage('settings')"><i class="fas fa-cog"></i> Settings</button>
   </div>
   <div class="nav-right">
+    <div id="conn-status" title="Connection Status" style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); padding-right: 10px; border-right: 1px solid var(--border);">
+      <span class="dot" id="conn-dot" style="background: var(--muted); width: 8px; height: 8px;"></span>
+      <span id="conn-text">Checking...</span>
+    </div>
     <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
     <div class="user-menu" onclick="toggleUserDropdown()">
       <div class="user-avatar" id="nav-user-initial">U</div>
@@ -620,8 +624,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <script>
 // CONFIG & STATE
-const SUPABASE_URL = 'https://cykjjrrexaqmsqwrgnzp.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5a2pqcnJleGFxbXNxd3JnbnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MjUyMDksImV4cCI6MjA2NzIwMTIwOX0.Fx6f23TWCQQMCIkc5hcx8LqHyskVMm6WAhJl1UFZpMA';
+const SUPABASE_URL = 'https://srdxtvchpuncdkfabiid.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyZHh0dmNocHVuY2RrZmFiaWlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2ODg4MjEsImV4cCI6MjA5NTI2NDgyMX0.SlvxONu_OUlmnJ3H60EXw3hdjiWHnUca62907uxU1Fk';
 
 let supabaseClient = null;
 try {
@@ -749,7 +753,12 @@ async function onAuthenticated() {
 }
 
 async function fetchData() {
+  const connDot = document.getElementById('conn-dot');
+  const connText = document.getElementById('conn-text');
+
   if (!supabaseClient) {
+    if (connDot) connDot.style.background = 'var(--red)';
+    if (connText) connText.textContent = 'Offline';
     useLocalFallback();
     return;
   }
@@ -762,6 +771,9 @@ async function fetchData() {
       .order('work_order', { ascending: false });
 
     if (woError) throw woError;
+
+    if (connDot) connDot.style.background = 'var(--green)';
+    if (connText) connText.textContent = 'Connected';
     
     // Map Supabase fields to app fields
     allData = woData.map(r => ({
@@ -816,6 +828,11 @@ async function fetchData() {
 
 function useLocalFallback() {
   console.log("Using local data fallback");
+  const connDot = document.getElementById('conn-dot');
+  const connText = document.getElementById('conn-text');
+  if (connDot) connDot.style.background = 'var(--amber)';
+  if (connText) connText.textContent = 'Local Mode';
+
   try {
     const saved = localStorage.getItem('qbc_data');
     if (saved) allData = JSON.parse(saved);
