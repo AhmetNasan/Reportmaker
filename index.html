@@ -808,7 +808,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div id="point-edit-actions" style="margin-top:12px; display:flex; gap:8px;"></div>
     </div>
 
-    <div class="north-arrow glass-panel"><i class="fas fa-compass"></i></div>
     <div class="map-coords glass-panel" id="map-coords-display">Lat: 0.000000 | Lng: 0.000000</div>
     <input type="file" id="kml-upload" style="display:none" accept=".kml,.kmz,.gpx,.csv" onchange="handleKMLUpload(event)">
   </div>
@@ -2065,7 +2064,7 @@ async function loadMapPresets() {
 }
 
 async function saveMapPresets() {
-  if (!supabaseClient || !isAdmin()) {
+  if (!supabaseClient || !isAdmin) {
     showToast("Admin access required", "error");
     return;
   }
@@ -2160,11 +2159,21 @@ function loadMarkers() {
       const style = r.style_settings || {};
       const color = style.color || defaultColor;
       const size = style.size || 12;
+      const icon = style.icon || 'circle';
+
+      let iconHtml = '';
+      if (icon === 'circle') {
+        iconHtml = `<div style='background-color:${color}; width:${size}px; height:${size}px; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.3)'></div>`;
+      } else {
+        iconHtml = `<div style="color:${color}; font-size:${size}px; display:flex; align-items:center; justify-content:center; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5))">
+                      <i class="fas fa-${icon}"></i>
+                    </div>`;
+      }
 
       const m = L.marker([r.Lat, r.Lng], {
         icon: L.divIcon({
           className: 'custom-div-icon',
-          html: `<div style='background-color:${color}; width:${size}px; height:${size}px; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.3)'></div>`,
+          html: iconHtml,
           iconSize: [size, size],
           iconAnchor: [size/2, size/2]
         }),
@@ -2256,6 +2265,7 @@ function showPointInfo(lat, lng, woData = null, isBoundary = false) {
 
   if (woData) {
     const style = woData.style_settings || {};
+    const icon = style.icon || 'circle';
     content += `
       <div style="color:var(--accent); font-weight:700; margin-bottom:5px;">Work Order: ${woData.WorkOrder}</div>
       <div style="font-size:10px; margin-bottom:8px;">${woData.Description || 'No description'}</div>
@@ -2270,6 +2280,17 @@ function showPointInfo(lat, lng, woData = null, isBoundary = false) {
           <div class="form-group">
             <label style="font-size:9px; display:block; margin-bottom:4px;">Size (${style.size || 12}px)</label>
             <input type="range" min="8" max="40" value="${style.size || 12}" style="width:100%;" onchange="updateObjectStyle('wo', '${woData.WorkOrder}', 'size', parseInt(this.value))">
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label style="font-size:9px; display:block; margin-bottom:4px;">Icon Symbol</label>
+            <select style="width:100%; background:var(--surface2); color:var(--text); border:1px solid var(--border); font-size:10px; padding:4px;" onchange="updateObjectStyle('wo', '${woData.WorkOrder}', 'icon', this.value)">
+              <option value="circle" ${icon==='circle'?'selected':''}>Circle</option>
+              <option value="map-marker-alt" ${icon==='map-marker-alt'?'selected':''}>Pin</option>
+              <option value="info-circle" ${icon==='info-circle'?'selected':''}>Info</option>
+              <option value="exclamation-triangle" ${icon==='exclamation-triangle'?'selected':''}>Warning</option>
+              <option value="check-circle" ${icon==='check-circle'?'selected':''}>Check</option>
+              <option value="star" ${icon==='star'?'selected':''}>Star</option>
+            </select>
           </div>
         </div>
       </div>
