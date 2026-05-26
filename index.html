@@ -16,8 +16,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.css" />
 <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-minimap@3.6.1/dist/Control.MiniMap.min.css" />
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-minimap@3.6.1/dist/Control.MiniMap.min.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -247,16 +252,228 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .pdf-modal{max-width:850px;width:95%; padding: 20px;}
 #pdfPreview{width:100%; background:var(--surface2); border-radius:8px; padding:20px; display:flex; justify-content:center; overflow-x:auto;}
 
-/* ─── MAP ─── */
-#page-map .wrapper { padding: 0; max-width: none; height: calc(100vh - var(--header-h)); }
-#map { width: 100%; height: 100%; z-index: 1; }
-.map-overlay { position: absolute; top: 80px; right: 60px; z-index: 10; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-@media (max-width: 768px) { .map-overlay { top: 10px; right: 10px; left: 10px; flex-direction: row; overflow-x: auto; padding-bottom: 10px; } }
+/* ─── MAP REDESIGN ─── */
+#page-map .wrapper { padding: 0; max-width: none; height: calc(100vh - var(--header-h)); display: flex; overflow: hidden; }
+#map { flex: 1; height: 100%; z-index: 1; }
+
+.gis-sidebar {
+  width: 300px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.gis-sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.gis-sidebar-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.gis-sidebar-stats {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  gap: 12px;
+}
+
+.gis-sidebar-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.gis-sidebar-section {
+  margin-bottom: 24px;
+}
+
+.gis-sidebar-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gis-layer-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+
+.gis-layer-item:last-child { border-bottom: none; }
+
+.gis-layer-toggle {
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.gis-layer-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.gis-layer-name { color: var(--text); }
+.gis-layer-count { font-size: 10px; color: var(--muted); }
+
+.gis-sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+/* Floating Controls */
+.gis-top-search {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 400px;
+  max-width: 90%;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+[data-theme="dark"] .glass-panel {
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gis-search-input-wrap {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+}
+
+.gis-search-input {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  flex: 1;
+  padding: 8px;
+  font-family: inherit;
+  outline: none;
+}
+
+.gis-toolbar {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
+.gis-tool-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: none;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 14px;
+}
+
+.gis-tool-btn:hover, .gis-tool-btn.active {
+  background: var(--accent);
+  color: #000;
+}
+
+.map-coords {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+  font-size: 11px;
+  padding: 6px 12px;
+  color: var(--text);
+}
+
+.north-arrow {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.basemap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.basemap-opt {
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  height: 60px;
+}
+
+.basemap-opt img { width: 100%; height: 100%; object-fit: cover; }
+.basemap-opt span {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 9px;
+  padding: 2px 4px;
+  text-align: center;
+}
+
+.basemap-opt.active { border-color: var(--accent); }
+
+@media (max-width: 900px) {
+  .gis-sidebar {
+    position: absolute;
+    left: -300px;
+    height: 100%;
+  }
+  .gis-sidebar.open { transform: translateX(300px); }
+  .gis-top-search { width: 300px; }
+}
+
 .map-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 260px; pointer-events: auto; }
-@media (max-width: 768px) { .map-card { width: 220px; flex-shrink: 0; padding: 10px; } .map-card h3 { font-size: 11px; } }
 .map-card h3 { font-size: 12px; margin-bottom: 10px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
-.map-coords { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 4px; font-size: 10px; color: #fff; z-index: 10; pointer-events: none; }
-.north-arrow { position: absolute; top: 20px; right: 20px; font-size: 24px; color: var(--accent); z-index: 10; background: var(--surface); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
 
 /* ─── FILE MANAGER ─── */
 .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; margin-top: 20px; }
@@ -299,6 +516,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 </div>
 
 <nav id="main-nav" style="display: none;">
+  <button class="hamburger" id="gis-sidebar-toggle" style="display:none" onclick="toggleGisSidebar()" aria-label="Toggle GIS Sidebar"><i class="fas fa-layer-group"></i></button>
   <button class="hamburger" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Toggle Navigation Menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
   <div class="nav-brand" id="nav-brand-container"> QBC <span>Platform</span></div>
   <div class="nav-tabs">
@@ -480,57 +698,119 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="page" id="page-map">
   <div class="wrapper" style="position: relative;">
+    
+    <aside class="gis-sidebar" id="gis-sidebar">
+      <div class="gis-sidebar-header">
+        <div class="gis-sidebar-title">QBC GIS Platform</div>
+        <div class="gis-sidebar-stats">
+          <span><i class="far fa-eye"></i> 1.2k views</span>
+          <span><i class="far fa-calendar-alt"></i> May 2025</span>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:16px;">
+          <button class="btn btn-primary btn-sm flex-1" onclick="document.getElementById('kml-upload').click()"><i class="fas fa-plus"></i> Add Layer</button>
+          <button class="btn btn-ghost btn-sm" title="Share"><i class="fas fa-share-alt"></i></button>
+        </div>
+      </div>
+
+      <div class="gis-sidebar-content">
+        <div class="gis-sidebar-section">
+          <div class="gis-sidebar-section-title">Data Layers <i class="fas fa-chevron-down"></i></div>
+          <div id="gis-layers-list">
+            <div class="gis-layer-item">
+              <input type="checkbox" checked onchange="toggleLayer('workorders', this.checked)">
+              <div class="gis-layer-info">
+                <span class="gis-layer-name">Work Orders</span>
+                <span class="gis-layer-count" id="gis-count-wo">0 items</span>
+              </div>
+              <button class="btn-reset" style="color:var(--muted)"><i class="fas fa-ellipsis-v"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gis-sidebar-section">
+          <div class="gis-sidebar-section-title">Boundaries <i class="fas fa-chevron-down"></i></div>
+          <div class="gis-layer-item">
+            <input type="checkbox" checked id="toggle-boundary" onchange="toggleBoundaryVisibility()">
+            <div class="gis-layer-info">
+              <span class="gis-layer-name">Project Boundary</span>
+            </div>
+            <div style="width:12px; height:12px; border:1px dashed var(--accent); background:rgba(0,200,255,0.1)"></div>
+          </div>
+        </div>
+
+        <div class="gis-sidebar-section" id="legend-section">
+          <div class="gis-sidebar-section-title">Legend</div>
+          <div style="display:flex; flex-direction:column; gap:10px; font-size:12px;">
+            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--green); border-radius:50%"></span> Completed</div>
+            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--amber); border-radius:50%"></span> In Progress</div>
+            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--red); border-radius:50%"></span> Delayed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gis-sidebar-footer">
+        <div class="gis-sidebar-section-title">Basemap Selection</div>
+        <div class="basemap-grid">
+          <div class="basemap-opt active" onclick="setMapView('standard')" id="base-std">
+            <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/4/8/5" alt="Street">
+            <span>Street</span>
+          </div>
+          <div class="basemap-opt" onclick="setMapView('satellite')" id="base-sat">
+            <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/8/5" alt="Satellite">
+            <span>Satellite</span>
+          </div>
+          <div class="basemap-opt" onclick="setMapView('hybrid')" id="base-hyb">
+            <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/8/5" alt="Hybrid">
+            <span>Hybrid</span>
+          </div>
+          <div class="basemap-opt" onclick="setMapView('terrain')" id="base-ter">
+            <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/4/8/5" alt="Terrain">
+            <span>Terrain</span>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm w-100 mt-3" onclick="exportMapKML()"><i class="fas fa-external-link-alt"></i> View in Google Earth</button>
+        <button class="btn btn-primary btn-sm w-100 mt-2" id="admin-save-presets" style="display:none" onclick="saveMapPresets()"><i class="fas fa-save"></i> Save Global Default</button>
+      </div>
+    </aside>
+
     <div id="map"></div>
-    <div class="map-overlay">
-      <div class="map-card">
-        <h3><i class="fas fa-search-location"></i> Search Coordinates</h3>
-        <div style="display:flex; gap:5px; margin-bottom:10px;">
-          <input type="text" id="map-search-input" class="filter-input" placeholder="Lat, Lng" style="flex:1; font-size:11px;">
-          <button class="btn btn-primary btn-sm" onclick="searchCoordinates()"><i class="fas fa-search"></i></button>
-        </div>
-        <small style="font-size:9px; color:var(--muted);">Format: 25.285, 51.531</small>
+
+    <div class="gis-top-search glass-panel">
+      <div class="gis-search-input-wrap">
+        <i class="fas fa-search" style="color:var(--muted)"></i>
+        <input type="text" id="map-search-input" class="gis-search-input" placeholder="Search coordinates or locations..." onkeydown="if(event.key==='Enter')searchCoordinates()">
+        <button class="btn-reset" onclick="searchCoordinates()"><i class="fas fa-arrow-right" style="color:var(--accent)"></i></button>
       </div>
-
-      <div class="map-card">
-        <h3><i class="fas fa-layer-group"></i> Map Controls</h3>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
-          <button class="btn btn-ghost btn-sm" onclick="setMapView('standard')" id="btn-map-std">Standard</button>
-          <button class="btn btn-ghost btn-sm" onclick="setMapView('satellite')" id="btn-map-sat">Satellite</button>
-        </div>
-        
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <button class="btn btn-ghost btn-sm w-100" onclick="exportMapKML()"><i class="fas fa-file-download"></i> Export KML</button>
-          <button class="btn btn-ghost btn-sm w-100" onclick="exportMapCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
-        </div>
-
-        <hr style="border-color: var(--border); margin: 12px 0;">
-        
-        <label class="btn btn-primary btn-sm w-100 mb-2">
-          <i class="fas fa-file-upload"></i> Import KML/KMZ/GPX
-          <input type="file" id="kml-upload" style="display:none" accept=".kml,.kmz,.gpx" onchange="handleKMLUpload(event)">
-        </label>
-        
-        <div style="display:flex; align-items:center; gap:10px; font-size:11px; color:var(--text);">
-          <input type="checkbox" id="toggle-boundary" checked onchange="toggleBoundaryVisibility()"> Show Boundary
-        </div>
-      </div>
-
-      <div class="map-card" id="point-info" style="display: none;">
-        <h3><i class="fas fa-info-circle"></i> Selected Point</h3>
-        <div id="point-details" style="font-size:11px; color:var(--muted); line-height:1.6;"></div>
-        <button class="btn btn-ghost btn-sm w-100 mt-2" onclick="hidePointInfo()">Close</button>
-      </div>
-
-      <div class="map-card">
-        <h3><i class="fas fa-list"></i> Map Legend</h3>
-        <div style="display:flex; flex-direction:column; gap:8px; font-size:11px;">
-          <div style="display:flex; align-items:center; gap:8px;"><span style="width:12px; height:12px; background:var(--accent); border-radius:50%; border:2px solid #fff;"></span> Work Order</div>
-          <div style="display:flex; align-items:center; gap:8px;"><span style="width:12px; height:12px; border:2px dashed var(--accent); background:rgba(0,200,255,0.2);"></span> Project Boundary</div>
-          <div style="display:flex; align-items:center; gap:8px;"><i class="fas fa-map-pin" style="color:var(--red); width:12px; text-align:center;"></i> Search Result</div>
-        </div>
-      </div>
-
     </div>
+
+    <div class="gis-toolbar glass-panel">
+      <button class="gis-tool-btn" onclick="map.zoomIn()" title="Zoom In"><i class="fas fa-plus"></i></button>
+      <button class="gis-tool-btn" onclick="map.zoomOut()" title="Zoom Out"><i class="fas fa-minus"></i></button>
+      <div style="width:1px; background:var(--border); margin:0 4px;"></div>
+      <button class="gis-tool-btn" id="tool-marker" onclick="toggleDrawMode('Marker')" title="Add Pin"><i class="fas fa-map-marker-alt"></i></button>
+      <button class="gis-tool-btn" id="tool-poly" onclick="toggleDrawMode('Polygon')" title="Draw Polygon"><i class="fas fa-draw-polygon"></i></button>
+      <button class="gis-tool-btn" id="tool-edit" onclick="toggleGlobalEdit()" title="Edit Geometry"><i class="fas fa-edit"></i></button>
+      <button class="gis-tool-btn" id="tool-measure" onclick="toggleMeasure()" title="Measure"><i class="fas fa-ruler-combined"></i></button>
+      <div style="width:1px; background:var(--border); margin:0 4px;"></div>
+      <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand"></i></button>
+      <button class="gis-tool-btn" onclick="resetMapView()" title="Reset View"><i class="fas fa-sync-alt"></i></button>
+      <div style="width:1px; background:var(--border); margin:0 4px;"></div>
+      <button class="gis-tool-btn" onclick="map.pm.Draw.undo()" title="Undo"><i class="fas fa-undo"></i></button>
+      <button class="gis-tool-btn" onclick="map.pm.Draw.redo()" title="Redo"><i class="fas fa-redo"></i></button>
+    </div>
+
+    <div class="map-card glass-panel" id="point-info" style="display: none; position: absolute; bottom: 80px; left: 320px; z-index: 10; width: 280px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0"><i class="fas fa-info-circle"></i> Details</h3>
+        <button class="btn-reset" onclick="hidePointInfo()"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="point-details" style="font-size:12px; color:var(--text); line-height:1.6;"></div>
+      <div id="point-edit-actions" style="margin-top:12px; display:flex; gap:8px;"></div>
+    </div>
+
+    <div class="north-arrow glass-panel"><i class="fas fa-compass"></i></div>
+    <div class="map-coords glass-panel" id="map-coords-display">Lat: 0.000000 | Lng: 0.000000</div>
+    <input type="file" id="kml-upload" style="display:none" accept=".kml,.kmz,.gpx,.csv" onchange="handleKMLUpload(event)">
   </div>
 </div>
 
@@ -734,6 +1014,7 @@ let currentPage = 1;
 const PAGE_SIZE = 50;
 let editingIdx = null;
 let map = null;
+let currentBasemap = 'standard';
 let boundaryLayer = null;
 let currentTheme = 'light';
 let companyLogo = null;
@@ -1120,8 +1401,12 @@ function showPage(id) {
   const mobileBtn = document.querySelector(`.mobile-nav-item[onclick*="showPage('${id}')"]`);
   if (mobileBtn) mobileBtn.classList.add('active');
 
+  const gisToggle = document.getElementById('gis-sidebar-toggle');
   if (id === 'map') {
+    if (gisToggle) gisToggle.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
     setTimeout(initMap, 100);
+  } else {
+    if (gisToggle) gisToggle.style.display = 'none';
   }
   
   if(id === 'dashboard') {
@@ -1547,6 +1832,8 @@ function updateAdminUI() {
     if (addBtn) addBtn.style.display = '';
     if (ap) ap.style.display = 'block';
     if (dz) dz.style.display = 'block';
+    const savePresetBtn = document.getElementById('admin-save-presets');
+    if (savePresetBtn) savePresetBtn.style.display = 'block';
   } else {
     if (btn) btn.textContent = '🔒 Locked';
     if (btn) btn.classList.remove('unlocked');
@@ -1644,20 +1931,34 @@ async function initMap() {
   if (map) return;
   
   map = L.map('map', {
-    fullscreenControl: true,
-    zoomControl: false
-  }).setView([25.2854, 51.5310], 11);
+    fullscreenControl: false, // We'll use our custom btn or let plugin handle it
+    zoomControl: false,
+    maxZoom: 22
+  }).setView([25.3548, 51.1839], 10); // Center on Qatar
 
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
   L.control.scale({ position: 'bottomright', imperial: false }).addTo(map);
 
-  baseLayers.standard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' });
-  baseLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
+  baseLayers.standard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxNativeZoom: 19, maxZoom: 22, attribution: '© OpenStreetMap' });
+  baseLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 19, maxZoom: 22, attribution: '© Esri' });
+  baseLayers.hybrid = L.layerGroup([
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 19, maxZoom: 22 }),
+    L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 19, maxZoom: 22 })
+  ]);
+  baseLayers.terrain = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 19, maxZoom: 22, attribution: '© Esri' });
   
   baseLayers.standard.addTo(map);
   
-  const baseMaps = { "Standard View": baseLayers.standard, "Satellite View": baseLayers.satellite };
-  L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+  // Custom Fullscreen handler
+  map.toggleFullscreen = function() {
+    const el = document.getElementById('page-map');
+    if (!document.fullscreenElement) {
+        el.requestFullscreen().catch(err => {
+            alert(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+  };
 
   // Address Search
   if (typeof L.Control.Geocoder !== 'undefined') {
@@ -1687,10 +1988,10 @@ async function initMap() {
       secondaryLengthUnit: 'kilometers',
       primaryAreaUnit: 'sqmeters',
       secondaryAreaUnit: 'hectares',
-      activeColor: 'var(--accent)',
-      completedColor: 'var(--accent2)'
+      activeColor: '#00c8ff',
+      completedColor: '#7c3aed'
     });
-    measureControl.addTo(map);
+    // We don't add it by default, toggled via toolbar
   }
 
   // Locate Me
@@ -1709,17 +2010,24 @@ async function initMap() {
 
   // Geoman (Editing)
   if (map.pm) {
-    map.pm.addControls({
-      position: 'topleft',
-      drawCircle: false,
-      drawMarker: true,
-      drawRectangle: true,
-      drawPolygon: true,
-      drawPolyline: true,
-      editMode: true,
-      dragMode: true,
-      cutPolygon: true,
-      removalMode: true,
+    map.pm.setLang('en');
+    
+    map.on('pm:create', async (e) => {
+        const layer = e.layer;
+        const type = e.shape;
+        
+        if (type === 'Marker') {
+            const latlng = layer.getLatLng();
+            showToast(`New marker created at ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`);
+            // In a real app, this would trigger an "Add Work Order" flow
+        }
+        
+        // Save history
+        saveMapHistory('create', { shape: type, latlngs: layer.getLatLngs ? layer.getLatLngs() : layer.getLatLng() });
+    });
+
+    map.on('pm:remove', (e) => {
+        saveMapHistory('delete', { shape: e.shape });
     });
   }
 
@@ -1730,26 +2038,46 @@ async function initMap() {
     const coordsDisp = document.getElementById('map-coords-display');
     if (coordsDisp) coordsDisp.textContent = `Lat: ${e.latlng.lat.toFixed(6)} | Lng: ${e.latlng.lng.toFixed(6)}`;
   });
+
+  // Minimap
+  if (L.Control.MiniMap) {
+      const miniMapLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+      new L.Control.MiniMap(miniMapLayer, { toggleDisplay: true, position: 'bottomleft' }).addTo(map);
+  }
   
   loadMarkers();
   loadProjectBoundary();
-  
-  // Add coordinate display and north arrow elements dynamically
-  const wrapper = document.querySelector('#page-map .wrapper');
-  if (!document.getElementById('map-coords-display')) {
-    const coords = document.createElement('div');
-    coords.id = 'map-coords-display';
-    coords.className = 'map-coords';
-    coords.textContent = 'Lat: 0.000000 | Lng: 0.000000';
-    wrapper.appendChild(coords);
+  loadMapPresets();
+}
+
+async function loadMapPresets() {
+  if (!supabaseClient) return;
+  try {
+    const { data } = await supabaseClient.from('project_boundaries').select('style_settings').eq('id', 0).maybeSingle();
+    if (data && data.style_settings) {
+      const presets = data.style_settings;
+      if (presets.basemap) setMapView(presets.basemap);
+      if (presets.center && presets.zoom) {
+        map.setView(presets.center, presets.zoom);
+      }
+    }
+  } catch(e) {}
+}
+
+async function saveMapPresets() {
+  if (!supabaseClient || !isAdmin()) {
+    showToast("Admin access required", "error");
+    return;
   }
-  if (!document.querySelector('.north-arrow')) {
-    const na = document.createElement('div');
-    na.className = 'north-arrow';
-    na.innerHTML = '<i class="fas fa-compass"></i>';
-    na.title = 'North';
-    wrapper.appendChild(na);
-  }
+  const presets = {
+    basemap: currentBasemap,
+    center: map.getCenter(),
+    zoom: map.getZoom()
+  };
+  try {
+    await supabaseClient.from('project_boundaries').upsert({ id: 0, name: 'MAP_PRESETS', style_settings: presets });
+    showToast("Map presets saved as default");
+  } catch(e) { showToast("Failed to save presets", "error"); }
 }
 
 function searchCoordinates() {
@@ -1816,23 +2144,57 @@ function exportMapCSV() {
 function loadMarkers() {
   if (!markersLayer) return;
   markersLayer.clearLayers();
+  
+  if (window.markerClusterGroup) {
+    map.removeLayer(window.markerClusterGroup);
+  }
+  
+  window.markerClusterGroup = L.markerClusterGroup({
+    showCoverageOnHover: false,
+    maxClusterRadius: 50
+  });
+
   allData.forEach(r => {
     if (r.Lat && r.Lng) {
+      const defaultColor = r.Status === 'COMP' ? 'var(--green)' : (r.Status === 'INPRG' ? 'var(--amber)' : 'var(--red)');
+      const style = r.style_settings || {};
+      const color = style.color || defaultColor;
+      const size = style.size || 12;
+      
       const m = L.marker([r.Lat, r.Lng], {
         icon: L.divIcon({
           className: 'custom-div-icon',
-          html: `<div style='background-color:var(--accent); width:12px; height:12px; border-radius:50%; border:2px solid #fff;'></div>`,
-          iconSize: [12, 12],
-          iconAnchor: [6, 6]
-        })
+          html: `<div style='background-color:${color}; width:${size}px; height:${size}px; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.3)'></div>`,
+          iconSize: [size, size],
+          iconAnchor: [size/2, size/2]
+        }),
+        draggable: true,
+        workOrder: r.WorkOrder
       });
+
       m.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
         showPointInfo(r.Lat, r.Lng, r);
       });
-      markersLayer.addLayer(m);
+
+      m.on('dragend', async (e) => {
+        const newPos = e.target.getLatLng();
+        r.Lat = newPos.lat;
+        r.Lng = newPos.lng;
+        if (supabaseClient) {
+          await supabaseClient.from('work_orders').update({ Lat: newPos.lat, Lng: newPos.lng }).eq('work_order', r.WorkOrder);
+        }
+        showToast(`Marker moved to ${newPos.lat.toFixed(4)}, ${newPos.lng.toFixed(4)}`);
+        saveMapHistory('move', { type: 'wo', id: r.WorkOrder, latlng: newPos });
+      });
+
+      window.markerClusterGroup.addLayer(m);
     }
   });
+  
+  map.addLayer(window.markerClusterGroup);
+  const countEl = document.getElementById('gis-count-wo');
+  if (countEl) countEl.textContent = `${allData.length} items`;
 }
 
 async function loadProjectBoundary() {
@@ -1841,11 +2203,30 @@ async function loadProjectBoundary() {
     const { data, error } = await supabaseClient.from('project_boundaries').select('*').limit(1).maybeSingle();
     if (data && data.geojson) {
       if (boundaryLayer) map.removeLayer(boundaryLayer);
+      const style = data.style_settings || { color: '#00c8ff', weight: 3, fillOpacity: 0.1 };
       boundaryLayer = L.geoJSON(data.geojson, {
-        style: { color: 'var(--accent)', weight: 3, fillOpacity: 0.1 }
+        style: style,
+        name: data.name || 'Project Boundary',
+        pmIgnore: false
       }).addTo(map);
+
+      boundaryLayer.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
+        showPointInfo(e.latlng.lat, e.latlng.lng, null, true);
+      });
+
+      boundaryLayer.eachLayer(layer => {
+        layer.on('pm:edit', async (e) => {
+           const newGeoJSON = boundaryLayer.toGeoJSON();
+           if (supabaseClient) {
+             await supabaseClient.from('project_boundaries').update({ geojson: newGeoJSON }).eq('id', 1);
+           }
+           showToast("Boundary geometry updated");
+           saveMapHistory('edit', { type: 'boundary', geojson: newGeoJSON });
+        });
+      });
     }
-  } catch(e) {}
+  } catch(e) { console.error("Boundary load failed", e); }
 }
 
 function onMapClick(e) {
@@ -1853,18 +2234,19 @@ function onMapClick(e) {
   showPointInfo(lat, lng);
 }
 
-function showPointInfo(lat, lng, woData = null) {
+function showPointInfo(lat, lng, woData = null, isBoundary = false) {
   const panel = document.getElementById('point-info');
   const details = document.getElementById('point-details');
   panel.style.display = 'block';
   
   let content = `
-    <strong>Latitude:</strong> ${lat.toFixed(6)}<br>
-    <strong>Longitude:</strong> ${lng.toFixed(6)}<br>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <strong style="font-size:12px;">Object Details</strong>
+      <span style="font-size:9px; color:var(--muted);">${lat.toFixed(4)}, ${lng.toFixed(4)}</span>
+    </div>
   `;
 
-  if (!woData) {
-    // Search for nearest WO within ~50 meters
+  if (!woData && !isBoundary) {
     woData = allData.find(r => {
       if (!r.Lat || !r.Lng) return false;
       const d = Math.sqrt(Math.pow(r.Lat - lat, 2) + Math.pow(r.Lng - lng, 2));
@@ -1873,21 +2255,74 @@ function showPointInfo(lat, lng, woData = null) {
   }
 
   if (woData) {
+    const style = woData.style_settings || {};
     content += `
-      <hr style="margin:10px 0; border-color:var(--border);">
       <div style="color:var(--accent); font-weight:700; margin-bottom:5px;">Work Order: ${woData.WorkOrder}</div>
       <div style="font-size:10px; margin-bottom:8px;">${woData.Description || 'No description'}</div>
-      <table style="width:100%; font-size:10px; border-collapse:collapse;">
-        <tr><td style="color:var(--muted); padding:2px 0;">Status:</td><td style="text-align:right;">${woData.Status || '—'}</td></tr>
-        <tr><td style="color:var(--muted); padding:2px 0;">Highway:</td><td style="text-align:right;">${woData.Highway || '—'}</td></tr>
-        <tr><td style="color:var(--muted); padding:2px 0;">Engineer:</td><td style="text-align:right;">${woData.PWA_ENG || '—'}</td></tr>
-        <tr><td style="color:var(--muted); padding:2px 0;">Fab Status:</td><td style="text-align:right;">${woData.FabStatus || '—'}</td></tr>
-      </table>
+      
+      <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+        <label style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:700;">Marker Style</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
+          <div class="form-group">
+            <label style="font-size:9px; display:block; margin-bottom:4px;">Color</label>
+            <input type="color" value="${style.color || '#00c8ff'}" style="width:100%; height:24px; padding:0; border:none; background:none; cursor:pointer;" onchange="updateObjectStyle('wo', '${woData.WorkOrder}', 'color', this.value)">
+          </div>
+          <div class="form-group">
+            <label style="font-size:9px; display:block; margin-bottom:4px;">Size (${style.size || 12}px)</label>
+            <input type="range" min="8" max="40" value="${style.size || 12}" style="width:100%;" onchange="updateObjectStyle('wo', '${woData.WorkOrder}', 'size', parseInt(this.value))">
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (isBoundary) {
+    const style = (boundaryLayer && boundaryLayer.options && boundaryLayer.options.style) || { color: '#00c8ff', weight: 3, fillOpacity: 0.1 };
+    const name = (boundaryLayer && boundaryLayer.options && boundaryLayer.options.name) || 'Project Boundary';
+    
+    // Try to get dash style from dashArray
+    let dash = 'solid';
+    if (style.dashArray === '5, 5') dash = 'dashed';
+    if (style.dashArray === '2, 5') dash = 'dotted';
+
+    content += `
+      <div style="color:var(--accent); font-weight:700; margin-bottom:5px;">
+        <input type="text" value="${name}" style="background:none; border:none; color:inherit; font:inherit; width:100%;" onchange="updateObjectStyle('boundary', 1, 'name', this.value)">
+      </div>
+      <div style="font-size:10px; margin-bottom:8px;">Custom area or site limit</div>
+      
+      <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+        <label style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:700;">Polygon Style</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
+          <div class="form-group">
+            <label style="font-size:9px; display:block; margin-bottom:4px;">Border Color</label>
+            <input type="color" value="${style.color || '#00c8ff'}" style="width:100%; height:24px; border:none; background:none; cursor:pointer;" onchange="updateObjectStyle('boundary', 1, 'color', this.value)">
+          </div>
+          <div class="form-group">
+            <label style="font-size:9px; display:block; margin-bottom:4px;">Fill Color</label>
+            <input type="color" value="${style.fillColor || style.color || '#00c8ff'}" style="width:100%; height:24px; border:none; background:none; cursor:pointer;" onchange="updateObjectStyle('boundary', 1, 'fillColor', this.value)">
+          </div>
+          <div class="form-group">
+            <label style="font-size:9px; display:block; margin-bottom:4px;">Thickness (${style.weight || 3}px)</label>
+            <input type="range" min="1" max="10" value="${style.weight || 3}" style="width:100%;" onchange="updateObjectStyle('boundary', 1, 'weight', parseInt(this.value))">
+          </div>
+          <div class="form-group">
+            <label style="font-size:9px; display:block; margin-bottom:4px;">Opacity (${Math.round((style.fillOpacity || 0.1)*100)}%)</label>
+            <input type="range" min="0" max="100" value="${(style.fillOpacity || 0.1)*100}" style="width:100%;" onchange="updateObjectStyle('boundary', 1, 'fillOpacity', parseFloat(this.value)/100)">
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label style="font-size:9px; display:block; margin-bottom:4px;">Line Style</label>
+            <select style="width:100%; background:var(--surface2); color:var(--text); border:1px solid var(--border); font-size:10px; padding:4px;" onchange="updateObjectStyle('boundary', 1, 'dashArray', this.value)">
+              <option value="" ${dash === 'solid' ? 'selected' : ''}>Solid</option>
+              <option value="5, 5" ${dash === 'dashed' ? 'selected' : ''}>Dashed</option>
+              <option value="2, 5" ${dash === 'dotted' ? 'selected' : ''}>Dotted</option>
+            </select>
+          </div>
+        </div>
+      </div>
     `;
   } else {
     content += `
       <hr style="margin:10px 0; border-color:var(--border);">
-      <em style="color:var(--muted);">No work order found at this location.</em>
+      <em style="color:var(--muted);">No editable object found at this location.</em>
     `;
   }
   details.innerHTML = content;
@@ -1898,12 +2333,30 @@ function hidePointInfo() {
 }
 
 function setMapView(type) {
-  if (type === 'satellite') {
-    map.removeLayer(baseLayers.standard);
-    baseLayers.satellite.addTo(map);
-  } else {
-    map.removeLayer(baseLayers.satellite);
-    baseLayers.standard.addTo(map);
+  currentBasemap = type;
+  Object.values(baseLayers).forEach(layer => map.removeLayer(layer));
+  if (baseLayers[type]) {
+    baseLayers[type].addTo(map);
+  }
+  
+  document.querySelectorAll('.basemap-opt').forEach(el => el.classList.remove('active'));
+  let id = 'base-std';
+  if (type === 'satellite') id = 'base-sat';
+  if (type === 'hybrid') id = 'base-hyb';
+  if (type === 'terrain') id = 'base-ter';
+  
+  const activeOpt = document.getElementById(id);
+  if (activeOpt) activeOpt.classList.add('active');
+}
+
+function resetMapView() {
+  map.setView([25.3548, 51.1839], 10);
+}
+
+function toggleLayer(layerId, visible) {
+  if (layerId === 'workorders') {
+    if (visible) markersLayer.addTo(map);
+    else map.removeLayer(markersLayer);
   }
 }
 
@@ -1993,6 +2446,105 @@ function toggleBoundaryVisibility() {
   } else {
     map.removeLayer(boundaryLayer);
   }
+}
+
+function toggleDrawMode(mode) {
+  document.querySelectorAll('.gis-tool-btn').forEach(b => b.classList.remove('active'));
+  if (mode === 'Marker') {
+    map.pm.enableDraw('Marker');
+    document.getElementById('tool-marker').classList.add('active');
+  } else if (mode === 'Polygon') {
+    map.pm.enableDraw('Polygon');
+    document.getElementById('tool-poly').classList.add('active');
+  } else {
+    map.pm.disableDraw();
+  }
+}
+
+let isGlobalEditMode = false;
+function toggleGlobalEdit() {
+  if (!isAdmin) { showToast("Admin access required", "error"); return; }
+  isGlobalEditMode = !isGlobalEditMode;
+  const btn = document.getElementById('tool-edit');
+  
+  if (isGlobalEditMode) {
+    btn.classList.add('active');
+    if (boundaryLayer) {
+      boundaryLayer.eachLayer(layer => {
+        if (layer.pm) layer.pm.enable();
+      });
+    }
+    showToast("Edit mode enabled. Drag handles to reshape objects.");
+  } else {
+    btn.classList.remove('active');
+    if (boundaryLayer) {
+      boundaryLayer.eachLayer(layer => {
+        if (layer.pm) layer.pm.disable();
+      });
+    }
+    showToast("Edit mode disabled.");
+  }
+}
+
+function toggleMeasure() {
+  const btn = document.getElementById('tool-measure');
+  btn.classList.toggle('active');
+  if (btn.classList.contains('active')) {
+    measureControl.addTo(map);
+  } else {
+    map.removeControl(measureControl);
+  }
+}
+
+function toggleGisSidebar() {
+  const sb = document.getElementById('gis-sidebar');
+  sb.classList.toggle('open');
+}
+
+async function updateObjectStyle(type, id, key, value) {
+  if (type === 'wo') {
+    const wo = allData.find(d => String(d.WorkOrder) === String(id));
+    if (!wo) return;
+    if (!wo.style_settings) wo.style_settings = {};
+    wo.style_settings[key] = value;
+    if (supabaseClient) {
+      await supabaseClient.from('work_orders').update({ style_settings: wo.style_settings }).eq('work_order', id);
+    }
+    loadMarkers();
+    showToast(`Marker style updated`);
+  } else if (type === 'boundary') {
+    if (!boundaryLayer) return;
+    
+    if (key === 'name') {
+      boundaryLayer.options.name = value;
+      if (supabaseClient) {
+        await supabaseClient.from('project_boundaries').update({ name: value }).eq('id', id);
+      }
+    } else {
+      let style = boundaryLayer.options.style || {};
+      if (typeof style === 'function') style = style(); 
+      
+      style[key] = value;
+      boundaryLayer.setStyle(style);
+      
+      if (supabaseClient) {
+        await supabaseClient.from('project_boundaries').update({ style_settings: style }).eq('id', id);
+      }
+    }
+    showToast(`Boundary updated`);
+  }
+}
+
+async function saveMapHistory(action, data) {
+    if (!supabaseClient) return;
+    try {
+        await supabaseClient.from('map_history').insert({
+            action: action,
+            data: data,
+            user_id: currentUser ? currentUser.id : null,
+            created_at: new Date()
+        });
+    } catch (e) { console.error("History log failed", e); }
 }
 
 // FILE MANAGER LOGIC
