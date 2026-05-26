@@ -184,6 +184,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .drop-zone .file-name{font-size:11px;color:var(--accent);margin-top:6px;}
 
 /* ─── BUTTONS ─── */
+.btn-reset{background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .btn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;transition:all .2s; display: inline-flex; align-items: center; gap: 8px; min-height: 36px;}
 .btn-primary{background:var(--accent);color:#000;}
 .btn-primary:hover{opacity: 0.9;}
@@ -485,8 +486,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="map-card">
         <h3><i class="fas fa-search-location"></i> Search Coordinates</h3>
         <div style="display:flex; gap:5px; margin-bottom:10px;">
-          <input type="text" id="map-search-input" class="filter-input" placeholder="Lat, Lng" style="flex:1; font-size:11px;">
-          <button class="btn btn-primary btn-sm" onclick="searchCoordinates()"><i class="fas fa-search"></i></button>
+          <input type="text" id="map-search-input" class="filter-input" placeholder="Lat, Lng" style="flex:1; font-size:11px;" aria-label="Coordinates (Lat, Lng)">
+          <button class="btn btn-primary btn-sm" onclick="searchCoordinates()" aria-label="Search coordinates"><i class="fas fa-search"></i></button>
         </div>
         <small style="font-size:9px; color:var(--muted);">Format: 25.285, 51.531</small>
       </div>
@@ -1251,20 +1252,22 @@ function renderTable() {
     if (photo) {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">
+          <button class="btn-reset" onclick="viewPhoto('${r.WorkOrder}')" aria-label="View photo">
+            <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px;">
+          </button>
           <div class="photo-actions">
-            <button class="btn btn-ghost btn-icon" onclick="uploadPhotoFor('${r.WorkOrder}')" title="Replace Photo"><i class="fas fa-sync-alt"></i></button>
-            <button class="btn btn-red btn-icon" onclick="deletePhoto('${r.WorkOrder}')" title="Delete Photo"><i class="fas fa-trash"></i></button>
+            <button class="btn btn-ghost btn-icon" onclick="uploadPhotoFor('${r.WorkOrder}')" title="Replace Photo" aria-label="Replace Photo"><i class="fas fa-sync-alt"></i></button>
+            <button class="btn btn-red btn-icon" onclick="deletePhoto('${r.WorkOrder}')" title="Delete Photo" aria-label="Delete Photo"><i class="fas fa-trash"></i></button>
           </div>
         </div>
       `;
     } else {
-      photoCell = `<div style="cursor:pointer; color:var(--muted)" onclick="uploadPhotoFor('${r.WorkOrder}')"><i class="fas fa-camera"></i></div>`;
+      photoCell = `<button class="btn-reset" style="color:var(--muted)" onclick="uploadPhotoFor('${r.WorkOrder}')" aria-label="Upload photo"><i class="fas fa-camera"></i></button>`;
     }
 
     const mapActions = (r.Lat && r.Lng) ? `
-      <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
-      <button class="btn btn-ghost btn-sm" onclick="copyCoords(${r.Lat}, ${r.Lng})" title="Copy Coordinates"><i class="fas fa-copy"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map" aria-label="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="copyCoords(${r.Lat}, ${r.Lng})" title="Copy Coordinates" aria-label="Copy Coordinates"><i class="fas fa-copy"></i></button>
     ` : '';
 
     return `<tr>
@@ -1284,8 +1287,8 @@ function renderTable() {
       <td>
         <div class="action-btns">
           ${mapActions}
-          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
-          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal(${allData.indexOf(r)})"><i class="fas fa-edit"></i></button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Fabrication Request" aria-label="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
+          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal(${allData.indexOf(r)})" aria-label="Edit Work Order"><i class="fas fa-edit"></i></button>` : ''}
         </div>
       </td>
     </tr>`;
