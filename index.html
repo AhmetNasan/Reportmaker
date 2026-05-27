@@ -193,6 +193,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .btn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;transition:all .2s; display: inline-flex; align-items: center; gap: 8px; min-height: 36px;}
 .btn-primary{background:var(--accent);color:#000;}
 .btn-primary:hover{opacity: 0.9;}
+.btn:disabled, .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
 .btn-sm{padding:5px 12px;font-size:11px;}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
@@ -499,6 +500,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.fa-spin { animation: spin 1s linear infinite; }
 </style>
 </head>
 <body data-theme="light">
@@ -511,7 +514,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" value="admin@qbc.qa">
     <input type="password" id="auth-password" class="auth-input" placeholder="Password" value="qbc2025">
     <div style="color: var(--green); font-size: 11px; margin-bottom: 12px;">Developer Bypass Ready - Admin Role Included</div>
-    <button class="auth-btn" onclick="handleAuth()">Sign In</button>
+    <button class="auth-btn" id="auth-btn" onclick="handleAuth()">Sign In</button>
     <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
   </div>
 </div>
@@ -780,7 +783,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="gis-search-input-wrap">
         <i class="fas fa-search" style="color:var(--muted)"></i>
         <input type="text" id="map-search-input" class="gis-search-input" placeholder="Search coordinates or locations..." onkeydown="if(event.key==='Enter')searchCoordinates()">
-        <button class="btn-reset" onclick="searchCoordinates()"><i class="fas fa-arrow-right" style="color:var(--accent)"></i></button>
+        <button class="btn-reset" onclick="searchCoordinates()" aria-label="Search coordinates"><i class="fas fa-arrow-right" style="color:var(--accent)"></i></button>
       </div>
     </div>
 
@@ -873,7 +876,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         </div>
         <div style="display:flex; gap:8px; margin-top:16px;">
           <button class="btn btn-ghost btn-sm flex-1" onclick="downloadCSVTemplate()"><i class="fas fa-download"></i> Template</button>
-          <button class="btn btn-primary btn-sm flex-1" onclick="processExcelUpload()"><i class="fas fa-upload"></i> Upload</button>
+          <button class="btn btn-primary btn-sm flex-1" id="csv-upload-btn" onclick="processExcelUpload()"><i class="fas fa-upload"></i> Upload</button>
         </div>
       </div>
 
@@ -1548,8 +1551,8 @@ function renderTable() {
     }
 
     const mapActions = (r.Lat && r.Lng) ? `
-      <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
-      <button class="btn btn-ghost btn-sm" onclick="copyCoords(${r.Lat}, ${r.Lng})" title="Copy Coordinates"><i class="fas fa-copy"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map" aria-label="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="copyCoords(${r.Lat}, ${r.Lng})" title="Copy Coordinates" aria-label="Copy Coordinates"><i class="fas fa-copy"></i></button>
     ` : '';
 
     return `<tr>
@@ -1569,8 +1572,8 @@ function renderTable() {
       <td>
         <div class="action-btns">
           ${mapActions}
-          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
-          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal(${allData.indexOf(r)})"><i class="fas fa-edit"></i></button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Fabrication Request" aria-label="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
+          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal(${allData.indexOf(r)})" aria-label="Edit Work Order"><i class="fas fa-edit"></i></button>` : ''}
         </div>
       </td>
     </tr>`;
@@ -1616,10 +1619,15 @@ async function handleAuth() {
   const email = document.getElementById('auth-email').value;
   const password = document.getElementById('auth-password').value;
   const isSignUp = document.getElementById('toggle-text').textContent === 'Sign In';
+  const authBtn = document.getElementById('auth-btn');
 
   if (!email || !password) return showToast('Please fill all fields', 'error');
 
-  // Developer Bypass
+  const originalBtnText = authBtn.innerHTML;
+  authBtn.disabled = true;
+  authBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isSignUp ? 'Signing Up...' : 'Signing In...'}`;
+
+  try {
   if ((email === 'admin@qbc.qa' || email === PRIMARY_ADMIN_EMAIL) && password === ADMIN_PWD) {
     currentUser = { email: email, id: 'dev-bypass' };
     isAdmin = true;
@@ -1637,7 +1645,6 @@ async function handleAuth() {
     return;
   }
 
-  try {
     if (isSignUp) {
       console.log("Attempting Sign Up for:", email);
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
@@ -1664,6 +1671,9 @@ async function handleAuth() {
   } catch (error) {
     console.error("Authentication error:", error);
     showToast(error.message, 'error');
+  } finally {
+    authBtn.disabled = false;
+    authBtn.innerHTML = originalBtnText;
   }
 }
 
@@ -1707,6 +1717,7 @@ function handleExcelUpload(evt) {
 
 async function processExcelUpload() {
   if (!pendingExcelFile) { showToast('No file selected','error'); return; }
+  const uploadBtn = document.getElementById('csv-upload-btn');
   if (!isAdmin) { 
     showToast('Admin mode required','error'); 
     openModal('adminModal');
@@ -1715,6 +1726,9 @@ async function processExcelUpload() {
   
   const reader = new FileReader();
   reader.onload = async e => {
+    const originalHtml = uploadBtn.innerHTML;
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     try {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, {type: 'array'});
@@ -1803,6 +1817,9 @@ async function processExcelUpload() {
     } catch(err) { 
       console.error(err);
       showToast('Error: ' + (err.message || 'Excel processing failed'), 'error'); 
+    } finally {
+      uploadBtn.disabled = false;
+      uploadBtn.innerHTML = originalHtml;
     }
   };
   reader.readAsArrayBuffer(pendingExcelFile);
