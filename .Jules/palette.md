@@ -1,0 +1,3 @@
+## 2025-05-30 - Standardizing Async Interaction Feedback
+**Learning:** Asynchronous operations like authentication and data persistence in this standalone application lacked visual feedback, leading to potential duplicate submissions and poor user perceived performance. Implementing a consistent pattern of disabling buttons, showing a spinner, and using ARIA attributes (aria-busy) significantly improves the experience.
+**Action:** Use a try...finally block for all asynchronous button actions to ensure the UI is restored even if the operation fails. Add IDs to key action buttons to target them reliably in JavaScript.
