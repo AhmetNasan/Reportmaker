@@ -59,6 +59,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .auth-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); margin-bottom: 16px; font-family: inherit; }
 .auth-btn { width: 100%; background: var(--accent); color: #000; border: none; border-radius: 8px; padding: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
 .auth-btn:hover { opacity: 0.9; }
+.auth-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 .auth-toggle { margin-top: 24px; font-size: 13px; color: var(--muted); cursor: pointer; }
 .auth-toggle span { color: var(--accent); }
 
@@ -198,6 +199,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
 .btn-green{background:var(--green);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
+.btn:disabled { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
 
 /* ─── FILTERS & TABLE ─── */
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
@@ -508,10 +510,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="auth-logo"> QATAR BUILDING COMPANY</div>
     <h2 id="auth-title">Welcome to QBC Platform</h2>
     <p style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Sign in to Qatar Building Company platform</p>
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" value="admin@qbc.qa">
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password" value="qbc2025">
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" value="admin@qbc.qa" onkeydown="if(event.key==='Enter')handleAuth()">
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password" value="qbc2025" onkeydown="if(event.key==='Enter')handleAuth()">
     <div style="color: var(--green); font-size: 11px; margin-bottom: 12px;">Developer Bypass Ready - Admin Role Included</div>
-    <button class="auth-btn" onclick="handleAuth()">Sign In</button>
+    <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
     <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
   </div>
 </div>
@@ -1817,28 +1819,33 @@ async function handleAuth() {
   const email = document.getElementById('auth-email').value;
   const password = document.getElementById('auth-password').value;
   const isSignUp = document.getElementById('toggle-text').textContent === 'Sign In';
+  const btn = document.getElementById('auth-submit-btn');
+  const originalHtml = btn.innerHTML;
 
   if (!email || !password) return showToast('Please fill all fields', 'error');
 
-  // Developer Bypass
-  if ((email === 'admin@qbc.qa' || email === PRIMARY_ADMIN_EMAIL) && password === ADMIN_PWD) {
-    currentUser = { email: email, id: 'dev-bypass' };
-    isAdmin = true;
-    isApproved = true;
-    await onAuthenticated();
-    updateAdminUI();
-    showToast('Admin Access Granted');
-    return;
-  }
-
-  if (!supabaseClient) {
-    currentUser = { email: email, id: 'local-user' };
-    onAuthenticated();
-    showToast('Logged in (Offline Mode)');
-    return;
-  }
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isSignUp ? 'Signing Up...' : 'Signing In...'}`;
 
   try {
+    // Developer Bypass
+    if ((email === 'admin@qbc.qa' || email === PRIMARY_ADMIN_EMAIL) && password === ADMIN_PWD) {
+      currentUser = { email: email, id: 'dev-bypass' };
+      isAdmin = true;
+      isApproved = true;
+      await onAuthenticated();
+      updateAdminUI();
+      showToast('Admin Access Granted');
+      return;
+    }
+
+    if (!supabaseClient) {
+      currentUser = { email: email, id: 'local-user' };
+      onAuthenticated();
+      showToast('Logged in (Offline Mode)');
+      return;
+    }
+
     if (isSignUp) {
       console.log("Attempting Sign Up for:", email);
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
@@ -1865,6 +1872,9 @@ async function handleAuth() {
   } catch (error) {
     console.error("Authentication error:", error);
     showToast(error.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
   }
 }
 
