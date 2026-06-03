@@ -507,7 +507,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="auth-card">
     <div class="auth-logo"> QATAR BUILDING COMPANY</div>
     <h2 id="auth-title">Welcome Back</h2>
-    <p style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Sign in to Qatar Building Company platform</p>
+    <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Sign in to Qatar Building Company platform</p>
     
     <div id="signup-fields" style="display: none;">
       <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name">
@@ -1905,6 +1905,16 @@ async function handleAuth() {
   try {
     if (!email || !password) throw new Error('Please fill all fields');
 
+    // Admin Bypass for Primary Email
+    if (email === PRIMARY_ADMIN_EMAIL && password === ADMIN_PWD) {
+      currentUser = { email: email, id: 'admin-bypass' };
+      isAdmin = true;
+      isApproved = true;
+      await onAuthenticated();
+      showToast('Admin Access Granted (Bypass)');
+      return;
+    }
+
     if (isSignUp) {
       const fullName = document.getElementById('auth-fullname').value;
       const mobile = document.getElementById('auth-mobile').value;
@@ -1964,6 +1974,7 @@ function showProfile() {
 
 function toggleAuthMode() {
   const title = document.getElementById('auth-title');
+  const subtitle = document.getElementById('auth-subtitle');
   const btn = document.querySelector('.auth-btn');
   const toggleText = document.getElementById('toggle-text');
   const helperText = document.querySelector('.auth-toggle').childNodes[0];
@@ -1973,12 +1984,14 @@ function toggleAuthMode() {
   
   if (btn.textContent === 'Sign In') {
     title.textContent = 'Create Account';
+    if (subtitle) subtitle.textContent = 'Register for the QBC Platform';
     btn.textContent = 'Sign Up';
     toggleText.textContent = 'Sign In';
     if (helperText) helperText.textContent = 'Already have an account? ';
     if (signupFields) signupFields.style.display = 'block';
   } else {
     title.textContent = 'Welcome Back';
+    if (subtitle) subtitle.textContent = 'Sign in to Qatar Building Company platform';
     btn.textContent = 'Sign In';
     toggleText.textContent = 'Sign Up';
     if (helperText) helperText.textContent = "Don't have an account? ";
