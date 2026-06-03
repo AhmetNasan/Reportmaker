@@ -881,9 +881,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="map-card glass-panel" id="measure-info" style="display: none; position: absolute; top: 20px; right: 80px; z-index: 10; width: 220px; border-color: var(--accent);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <h3 style="margin:0; font-size:11px;"><i class="fas fa-ruler-combined"></i> Measurements</h3>
-        <button class="btn-reset" onclick="document.getElementById('measure-info').style.display='none'"><i class="fas fa-times"></i></button>
+        <button class="btn btn-red btn-icon" onclick="stopMeasurement()" title="Exit Measurement"><i class="fas fa-times"></i></button>
       </div>
       <div id="measure-results" style="font-size:12px; color:var(--text); font-weight:700;">No data</div>
+      <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px;">
+         <button class="btn btn-ghost btn-sm flex-1" onclick="clearMeasurements()"><i class="fas fa-eraser"></i> Clear</button>
+      </div>
     </div>
 
     <div class="map-coords glass-panel" id="map-coords-display">Lat: 0.000000 | Lng: 0.000000</div>
@@ -1263,7 +1266,7 @@ async function onAuthenticated() {
   }
 
   const navUserName = document.getElementById('nav-user-name');
-  if (navUserName) navUserName.textContent = profileData?.full_name || currentUser.email.split('@')[0];
+  if (navUserName) navUserName.textContent = currentUser.user_metadata?.full_name || profileData?.full_name || currentUser.email.split('@')[0];
 
   if (!isApproved && currentUser.email !== PRIMARY_ADMIN_EMAIL) {
     document.body.innerHTML = `
@@ -2055,13 +2058,18 @@ async function handleAuth() {
 async function showProfile() {
   if (!currentUser) return;
   
+  // Use user metadata as primary source, profiles table as secondary
+  document.getElementById('prof-name').value = currentUser.user_metadata?.full_name || '';
+  document.getElementById('prof-mobile').value = currentUser.user_metadata?.mobile || '';
+  document.getElementById('prof-position').value = currentUser.user_metadata?.position || '';
+
   if (supabaseClient) {
     try {
       const { data } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
       if (data) {
-        document.getElementById('prof-name').value = data.full_name || '';
-        document.getElementById('prof-mobile').value = data.mobile || '';
-        document.getElementById('prof-position').value = data.position || '';
+        if (!document.getElementById('prof-name').value) document.getElementById('prof-name').value = data.full_name || '';
+        if (!document.getElementById('prof-mobile').value) document.getElementById('prof-mobile').value = data.mobile || '';
+        if (!document.getElementById('prof-position').value) document.getElementById('prof-position').value = data.position || '';
       }
     } catch(e) {}
   }
@@ -2078,12 +2086,25 @@ async function saveProfile() {
   const newPwd = document.getElementById('prof-pwd').value;
 
   try {
-    const { error: profileError } = await supabaseClient
-      .from('profiles')
-      .update({ full_name: fullName, mobile: mobile, position: position })
-      .eq('id', currentUser.id);
-    
-    if (profileError) throw profileError;
+    // Save to Auth Metadata (More reliable than profiles table for custom fields sometimes)
+    const { error: authError } = await supabaseClient.auth.updateUser({
+      data: {
+        full_name: fullName,
+        mobile: mobile,
+        position: position
+      }
+    });
+    if (authError) throw authError;
+
+    // Also attempt to save to profiles table for data consistency
+    try {
+      await supabaseClient
+        .from('profiles')
+        .update({ full_name: fullName, mobile: mobile, position: position })
+        .eq('id', currentUser.id);
+    } catch (dbErr) {
+      console.warn("Table sync failed but metadata updated:", dbErr);
+    }
 
     if (newPwd) {
       if (newPwd.length < 6) throw new Error("Password must be at least 6 characters");
@@ -2489,17 +2510,12 @@ async function initMap() {
       primaryAreaUnit: 'sqmeters',
       secondaryAreaUnit: 'hectares',
       activeColor: '#00c8ff',
-      completedColor: '#7c3aed'
+      completedColor: '#7c3aed',
+      captureZIndex: 10000
     });
     
     map.on('measurefinish', function(e) {
-      const info = document.getElementById('measure-info');
-      const results = document.getElementById('measure-results');
-      if (info && results) {
-        info.style.display = 'block';
-        let html = `Area: ${e.areaDisplay}<br>Length: ${e.lengthDisplay}`;
-        results.innerHTML = html;
-      }
+      updateMeasureUI(e);
     });
   }
 
@@ -2521,6 +2537,15 @@ async function initMap() {
   if (map.pm) {
     map.pm.setLang('en');
     
+    // Engineering Enhancements: Snapping & Measurements
+    map.pm.setGlobalOptions({
+      snappable: true,
+      snapDistance: 20,
+      allowSelfIntersection: false,
+      hintlineStyle: { color: 'var(--accent)', dashArray: [5, 5] },
+      templineStyle: { color: 'var(--accent)' }
+    });
+
     map.on('pm:create', async (e) => {
         const layer = e.layer;
         const type = e.shape;
@@ -2578,7 +2603,11 @@ async function initMap() {
   map.on('click', onMapClick);
   map.on('mousemove', (e) => {
     const coordsDisp = document.getElementById('map-coords-display');
-    if (coordsDisp) coordsDisp.textContent = `Lat: ${e.latlng.lat.toFixed(6)} | Lng: ${e.latlng.lng.toFixed(6)}`;
+    if (coordsDisp) {
+       const lat = e.latlng.lat.toFixed(7);
+       const lng = e.latlng.lng.toFixed(7);
+       coordsDisp.innerHTML = `<i class="fas fa-crosshairs"></i> ${lat}, ${lng}`;
+    }
   });
 
   // Minimap
@@ -3053,11 +3082,46 @@ function toggleGlobalEdit() {
 
 function toggleMeasure() {
   const btn = document.getElementById('tool-measure');
-  btn.classList.toggle('active');
   if (btn.classList.contains('active')) {
-    measureControl.addTo(map);
+    stopMeasurement();
   } else {
-    map.removeControl(measureControl);
+    startMeasurement();
+  }
+}
+
+function startMeasurement() {
+  const btn = document.getElementById('tool-measure');
+  btn.classList.add('active');
+  measureControl.addTo(map);
+  // Leaflet-measure usually auto-starts its UI
+  document.getElementById('measure-info').style.display = 'block';
+  document.getElementById('measure-results').innerHTML = '<span style="color:var(--muted)">Click on map to start measuring</span>';
+  showToast("Measurement mode active");
+}
+
+function stopMeasurement() {
+  const btn = document.getElementById('tool-measure');
+  btn.classList.remove('active');
+  try { map.removeControl(measureControl); } catch(e){}
+  document.getElementById('measure-info').style.display = 'none';
+  showToast("Measurement mode exited");
+}
+
+function clearMeasurements() {
+  stopMeasurement();
+  startMeasurement();
+}
+
+function updateMeasureUI(e) {
+  const info = document.getElementById('measure-info');
+  const results = document.getElementById('measure-results');
+  if (info && results) {
+    info.style.display = 'block';
+    let html = `
+      <div style="margin-bottom:4px;">Area: <span style="color:var(--accent)">${e.areaDisplay}</span></div>
+      <div>Length: <span style="color:var(--accent)">${e.lengthDisplay}</span></div>
+    `;
+    results.innerHTML = html;
   }
 }
 
