@@ -1,0 +1,3 @@
+## 2025-05-15 - [UX/A11y Feedback & Keyboard Support]
+**Learning:** Asynchronous operations like authentication and data saving require immediate visual feedback (loading spinners and disabled states) to prevent duplicate submissions and guide the user. Furthermore, keyboard accessibility (Enter key for forms) and descriptive ARIA labels for icon-only buttons are essential for a professional engineering platform.
+**Action:** Use a `try...finally` block to manage button states during async calls, and ensure all interactive elements use semantic `<button>` tags with `aria-label` and keyboard listeners.

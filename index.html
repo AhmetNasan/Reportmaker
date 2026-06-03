@@ -59,6 +59,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .auth-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); margin-bottom: 16px; font-family: inherit; }
 .auth-btn { width: 100%; background: var(--accent); color: #000; border: none; border-radius: 8px; padding: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
 .auth-btn:hover { opacity: 0.9; }
+.auth-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 .auth-toggle { margin-top: 24px; font-size: 13px; color: var(--muted); cursor: pointer; }
 .auth-toggle span { color: var(--accent); }
 
@@ -191,6 +192,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 /* ─── BUTTONS ─── */
 .btn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:12px;font-weight:500;transition:all .2s; display: inline-flex; align-items: center; gap: 8px; min-height: 36px;}
+.btn:disabled { opacity: 0.7; cursor: not-allowed; }
 .btn-primary{background:var(--accent);color:#000;}
 .btn-primary:hover{opacity: 0.9;}
 .btn-sm{padding:5px 12px;font-size:11px;}
@@ -508,10 +510,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="auth-logo"> QATAR BUILDING COMPANY</div>
     <h2 id="auth-title">Welcome to QBC Platform</h2>
     <p style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Sign in to Qatar Building Company platform</p>
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" value="admin@qbc.qa">
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password" value="qbc2025">
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" value="admin@qbc.qa" onkeydown="if(event.key==='Enter')handleAuth()">
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password" value="qbc2025" onkeydown="if(event.key==='Enter')handleAuth()">
     <div style="color: var(--green); font-size: 11px; margin-bottom: 12px;">Developer Bypass Ready - Admin Role Included</div>
-    <button class="auth-btn" onclick="handleAuth()">Sign In</button>
+    <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
     <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
   </div>
 </div>
@@ -533,7 +535,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <span class="dot" id="conn-dot" style="background: var(--muted); width: 8px; height: 8px;"></span>
       <span id="conn-text">Checking...</span>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
+    <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode" aria-label="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
     <div class="user-menu">
       <button class="user-avatar" id="nav-user-btn" onclick="toggleUserDropdown()" aria-label="User Menu" aria-haspopup="true" aria-expanded="false">U</button>
       <div class="user-dropdown" id="user-dropdown" role="menu">
@@ -783,19 +785,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     </div>
 
     <div class="gis-toolbar glass-panel">
-      <button class="gis-tool-btn" onclick="map.zoomIn()" title="Zoom In"><i class="fas fa-plus"></i></button>
-      <button class="gis-tool-btn" onclick="map.zoomOut()" title="Zoom Out"><i class="fas fa-minus"></i></button>
+      <button class="gis-tool-btn" onclick="map.zoomIn()" title="Zoom In" aria-label="Zoom In"><i class="fas fa-plus"></i></button>
+      <button class="gis-tool-btn" onclick="map.zoomOut()" title="Zoom Out" aria-label="Zoom Out"><i class="fas fa-minus"></i></button>
       <div style="width:1px; background:var(--border); margin:0 4px;"></div>
-      <button class="gis-tool-btn" id="tool-marker" onclick="toggleDrawMode('Marker')" title="Add Pin"><i class="fas fa-map-marker-alt"></i></button>
-      <button class="gis-tool-btn" id="tool-poly" onclick="toggleDrawMode('Polygon')" title="Draw Polygon"><i class="fas fa-draw-polygon"></i></button>
-      <button class="gis-tool-btn" id="tool-edit" onclick="toggleGlobalEdit()" title="Edit Geometry"><i class="fas fa-edit"></i></button>
-      <button class="gis-tool-btn" id="tool-measure" onclick="toggleMeasure()" title="Measure"><i class="fas fa-ruler-combined"></i></button>
+      <button class="gis-tool-btn" id="tool-marker" onclick="toggleDrawMode('Marker')" title="Add Pin" aria-label="Add Pin"><i class="fas fa-map-marker-alt"></i></button>
+      <button class="gis-tool-btn" id="tool-poly" onclick="toggleDrawMode('Polygon')" title="Draw Polygon" aria-label="Draw Polygon"><i class="fas fa-draw-polygon"></i></button>
+      <button class="gis-tool-btn" id="tool-edit" onclick="toggleGlobalEdit()" title="Edit Geometry" aria-label="Edit Geometry"><i class="fas fa-edit"></i></button>
+      <button class="gis-tool-btn" id="tool-measure" onclick="toggleMeasure()" title="Measure" aria-label="Measure"><i class="fas fa-ruler-combined"></i></button>
       <div style="width:1px; background:var(--border); margin:0 4px;"></div>
-      <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand"></i></button>
-      <button class="gis-tool-btn" onclick="resetMapView()" title="Reset View"><i class="fas fa-sync-alt"></i></button>
+      <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Fullscreen" aria-label="Fullscreen"><i class="fas fa-expand"></i></button>
+      <button class="gis-tool-btn" onclick="resetMapView()" title="Reset View" aria-label="Reset View"><i class="fas fa-sync-alt"></i></button>
       <div style="width:1px; background:var(--border); margin:0 4px;"></div>
-      <button class="gis-tool-btn" onclick="map.pm.Draw.undo()" title="Undo"><i class="fas fa-undo"></i></button>
-      <button class="gis-tool-btn" onclick="map.pm.Draw.redo()" title="Redo"><i class="fas fa-redo"></i></button>
+      <button class="gis-tool-btn" onclick="map.pm.Draw.undo()" title="Undo" aria-label="Undo"><i class="fas fa-undo"></i></button>
+      <button class="gis-tool-btn" onclick="map.pm.Draw.redo()" title="Redo" aria-label="Redo"><i class="fas fa-redo"></i></button>
     </div>
 
     <div class="map-card glass-panel" id="point-info" style="display: none; position: absolute; bottom: 80px; left: 320px; z-index: 10; width: 280px;">
@@ -1028,7 +1030,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('editModal')">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="saveEdit()">💾 Save Changes</button>
+      <button class="btn btn-primary btn-sm" id="save-edit-btn" onclick="saveEdit()">💾 Save Changes</button>
     </div>
   </div>
 </div>
@@ -1817,28 +1819,33 @@ async function handleAuth() {
   const email = document.getElementById('auth-email').value;
   const password = document.getElementById('auth-password').value;
   const isSignUp = document.getElementById('toggle-text').textContent === 'Sign In';
+  const btn = document.getElementById('auth-submit-btn');
+  const originalText = btn.innerHTML;
 
   if (!email || !password) return showToast('Please fill all fields', 'error');
 
-  // Developer Bypass
-  if ((email === 'admin@qbc.qa' || email === PRIMARY_ADMIN_EMAIL) && password === ADMIN_PWD) {
-    currentUser = { email: email, id: 'dev-bypass' };
-    isAdmin = true;
-    isApproved = true;
-    await onAuthenticated();
-    updateAdminUI();
-    showToast('Admin Access Granted');
-    return;
-  }
-
-  if (!supabaseClient) {
-    currentUser = { email: email, id: 'local-user' };
-    onAuthenticated();
-    showToast('Logged in (Offline Mode)');
-    return;
-  }
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isSignUp ? 'Signing Up...' : 'Signing In...'}`;
 
   try {
+    // Developer Bypass
+    if ((email === 'admin@qbc.qa' || email === PRIMARY_ADMIN_EMAIL) && password === ADMIN_PWD) {
+      currentUser = { email: email, id: 'dev-bypass' };
+      isAdmin = true;
+      isApproved = true;
+      await onAuthenticated();
+      updateAdminUI();
+      showToast('Admin Access Granted');
+      return;
+    }
+
+    if (!supabaseClient) {
+      currentUser = { email: email, id: 'local-user' };
+      await onAuthenticated();
+      showToast('Logged in (Offline Mode)');
+      return;
+    }
+
     if (isSignUp) {
       console.log("Attempting Sign Up for:", email);
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
@@ -1860,11 +1867,14 @@ async function handleAuth() {
       if (error) throw error;
       currentUser = data.user;
       console.log("Sign In successful:", currentUser.email);
-      onAuthenticated();
+      await onAuthenticated();
     }
   } catch (error) {
     console.error("Authentication error:", error);
     showToast(error.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
   }
 }
 
@@ -3315,6 +3325,11 @@ async function saveEdit() {
 
   if (!r.WorkOrder) { showToast('Work Order is required','error'); return; }
 
+  const btn = document.getElementById('save-edit-btn');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
+
   try {
     await saveWorkOrderToSupabase(r);
     showToast('Saved successfully');
@@ -3322,6 +3337,9 @@ async function saveEdit() {
     fetchData();
   } catch (error) {
     showToast('Error saving changes', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
   }
 }
 
