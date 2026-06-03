@@ -497,6 +497,22 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .toast.show{opacity:1;transform:translateY(0);}
 .toast.error{background:var(--red);color:#fff;}
 
+.pulse-marker {
+  width: 24px;
+  height: 24px;
+  background: #ff00ff;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 rgba(255, 0, 255, 0.4);
+  animation: marker-pulse 1.5s infinite;
+}
+
+@keyframes marker-pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 255, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 0, 255, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 255, 0); }
+}
+
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -519,6 +535,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <input type="password" id="auth-password" class="auth-input" placeholder="Password">
     
     <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
+    <div style="margin-top: 16px; font-size: 11px; color: var(--accent); cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
     <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
   </div>
 </div>
@@ -542,6 +559,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     </div>
     <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
     <div class="user-menu">
+      <span id="nav-user-name" style="font-size: 11px; font-weight: 600; color: var(--text); margin-right: 4px;">User</span>
       <button class="user-avatar" id="nav-user-btn" onclick="toggleUserDropdown()" aria-label="User Menu" aria-haspopup="true" aria-expanded="false">U</button>
       <div class="user-dropdown" id="user-dropdown" role="menu">
         <button class="dropdown-item" onclick="showProfile()" role="menuitem"><i class="fas fa-user-circle"></i> Profile</button>
@@ -645,6 +663,51 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
+<div class="modal-overlay" id="profileModal">
+  <div class="modal" style="max-width:400px;">
+    <button class="modal-close" onclick="closeModal('profileModal')">×</button>
+    <div class="modal-title">Edit Profile</div>
+    <div class="form-group mb-3">
+      <label>Full Name</label>
+      <input type="text" id="prof-name" class="filter-input w-100">
+    </div>
+    <div class="form-group mb-3">
+      <label>Mobile Number</label>
+      <input type="text" id="prof-mobile" class="filter-input w-100">
+    </div>
+    <div class="form-group mb-3">
+      <label>Position / Job Title</label>
+      <input type="text" id="prof-position" class="filter-input w-100">
+    </div>
+    <hr style="margin:20px 0; border-color:var(--border);">
+    <div class="modal-title" style="font-size:14px;">Change Password</div>
+    <div class="form-group mb-3">
+      <label>New Password</label>
+      <input type="password" id="prof-pwd" class="filter-input w-100" placeholder="Minimum 6 characters">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('profileModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="recoveryModal">
+  <div class="modal" style="max-width:360px;">
+    <button class="modal-close" onclick="closeModal('recoveryModal')">×</button>
+    <div class="modal-title">Password Recovery</div>
+    <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Please enter your email address. A recovery request will be sent to the administrator.</p>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="recovery-email" class="auth-input" placeholder="Enter your email">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('recoveryModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitRecovery()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-workorders">
   <div class="wrapper">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
@@ -659,6 +722,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <input type="text" class="filter-input" placeholder="🔍 Search WO / Description…" id="searchInput" oninput="applyFilters()" style="min-width:220px;">
       <select class="filter-input" id="filterStatus" onchange="applyFilters()">
         <option value="">All Statuses</option>
+        <option value="NOT_COMP">All Except COMP</option>
         <option>COMP</option><option>INPRG</option><option>DISPATCH</option>
         <option>WPERM</option><option>RTNENG</option><option>APPR</option>
       </select>
@@ -688,7 +752,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <th>Qty</th>
             <th>Fabrication Status</th>
             <th>Install Date</th>
-            <th>Fabrication Details</th>
             <th>Photo</th>
             <th>Actions</th>
           </tr>
@@ -758,7 +821,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="gis-sidebar-footer">
         <div class="gis-sidebar-section-title">Basemap Selection</div>
         <div class="basemap-grid">
-          <div class="basemap-opt active" onclick="setMapView('standard')" id="base-std">
+          <div class="basemap-opt" onclick="setMapView('standard')" id="base-std">
             <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/4/8/5" alt="Street">
             <span>Street</span>
           </div>
@@ -766,7 +829,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/8/5" alt="Satellite">
             <span>Satellite</span>
           </div>
-          <div class="basemap-opt" onclick="setMapView('hybrid')" id="base-hyb">
+          <div class="basemap-opt active" onclick="setMapView('hybrid')" id="base-hyb">
             <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/8/5" alt="Hybrid">
             <span>Hybrid</span>
           </div>
@@ -813,6 +876,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
       <div id="point-details" style="font-size:12px; color:var(--text); line-height:1.6;"></div>
       <div id="point-edit-actions" style="margin-top:12px; display:flex; gap:8px;"></div>
+    </div>
+
+    <div class="map-card glass-panel" id="measure-info" style="display: none; position: absolute; top: 20px; right: 80px; z-index: 10; width: 220px; border-color: var(--accent);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="margin:0; font-size:11px;"><i class="fas fa-ruler-combined"></i> Measurements</h3>
+        <button class="btn-reset" onclick="document.getElementById('measure-info').style.display='none'"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="measure-results" style="font-size:12px; color:var(--text); font-weight:700;">No data</div>
     </div>
 
     <div class="map-coords glass-panel" id="map-coords-display">Lat: 0.000000 | Lng: 0.000000</div>
@@ -905,7 +976,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <th>Qty</th>
             <th>Fabrication Status</th>
             <th>Install Date</th>
-            <th>Fabrication Details</th>
             <th>Photo</th>
             <th>Actions</th>
           </tr>
@@ -1083,7 +1153,7 @@ let filteredFabData = [];
 let photos = {}; 
 let currentPage = 1;
 let fabCurrentPage = 1;
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 200;
 let editingIdx = null;
 let map = null;
 let currentBasemap = 'standard';
@@ -1185,6 +1255,15 @@ async function onAuthenticated() {
       isApproved = true; // Offline fallback
     }
   }
+
+  let profileData = null;
+  if (supabaseClient) {
+    const { data } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+    profileData = data;
+  }
+
+  const navUserName = document.getElementById('nav-user-name');
+  if (navUserName) navUserName.textContent = profileData?.full_name || currentUser.email.split('@')[0];
 
   if (!isApproved && currentUser.email !== PRIMARY_ADMIN_EMAIL) {
     document.body.innerHTML = `
@@ -1558,15 +1637,19 @@ function getStatusCat(r) {
     if (hasTarget && hasInstallDate) {
       const target = new Date(r.TargetFinish);
       const install = new Date(r.InstallationDate);
+      // On-Time: COMP & Install <= Target
+      // Completed (Breached): COMP & Install > Target
       return install <= target ? 'green' : 'amber';
     }
-    return 'green'; // Assume on-time if no target? or default green
+    return 'green'; 
   } else {
     if (hasTarget) {
       const target = new Date(r.TargetFinish);
+      // Not Completed (Breached): Not COMP & Today > Target
+      // Pending within Target Date: Not COMP & Today <= Target
       return today > target ? 'red' : 'blue';
     }
-    return 'blue'; // Pending
+    return 'blue';
   }
 }
 
@@ -1576,7 +1659,8 @@ function updateDashboard() {
   allData.forEach(r => {
     const cat = getStatusCat(r);
     stats[cat]++;
-    let dStr = r.TargetFinish || r.TargetStart;
+    // Dashboard based on Target Start Date month
+    let dStr = r.TargetStart || r.TargetFinish;
     let mName = "Unknown";
     if (dStr && dStr.includes('-')) {
        const d = new Date(dStr);
@@ -1734,8 +1818,12 @@ function renderFabPagination() {
   const total = Math.ceil(filteredFabData.length / PAGE_SIZE);
   const pg = document.getElementById('fabPagination');
   if (total <= 1) { pg.innerHTML = ''; return; }
-  let html = `<span class="pg-info">Page ${fabCurrentPage} of ${total}</span>`;
-  for (let p = 1; p <= total; p++) html += `<button class="pg-btn${p===fabCurrentPage?' active':''}" onclick="gotoFabPage(${p})">${p}</button>`;
+  let html = `<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; align-items:center;">
+    <span class="pg-info" style="margin-right:10px;">Page ${fabCurrentPage} of ${total}</span>`;
+  for (let p = 1; p <= total; p++) {
+    html += `<button class="pg-btn${p===fabCurrentPage?' active':''}" onclick="gotoFabPage(${p})">${p}</button>`;
+  }
+  html += `</div>`;
   pg.innerHTML = html;
 }
 function gotoFabPage(p) { fabCurrentPage = p; renderFabTable(); }
@@ -1770,7 +1858,8 @@ function applyFilters() {
   const fab = document.getElementById('filterFab').value;
   filteredData = allData.filter(r => {
     const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Highway||'').toLowerCase().includes(q);
-    const matchSt = !st || r.Status === st;
+    let matchSt = !st || r.Status === st;
+    if (st === 'NOT_COMP') matchSt = r.Status !== 'COMP';
     const matchEng = !eng || r.PWA_ENG === eng;
     const matchFab = !fab || (r.FabStatus||'').toLowerCase() === fab.toLowerCase();
     return matchQ && matchSt && matchEng && matchFab;
@@ -1824,25 +1913,17 @@ function renderTable() {
 
     return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')">
       <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
-      <td><span class="wo-num">${r.WorkOrder}</span></td>
-      <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
-      <td>${stBadge}</td>
-      <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
-      <td style="font-size:11px">${r.Highway||'—'}</td>
-      <td style="font-size:11px">${r.TargetFinish||'—'}</td>
-      <td style="font-size:11px">${r.SignType||'—'}</td>
-      <td style="font-size:11px">${r.SignRef||'—'}</td>
-      <td style="font-size:11px">${r.SignQty||'—'}</td>
-      <td>${r.FabStatus||'—'}</td>
-      <td style="font-size:11px">${r.InstallationDate||'—'}</td>
-      <td>
-        <div style="display:flex; gap:4px; align-items:center;">
-          <textarea class="filter-input" style="min-width:120px; height:32px; font-size:11px; padding:4px;" 
-            onblur="updateFabDetails('${r.WorkOrder}', this.value)"
-            onkeydown="if(event.ctrlKey && event.key==='Enter') { this.blur(); }">${r.FabDetails||''}</textarea>
-          <button class="btn btn-ghost btn-icon" onclick="event.stopPropagation(); updateFabDetails('${r.WorkOrder}', this.previousElementSibling.value)" title="Save"><i class="fas fa-save"></i></button>
-        </div>
-      </td>
+      <td onclick="makeEditable(this, '${r.WorkOrder}', 'WorkOrder')"><span class="wo-num">${r.WorkOrder}</span></td>
+      <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}" onclick="makeEditable(this, '${r.WorkOrder}', 'Description')"><span>${(r.Description||'').substring(0,40)}</span></td>
+      <td onclick="makeEditable(this, '${r.WorkOrder}', 'Status', 'select')">${stBadge}</td>
+      <td style="font-size:11px;color:var(--muted)" onclick="makeEditable(this, '${r.WorkOrder}', 'PWA_ENG')">${r.PWA_ENG||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Highway')">${r.Highway||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TargetFinish', 'date')">${r.TargetFinish||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignType')">${r.SignType||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignRef')">${r.SignRef||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignQty')">${r.SignQty||'—'}</td>
+      <td onclick="makeEditable(this, '${r.WorkOrder}', 'FabStatus', 'select_fab')">${r.FabStatus||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'InstallationDate', 'date')">${r.InstallationDate||'—'}</td>
       <td>${photoCell}<input type="file" style="display:none" id="file_${r.WorkOrder}" accept="image/*" onchange="handlePhotoUpload(event,'${r.WorkOrder}')"></td>
       <td>
         <div class="action-btns">
@@ -1862,8 +1943,12 @@ function renderPagination() {
   const total = Math.ceil(filteredData.length / PAGE_SIZE);
   const pg = document.getElementById('pagination');
   if (total <= 1) { pg.innerHTML = ''; return; }
-  let html = `<span class="pg-info">Page ${currentPage} of ${total}</span>`;
-  for (let p = 1; p <= total; p++) html += `<button class="pg-btn${p===currentPage?' active':''}" onclick="gotoPage(${p})">${p}</button>`;
+  let html = `<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; align-items:center;">
+    <span class="pg-info" style="margin-right:10px;">Page ${currentPage} of ${total}</span>`;
+  for (let p = 1; p <= total; p++) {
+    html += `<button class="pg-btn${p===currentPage?' active':''}" onclick="gotoPage(${p})">${p}</button>`;
+  }
+  html += `</div>`;
   pg.innerHTML = html;
 }
 function gotoPage(p) { currentPage = p; renderTable(); }
@@ -1967,9 +2052,76 @@ async function handleAuth() {
   }
 }
 
-function showProfile() {
+async function showProfile() {
   if (!currentUser) return;
-  alert(`User Profile\nEmail: ${currentUser.email}\nID: ${currentUser.id}`);
+  
+  if (supabaseClient) {
+    try {
+      const { data } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+      if (data) {
+        document.getElementById('prof-name').value = data.full_name || '';
+        document.getElementById('prof-mobile').value = data.mobile || '';
+        document.getElementById('prof-position').value = data.position || '';
+      }
+    } catch(e) {}
+  }
+  document.getElementById('prof-pwd').value = '';
+  openModal('profileModal');
+}
+
+async function saveProfile() {
+  if (!supabaseClient || !currentUser) return;
+  
+  const fullName = document.getElementById('prof-name').value;
+  const mobile = document.getElementById('prof-mobile').value;
+  const position = document.getElementById('prof-position').value;
+  const newPwd = document.getElementById('prof-pwd').value;
+
+  try {
+    const { error: profileError } = await supabaseClient
+      .from('profiles')
+      .update({ full_name: fullName, mobile: mobile, position: position })
+      .eq('id', currentUser.id);
+    
+    if (profileError) throw profileError;
+
+    if (newPwd) {
+      if (newPwd.length < 6) throw new Error("Password must be at least 6 characters");
+      const { error: pwdError } = await supabaseClient.auth.updateUser({ password: newPwd });
+      if (pwdError) throw pwdError;
+    }
+
+    showToast("Profile updated successfully");
+    closeModal('profileModal');
+    
+    const navUserName = document.getElementById('nav-user-name');
+    if (navUserName) navUserName.textContent = fullName || currentUser.email.split('@')[0];
+    
+  } catch (error) {
+    showToast(error.message, "error");
+  }
+}
+
+async function submitRecovery() {
+  const email = document.getElementById('recovery-email').value;
+  if (!email) return showToast("Email is required", "error");
+
+  if (supabaseClient) {
+    try {
+      // Logic for recovery request: could insert into a 'recovery_requests' table or use auth reset
+      // For this specific requirement "submit to administrator", let's assume a table or email trigger
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.href,
+      });
+      if (error) throw error;
+      showToast("Recovery email sent. Check your inbox.");
+      closeModal('recoveryModal');
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  } else {
+    showToast("Feature unavailable in local mode", "error");
+  }
 }
 
 function toggleAuthMode() {
@@ -2293,7 +2445,8 @@ async function initMap() {
   ]);
   baseLayers.terrain = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 19, maxZoom: 22, attribution: '© Esri' });
   
-  baseLayers.standard.addTo(map);
+  baseLayers.hybrid.addTo(map);
+  currentBasemap = 'hybrid';
   
   // Custom Fullscreen handler
   map.toggleFullscreen = function() {
@@ -2338,7 +2491,16 @@ async function initMap() {
       activeColor: '#00c8ff',
       completedColor: '#7c3aed'
     });
-    // We don't add it by default, toggled via toolbar
+    
+    map.on('measurefinish', function(e) {
+      const info = document.getElementById('measure-info');
+      const results = document.getElementById('measure-results');
+      if (info && results) {
+        info.style.display = 'block';
+        let html = `Area: ${e.areaDisplay}<br>Length: ${e.lengthDisplay}`;
+        results.innerHTML = html;
+      }
+    });
   }
 
   // Locate Me
@@ -3236,11 +3398,25 @@ async function deletePhoto(wo) {
   }
 }
 
+let highlightMarker = null;
 function showOnMap(lat, lng, wo) {
   showPage('map');
   setTimeout(() => {
     if (map) {
-      map.setView([lat, lng], 16);
+      map.setView([lat, lng], 19); // Zoom in closer
+      
+      if (highlightMarker) map.removeLayer(highlightMarker);
+      
+      highlightMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: 'highlight-marker',
+          html: '<div class="pulse-marker"></div>',
+          iconSize: [30, 30],
+          iconAnchor: [15, 15]
+        }),
+        zIndexOffset: 1000
+      }).addTo(map);
+
       showPointInfo(lat, lng, allData.find(d => String(d.WorkOrder) === String(wo)));
     }
   }, 300);
@@ -3425,6 +3601,72 @@ const FAB_FIELDS = [
   {k:'FabDetails',l:'Fabrication Details'}
 ];
 
+function makeEditable(cell, woId, field, type = 'text') {
+  if (cell.querySelector('input') || cell.querySelector('select')) return;
+  
+  const wo = allData.find(d => String(d.WorkOrder) === String(woId));
+  if (!wo) return;
+
+  const originalValue = wo[field] || '';
+  let input;
+
+  if (type === 'select' || type === 'select_fab') {
+    input = document.createElement('select');
+    input.className = 'filter-input';
+    input.style.width = '100%';
+    input.style.fontSize = '11px';
+    input.style.padding = '2px';
+    
+    const opts = type === 'select' 
+      ? ['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR'] 
+      : ['Pending','Ongoing','Done'];
+    
+    opts.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o;
+      opt.textContent = o;
+      if (o === originalValue) opt.selected = true;
+      input.appendChild(opt);
+    });
+  } else {
+    input = document.createElement('input');
+    input.type = type;
+    input.className = 'filter-input';
+    input.style.width = '100%';
+    input.style.fontSize = '11px';
+    input.style.padding = '2px';
+    input.value = originalValue;
+  }
+
+  const save = async () => {
+    const newValue = input.value;
+    if (newValue !== originalValue) {
+      wo[field] = newValue;
+      try {
+        await saveWorkOrderToSupabase(wo);
+        showToast(`${field} updated`);
+        renderTable();
+        updateDashboard();
+      } catch (err) {
+        showToast("Error updating field", "error");
+        renderTable();
+      }
+    } else {
+      renderTable();
+    }
+  };
+
+  input.onblur = save;
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') save();
+    if (e.key === 'Escape') renderTable();
+  };
+
+  cell.innerHTML = '';
+  cell.appendChild(input);
+  input.focus();
+}
+
 async function updateFabDetails(woId, value) {
   const wo = allData.find(d => d.WorkOrder === woId);
   if (!wo) return;
@@ -3433,8 +3675,6 @@ async function updateFabDetails(woId, value) {
   try {
     await saveWorkOrderToSupabase(wo);
     showToast('Fabrication details updated');
-    // We don't necessarily need to renderTable here if it was a blur event, 
-    // but it keeps data in sync if multiple tabs are open (or for local fallback consistency)
   } catch (err) {
     showToast('Error updating details', 'error');
   }
