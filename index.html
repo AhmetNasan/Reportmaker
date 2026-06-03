@@ -96,7 +96,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 /* ─── PAGES ─── */
 .page{display:none;padding-top:var(--header-h);min-height:100vh;position:relative;z-index:1;}
 .page.active{display:block;}
-.wrapper{max-width:1400px;margin:0 auto;padding:32px 20px;}
+.wrapper{max-width:100%;margin:0 auto;padding:32px 24px;}
 @media (max-width: 600px) { .wrapper { padding: 20px 15px; } }
 
 /* ─── ADMIN LOCK ─── */
@@ -222,7 +222,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .fab-notdone{color:var(--red);font-size:11px;}
 .fab-ongoing{color:var(--amber);font-size:11px;}
 .fab-empty{color:var(--muted);font-size:11px;}
-.action-btns{display:flex;gap:4px;flex-wrap:wrap;}
+.action-btns{display:flex;gap:4px;flex-wrap:nowrap;min-width:max-content;}
 .photo-actions { display: flex; gap: 4px; margin-top: 4px; }
 .btn-icon { padding: 4px; font-size: 10px; min-width: 24px; justify-content: center; }
 .pagination{display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:flex-end;}
@@ -506,12 +506,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div id="auth-container" class="auth-container">
   <div class="auth-card">
     <div class="auth-logo"> QATAR BUILDING COMPANY</div>
-    <h2 id="auth-title">Welcome to QBC Platform</h2>
+    <h2 id="auth-title">Welcome Back</h2>
     <p style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Sign in to Qatar Building Company platform</p>
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" value="admin@qbc.qa">
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password" value="qbc2025">
-    <div style="color: var(--green); font-size: 11px; margin-bottom: 12px;">Developer Bypass Ready - Admin Role Included</div>
-    <button class="auth-btn" onclick="handleAuth()">Sign In</button>
+    
+    <div id="signup-fields" style="display: none;">
+      <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name">
+      <input type="text" id="auth-mobile" class="auth-input" placeholder="Mobile Number">
+      <input type="text" id="auth-position" class="auth-input" placeholder="Position / Job Title">
+    </div>
+
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address">
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password">
+    
+    <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
     <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
   </div>
 </div>
@@ -526,7 +533,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="nav-tab" onclick="showPage('fabrication')"><i class="fas fa-tools"></i> Fabrication Request</button>
-    <button class="nav-tab" onclick="showPage('settings')"><i class="fas fa-cog"></i> Settings</button>
+    <button class="nav-tab" id="nav-tab-settings" onclick="showPage('settings')" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
   </div>
   <div class="nav-right">
     <div id="conn-status" title="Connection Status" style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); padding-right: 10px; border-right: 1px solid var(--border);">
@@ -553,7 +560,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="mobile-nav-item" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="mobile-nav-item" onclick="showPage('fabrication'); toggleMobileMenu();"><i class="fas fa-tools"></i> Fabrication Request</button>
-    <button class="mobile-nav-item" onclick="showPage('settings'); toggleMobileMenu();"><i class="fas fa-cog"></i> Settings</button>
+    <button class="mobile-nav-item" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0;">
     <button class="mobile-nav-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
 </div>
@@ -581,25 +588,25 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <div class="kpi-icon">📋</div>
       </div>
       <div class="kpi-card on-time">
-        <div class="kpi-label">Completed Within Target</div>
+        <div class="kpi-label">On-Time</div>
         <div class="kpi-value" id="kpiGreen">-</div>
         <div class="kpi-pct" id="kpiGreenPct">-%</div>
         <div class="kpi-icon">✅</div>
       </div>
       <div class="kpi-card breached">
-        <div class="kpi-label">Comp (But Breached)</div>
+        <div class="kpi-label">Completed (Breached)</div>
         <div class="kpi-value" id="kpiAmber">-</div>
         <div class="kpi-pct" id="kpiAmberPct">-%</div>
         <div class="kpi-icon">⚠️</div>
       </div>
       <div class="kpi-card failed">
-        <div class="kpi-label">Not Comp (Breached)</div>
+        <div class="kpi-label">Not Completed (Breached)</div>
         <div class="kpi-value" id="kpiRed">-</div>
         <div class="kpi-pct" id="kpiRedPct">-%</div>
         <div class="kpi-icon">❌</div>
       </div>
       <div class="kpi-card pending">
-        <div class="kpi-label">Pending (Within Target)</div>
+        <div class="kpi-label">Pending within Target Date</div>
         <div class="kpi-value" id="kpiBlue">-</div>
         <div class="kpi-pct" id="kpiBluePct">-%</div>
         <div class="kpi-icon">⏳</div>
@@ -612,9 +619,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <div class="card-title">Monthly Volume — Stacked</div>
         <div class="bar-chart" id="barChart"></div>
         <div style="display:flex;gap:16px;margin-top:16px;flex-wrap:wrap;">
-          <div class="eng-stat"><span class="dot green"></span><span style="color:var(--muted);font-size:11px">Within Target</span></div>
-          <div class="eng-stat"><span class="dot amber"></span><span style="color:var(--muted);font-size:11px">Breached</span></div>
-          <div class="eng-stat"><span class="dot red"></span><span style="color:var(--muted);font-size:11px">Not Comp</span></div>
+          <div class="eng-stat"><span class="dot green"></span><span style="color:var(--muted);font-size:11px">On-Time</span></div>
+          <div class="eng-stat"><span class="dot amber"></span><span style="color:var(--muted);font-size:11px">Comp (Breached)</span></div>
+          <div class="eng-stat"><span class="dot red"></span><span style="color:var(--muted);font-size:11px">Not Comp (Breached)</span></div>
           <div class="eng-stat"><span class="dot blue"></span><span style="color:var(--muted);font-size:11px">Pending</span></div>
         </div>
       </div>
@@ -740,9 +747,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <div class="gis-sidebar-section" id="legend-section">
           <div class="gis-sidebar-section-title">Legend</div>
           <div style="display:flex; flex-direction:column; gap:10px; font-size:12px;">
-            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--green); border-radius:50%"></span> Completed</div>
-            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--amber); border-radius:50%"></span> In Progress</div>
-            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--red); border-radius:50%"></span> Delayed</div>
+            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--green); border-radius:50%"></span> On-Time</div>
+            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--amber); border-radius:50%"></span> Comp (Breached)</div>
+            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--red); border-radius:50%"></span> Not Comp (Breached)</div>
+            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--blue); border-radius:50%"></span> Pending</div>
           </div>
         </div>
       </div>
@@ -1068,6 +1076,7 @@ const PRIMARY_ADMIN_EMAIL = 'ahmetnasan1993@gmail.com';
 let currentUser = null;
 let isAdmin = false;
 let isApproved = false;
+let pendingApprovalCount = 0;
 let allData = [];
 let filteredData = [];
 let filteredFabData = [];
@@ -1085,8 +1094,24 @@ let fmType = 'images';
 let fmView = 'grid';
 let fmSelected = new Set();
 let fmFiles = [];
+let selectedWorkOrder = null;
 
 // INITIALIZATION
+window.addEventListener('paste', async (e) => {
+  if (!selectedWorkOrder) return;
+  const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+  for (let index in items) {
+    const item = items[index];
+    if (item.kind === 'file' && item.type.startsWith('image/')) {
+      const blob = item.getAsFile();
+      const file = new File([blob], `pasted_image_${Date.now()}.png`, { type: 'image/png' });
+      const mockEvent = { target: { files: [file] } };
+      handlePhotoUpload(mockEvent, selectedWorkOrder);
+      showToast("Uploading pasted image...");
+    }
+  }
+});
+
 window.addEventListener('load', async () => {
   let session = null;
   if (supabaseClient) {
@@ -1098,6 +1123,11 @@ window.addEventListener('load', async () => {
   
   if (session) {
     currentUser = session.user;
+    // For local bypass if email is admin, allow it for development but primary is Ahmet
+    if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
+        isAdmin = true;
+        isApproved = true;
+    }
     await onAuthenticated();
   } else {
     const authCont = document.getElementById('auth-container');
@@ -1111,7 +1141,7 @@ async function onAuthenticated() {
   document.getElementById('auth-container').style.display = 'none';
   
   // Check for Admin Rights
-  if (currentUser.email === PRIMARY_ADMIN_EMAIL || currentUser.email === 'admin@qbc.qa') {
+  if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
     isAdmin = true;
     isApproved = true;
   } else {
@@ -1176,12 +1206,39 @@ async function onAuthenticated() {
   if (isAdmin) {
     const ap = document.getElementById('admin-panel');
     if (ap) ap.style.display = 'block';
+    const settingsTab = document.getElementById('nav-tab-settings');
+    if (settingsTab) settingsTab.style.display = 'flex';
+    const mobileSettingsTab = document.getElementById('mobile-nav-settings');
+    if (mobileSettingsTab) mobileSettingsTab.style.display = 'flex';
+    
     updateAdminUI();
+    fetchPendingApprovalCount();
   }
 
   loadLogo();
   showPage('dashboard');
   fetchData();
+}
+
+async function fetchAllWorkOrders() {
+  let allRows = [];
+  let page = 0;
+  const pageSize = 1000;
+  let moreRows = true;
+
+  while (moreRows) {
+    const { data, error } = await supabaseClient
+      .from('work_orders')
+      .select('*')
+      .range(page * pageSize, (page + 1) * pageSize - 1)
+      .order('work_order', { ascending: false });
+
+    if (error) throw error;
+    allRows = allRows.concat(data);
+    if (data.length < pageSize) moreRows = false;
+    page++;
+  }
+  return allRows;
 }
 
 async function fetchData() {
@@ -1197,12 +1254,7 @@ async function fetchData() {
   
   if (isAdmin) loadPendingUsers();
   try {
-    const { data: woData, error: woError } = await supabaseClient
-      .from('work_orders')
-      .select('*')
-      .order('work_order', { ascending: false });
-
-    if (woError) throw woError;
+    const woData = await fetchAllWorkOrders();
 
     if (connDot) connDot.style.background = 'var(--green)';
     if (connText) connText.textContent = 'Connected';
@@ -1235,7 +1287,9 @@ async function fetchData() {
       InstallationDate: r.installation_date,
       ScrapRemoval: r.scrap_removal,
       FabDetails: r.fab_details || '',
-      isSentToFab: r.is_sent_to_fab || false
+      isSentToFab: r.is_sent_to_fab || false,
+      fab_history: r.fab_history || [],
+      style_settings: r.style_settings || {}
     }));
 
     const { data: photoData, error: photoError } = await supabaseClient
@@ -1320,7 +1374,9 @@ async function saveWorkOrderToSupabase(wo) {
     installation_date: wo.InstallationDate || null,
     scrap_removal: wo.ScrapRemoval,
     fab_details: wo.FabDetails,
-    is_sent_to_fab: wo.isSentToFab || false
+    is_sent_to_fab: wo.isSentToFab || false,
+    fab_history: wo.fab_history || [],
+    style_settings: wo.style_settings || {}
   };
 
   const { error } = await supabaseClient
@@ -1453,6 +1509,10 @@ function toggleMobileMenu() {
 }
 
 function showPage(id) {
+  if (id === 'settings' && !isAdmin) {
+    showToast("Access Denied", "error");
+    return;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.mobile-nav-item').forEach(t => t.classList.remove('active'));
@@ -1489,17 +1549,25 @@ function showPage(id) {
 // DASHBOARD LOGIC
 function getStatusCat(r) {
   const isComp = r.Status === 'COMP';
-  const hasTarget = r.TargetFinish && r.TargetFinish.trim() !== '';
-  let breached = false;
-  if (hasTarget) {
-    const target = new Date(r.TargetFinish);
-    const actual = (r.InstallationDate && r.InstallationDate.trim() !== '') ? new Date(r.InstallationDate) : new Date();
-    if (actual > target) breached = true;
+  const hasTarget = r.TargetFinish && r.TargetFinish.trim() !== '' && !isNaN(new Date(r.TargetFinish));
+  const hasInstallDate = r.InstallationDate && r.InstallationDate.trim() !== '' && !isNaN(new Date(r.InstallationDate));
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  if (isComp) {
+    if (hasTarget && hasInstallDate) {
+      const target = new Date(r.TargetFinish);
+      const install = new Date(r.InstallationDate);
+      return install <= target ? 'green' : 'amber';
+    }
+    return 'green'; // Assume on-time if no target? or default green
+  } else {
+    if (hasTarget) {
+      const target = new Date(r.TargetFinish);
+      return today > target ? 'red' : 'blue';
+    }
+    return 'blue'; // Pending
   }
-  if (isComp && !breached) return 'green';
-  if (isComp && breached) return 'amber';
-  if (!isComp && breached) return 'red';
-  return 'blue';
 }
 
 function updateDashboard() {
@@ -1713,6 +1781,14 @@ function applyFilters() {
   if (label) label.textContent = `(${filteredData.length} of ${allData.length})`;
 }
 
+function selectWorkOrderRow(woId) {
+  selectedWorkOrder = woId;
+  document.querySelectorAll('#woBody tr').forEach(tr => {
+    if (tr.getAttribute('data-wo') === woId) tr.classList.add('selected');
+    else tr.classList.remove('selected');
+  });
+}
+
 function renderTable() {
   const tbody = document.getElementById('woBody');
   const start = (currentPage - 1) * PAGE_SIZE;
@@ -1724,27 +1800,29 @@ function renderTable() {
   tbody.innerHTML = slice.map((r, i) => {
     const stBadge = `<span class="status-badge badge-${r.Status||'COMP'}">${r.Status||'–'}</span>`;
     const photo = photos[r.WorkOrder];
+    const isSelected = selectedWorkOrder === r.WorkOrder;
+
     let photoCell = '';
     if (photo) {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">
+          <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="event.stopPropagation(); viewPhoto('${r.WorkOrder}')">
           <div class="photo-actions">
-            <button class="btn btn-ghost btn-icon" onclick="uploadPhotoFor('${r.WorkOrder}')" title="Replace Photo"><i class="fas fa-sync-alt"></i></button>
-            <button class="btn btn-red btn-icon" onclick="deletePhoto('${r.WorkOrder}')" title="Delete Photo"><i class="fas fa-trash"></i></button>
+            <button class="btn btn-ghost btn-icon" onclick="event.stopPropagation(); uploadPhotoFor('${r.WorkOrder}')" title="Replace Photo"><i class="fas fa-sync-alt"></i></button>
+            <button class="btn btn-red btn-icon" onclick="event.stopPropagation(); deletePhoto('${r.WorkOrder}')" title="Delete Photo"><i class="fas fa-trash"></i></button>
           </div>
         </div>
       `;
     } else {
-      photoCell = `<div style="cursor:pointer; color:var(--muted)" onclick="uploadPhotoFor('${r.WorkOrder}')"><i class="fas fa-camera"></i></div>`;
+      photoCell = `<div style="cursor:pointer; color:var(--muted)" onclick="event.stopPropagation(); uploadPhotoFor('${r.WorkOrder}')"><i class="fas fa-camera"></i></div>`;
     }
 
     const mapActions = (r.Lat && r.Lng) ? `
-      <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
-      <button class="btn btn-ghost btn-sm" onclick="copyCoords(${r.Lat}, ${r.Lng})" title="Copy Coordinates"><i class="fas fa-copy"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); copyCoords(${r.Lat}, ${r.Lng})" title="Copy Coordinates"><i class="fas fa-copy"></i></button>
     ` : '';
 
-    return `<tr>
+    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')">
       <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
       <td><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
@@ -1762,16 +1840,17 @@ function renderTable() {
           <textarea class="filter-input" style="min-width:120px; height:32px; font-size:11px; padding:4px;" 
             onblur="updateFabDetails('${r.WorkOrder}', this.value)"
             onkeydown="if(event.ctrlKey && event.key==='Enter') { this.blur(); }">${r.FabDetails||''}</textarea>
-          <button class="btn btn-ghost btn-icon" onclick="updateFabDetails('${r.WorkOrder}', this.previousElementSibling.value)" title="Save"><i class="fas fa-save"></i></button>
+          <button class="btn btn-ghost btn-icon" onclick="event.stopPropagation(); updateFabDetails('${r.WorkOrder}', this.previousElementSibling.value)" title="Save"><i class="fas fa-save"></i></button>
         </div>
       </td>
       <td>${photoCell}<input type="file" style="display:none" id="file_${r.WorkOrder}" accept="image/*" onchange="handlePhotoUpload(event,'${r.WorkOrder}')"></td>
       <td>
         <div class="action-btns">
           ${mapActions}
-          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
-          ${!r.isSentToFab ? `<button class="btn btn-primary btn-sm" onclick="sendToFabrication('${r.WorkOrder}')" title="Send to Fabrication"><i class="fas fa-paper-plane"></i> Send</button>` : `<span class="status-badge badge-APPR" style="font-size:9px;"><i class="fas fa-check"></i> Sent</span>`}
-          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal(${allData.indexOf(r)})"><i class="fas fa-edit"></i></button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openFabModal('${r.WorkOrder}')" title="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); sendToFabrication('${r.WorkOrder}')" title="Send to Fabrication"><i class="fas fa-paper-plane"></i> Send ${r.fab_history && r.fab_history.length > 0 ? '(' + r.fab_history.length + ')' : ''}</button>
+          ${r.isSentToFab ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showFabHistory('${r.WorkOrder}')" title="View History"><i class="fas fa-history"></i></button>` : ''}
+          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openEditModal(${allData.indexOf(r)})"><i class="fas fa-edit"></i></button>` : ''}
         </div>
       </td>
     </tr>`;
@@ -1818,42 +1897,49 @@ async function handleAuth() {
   const password = document.getElementById('auth-password').value;
   const isSignUp = document.getElementById('toggle-text').textContent === 'Sign In';
 
-  if (!email || !password) return showToast('Please fill all fields', 'error');
-
-  // Developer Bypass
-  if ((email === 'admin@qbc.qa' || email === PRIMARY_ADMIN_EMAIL) && password === ADMIN_PWD) {
-    currentUser = { email: email, id: 'dev-bypass' };
-    isAdmin = true;
-    isApproved = true;
-    await onAuthenticated();
-    updateAdminUI();
-    showToast('Admin Access Granted');
-    return;
-  }
-
-  if (!supabaseClient) {
-    currentUser = { email: email, id: 'local-user' };
-    onAuthenticated();
-    showToast('Logged in (Offline Mode)');
-    return;
-  }
+  const btn = document.getElementById('auth-submit-btn');
+  btn.disabled = true;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Please wait...';
 
   try {
+    if (!email || !password) throw new Error('Please fill all fields');
+
     if (isSignUp) {
+      const fullName = document.getElementById('auth-fullname').value;
+      const mobile = document.getElementById('auth-mobile').value;
+      const position = document.getElementById('auth-position').value;
+
+      if (!fullName || !mobile || !position) throw new Error('Please fill all mandatory fields');
+
       console.log("Attempting Sign Up for:", email);
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      const { data, error } = await supabaseClient.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            mobile: mobile,
+            position: position
+          }
+        }
+      });
       if (error) throw error;
       
-      // Auto-profile on signup
+      // Auto-profile on signup with extra data
       if (data.user) {
         await supabaseClient.from('profiles').upsert({ 
           id: data.user.id, 
-          email: data.user.email, 
+          email: data.user.email,
+          full_name: fullName,
+          mobile: mobile,
+          position: position,
           is_approved: false 
         });
       }
       
-      showToast('Check your email for confirmation');
+      showToast('Registration successful. Awaiting administrator approval.');
+      toggleAuthMode(); // Switch back to sign in
     } else {
       console.log("Attempting Sign In for:", email);
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -1865,6 +1951,9 @@ async function handleAuth() {
   } catch (error) {
     console.error("Authentication error:", error);
     showToast(error.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
   }
 }
 
@@ -1878,6 +1967,7 @@ function toggleAuthMode() {
   const btn = document.querySelector('.auth-btn');
   const toggleText = document.getElementById('toggle-text');
   const helperText = document.querySelector('.auth-toggle').childNodes[0];
+  const signupFields = document.getElementById('signup-fields');
   
   if (!title || !btn || !toggleText) return;
   
@@ -1886,11 +1976,13 @@ function toggleAuthMode() {
     btn.textContent = 'Sign Up';
     toggleText.textContent = 'Sign In';
     if (helperText) helperText.textContent = 'Already have an account? ';
+    if (signupFields) signupFields.style.display = 'block';
   } else {
     title.textContent = 'Welcome Back';
     btn.textContent = 'Sign In';
     toggleText.textContent = 'Sign Up';
     if (helperText) helperText.textContent = "Don't have an account? ";
+    if (signupFields) signupFields.style.display = 'none';
   }
 }
 
@@ -2073,6 +2165,32 @@ async function clearAllData() {
   }
 }
 
+async function fetchPendingApprovalCount() {
+  if (!supabaseClient || !isAdmin) return;
+  try {
+    const { count, error } = await supabaseClient
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_approved', false);
+    
+    if (error) throw error;
+    pendingApprovalCount = count || 0;
+    updatePendingBadge();
+  } catch (e) { console.error("Fetch pending count failed:", e); }
+}
+
+function updatePendingBadge() {
+  const badge = document.getElementById('pending-badge');
+  const mobileBadge = document.getElementById('mobile-pending-badge');
+  if (pendingApprovalCount > 0) {
+    if (badge) { badge.textContent = pendingApprovalCount; badge.style.display = 'inline-block'; }
+    if (mobileBadge) { mobileBadge.textContent = pendingApprovalCount; mobileBadge.style.display = 'inline-block'; }
+  } else {
+    if (badge) badge.style.display = 'none';
+    if (mobileBadge) mobileBadge.style.display = 'none';
+  }
+}
+
 async function loadPendingUsers() {
   if (!supabaseClient) return;
   try {
@@ -2085,14 +2203,28 @@ async function loadPendingUsers() {
     
     const tbody = document.getElementById('pending-users-list');
     if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">No users found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">No users found</td></tr>';
       return;
+    }
+    
+    const headerRow = tbody.closest('table').querySelector('thead tr');
+    if (headerRow) {
+      headerRow.innerHTML = `
+        <th>Full Name</th>
+        <th>Email</th>
+        <th>Mobile</th>
+        <th>Position</th>
+        <th>Status</th>
+        <th>Actions</th>
+      `;
     }
     
     tbody.innerHTML = data.map(u => `
       <tr>
+        <td>${u.full_name || '—'}</td>
         <td>${u.email}</td>
-        <td style="color:var(--muted); font-size:11px;">${new Date(u.created_at).toLocaleDateString()}</td>
+        <td style="font-size:11px;">${u.mobile || '—'}</td>
+        <td style="font-size:11px;">${u.position || '—'}</td>
         <td>
           <span class="status-badge" style="background:${u.is_approved ? 'rgba(34,197,94,.15)' : 'rgba(245,158,11,.15)'}; color:${u.is_approved ? 'var(--green)' : 'var(--amber)'}">
             ${u.is_approved ? 'Approved' : 'Pending'}
@@ -2119,6 +2251,7 @@ async function approveUser(userId, status) {
     if (error) throw error;
     showToast(status ? "User approved" : "Access revoked");
     loadPendingUsers();
+    fetchPendingApprovalCount();
   } catch (e) { showToast("Action failed", "error"); }
 }
 
@@ -2390,7 +2523,8 @@ function loadMarkers() {
 
   allData.forEach(r => {
     if (r.Lat && r.Lng) {
-      const defaultColor = r.Status === 'COMP' ? 'var(--green)' : (r.Status === 'INPRG' ? 'var(--amber)' : 'var(--red)');
+      const cat = getStatusCat(r);
+      const defaultColor = cat === 'green' ? 'var(--green)' : (cat === 'amber' ? 'var(--amber)' : (cat === 'red' ? 'var(--red)' : 'var(--blue)'));
       const style = r.style_settings || {};
       const color = style.color || defaultColor;
       const size = style.size || 12;
@@ -3296,14 +3430,32 @@ async function updateFabDetails(woId, value) {
 async function sendToFabrication(woId) {
   const wo = allData.find(d => d.WorkOrder === woId);
   if (!wo) return;
+  
+  if (!wo.fab_history) wo.fab_history = [];
+  const submission = {
+    date: new Date().toISOString(),
+    user: currentUser ? currentUser.email : 'unknown'
+  };
+  wo.fab_history.push(submission);
   wo.isSentToFab = true;
+  
   try {
     await saveWorkOrderToSupabase(wo);
-    showToast('Sent to Fabrication Request Page');
+    showToast(`Sent to Fabrication (Total: ${wo.fab_history.length})`);
     applyFilters(); // Re-render
   } catch (err) {
     showToast('Error sending request', 'error');
   }
+}
+
+function showFabHistory(woId) {
+  const wo = allData.find(d => d.WorkOrder === woId);
+  if (!wo || !wo.fab_history || wo.fab_history.length === 0) {
+    showToast("No submission history", "info");
+    return;
+  }
+  const historyStr = wo.fab_history.map(h => `${new Date(h.date).toLocaleString()} by ${h.user}`).join('\n');
+  alert(`Fabrication Submission History for WO ${woId}:\n\n${historyStr}`);
 }
 
 async function saveEdit() {
