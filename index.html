@@ -231,7 +231,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .pg-info{font-size:11px;color:var(--muted);}
 
 /* ─── MODAL ─── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1100;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:700px;width:90%;max-height:90vh;overflow-y:auto;position:relative;}
 @media (max-width: 600px) { .modal { width: 95%; padding: 20px; } .modal-title { font-size: 14px; } }
@@ -672,6 +672,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <input type="text" id="prof-name" class="filter-input w-100">
     </div>
     <div class="form-group mb-3">
+      <label>Email Address</label>
+      <input type="email" id="prof-email" class="filter-input w-100">
+    </div>
+    <div class="form-group mb-3">
       <label>Mobile Number</label>
       <input type="text" id="prof-mobile" class="filter-input w-100">
     </div>
@@ -682,7 +686,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <hr style="margin:20px 0; border-color:var(--border);">
     <div class="modal-title" style="font-size:14px;">Security</div>
     <div class="form-group mb-3">
-      <label>Current Password <span style="color:var(--red); font-size:10px;">(Required for changes)</span></label>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <label>Current Password <span style="color:var(--red); font-size:10px;">(Required)</span></label>
+        <button class="btn-reset" style="font-size:10px; color:var(--accent);" onclick="handleProfileForgotPwd()">Forgot?</button>
+      </div>
       <input type="password" id="prof-pwd-current" class="filter-input w-100" placeholder="Enter current password">
     </div>
     <div class="form-group mb-3">
@@ -700,7 +707,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="modal" style="max-width:360px;">
     <button class="modal-close" onclick="closeModal('recoveryModal')">×</button>
     <div class="modal-title">Password Recovery</div>
-    <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Please enter your email address. A recovery request will be sent to the administrator.</p>
+    <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Please enter your email address. We will send you a link to reset your password.</p>
     <div class="form-group">
       <label>Email Address</label>
       <input type="email" id="recovery-email" class="auth-input" placeholder="Enter your email">
@@ -1234,6 +1241,12 @@ window.addEventListener('load', async () => {
   
   const dateBadge = document.getElementById('dateBadge');
   if (dateBadge) dateBadge.textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  // Handle password reset redirection
+  if (window.location.hash && window.location.hash.includes('type=recovery')) {
+    showToast("Password reset link detected. Please update your password in the Profile section.", "amber");
+    // The session is automatically picked up by Supabase and handled in onAuthStateChange
+  }
 });
 
 async function onAuthenticated() {
@@ -2086,6 +2099,7 @@ async function showProfile() {
   
   // Use user metadata as primary source, profiles table as secondary
   document.getElementById('prof-name').value = currentUser.user_metadata?.full_name || '';
+  document.getElementById('prof-email').value = currentUser.email || '';
   document.getElementById('prof-mobile').value = currentUser.user_metadata?.mobile || '';
   document.getElementById('prof-position').value = currentUser.user_metadata?.position || '';
 
@@ -2109,14 +2123,21 @@ async function saveProfile() {
     showToast("Authentication session missing!", "error");
     return;
   }
+
+  if (currentUser.id === 'admin-bypass') {
+    showToast("Profile updates are not available in Admin Bypass mode. Please sign in with a real account.", "error");
+    return;
+  }
   
   const fullName = document.getElementById('prof-name').value;
+  const email = document.getElementById('prof-email').value;
   const mobile = document.getElementById('prof-mobile').value;
   const position = document.getElementById('prof-position').value;
   const currentPwd = document.getElementById('prof-pwd-current').value;
   const newPwd = document.getElementById('prof-pwd').value;
 
   if (!fullName) return showToast("Full Name is required", "error");
+  if (!email) return showToast("Email Address is required", "error");
   if (!currentPwd) return showToast("Current password required to save changes", "error");
 
   const btn = document.getElementById('save-profile-btn');
@@ -2126,6 +2147,7 @@ async function saveProfile() {
 
   try {
     // 1. Verify Current Password (Security measure & Session Refresh)
+    // We use the email from the current session, NOT the new one being typed.
     console.log("Verifying current session for:", currentUser.email);
     const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
       email: currentUser.email,
@@ -2140,8 +2162,8 @@ async function saveProfile() {
     // Refresh global currentUser from fresh session
     currentUser = signInData.user;
 
-    // 2. Update Auth Metadata
-    console.log("Updating auth metadata...");
+    // 2. Update Basic Metadata
+    console.log("Updating profile metadata...");
     const { data: updateData, error: authError } = await supabaseClient.auth.updateUser({
       data: {
         full_name: fullName,
@@ -2152,16 +2174,12 @@ async function saveProfile() {
     if (authError) throw authError;
     currentUser = updateData.user;
 
-    // 3. Sync to profiles table
-    console.log("Syncing to profiles table...");
-    try {
-      const { error: dbErr } = await supabaseClient
-        .from('profiles')
-        .update({ full_name: fullName, mobile: mobile, position: position })
-        .eq('id', currentUser.id);
-      if (dbErr) throw dbErr;
-    } catch (dbErr) {
-      console.warn("Table sync failed but metadata updated:", dbErr);
+    // 3. Update Email if changed
+    if (email !== currentUser.email) {
+      console.log("Updating email...");
+      const { error: emailError } = await supabaseClient.auth.updateUser({ email });
+      if (emailError) throw emailError;
+      showToast("Verification link sent to new email address. Please confirm it.", "amber");
     }
 
     // 4. Update Password if requested
@@ -2170,6 +2188,23 @@ async function saveProfile() {
       console.log("Updating password...");
       const { error: pwdError } = await supabaseClient.auth.updateUser({ password: newPwd });
       if (pwdError) throw pwdError;
+    }
+
+    // 5. Sync to profiles table
+    console.log("Syncing to profiles table...");
+    try {
+      const { error: dbErr } = await supabaseClient
+        .from('profiles')
+        .update({ 
+          full_name: fullName, 
+          email: email, 
+          mobile: mobile, 
+          position: position 
+        })
+        .eq('id', currentUser.id);
+      if (dbErr) throw dbErr;
+    } catch (dbErr) {
+      console.warn("Table sync failed but metadata updated:", dbErr);
     }
 
     showToast("Profile updated successfully");
@@ -2192,21 +2227,31 @@ async function submitRecovery() {
   const email = document.getElementById('recovery-email').value;
   if (!email) return showToast("Email is required", "error");
 
+  const btn = document.querySelector('#recoveryModal .btn-primary');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
   if (supabaseClient) {
     try {
-      // Logic for recovery request: could insert into a 'recovery_requests' table or use auth reset
-      // For this specific requirement "submit to administrator", let's assume a table or email trigger
+      // Logic for recovery request: use auth reset
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.href,
+        redirectTo: window.location.origin + window.location.pathname,
       });
       if (error) throw error;
-      showToast("Recovery email sent. Check your inbox.");
+      showToast("Recovery email sent. Check your inbox.", "green");
       closeModal('recoveryModal');
     } catch (error) {
+      console.error("Recovery error:", error);
       showToast(error.message, "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
     }
   } else {
     showToast("Feature unavailable in local mode", "error");
+    btn.disabled = false;
+    btn.innerHTML = originalText;
   }
 }
 
@@ -2240,6 +2285,14 @@ function toggleAuthMode() {
 async function handleLogout() {
   if(supabaseClient) await supabaseClient.auth.signOut();
   location.reload();
+}
+
+function handleProfileForgotPwd() {
+  closeModal('profileModal');
+  openModal('recoveryModal');
+  if (currentUser && currentUser.email) {
+    document.getElementById('recovery-email').value = currentUser.email;
+  }
 }
 
 let pendingExcelFile = null;
