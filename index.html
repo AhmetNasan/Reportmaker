@@ -1073,6 +1073,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <h3>👥 User Management</h3>
         <p>Manage access requests and user approvals.</p>
         <div class="table-wrap" style="margin-top:16px;">
+          <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="loadPendingUsers()"><i class="fas fa-sync"></i> Refresh Users</button>
+          </div>
           <table class="main-table">
             <thead>
               <tr>
@@ -1155,7 +1158,6 @@ try {
   console.error("Supabase init error:", e);
 }
 
-const ADMIN_PWD = 'qbc2025';
 const PRIMARY_ADMIN_EMAIL = 'ahmetnasan1993@gmail.com';
 let currentUser = null;
 let isAdmin = false;
@@ -1334,6 +1336,7 @@ async function onAuthenticated() {
     
     updateAdminUI();
     fetchPendingApprovalCount();
+    loadPendingUsers();
   }
 
   loadLogo();
@@ -2032,16 +2035,6 @@ async function handleAuth() {
   try {
     if (!email || !password) throw new Error('Please fill all fields');
 
-    // Admin Bypass for Primary Email
-    if (email === PRIMARY_ADMIN_EMAIL && password === ADMIN_PWD) {
-      currentUser = { email: email, id: 'admin-bypass' };
-      isAdmin = true;
-      isApproved = true;
-      await onAuthenticated();
-      showToast('Admin Access Granted (Bypass)');
-      return;
-    }
-
     if (isSignUp) {
       const fullName = document.getElementById('auth-fullname').value;
       const mobile = document.getElementById('auth-mobile').value;
@@ -2121,11 +2114,6 @@ async function showProfile() {
 async function saveProfile() {
   if (!supabaseClient || !currentUser) {
     showToast("Authentication session missing!", "error");
-    return;
-  }
-
-  if (currentUser.id === 'admin-bypass') {
-    showToast("Profile updates are not available in Admin Bypass mode. Please sign in with a real account.", "error");
     return;
   }
   
@@ -2412,6 +2400,7 @@ function toggleAdmin() {
 }
 function checkAdmin() {
   const pwd = document.getElementById('adminPwd').value;
+  // Fallback admin password for sessions that are already authenticated but need to unlock admin features
   if (pwd === 'qbc2025') {
     isAdmin = true; closeModal('adminModal'); document.getElementById('adminPwd').value = '';
     updateAdminUI(); showToast('Admin mode enabled');
