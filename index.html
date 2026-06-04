@@ -680,14 +680,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <input type="text" id="prof-position" class="filter-input w-100">
     </div>
     <hr style="margin:20px 0; border-color:var(--border);">
-    <div class="modal-title" style="font-size:14px;">Change Password</div>
+    <div class="modal-title" style="font-size:14px;">Security</div>
     <div class="form-group mb-3">
-      <label>New Password</label>
+      <label>Current Password <span style="color:var(--red); font-size:10px;">(Required for changes)</span></label>
+      <input type="password" id="prof-pwd-current" class="filter-input w-100" placeholder="Enter current password">
+    </div>
+    <div class="form-group mb-3">
+      <label>New Password <span style="color:var(--muted); font-size:10px;">(Leave blank to keep current)</span></label>
       <input type="password" id="prof-pwd" class="filter-input w-100" placeholder="Minimum 6 characters">
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('profileModal')">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="saveProfile()">Save Changes</button>
+      <button class="btn btn-primary btn-sm" id="save-profile-btn" onclick="saveProfile()">Save Changes</button>
     </div>
   </div>
 </div>
@@ -1186,26 +1190,48 @@ window.addEventListener('paste', async (e) => {
 });
 
 window.addEventListener('load', async () => {
-  let session = null;
   if (supabaseClient) {
+    // Set up auth state change listener for automatic session management
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth State Changed:", event, session ? "Session present" : "No session");
+      if (session) {
+        currentUser = session.user;
+        if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
+          isAdmin = true;
+          isApproved = true;
+        }
+        await onAuthenticated();
+      } else {
+        currentUser = null;
+        isAdmin = false;
+        isApproved = false;
+        document.getElementById('auth-container').style.display = 'flex';
+        document.getElementById('main-nav').style.display = 'none';
+      }
+    });
+
     try {
-      const res = await supabaseClient.auth.getSession();
-      session = res.data.session;
-    } catch(e) {}
-  }
-  
-  if (session) {
-    currentUser = session.user;
-    // For local bypass if email is admin, allow it for development but primary is Ahmet
-    if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
-        isAdmin = true;
-        isApproved = true;
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        currentUser = session.user;
+        if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
+          isAdmin = true;
+          isApproved = true;
+        }
+        await onAuthenticated();
+      } else {
+        document.getElementById('auth-container').style.display = 'flex';
+      }
+    } catch(e) {
+      console.error("Initial session check failed:", e);
+      document.getElementById('auth-container').style.display = 'flex';
     }
-    await onAuthenticated();
   } else {
+    // Offline / Local Mode Fallback
     const authCont = document.getElementById('auth-container');
     if (authCont) authCont.style.display = 'flex';
   }
+
   const dateBadge = document.getElementById('dateBadge');
   if (dateBadge) dateBadge.textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 });
@@ -2044,7 +2070,7 @@ async function handleAuth() {
       if (error) throw error;
       currentUser = data.user;
       console.log("Sign In successful:", currentUser.email);
-      onAuthenticated();
+      await onAuthenticated();
     }
   } catch (error) {
     console.error("Authentication error:", error);
@@ -2073,21 +2099,50 @@ async function showProfile() {
       }
     } catch(e) {}
   }
+  document.getElementById('prof-pwd-current').value = '';
   document.getElementById('prof-pwd').value = '';
   openModal('profileModal');
 }
 
 async function saveProfile() {
-  if (!supabaseClient || !currentUser) return;
+  if (!supabaseClient || !currentUser) {
+    showToast("Authentication session missing!", "error");
+    return;
+  }
   
   const fullName = document.getElementById('prof-name').value;
   const mobile = document.getElementById('prof-mobile').value;
   const position = document.getElementById('prof-position').value;
+  const currentPwd = document.getElementById('prof-pwd-current').value;
   const newPwd = document.getElementById('prof-pwd').value;
 
+  if (!fullName) return showToast("Full Name is required", "error");
+  if (!currentPwd) return showToast("Current password required to save changes", "error");
+
+  const btn = document.getElementById('save-profile-btn');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
   try {
-    // Save to Auth Metadata (More reliable than profiles table for custom fields sometimes)
-    const { error: authError } = await supabaseClient.auth.updateUser({
+    // 1. Verify Current Password (Security measure & Session Refresh)
+    console.log("Verifying current session for:", currentUser.email);
+    const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
+      email: currentUser.email,
+      password: currentPwd
+    });
+
+    if (signInError) {
+      console.error("Profile security verification failed:", signInError);
+      throw new Error("Security verification failed: Incorrect current password.");
+    }
+
+    // Refresh global currentUser from fresh session
+    currentUser = signInData.user;
+
+    // 2. Update Auth Metadata
+    console.log("Updating auth metadata...");
+    const { data: updateData, error: authError } = await supabaseClient.auth.updateUser({
       data: {
         full_name: fullName,
         mobile: mobile,
@@ -2095,19 +2150,24 @@ async function saveProfile() {
       }
     });
     if (authError) throw authError;
+    currentUser = updateData.user;
 
-    // Also attempt to save to profiles table for data consistency
+    // 3. Sync to profiles table
+    console.log("Syncing to profiles table...");
     try {
-      await supabaseClient
+      const { error: dbErr } = await supabaseClient
         .from('profiles')
         .update({ full_name: fullName, mobile: mobile, position: position })
         .eq('id', currentUser.id);
+      if (dbErr) throw dbErr;
     } catch (dbErr) {
       console.warn("Table sync failed but metadata updated:", dbErr);
     }
 
+    // 4. Update Password if requested
     if (newPwd) {
-      if (newPwd.length < 6) throw new Error("Password must be at least 6 characters");
+      if (newPwd.length < 6) throw new Error("New password must be at least 6 characters");
+      console.log("Updating password...");
       const { error: pwdError } = await supabaseClient.auth.updateUser({ password: newPwd });
       if (pwdError) throw pwdError;
     }
@@ -2115,11 +2175,16 @@ async function saveProfile() {
     showToast("Profile updated successfully");
     closeModal('profileModal');
     
+    // Update UI dynamically
     const navUserName = document.getElementById('nav-user-name');
     if (navUserName) navUserName.textContent = fullName || currentUser.email.split('@')[0];
     
   } catch (error) {
+    console.error("Profile update error:", error);
     showToast(error.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
   }
 }
 
