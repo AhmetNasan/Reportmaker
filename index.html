@@ -264,8 +264,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   display: flex;
   flex-direction: column;
   z-index: 20;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, width 0.3s ease;
   overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .gis-sidebar-header {
@@ -382,27 +383,36 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .gis-toolbar {
   position: absolute;
   top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 20px;
   z-index: 10;
   display: flex;
-  gap: 8px;
-  padding: 8px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+@media (max-width: 900px) {
+  .gis-toolbar {
+    left: auto;
+    right: 10px;
+    top: 100px;
+  }
 }
 
 .gis-tool-btn {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
   border: none;
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
   transition: 0.2s;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .gis-tool-btn:hover, .gis-tool-btn.active {
@@ -602,7 +612,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="kpi-card total">
         <div class="kpi-label">Total Work Orders</div>
         <div class="kpi-value" id="kpiTotal">-</div>
-        <div class="kpi-pct">In Local Storage</div>
+        <div class="kpi-pct" id="kpiTotalLabel">System Records</div>
         <div class="kpi-icon">📋</div>
       </div>
       <div class="kpi-card on-time">
@@ -650,8 +660,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <tr>
               <th>Month</th>
               <th>Total</th>
-              <th>✅ On Time</th>
-              <th>⚠️ Breached</th>
+              <th>✅ On-Time</th>
+              <th>⚠️ Comp(B)</th>
+              <th>❌ NotComp(B)</th>
+              <th>⏳ Pending</th>
               <th>Rate</th>
             </tr>
           </thead>
@@ -867,17 +879,29 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="gis-toolbar glass-panel">
       <button class="gis-tool-btn" onclick="map.zoomIn()" title="Zoom In"><i class="fas fa-plus"></i></button>
       <button class="gis-tool-btn" onclick="map.zoomOut()" title="Zoom Out"><i class="fas fa-minus"></i></button>
-      <div style="width:1px; background:var(--border); margin:0 4px;"></div>
+      
+      <div style="height:1px; background:var(--border); margin:4px 0;"></div>
+      
       <button class="gis-tool-btn" id="tool-marker" onclick="toggleDrawMode('Marker')" title="Add Pin"><i class="fas fa-map-marker-alt"></i></button>
+      <button class="gis-tool-btn" id="tool-line" onclick="toggleDrawMode('Line')" title="Draw Polyline"><i class="fas fa-project-diagram"></i></button>
+      <button class="gis-tool-btn" id="tool-rect" onclick="toggleDrawMode('Rectangle')" title="Draw Rectangle"><i class="far fa-square"></i></button>
       <button class="gis-tool-btn" id="tool-poly" onclick="toggleDrawMode('Polygon')" title="Draw Polygon"><i class="fas fa-draw-polygon"></i></button>
-      <button class="gis-tool-btn" id="tool-edit" onclick="toggleGlobalEdit()" title="Edit Geometry"><i class="fas fa-edit"></i></button>
-      <button class="gis-tool-btn" id="tool-measure" onclick="toggleMeasure()" title="Measure"><i class="fas fa-ruler-combined"></i></button>
-      <div style="width:1px; background:var(--border); margin:0 4px;"></div>
-      <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand"></i></button>
+      <button class="gis-tool-btn" id="tool-circle" onclick="toggleDrawMode('Circle')" title="Draw Circle"><i class="far fa-circle"></i></button>
+      <button class="gis-tool-btn" id="tool-text" onclick="showToast('Text Tool Coming Soon')" title="Text Tool"><i class="fas fa-font"></i></button>
+      
+      <div style="height:1px; background:var(--border); margin:4px 0;"></div>
+      
+      <button class="gis-tool-btn" id="tool-edit" onclick="toggleGlobalEdit()" title="Edit Geometry"><i class="fas fa-mouse-pointer"></i></button>
+      <button class="gis-tool-btn" id="tool-drag" onclick="map.pm.disableDraw(); map.pm.disableGlobalEditMode();" title="Drag Map"><i class="fas fa-arrows-alt"></i></button>
+      <button class="gis-tool-btn" id="tool-cut" onclick="toggleDrawMode('Cut')" title="Cut Polygon"><i class="fas fa-scissors"></i></button>
+      <button class="gis-tool-btn" id="tool-delete" onclick="map.pm.toggleGlobalRemovalMode()" title="Delete Layer"><i class="fas fa-eraser"></i></button>
       <button class="gis-tool-btn" onclick="resetMapView()" title="Reset View"><i class="fas fa-sync-alt"></i></button>
-      <div style="width:1px; background:var(--border); margin:0 4px;"></div>
+      
+      <div style="height:1px; background:var(--border); margin:4px 0;"></div>
+      
       <button class="gis-tool-btn" onclick="map.pm.Draw.undo()" title="Undo"><i class="fas fa-undo"></i></button>
-      <button class="gis-tool-btn" onclick="map.pm.Draw.redo()" title="Redo"><i class="fas fa-redo"></i></button>
+      <button class="gis-tool-btn" id="tool-measure" onclick="toggleMeasure()" title="Measure"><i class="fas fa-ruler-combined"></i></button>
+      <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand"></i></button>
     </div>
 
     <div class="map-card glass-panel" id="point-info" style="display: none; position: absolute; bottom: 80px; left: 320px; z-index: 10; width: 280px;">
@@ -1672,52 +1696,62 @@ function showPage(id) {
 
 // DASHBOARD LOGIC
 function getStatusCat(r) {
-  const isComp = r.Status === 'COMP';
-  const hasTarget = r.TargetFinish && r.TargetFinish.trim() !== '' && !isNaN(new Date(r.TargetFinish));
-  const hasInstallDate = r.InstallationDate && r.InstallationDate.trim() !== '' && !isNaN(new Date(r.InstallationDate));
+  const targetFinish = (r.TargetFinish && r.TargetFinish !== '0' && r.TargetFinish !== 0) ? new Date(r.TargetFinish) : null;
+  const installDate = (r.InstallationDate && r.InstallationDate !== '0' && r.InstallationDate !== 0) ? new Date(r.InstallationDate) : null;
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  if (isComp) {
-    if (hasTarget && hasInstallDate) {
-      const target = new Date(r.TargetFinish);
-      const install = new Date(r.InstallationDate);
-      // On-Time: COMP & Install <= Target
-      // Completed (Breached): COMP & Install > Target
-      return install <= target ? 'green' : 'amber';
+  // Rule: If installation date exists, compare with target finish
+  if (installDate && !isNaN(installDate.getTime())) {
+    if (targetFinish && !isNaN(targetFinish.getTime())) {
+      // On-Time (green) if Install <= Target Finish
+      // Completed (Breached) (amber) if Install > Target Finish
+      return installDate <= targetFinish ? 'green' : 'amber';
     }
-    return 'green'; 
+    return 'green'; // Default if target missing but installed
   } else {
-    if (hasTarget) {
-      const target = new Date(r.TargetFinish);
-      // Not Completed (Breached): Not COMP & Today > Target
-      // Pending within Target Date: Not COMP & Today <= Target
-      return today > target ? 'red' : 'blue';
+    // Rule: If installation date is empty/0, compare Target Finish with Today
+    if (targetFinish && !isNaN(targetFinish.getTime())) {
+      // Not Completed (Breached) (red) if Target Finish < Today
+      // Pending Within Target Date (blue) if Target Finish >= Today
+      return today > targetFinish ? 'red' : 'blue';
     }
-    return 'blue';
+    return 'blue'; // Default if both missing
   }
 }
 
 function updateDashboard() {
   let stats = { total: allData.length, green: 0, amber: 0, red: 0, blue: 0 };
   let monthsObj = {};
+  
   allData.forEach(r => {
     const cat = getStatusCat(r);
     stats[cat]++;
-    // Dashboard based on Target Start Date month
-    let dStr = r.TargetStart || r.TargetFinish;
-    let mName = "Unknown";
-    if (dStr && dStr.includes('-')) {
-       const d = new Date(dStr);
-       if(!isNaN(d)) mName = d.toLocaleString('default', { month: 'short', year:'numeric' });
+    
+    // Dashboard grouping strictly based on Target Start Date
+    let mName = "No Date";
+    let sortKey = 9999999999999; // Default for No Date
+    
+    if (r.TargetStart && r.TargetStart !== '0' && r.TargetStart !== 0) {
+       const d = new Date(r.TargetStart);
+       if(!isNaN(d.getTime())) {
+         mName = d.toLocaleString('default', { month: 'short', year:'numeric' });
+         // Create a sortable key (YYYYMM)
+         sortKey = d.getFullYear() * 100 + d.getMonth();
+       }
     }
-    if (!monthsObj[mName]) monthsObj[mName] = { month: mName, total: 0, green: 0, amber: 0, red: 0, blue: 0 };
+    
+    if (!monthsObj[mName]) {
+      monthsObj[mName] = { month: mName, total: 0, green: 0, amber: 0, red: 0, blue: 0, sortKey: sortKey };
+    }
     monthsObj[mName].total++;
     monthsObj[mName][cat]++;
   });
 
   const kpiTotal = document.getElementById('kpiTotal');
   if (kpiTotal) kpiTotal.textContent = stats.total.toLocaleString();
+  const kpiTotalLabel = document.getElementById('kpiTotalLabel');
+  if (kpiTotalLabel) kpiTotalLabel.textContent = supabaseClient ? "Cloud Synchronized" : "Local Database Only";
   const kpiGreen = document.getElementById('kpiGreen');
   if (kpiGreen) kpiGreen.textContent = stats.green.toLocaleString();
   const kpiAmber = document.getElementById('kpiAmber');
@@ -1737,7 +1771,8 @@ function updateDashboard() {
   const kpiBluePct = document.getElementById('kpiBluePct');
   if (kpiBluePct) kpiBluePct.textContent = getPct(stats.blue);
 
-  let mArr = Object.values(monthsObj).sort((a,b) => b.total - a.total).slice(0,8);
+  // Chronological sort
+  let mArr = Object.values(monthsObj).sort((a, b) => a.sortKey - b.sortKey);
   renderMonthly(mArr, stats);
 }
 
@@ -1751,12 +1786,34 @@ function renderMonthly(mArr, grandTotal) {
 
   mArr.forEach(d => {
     const rate = d.total ? ((d.green / d.total) * 100).toFixed(1) : 0;
-    tbody.innerHTML += `<tr><td><span class="month-name">${d.month}</span></td><td><span class="total-num">${d.total.toLocaleString()}</span></td><td><span class="num-green">${d.green.toLocaleString()}</span></td><td><span class="num-amber">${d.amber.toLocaleString()}</span></td><td><div style="font-size:12px;color:var(--green);margin-bottom:3px;">${rate}%</div><div class="progress-wrap"><div class="progress-fill" style="width:${rate}%;background:var(--green)"></div></div></td></tr>`;
+    tbody.innerHTML += `<tr>
+      <td><span class="month-name">${d.month}</span></td>
+      <td><span class="total-num">${d.total.toLocaleString()}</span></td>
+      <td><span class="num-green" style="color:var(--green); font-weight:600;">${d.green.toLocaleString()}</span></td>
+      <td><span class="num-amber" style="color:var(--amber); font-weight:600;">${d.amber.toLocaleString()}</span></td>
+      <td><span class="num-red" style="color:var(--red); font-weight:600;">${d.red.toLocaleString()}</span></td>
+      <td><span class="num-blue" style="color:var(--blue); font-weight:600;">${d.blue.toLocaleString()}</span></td>
+      <td>
+        <div style="font-size:12px;color:var(--green);margin-bottom:3px;">${rate}%</div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${rate}%;background:var(--green)"></div></div>
+      </td>
+    </tr>`;
+    
     const gW = (d.green / maxTotal * 100).toFixed(1);
     const aW = (d.amber / maxTotal * 100).toFixed(1);
     const rW = (d.red / maxTotal * 100).toFixed(1);
     const bW = (d.blue / maxTotal * 100).toFixed(1);
-    barChart.innerHTML += `<div class="bar-row"><span class="bar-label">${d.month.split(' ')[0]}</span><div class="bar-track"><div class="bar-seg green" data-w="${gW}" style="width:0"></div><div class="bar-seg amber" data-w="${aW}" style="width:0"></div><div class="bar-seg red" data-w="${rW}" style="width:0"></div><div class="bar-seg blue" data-w="${bW}" style="width:0"></div></div><span class="bar-total">${d.total}</span></div>`;
+    
+    barChart.innerHTML += `<div class="bar-row">
+      <span class="bar-label">${d.month}</span>
+      <div class="bar-track">
+        <div class="bar-seg green" data-w="${gW}" style="width:${gW}%"></div>
+        <div class="bar-seg amber" data-w="${aW}" style="width:${aW}%"></div>
+        <div class="bar-seg red" data-w="${rW}" style="width:${rW}%"></div>
+        <div class="bar-seg blue" data-w="${bW}" style="width:${bW}%"></div>
+      </div>
+      <span class="bar-total">${d.total}</span>
+    </div>`;
   });
 }
 
@@ -3151,15 +3208,22 @@ function toggleBoundaryVisibility() {
 
 function toggleDrawMode(mode) {
   document.querySelectorAll('.gis-tool-btn').forEach(b => b.classList.remove('active'));
-  if (mode === 'Marker') {
-    map.pm.enableDraw('Marker');
-    document.getElementById('tool-marker').classList.add('active');
-  } else if (mode === 'Polygon') {
-    map.pm.enableDraw('Polygon');
-    document.getElementById('tool-poly').classList.add('active');
-  } else {
+  if (!mode) {
     map.pm.disableDraw();
+    return;
   }
+  
+  map.pm.enableDraw(mode);
+  const toolMap = {
+    'Marker': 'tool-marker',
+    'Line': 'tool-line',
+    'Rectangle': 'tool-rect',
+    'Polygon': 'tool-poly',
+    'Circle': 'tool-circle',
+    'Cut': 'tool-cut'
+  };
+  const btnId = toolMap[mode];
+  if (btnId) document.getElementById(btnId).classList.add('active');
 }
 
 let isGlobalEditMode = false;
