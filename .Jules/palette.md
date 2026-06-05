@@ -1,0 +1,3 @@
+## 2026-06-05 - [Navigation & Identity Persistence]
+**Learning:** In a single-file application without a framework, UI state transitions (like authentication) must be meticulously synchronized with both visual elements (User Avatar) and assistive technologies (ARIA attributes). Failure to update these can lead to "identity drift" where the UI doesn't reflect the session, and "context loss" for screen reader users.
+**Action:** Use a centralized function for UI state changes (like showPage) to manage both active classes and ARIA attributes (aria-current). Ensure all toggle buttons have explicit aria-controls and aria-expanded synchronization.
