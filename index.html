@@ -383,7 +383,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .gis-toolbar {
   position: absolute;
   top: 80px;
-  left: 320px;
+  right: 20px;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -394,7 +394,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 @media (max-width: 900px) {
   .gis-toolbar {
-    left: auto;
     right: 10px;
     top: 100px;
   }
@@ -423,11 +422,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .map-coords {
   position: absolute;
   bottom: 20px;
-  right: 20px;
+  left: 320px;
   z-index: 10;
   font-size: 11px;
   padding: 6px 12px;
   color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .map-coords {
+    left: 10px;
+  }
 }
 
 .north-arrow {
@@ -604,12 +609,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="header-right" style="text-align:right">
         <div class="company" style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-weight:700;font-size:14px;color:var(--accent);letter-spacing:0.05em;">PBC - RF0001 </div>
         <div class="prepared" style="font-size:12px;color:var(--muted);margin-top:4px;">Prepared by: Eng. Ahmet Nasan</div>
-        <div class="date-badge" id="dateBadge" style="display:inline-block;margin-top:8px;padding:4px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:100px;font-size:11px;color:var(--muted);">Loading…</div>
+        <div class="date-badge" id="dateBadge" style="display:inline-block;margin-top:8px;padding:4px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:100px;font-size:11px;color:var(--muted); font-weight: 700;">Loading…</div>
       </div>
     </header>
 
     <div class="kpi-grid">
-      <div class="kpi-card total">
+      <div class="kpi-card total" style="background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 200, 255, 0.05) 100%);">
         <div class="kpi-label">Total Work Orders</div>
         <div class="kpi-value" id="kpiTotal">-</div>
         <div class="kpi-pct" id="kpiTotalLabel">System Records</div>
@@ -901,6 +906,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div style="height:1px; background:var(--border); margin:4px 0;"></div>
       
       <button class="gis-tool-btn" onclick="map.pm.Draw.undo()" title="Undo"><i class="fas fa-undo"></i></button>
+      <button class="gis-tool-btn" onclick="exitGisModes()" title="Exit / Reset Tools"><i class="fas fa-times-circle"></i></button>
       <button class="gis-tool-btn" id="tool-measure" onclick="toggleMeasure()" title="Measure"><i class="fas fa-ruler-combined"></i></button>
       <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand"></i></button>
     </div>
@@ -914,7 +920,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div id="point-edit-actions" style="margin-top:12px; display:flex; gap:8px;"></div>
     </div>
 
-    <div class="map-card glass-panel" id="measure-info" style="display: none; position: absolute; top: 20px; right: 80px; z-index: 10; width: 220px; border-color: var(--accent);">
+    <div class="map-card glass-panel" id="measure-info" style="display: none; position: absolute; bottom: 20px; right: 20px; z-index: 20; width: 240px; border-color: var(--accent); border-width: 2px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <h3 style="margin:0; font-size:11px;"><i class="fas fa-ruler-combined"></i> Measurements</h3>
         <button class="btn btn-red btn-icon" onclick="stopMeasurement()" title="Exit Measurement"><i class="fas fa-times"></i></button>
@@ -1529,13 +1535,34 @@ async function saveWorkOrderToSupabase(wo) {
     style_settings: wo.style_settings || {}
   };
 
-  const { error } = await supabaseClient
+  // Try update first
+  const { data, error: updateError } = await supabaseClient
     .from('work_orders')
-    .upsert(payload, { onConflict: 'work_order' });
+    .update(payload)
+    .eq('work_order', wo.WorkOrder)
+    .select();
 
-  if (error) {
-    console.error("Supabase Save Error:", error);
-    throw error;
+  if (updateError) {
+    console.warn("Update failed, attempting upsert...", updateError);
+    // If update fails (maybe due to RLS on update vs insert), try upsert as fallback
+    const { error: upsertError } = await supabaseClient
+      .from('work_orders')
+      .upsert(payload, { onConflict: 'work_order' });
+    
+    if (upsertError) {
+      console.error("Supabase Save Error:", upsertError);
+      throw upsertError;
+    }
+  } else if (!data || data.length === 0) {
+    // No rows updated (maybe record didn't exist), try insert
+    const { error: insertError } = await supabaseClient
+      .from('work_orders')
+      .insert(payload);
+    
+    if (insertError) {
+      console.error("Supabase Insert Error:", insertError);
+      throw insertError;
+    }
   }
 }
 
@@ -2695,7 +2722,7 @@ async function initMap() {
 
   if (typeof L.Control.Measure !== 'undefined') {
     measureControl = new L.Control.Measure({
-      position: 'topright',
+      position: 'bottomright',
       primaryLengthUnit: 'meters',
       secondaryLengthUnit: 'kilometers',
       primaryAreaUnit: 'sqmeters',
@@ -2707,6 +2734,12 @@ async function initMap() {
     
     map.on('measurefinish', function(e) {
       updateMeasureUI(e);
+    });
+    
+    // Also listen to start and stop
+    map.on('measurestart', function() {
+       document.getElementById('measure-info').style.display = 'block';
+       document.getElementById('measure-results').innerHTML = 'Measuring...';
     });
   }
 
@@ -3276,6 +3309,20 @@ function toggleGlobalEdit() {
     }
     showToast("Edit mode disabled.");
   }
+}
+
+function exitGisModes() {
+  if(map && map.pm) {
+    map.pm.disableDraw();
+    map.pm.disableGlobalEditMode();
+  }
+  isGlobalEditMode = false;
+  const editBtn = document.getElementById('tool-edit');
+  if (editBtn) editBtn.classList.remove('active');
+  document.querySelectorAll('.gis-tool-btn').forEach(b => b.classList.remove('active'));
+  stopMeasurement();
+  hidePointInfo();
+  if (highlightMarker && map) map.removeLayer(highlightMarker);
 }
 
 function toggleMeasure() {
@@ -4027,8 +4074,10 @@ function fieldHTML(f, val, extra='') {
 }
 function parseCSVDate(val) {
   if (!val) return null;
+  if (val instanceof Date) return isNaN(val.getTime()) ? null : val.toISOString().split('T')[0];
+
   const s = String(val).trim();
-  if (!s || s === '0') return null;
+  if (!s || s === '0' || s.toLowerCase() === 'null') return null;
 
   // Handle DD/MM/YYYY or DD-MM-YYYY
   const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
@@ -4048,7 +4097,12 @@ function parseCSVDate(val) {
     return `${year}-${month}-${day}`;
   }
 
-  // Fallback
+  // Excel serial number
+  if (!isNaN(s) && s.length > 4 && s.length < 6) {
+    const date = new Date((Number(s) - 25569) * 86400 * 1000);
+    if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+  }
+
   const d = new Date(s);
   return isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
 }
