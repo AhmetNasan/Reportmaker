@@ -383,7 +383,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .gis-toolbar {
   position: absolute;
   top: 80px;
-  left: 20px;
+  left: 320px;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -769,6 +769,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <th>Status</th>
             <th>PWA Engineer</th>
             <th>Highway</th>
+            <th>Target Start</th>
             <th>Target Finish</th>
             <th>Sign Type</th>
             <th>Sign Ref</th>
@@ -1008,6 +1009,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <th>Status</th>
             <th>PWA Engineer</th>
             <th>Highway</th>
+            <th>Target Start</th>
             <th>Target Finish</th>
             <th>Sign Type</th>
             <th>Sign Ref</th>
@@ -1533,11 +1535,7 @@ async function saveWorkOrderToSupabase(wo) {
 
   if (error) {
     console.error("Supabase Save Error:", error);
-    if (error.message.includes('row-level security')) {
-       showToast("Access Denied: Check Supabase RLS Policies", "error");
-    } else {
-       showToast("Error saving to cloud", "error");
-    }
+    throw error;
   }
 }
 
@@ -1884,6 +1882,7 @@ function renderFabTable() {
       <td>${stBadge}</td>
       <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
       <td style="font-size:11px">${r.Highway||'—'}</td>
+      <td style="font-size:11px">${r.TargetStart||'—'}</td>
       <td style="font-size:11px">${r.TargetFinish||'—'}</td>
       <td style="font-size:11px">${r.SignType||'—'}</td>
       <td style="font-size:11px">${r.SignRef||'—'}</td>
@@ -2020,6 +2019,7 @@ function renderTable() {
       <td onclick="makeEditable(this, '${r.WorkOrder}', 'Status', 'select')">${stBadge}</td>
       <td style="font-size:11px;color:var(--muted)" onclick="makeEditable(this, '${r.WorkOrder}', 'PWA_ENG')">${r.PWA_ENG||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Highway')">${r.Highway||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TargetStart', 'date')">${r.TargetStart||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TargetFinish', 'date')">${r.TargetFinish||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignType')">${r.SignType||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignRef')">${r.SignRef||'—'}</td>
@@ -2378,23 +2378,23 @@ async function processExcelUpload() {
 
       const upsertData = [];
       const MAP = { 
-        'description': 'description', 'status': 'status', 'pwa engineer': 'pwa_eng', 'engineer': 'pwa_eng',
-        'target start': 'target_start', 'target finish': 'target_finish', 'remaining': 'remaining',
-        'highway': 'highway', 'latitude': 'lat', 'longitude': 'lng', 'lat': 'lat', 'lng': 'lng',
-        'road category': 'road_catg', 'road catg': 'road_catg',
-        'sign type': 'sign_type', 'sign ref': 'sign_ref', 'sign shape': 'sign_shape', 
-        'sign size': 'sign_size', 'sign material': 'sign_material',
-        'sign qty': 'sign_qty', 'post type': 'post_type', 'post height': 'post_height', 
-        'post qty': 'post_qty', 'found size': 'found_size', 'found qty': 'found_qty',
-        'scrap removal': 'scrap_removal', 'fab status': 'fab_status', 
-        'installation date': 'installation_date' 
+        'description': 'Description', 'status': 'Status', 'pwa engineer': 'PWA_ENG', 'engineer': 'PWA_ENG',
+        'target start': 'TargetStart', 'target start date': 'TargetStart', 'target finish': 'TargetFinish', 'target finish date': 'TargetFinish', 'remaining': 'Remaining',
+        'highway': 'Highway', 'latitude': 'Lat', 'longitude': 'Lng', 'lat': 'Lat', 'lng': 'Lng',
+        'road category': 'RoadCatg', 'road catg': 'RoadCatg',
+        'sign type': 'SignType', 'sign ref': 'SignRef', 'sign shape': 'SignShape', 
+        'sign size': 'SignSize', 'sign material': 'SignMaterial',
+        'sign qty': 'SignQty', 'post type': 'PostType', 'post height': 'PostHeight', 
+        'post qty': 'PostQty', 'found size': 'FoundSize', 'found qty': 'FoundQty',
+        'scrap removal': 'ScrapRemoval', 'fab status': 'FabStatus', 
+        'installation date': 'InstallationDate' 
       };
 
       dataRows.forEach(row => {
         const wo = String(row[woIdx] || '').trim(); 
         if (!wo) return;
         
-        const r = { work_order: wo };
+        const r = { WorkOrder: wo };
         headers.forEach((h, i) => {
           const k = MAP[h];
           if (k) {
@@ -2405,13 +2405,11 @@ async function processExcelUpload() {
               return;
             }
 
-            if (k === 'lat' || k === 'lng') {
+            if (k === 'Lat' || k === 'Lng') {
               const num = parseFloat(val);
               r[k] = isNaN(num) ? null : num;
-            } else if (k === 'target_start' || k === 'target_finish' || k === 'installation_date') {
-              // Basic date validation
-              const dateVal = String(val).trim();
-              r[k] = isNaN(Date.parse(dateVal)) ? null : dateVal;
+            } else if (k === 'TargetStart' || k === 'TargetFinish' || k === 'InstallationDate') {
+              r[k] = parseCSVDate(val);
             } else {
               r[k] = String(val).trim();
             }
@@ -2425,19 +2423,48 @@ async function processExcelUpload() {
         return;
       }
 
-      // Deduplicate upsertData by work_order to avoid "ON CONFLICT" errors
-      const uniqueData = Array.from(new Map(upsertData.map(item => [item.work_order, item])).values());
+      // Deduplicate upsertData by WorkOrder to avoid "ON CONFLICT" errors
+      const uniqueData = Array.from(new Map(upsertData.map(item => [item.WorkOrder, item])).values());
 
       if (supabaseClient) {
+        // Map PascalCase to snake_case for Supabase
+        const dbData = uniqueData.map(wo => ({
+          work_order: wo.WorkOrder,
+          description: wo.Description,
+          status: wo.Status,
+          pwa_eng: wo.PWA_ENG,
+          target_start: wo.TargetStart || null,
+          target_finish: wo.TargetFinish || null,
+          remaining: wo.Remaining,
+          highway: wo.Highway,
+          lat: wo.Lat,
+          lng: wo.Lng,
+          road_catg: wo.RoadCatg,
+          sign_type: wo.SignType,
+          sign_ref: wo.SignRef,
+          sign_shape: wo.SignShape,
+          sign_size: wo.SignSize,
+          sign_material: wo.SignMaterial,
+          sign_qty: wo.SignQty,
+          post_type: wo.PostType,
+          post_height: wo.PostHeight,
+          post_qty: wo.PostQty,
+          found_size: wo.FoundSize,
+          found_qty: wo.FoundQty,
+          fab_status: wo.FabStatus,
+          installation_date: wo.InstallationDate || null,
+          scrap_removal: wo.ScrapRemoval
+        }));
+
         // Process in chunks to avoid payload size limits
         const chunkSize = 100;
-        for (let i = 0; i < uniqueData.length; i += chunkSize) {
-          const chunk = uniqueData.slice(i, i + chunkSize);
+        for (let i = 0; i < dbData.length; i += chunkSize) {
+          const chunk = dbData.slice(i, i + chunkSize);
           const { error } = await supabaseClient.from('work_orders').upsert(chunk, { onConflict: 'work_order' });
           if (error) throw error;
         }
       } else {
-         localStorage.setItem('qbc_data', JSON.stringify(upsertData));
+         localStorage.setItem('qbc_data', JSON.stringify(uniqueData));
       }
       
       showToast(`Successfully uploaded ${upsertData.length} records`);
@@ -3770,14 +3797,14 @@ function exportPDF() {
 
 function downloadCSVTemplate() {
   const headers = [
-    "Work Order", "Description", "Status", "PWA Engineer", "Target Start", "Target Finish", 
-    "Remaining", "Highway", "Latitude", "Longitude", "Road Category", "Sign Type", 
+    "Work Order", "Description", "Status", "PWA Engineer", "Highway", "Target Start", "Target Finish", 
+    "Remaining", "Latitude", "Longitude", "Road Category", "Sign Type", 
     "Sign Ref", "Sign Shape", "Sign Size", "Sign Material", "Sign Qty", "Post Type", 
     "Post Height", "Post Qty", "Found Size", "Found Qty", "Fabrication Status", "Installation Date", "Scrap Removal"
   ];
   const sample = [
-    "WO12345", "Sample Description", "INPRG", "Engineer Name", "2024-01-01", "2024-01-10",
-    "5", "Dukhan Road", "25.285", "51.531", "Main Road", "Regulatory",
+    "WO12345", "Sample Description", "INPRG", "Engineer Name", "Dukhan Road", "01/01/2026", "10/01/2026",
+    "5", "25.285", "51.531", "Main Road", "Regulatory",
     "R-101", "Circle", "600mm", "Aluminum", "1", "Steel",
     "2000", "1", "400x400x600", "1", "Pending", "", "No"
   ];
@@ -3876,6 +3903,7 @@ function makeEditable(cell, woId, field, type = 'text') {
   const save = async () => {
     const newValue = input.value;
     if (newValue !== originalValue) {
+      const prevValue = wo[field];
       wo[field] = newValue;
       try {
         await saveWorkOrderToSupabase(wo);
@@ -3883,7 +3911,13 @@ function makeEditable(cell, woId, field, type = 'text') {
         renderTable();
         updateDashboard();
       } catch (err) {
-        showToast("Error updating field", "error");
+        console.error("Save failed:", err);
+        wo[field] = prevValue; // Rollback
+        if (err.message && err.message.includes('row-level security')) {
+           showToast("Access Denied: Check RLS Policies", "error");
+        } else {
+           showToast("Error saving changes", "error");
+        }
         renderTable();
       }
     } else {
@@ -3991,6 +4025,34 @@ function fieldHTML(f, val, extra='') {
   if (f.k === 'FabDetails') return `<div class="form-group" style="${extra}; grid-column: 1/-1;"><label>${f.l}</label><textarea id="${id}" style="height:60px;">${val||''}</textarea></div>`;
   return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="text" id="${id}" value="${val||''}"></div>`;
 }
+function parseCSVDate(val) {
+  if (!val) return null;
+  const s = String(val).trim();
+  if (!s || s === '0') return null;
+
+  // Handle DD/MM/YYYY or DD-MM-YYYY
+  const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (dmyMatch) {
+    const day = dmyMatch[1].padStart(2, '0');
+    const month = dmyMatch[2].padStart(2, '0');
+    const year = dmyMatch[3];
+    return `${year}-${month}-${day}`;
+  }
+
+  // Handle YYYY/MM/DD or YYYY-MM-DD
+  const ymdMatch = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  if (ymdMatch) {
+    const year = ymdMatch[1];
+    const month = ymdMatch[2].padStart(2, '0');
+    const day = ymdMatch[3].padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Fallback
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+}
+
 function showToast(msg, type='') { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.className='toast'+(type?' '+type:''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
 
 </script>
