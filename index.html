@@ -254,24 +254,74 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 #pdfPreview{width:100%; background:var(--surface2); border-radius:8px; padding:20px; display:flex; justify-content:center; overflow-x:auto;}
 
 /* ─── MAP REDESIGN ─── */
-#page-map .wrapper { padding: 0; max-width: none; height: calc(100vh - var(--header-h)); display: flex; overflow: hidden; }
-#map { flex: 1; height: 100%; z-index: 1; }
+.gis-container {
+  height: calc(100vh - var(--header-h));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.gis-top-bar {
+  height: 48px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 16px;
+  z-index: 30;
+}
+
+.gis-main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
 
 .gis-sidebar {
-  width: 300px;
+  width: 320px;
   background: var(--surface);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   z-index: 20;
-  transition: transform 0.3s ease, width 0.3s ease;
-  overflow-y: auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
   flex-shrink: 0;
 }
 
+.gis-sidebar.collapsed {
+  width: 0;
+  border-right: none;
+}
+
+.gis-map-canvas {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#map { width: 100%; height: 100%; z-index: 1; }
+
+.gis-status-bar {
+  height: 32px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 11px;
+  color: var(--muted);
+  z-index: 30;
+  gap: 20px;
+}
+
 .gis-sidebar-header {
-  padding: 20px;
+  padding: 16px;
   border-bottom: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .gis-sidebar-title {
@@ -291,7 +341,66 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 .gis-sidebar-content {
   flex: 1;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.gis-tabs {
+  display: flex;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 4px;
+}
+
+.gis-tab {
+  flex: 1;
+  padding: 10px 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.gis-tab i { font-size: 14px; }
+.gis-tab:hover { color: var(--text); }
+.gis-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(0, 200, 255, 0.05); }
+
+.gis-tab-panel {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.gis-tab-panel.active {
+  display: block;
+}
+
+.gis-panel-section {
+  margin-bottom: 24px;
+}
+
+.gis-panel-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
 }
 
 .gis-sidebar-section {
@@ -341,16 +450,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 }
 
 /* Floating Controls */
-.gis-top-search {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  width: 400px;
-  max-width: 90%;
-}
-
 .glass-panel {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
@@ -419,21 +518,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   color: #000;
 }
 
-.map-coords {
-  position: absolute;
-  bottom: 20px;
-  left: 320px;
-  z-index: 10;
-  font-size: 11px;
-  padding: 6px 12px;
-  color: var(--text);
-}
-
-@media (max-width: 900px) {
-  .map-coords {
-    left: 10px;
-  }
-}
 
 .north-arrow {
   position: absolute;
@@ -481,11 +565,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 @media (max-width: 900px) {
   .gis-sidebar {
     position: absolute;
-    left: -300px;
+    left: 0;
+    transform: translateX(-100%);
     height: 100%;
+    width: 280px;
   }
-  .gis-sidebar.open { transform: translateX(300px); }
-  .gis-top-search { width: 300px; }
+  .gis-sidebar.open { transform: translateX(0); }
+  .gis-sidebar.collapsed { width: 280px; transform: translateX(-100%); }
 }
 
 .map-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 260px; pointer-events: auto; }
@@ -795,94 +881,193 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 </div>
 
 <div class="page" id="page-map">
-  <div class="wrapper" style="position: relative;">
-    
-    <aside class="gis-sidebar" id="gis-sidebar">
-      <div class="gis-sidebar-header">
-        <div class="gis-sidebar-title">QBC GIS Platform</div>
-        <div class="gis-sidebar-stats">
-          <span><i class="far fa-eye"></i> 1.2k views</span>
-          <span><i class="far fa-calendar-alt"></i> May 2025</span>
-        </div>
-        <div style="display:flex; gap:8px; margin-top:16px;">
-          <button class="btn btn-primary btn-sm flex-1" onclick="document.getElementById('kml-upload').click()"><i class="fas fa-plus"></i> Add Layer</button>
-          <button class="btn btn-ghost btn-sm" title="Share"><i class="fas fa-share-alt"></i></button>
-        </div>
-      </div>
-
-      <div class="gis-sidebar-content">
-        <div class="gis-sidebar-section">
-          <div class="gis-sidebar-section-title">Data Layers <i class="fas fa-chevron-down"></i></div>
-          <div id="gis-layers-list">
-            <div class="gis-layer-item">
-              <input type="checkbox" checked onchange="toggleLayer('workorders', this.checked)">
-              <div class="gis-layer-info">
-                <span class="gis-layer-name">Work Orders</span>
-                <span class="gis-layer-count" id="gis-count-wo">0 items</span>
-              </div>
-              <button class="btn-reset" style="color:var(--muted)"><i class="fas fa-ellipsis-v"></i></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="gis-sidebar-section">
-          <div class="gis-sidebar-section-title">Boundaries <i class="fas fa-chevron-down"></i></div>
-          <div class="gis-layer-item">
-            <input type="checkbox" checked id="toggle-boundary" onchange="toggleBoundaryVisibility()">
-            <div class="gis-layer-info">
-              <span class="gis-layer-name">Project Boundary</span>
-            </div>
-            <div style="width:12px; height:12px; border:1px dashed var(--accent); background:rgba(0,200,255,0.1)"></div>
-          </div>
-        </div>
-
-        <div class="gis-sidebar-section" id="legend-section">
-          <div class="gis-sidebar-section-title">Legend</div>
-          <div style="display:flex; flex-direction:column; gap:10px; font-size:12px;">
-            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--green); border-radius:50%"></span> On-Time</div>
-            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--amber); border-radius:50%"></span> Comp (Breached)</div>
-            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--red); border-radius:50%"></span> Not Comp (Breached)</div>
-            <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--blue); border-radius:50%"></span> Pending</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="gis-sidebar-footer">
-        <div class="gis-sidebar-section-title">Basemap Selection</div>
-        <div class="basemap-grid">
-          <div class="basemap-opt" onclick="setMapView('standard')" id="base-std">
-            <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/4/8/5" alt="Street">
-            <span>Street</span>
-          </div>
-          <div class="basemap-opt" onclick="setMapView('satellite')" id="base-sat">
-            <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/8/5" alt="Satellite">
-            <span>Satellite</span>
-          </div>
-          <div class="basemap-opt active" onclick="setMapView('hybrid')" id="base-hyb">
-            <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/8/5" alt="Hybrid">
-            <span>Hybrid</span>
-          </div>
-          <div class="basemap-opt" onclick="setMapView('terrain')" id="base-ter">
-            <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/4/8/5" alt="Terrain">
-            <span>Terrain</span>
-          </div>
-        </div>
-        <button class="btn btn-ghost btn-sm w-100 mt-3" onclick="exportMapKML()"><i class="fas fa-external-link-alt"></i> View in Google Earth</button>
-        <button class="btn btn-primary btn-sm w-100 mt-2" id="admin-save-presets" style="display:none" onclick="saveMapPresets()"><i class="fas fa-save"></i> Save Global Default</button>
-      </div>
-    </aside>
-
-    <div id="map"></div>
-
-    <div class="gis-top-search glass-panel">
-      <div class="gis-search-input-wrap">
+  <div class="gis-container">
+    <header class="gis-top-bar">
+      <button class="btn btn-ghost btn-sm" onclick="toggleGisSidebar()" title="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+      <div class="gis-search-wrap" style="flex: 1; max-width: 600px; display: flex; align-items: center; background: var(--surface2); border-radius: 8px; padding: 0 12px; border: 1px solid var(--border);">
         <i class="fas fa-search" style="color:var(--muted)"></i>
-        <input type="text" id="map-search-input" class="gis-search-input" placeholder="Search coordinates or locations..." onkeydown="if(event.key==='Enter')searchCoordinates()">
+        <input type="text" id="map-search-input" class="gis-search-input" placeholder="Search Asset ID, coordinates, or locations..." onkeydown="if(event.key==='Enter')searchCoordinates()" style="background: transparent; border: none; color: var(--text); flex: 1; padding: 8px; outline: none; font-size: 13px;">
         <button class="btn-reset" onclick="searchCoordinates()"><i class="fas fa-arrow-right" style="color:var(--accent)"></i></button>
       </div>
-    </div>
+      <div style="flex: 1;"></div>
+      <div class="gis-top-actions">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('kml-upload').click()"><i class="fas fa-upload"></i> Import</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportMapKML()"><i class="fas fa-download"></i> Export</button>
+      </div>
+    </header>
 
-    <div class="gis-toolbar glass-panel">
+    <div class="gis-main-content">
+      <aside class="gis-sidebar" id="gis-sidebar">
+        <div class="gis-sidebar-header">
+          <div class="gis-sidebar-title">QBC GIS Platform</div>
+          <div class="gis-sidebar-stats">
+            <span><i class="far fa-eye"></i> 1.2k views</span>
+            <span><i class="far fa-calendar-alt"></i> May 2025</span>
+          </div>
+        </div>
+
+        <div class="gis-tabs">
+          <button class="gis-tab active" onclick="switchGisTab('layers')" title="Layers"><i class="fas fa-layer-group"></i><span>Layers</span></button>
+          <button class="gis-tab" onclick="switchGisTab('assets')" title="Asset Info"><i class="fas fa-info-circle"></i><span>Assets</span></button>
+          <button class="gis-tab" onclick="switchGisTab('measure')" title="Measure"><i class="fas fa-ruler-combined"></i><span>Measure</span></button>
+          <button class="gis-tab" onclick="switchGisTab('workorders')" title="Work Orders"><i class="fas fa-clipboard-list"></i><span>Work</span></button>
+          <button class="gis-tab" onclick="switchGisTab('search')" title="Search Results"><i class="fas fa-list-ul"></i><span>Results</span></button>
+        </div>
+
+        <div class="gis-sidebar-content">
+          <!-- LAYERS PANEL -->
+          <div class="gis-tab-panel active" id="gis-panel-layers">
+            <div class="gis-panel-section">
+              <div class="gis-panel-section-title">Data Layers <i class="fas fa-chevron-down"></i></div>
+              <div id="gis-layers-list">
+                <div class="gis-layer-item">
+                  <input type="checkbox" checked onchange="toggleLayer('workorders', this.checked)">
+                  <div class="gis-layer-info">
+                    <span class="gis-layer-name">Work Orders</span>
+                    <span class="gis-layer-count" id="gis-count-wo">0 items</span>
+                  </div>
+                  <button class="btn-reset" style="color:var(--muted)"><i class="fas fa-ellipsis-v"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="gis-panel-section">
+              <div class="gis-panel-section-title">Boundaries <i class="fas fa-chevron-down"></i></div>
+              <div class="gis-layer-item">
+                <input type="checkbox" checked id="toggle-boundary" onchange="toggleBoundaryVisibility()">
+                <div class="gis-layer-info">
+                  <span class="gis-layer-name">Project Boundary</span>
+                </div>
+                <div style="width:12px; height:12px; border:1px dashed var(--accent); background:rgba(0,200,255,0.1)"></div>
+              </div>
+            </div>
+
+            <div class="gis-panel-section" id="legend-section">
+              <div class="gis-panel-section-title">Legend</div>
+              <div style="display:flex; flex-direction:column; gap:10px; font-size:12px;">
+                <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--green); border-radius:50%"></span> On-Time</div>
+                <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--amber); border-radius:50%"></span> Comp (Breached)</div>
+                <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--red); border-radius:50%"></span> Not Comp (Breached)</div>
+                <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--blue); border-radius:50%"></span> Pending</div>
+              </div>
+            </div>
+
+            <div class="gis-panel-section">
+              <div class="gis-panel-section-title">Basemap Selection</div>
+              <div class="basemap-grid">
+                <div class="basemap-opt" onclick="setMapView('standard')" id="base-std">
+                  <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/4/8/5" alt="Street">
+                  <span>Street</span>
+                </div>
+                <div class="basemap-opt" onclick="setMapView('satellite')" id="base-sat">
+                  <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/8/5" alt="Satellite">
+                  <span>Satellite</span>
+                </div>
+                <div class="basemap-opt active" onclick="setMapView('hybrid')" id="base-hyb">
+                  <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/8/5" alt="Hybrid">
+                  <span>Hybrid</span>
+                </div>
+                <div class="basemap-opt" onclick="setMapView('terrain')" id="base-ter">
+                  <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/4/8/5" alt="Terrain">
+                  <span>Terrain</span>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm w-100 mt-2" id="admin-save-presets" style="display:none" onclick="saveMapPresets()"><i class="fas fa-save"></i> Save Global Default</button>
+            </div>
+          </div>
+
+          <!-- ASSET INFO PANEL -->
+          <div class="gis-tab-panel" id="gis-panel-assets">
+            <div class="gis-panel-section">
+               <div class="gis-panel-section-title">Asset Information <i class="fas fa-info-circle"></i></div>
+               <div id="point-details" style="font-size:12px; color:var(--text); line-height:1.6;">
+                  <p style="color: var(--muted); padding: 20px; text-align: center;">Select an asset on the map to view details.</p>
+               </div>
+            </div>
+            <div class="gis-panel-section" id="road-chainage-section">
+               <div class="gis-panel-section-title">Engineering Data <i class="fas fa-drafting-compass"></i></div>
+               <div style="font-size: 11px; color: var(--muted); padding: 10px; background: var(--surface2); border-radius: 6px; border: 1px dashed var(--border);">
+                  <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+                     <span>Road Chainage:</span> <span style="color: var(--text);">--</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between;">
+                     <span>Elevation:</span> <span style="color: var(--text);">--</span>
+                  </div>
+               </div>
+            </div>
+          </div>
+
+          <!-- MEASUREMENT PANEL -->
+          <div class="gis-tab-panel" id="gis-panel-measure">
+            <div class="gis-panel-section">
+               <div class="gis-panel-section-title">Active Measurement <i class="fas fa-ruler-combined"></i></div>
+               <div id="measure-results" style="background: var(--surface2); border-radius: 8px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border);">
+                  <p style="color: var(--muted); font-size: 12px; text-align: center;">Measurement mode inactive</p>
+               </div>
+               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  <button class="btn btn-primary btn-sm" onclick="toggleMeasure()" id="measure-btn-main"><i class="fas fa-play"></i> Start</button>
+                  <button class="btn btn-ghost btn-sm" onclick="clearMeasurements()"><i class="fas fa-eraser"></i> Clear</button>
+                  <button class="btn btn-red btn-sm" onclick="stopMeasurement()" style="grid-column: span 2;"><i class="fas fa-times-circle"></i> Exit Mode</button>
+               </div>
+            </div>
+            <div class="gis-panel-section">
+               <div class="gis-panel-section-title">Instructions</div>
+               <ul style="font-size: 11px; color: var(--muted); padding-left: 16px; line-height: 1.6;">
+                  <li>Click on the map to place measurement points.</li>
+                  <li>Double-click to finish the current measurement.</li>
+                  <li>Use "Clear" to reset current drawing.</li>
+               </ul>
+            </div>
+          </div>
+
+          <!-- WORK ORDERS PANEL -->
+          <div class="gis-tab-panel" id="gis-panel-workorders">
+             <div class="gis-panel-section">
+                <div class="gis-panel-section-title">Inspection Records <i class="fas fa-file-invoice"></i></div>
+                <div style="font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+                   <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Last Inspection:</span> <span style="color:var(--text)">15 May 2025</span></div>
+                   <div style="display:flex; justify-content:space-between;"><span>Status:</span> <span class="status-badge badge-COMP">Compliant</span></div>
+                </div>
+                <button class="btn btn-ghost btn-sm w-100" onclick="showToast('Loading Inspection History...')"><i class="fas fa-history"></i> View Full History</button>
+             </div>
+
+             <div class="gis-panel-section">
+                <div class="gis-panel-section-title">Nearby Work Orders <i class="fas fa-clipboard-list"></i></div>
+                <div id="gis-nearby-wo-list">
+                   <p style="color: var(--muted); font-size: 12px; padding: 20px; text-align: center;">Click on the map to find nearby work orders.</p>
+                </div>
+             </div>
+
+             <div class="gis-panel-section">
+                <div class="gis-panel-section-title">Utility & Inventory <i class="fas fa-database"></i></div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                   <div class="gis-layer-item">
+                      <input type="checkbox" onchange="showToast('Utility Layer coming soon')">
+                      <div class="gis-layer-info"><span class="gis-layer-name">Electrical Cables</span></div>
+                   </div>
+                   <div class="gis-layer-item">
+                      <input type="checkbox" onchange="showToast('Water Network coming soon')">
+                      <div class="gis-layer-info"><span class="gis-layer-name">Water Pipelines</span></div>
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          <!-- SEARCH RESULTS PANEL -->
+          <div class="gis-tab-panel" id="gis-panel-search">
+             <div class="gis-panel-section">
+                <div class="gis-panel-section-title">Search Results <i class="fas fa-list-ul"></i></div>
+                <div id="gis-search-results">
+                   <p style="color: var(--muted); font-size: 12px; padding: 20px; text-align: center;">Search by ID or Coordinates above.</p>
+                </div>
+             </div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="gis-map-canvas">
+        <div id="map"></div>
+        <div class="gis-toolbar glass-panel">
       <button class="gis-tool-btn" onclick="map.zoomIn()" title="Zoom In"><i class="fas fa-plus"></i></button>
       <button class="gis-tool-btn" onclick="map.zoomOut()" title="Zoom Out"><i class="fas fa-minus"></i></button>
       
@@ -911,27 +1096,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand"></i></button>
     </div>
 
-    <div class="map-card glass-panel" id="point-info" style="display: none; position: absolute; bottom: 80px; left: 320px; z-index: 10; width: 280px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="margin:0"><i class="fas fa-info-circle"></i> Details</h3>
-        <button class="btn-reset" onclick="hidePointInfo()"><i class="fas fa-times"></i></button>
-      </div>
-      <div id="point-details" style="font-size:12px; color:var(--text); line-height:1.6;"></div>
-      <div id="point-edit-actions" style="margin-top:12px; display:flex; gap:8px;"></div>
-    </div>
-
-    <div class="map-card glass-panel" id="measure-info" style="display: none; position: absolute; bottom: 20px; right: 20px; z-index: 20; width: 240px; border-color: var(--accent); border-width: 2px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 style="margin:0; font-size:11px;"><i class="fas fa-ruler-combined"></i> Measurements</h3>
-        <button class="btn btn-red btn-icon" onclick="stopMeasurement()" title="Exit Measurement"><i class="fas fa-times"></i></button>
-      </div>
-      <div id="measure-results" style="font-size:12px; color:var(--text); font-weight:700;">No data</div>
-      <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px;">
-         <button class="btn btn-ghost btn-sm flex-1" onclick="clearMeasurements()"><i class="fas fa-eraser"></i> Clear</button>
       </div>
     </div>
 
-    <div class="map-coords glass-panel" id="map-coords-display">Lat: 0.000000 | Lng: 0.000000</div>
+    <footer class="gis-status-bar">
+      <div id="map-coords-display"><i class="fas fa-crosshairs"></i> Lat: 0.000000 | Lng: 0.000000</div>
+      <div style="border-right: 1px solid var(--border); height: 16px;"></div>
+      <div id="map-scale-display">Scale: --</div>
+      <div style="flex: 1;"></div>
+      <div id="active-layer-display">Layer: Work Orders</div>
+      <div id="live-measure-summary" style="color: var(--accent); font-weight: 600;"></div>
+    </footer>
+
     <input type="file" id="kml-upload" style="display:none" accept=".kml,.kmz,.gpx,.csv" onchange="handleKMLUpload(event)">
   </div>
 </div>
@@ -1702,7 +1878,10 @@ function showPage(id) {
   const gisToggle = document.getElementById('gis-sidebar-toggle');
   if (id === 'map') {
     if (gisToggle) gisToggle.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
-    setTimeout(initMap, 100);
+    setTimeout(() => {
+       initMap();
+       if(map) map.invalidateSize();
+    }, 100);
   } else {
     if (gisToggle) gisToggle.style.display = 'none';
   }
@@ -2676,6 +2855,11 @@ async function initMap() {
 
   L.control.scale({ position: 'bottomright', imperial: false }).addTo(map);
 
+  map.on('zoomend', () => {
+    const scaleDisp = document.getElementById('map-scale-display');
+    if (scaleDisp) scaleDisp.textContent = `Zoom Level: ${map.getZoom()}`;
+  });
+
   baseLayers.standard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxNativeZoom: 19, maxZoom: 22, attribution: '© OpenStreetMap' });
   baseLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 19, maxZoom: 22, attribution: '© Esri' });
   baseLayers.hybrid = L.layerGroup([
@@ -2736,10 +2920,11 @@ async function initMap() {
       updateMeasureUI(e);
     });
     
-    // Also listen to start and stop
     map.on('measurestart', function() {
-       document.getElementById('measure-info').style.display = 'block';
-       document.getElementById('measure-results').innerHTML = 'Measuring...';
+       switchGisTab('measure');
+       document.getElementById('measure-results').innerHTML = '<div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-spinner fa-spin"></i> <span>Measuring active...</span></div>';
+       document.getElementById('measure-btn-main').innerHTML = '<i class="fas fa-stop"></i> Stop';
+       document.getElementById('measure-btn-main').classList.add('btn-red');
     });
   }
 
@@ -3041,14 +3226,13 @@ function onMapClick(e) {
 }
 
 function showPointInfo(lat, lng, woData = null, isBoundary = false) {
-  const panel = document.getElementById('point-info');
+  switchGisTab('assets');
   const details = document.getElementById('point-details');
-  panel.style.display = 'block';
   
   let content = `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <strong style="font-size:12px;">Object Details</strong>
-      <span style="font-size:9px; color:var(--muted);">${lat.toFixed(4)}, ${lng.toFixed(4)}</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+      <strong style="font-size:13px; color: var(--accent);">Object Details</strong>
+      <span style="font-size:10px; color:var(--muted); font-family: monospace;">${lat.toFixed(6)}, ${lng.toFixed(6)}</span>
     </div>
   `;
 
@@ -3147,7 +3331,10 @@ function showPointInfo(lat, lng, woData = null, isBoundary = false) {
 }
 
 function hidePointInfo() {
-  document.getElementById('point-info').style.display = 'none';
+  const details = document.getElementById('point-details');
+  if(details) {
+    details.innerHTML = '<p style="color: var(--muted); padding: 20px; text-align: center;">Select an asset on the map to view details.</p>';
+  }
 }
 
 function setMapView(type) {
@@ -3327,6 +3514,7 @@ function exitGisModes() {
 
 function toggleMeasure() {
   const btn = document.getElementById('tool-measure');
+  const mainBtn = document.getElementById('measure-btn-main');
   if (btn.classList.contains('active')) {
     stopMeasurement();
   } else {
@@ -3336,43 +3524,98 @@ function toggleMeasure() {
 
 function startMeasurement() {
   const btn = document.getElementById('tool-measure');
+  const mainBtn = document.getElementById('measure-btn-main');
   btn.classList.add('active');
+  switchGisTab('measure');
   measureControl.addTo(map);
-  // Leaflet-measure usually auto-starts its UI
-  document.getElementById('measure-info').style.display = 'block';
-  document.getElementById('measure-results').innerHTML = '<span style="color:var(--muted)">Click on map to start measuring</span>';
+  // Leaflet-measure plugin auto-triggers measurestart
   showToast("Measurement mode active");
 }
 
 function stopMeasurement() {
   const btn = document.getElementById('tool-measure');
+  const mainBtn = document.getElementById('measure-btn-main');
   btn.classList.remove('active');
+  if(mainBtn) {
+    mainBtn.innerHTML = '<i class="fas fa-play"></i> Start';
+    mainBtn.classList.remove('btn-red');
+  }
   try { map.removeControl(measureControl); } catch(e){}
-  document.getElementById('measure-info').style.display = 'none';
+  document.getElementById('measure-results').innerHTML = '<p style="color: var(--muted); font-size: 12px; text-align: center;">Measurement mode inactive</p>';
+  document.getElementById('live-measure-summary').textContent = '';
   showToast("Measurement mode exited");
 }
 
 function clearMeasurements() {
+  // The leaflet-measure plugin doesn't have a simple "clear" method exposed easily while active
+  // So we stop and restart to reset the state
   stopMeasurement();
   startMeasurement();
 }
 
 function updateMeasureUI(e) {
-  const info = document.getElementById('measure-info');
   const results = document.getElementById('measure-results');
-  if (info && results) {
-    info.style.display = 'block';
+  const summary = document.getElementById('live-measure-summary');
+  if (results) {
     let html = `
-      <div style="margin-bottom:4px;">Area: <span style="color:var(--accent)">${e.areaDisplay}</span></div>
-      <div>Length: <span style="color:var(--accent)">${e.lengthDisplay}</span></div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:11px; color:var(--muted);">Area:</span>
+          <span style="color:var(--accent); font-weight:700;">${e.areaDisplay}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:11px; color:var(--muted);">Length:</span>
+          <span style="color:var(--accent); font-weight:700;">${e.lengthDisplay}</span>
+        </div>
+      </div>
     `;
     results.innerHTML = html;
+  }
+  if (summary) {
+    summary.textContent = `| Length: ${e.lengthDisplay} | Area: ${e.areaDisplay}`;
   }
 }
 
 function toggleGisSidebar() {
   const sb = document.getElementById('gis-sidebar');
-  sb.classList.toggle('open');
+  if (window.innerWidth <= 900) {
+    sb.classList.toggle('open');
+  } else {
+    sb.classList.toggle('collapsed');
+  }
+  // Important: Resize map after sidebar transition
+  setTimeout(() => { if(map) map.invalidateSize(); }, 350);
+}
+
+// Global resize listener for map sync
+window.addEventListener('resize', () => {
+  if (allData.length > 0 && document.getElementById('page-map').classList.contains('active')) {
+    if(map) map.invalidateSize();
+    const gisToggle = document.getElementById('gis-sidebar-toggle');
+    if (gisToggle) gisToggle.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
+  }
+});
+
+function switchGisTab(tabId) {
+  // Update Tabs UI
+  document.querySelectorAll('.gis-tab').forEach(t => t.classList.remove('active'));
+  const activeTab = document.querySelector(`.gis-tab[onclick*="'${tabId}'"]`);
+  if (activeTab) activeTab.classList.add('active');
+
+  // Update Panels UI
+  document.querySelectorAll('.gis-tab-panel').forEach(p => p.classList.remove('active'));
+  const activePanel = document.getElementById(`gis-panel-${tabId}`);
+  if (activePanel) activePanel.classList.add('active');
+
+  // Auto-expand sidebar if collapsed
+  const sb = document.getElementById('gis-sidebar');
+  if (sb.classList.contains('collapsed')) {
+    sb.classList.remove('collapsed');
+    setTimeout(() => { if(map) map.invalidateSize(); }, 350);
+  }
+  if (window.innerWidth <= 900 && !sb.classList.contains('open')) {
+    sb.classList.add('open');
+  }
 }
 
 async function updateObjectStyle(type, id, key, value) {
