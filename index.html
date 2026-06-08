@@ -202,12 +202,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 /* ─── FILTERS & TABLE ─── */
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
 .filter-input{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--text);font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:12px;outline:none;transition:border .2s;}
-.filter-input:focus{border-color:var(--accent);}
+.filter-input:focus{border-color:var(--accent);box-shadow: 0 0 0 2px var(--accent);}
 .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r); -webkit-overflow-scrolling: touch; }
 .main-table{width:100%;border-collapse:collapse;font-size:12px;}
 .main-table thead th{background:var(--surface2);padding:10px 12px;text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;border-bottom:1px solid var(--border);position:sticky;top:0;}
 .main-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
-.main-table tbody tr:hover{background:rgba(255,255,255,.03);}
+.main-table tbody tr:hover{background:rgba(0, 200, 255, 0.05);}
+.main-table tbody tr.selected { background: rgba(0, 200, 255, 0.1) !important; }
 .main-table tbody td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
 .wo-num{font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-weight:700;font-size:13px;color:var(--accent);}
 .desc-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
@@ -2180,8 +2181,13 @@ function applyFilters() {
 function selectWorkOrderRow(woId) {
   selectedWorkOrder = woId;
   document.querySelectorAll('#woBody tr').forEach(tr => {
-    if (tr.getAttribute('data-wo') === woId) tr.classList.add('selected');
-    else tr.classList.remove('selected');
+    if (tr.getAttribute('data-wo') === String(woId)) {
+      tr.classList.add('selected');
+      tr.setAttribute('aria-selected', 'true');
+    } else {
+      tr.classList.remove('selected');
+      tr.setAttribute('aria-selected', 'false');
+    }
   });
 }
 
@@ -2196,7 +2202,7 @@ function renderTable() {
   tbody.innerHTML = slice.map((r, i) => {
     const stBadge = `<span class="status-badge badge-${r.Status||'COMP'}">${r.Status||'–'}</span>`;
     const photo = photos[r.WorkOrder];
-    const isSelected = selectedWorkOrder === r.WorkOrder;
+    const isSelected = String(selectedWorkOrder) === String(r.WorkOrder);
 
     let photoCell = '';
     if (photo) {
@@ -2218,7 +2224,7 @@ function renderTable() {
       <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); copyCoords(${r.Lat}, ${r.Lng})" title="Copy Coordinates"><i class="fas fa-copy"></i></button>
     ` : '';
 
-    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')">
+    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')" aria-selected="${isSelected}">
       <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
       <td onclick="makeEditable(this, '${r.WorkOrder}', 'WorkOrder')"><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}" onclick="makeEditable(this, '${r.WorkOrder}', 'Description')"><span>${(r.Description||'').substring(0,40)}</span></td>
@@ -3969,6 +3975,7 @@ function showOnMap(lat, lng, wo) {
         zIndexOffset: 1000
       }).addTo(map);
 
+      selectWorkOrderRow(wo);
       showPointInfo(lat, lng, allData.find(d => String(d.WorkOrder) === String(wo)));
     }
   }, 300);
