@@ -58,6 +58,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .auth-logo { font-size: 32px; margin-bottom: 24px; color: var(--accent); }
 .auth-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); margin-bottom: 16px; font-family: inherit; }
 .auth-btn { width: 100%; background: var(--accent); color: #000; border: none; border-radius: 8px; padding: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.auth-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 .auth-btn:hover { opacity: 0.9; }
 .auth-toggle { margin-top: 24px; font-size: 13px; color: var(--muted); cursor: pointer; }
 .auth-toggle span { color: var(--accent); }
@@ -191,6 +192,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 /* ─── BUTTONS ─── */
 .btn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:12px;font-weight:500;transition:all .2s; display: inline-flex; align-items: center; gap: 8px; min-height: 36px;}
+.btn:disabled{opacity: 0.7; cursor: not-allowed;}
 .btn-primary{background:var(--accent);color:#000;}
 .btn-primary:hover{opacity: 0.9;}
 .btn-sm{padding:5px 12px;font-size:11px;}
@@ -198,6 +200,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
 .btn-green{background:var(--green);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
+.btn-reset{background:none; border:none; padding:0; cursor:pointer; font-family:inherit;}
 
 /* ─── FILTERS & TABLE ─── */
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
@@ -627,13 +630,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Sign in to Qatar Building Company platform</p>
     
     <div id="signup-fields" style="display: none;">
-      <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name">
-      <input type="text" id="auth-mobile" class="auth-input" placeholder="Mobile Number">
-      <input type="text" id="auth-position" class="auth-input" placeholder="Position / Job Title">
+      <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name" onkeydown="if(event.key==='Enter')handleAuth()">
+      <input type="text" id="auth-mobile" class="auth-input" placeholder="Mobile Number" onkeydown="if(event.key==='Enter')handleAuth()">
+      <input type="text" id="auth-position" class="auth-input" placeholder="Position / Job Title" onkeydown="if(event.key==='Enter')handleAuth()">
     </div>
 
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address">
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password">
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" onkeydown="if(event.key==='Enter')handleAuth()">
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password" onkeydown="if(event.key==='Enter')handleAuth()">
     
     <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
     <div style="margin-top: 16px; font-size: 11px; color: var(--accent); cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
@@ -661,7 +664,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
     <div class="user-menu">
       <span id="nav-user-name" style="font-size: 11px; font-weight: 600; color: var(--text); margin-right: 4px;">User</span>
-      <button class="user-avatar" id="nav-user-btn" onclick="toggleUserDropdown()" aria-label="User Menu" aria-haspopup="true" aria-expanded="false">U</button>
+      <button class="user-avatar" id="nav-user-btn" onclick="toggleUserDropdown()" aria-label="User Menu" aria-haspopup="true" aria-expanded="false"><span id="nav-user-initial">U</span></button>
       <div class="user-dropdown" id="user-dropdown" role="menu">
         <button class="dropdown-item" onclick="showProfile()" role="menuitem"><i class="fas fa-user-circle"></i> Profile</button>
         <button class="dropdown-item" onclick="showPage('settings')" role="menuitem"><i class="fas fa-sliders-h"></i> Settings</button>
