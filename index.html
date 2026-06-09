@@ -199,6 +199,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .btn-green{background:var(--green);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
 
+/* ─── UPLOAD PROGRESS ─── */
+.upload-progress-container { margin-top: 16px; display: none; flex-direction: column; gap: 8px; }
+.upload-progress-text { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; }
+.upload-progress-bar { background: var(--surface2); border: 1px solid var(--border); height: 8px; border-radius: 4px; overflow: hidden; }
+.upload-progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+.upload-status-msg { font-size: 11px; margin-top: 4px; text-align: center; }
+.upload-status-msg.success { color: var(--green); }
+.upload-status-msg.error { color: var(--red); }
+
 /* ─── FILTERS & TABLE ─── */
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
 .filter-input{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--text);font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:12px;outline:none;transition:border .2s;}
@@ -1254,8 +1263,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <div class="file-name" id="excelFileName"></div>
         </div>
         <div style="display:flex; gap:8px; margin-top:16px;">
-          <button class="btn btn-ghost btn-sm flex-1" onclick="downloadCSVTemplate()"><i class="fas fa-download"></i> Template</button>
-          <button class="btn btn-primary btn-sm flex-1" onclick="processExcelUpload()"><i class="fas fa-upload"></i> Upload</button>
+          <button class="btn btn-ghost btn-sm flex-1" id="csv-template-btn" onclick="downloadCSVTemplate()"><i class="fas fa-download"></i> Template</button>
+          <button class="btn btn-primary btn-sm flex-1" id="csv-upload-btn" onclick="processExcelUpload()"><i class="fas fa-upload"></i> Upload</button>
+        </div>
+
+        <div class="upload-progress-container" id="upload-progress-container">
+          <div class="upload-progress-text">
+            <span id="upload-status-label">Uploading CSV file...</span>
+            <span id="upload-pct">0%</span>
+          </div>
+          <div class="upload-progress-bar">
+            <div class="upload-progress-fill" id="upload-progress-fill"></div>
+          </div>
+          <div id="upload-status-msg" class="upload-status-msg"></div>
         </div>
       </div>
 
@@ -1399,7 +1419,7 @@ let photos = {};
 let currentPage = 1;
 let fabCurrentPage = 1;
 const PAGE_SIZE = 200;
-let editingIdx = null;
+let editingWO = null;
 let map = null;
 let currentBasemap = 'standard';
 let boundaryLayer = null;
@@ -1770,12 +1790,12 @@ async function saveWorkOrderToSupabase(wo) {
     sign_shape: wo.SignShape,
     sign_size: wo.SignSize,
     sign_material: wo.SignMaterial,
-    sign_qty: parseInt(wo.SignQty) || null,
+    sign_qty: wo.SignQty || null,
     post_type: wo.PostType,
     post_height: wo.PostHeight,
-    post_qty: parseInt(wo.PostQty) || null,
+    post_qty: wo.PostQty || null,
     found_size: wo.FoundSize,
-    found_qty: parseInt(wo.FoundQty) || null,
+    found_qty: wo.FoundQty || null,
     fab_status: wo.FabStatus,
     installation_date: wo.InstallationDate || null,
     scrap_removal: wo.ScrapRemoval,
@@ -2211,7 +2231,7 @@ function renderManufacturingTable() {
           ${mapActions}
           <button class="btn btn-ghost btn-sm" onclick="showPage('workorders'); selectWorkOrderRow('${r.WorkOrder}');" title="View Work Order"><i class="fas fa-clipboard-list"></i></button>
           <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
-          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal(${allData.indexOf(r)}, 'manufacturing')"><i class="fas fa-edit"></i></button>` : ''}
+          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal('${r.WorkOrder}', 'manufacturing')"><i class="fas fa-edit"></i></button>` : ''}
         </div>
       </td>
     </tr>`;
@@ -2362,7 +2382,7 @@ function renderTable() {
           <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); sendToFabrication('${r.WorkOrder}')" title="Send to Fabrication"><i class="fas fa-paper-plane"></i></button>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showManufacturingFor('${r.WorkOrder}')" title="View Manufacturing"><i class="fas fa-industry"></i></button>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openFabModal('${r.WorkOrder}')" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
-          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openEditModal(${allData.indexOf(r)})"><i class="fas fa-edit"></i></button>` : ''}
+          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openEditModal('${r.WorkOrder}')"><i class="fas fa-edit"></i></button>` : ''}
         </div>
       </td>
     </tr>`;
@@ -2690,6 +2710,23 @@ async function processExcelUpload() {
     return; 
   }
   
+  const uploadBtn = document.getElementById('csv-upload-btn');
+  const templateBtn = document.getElementById('csv-template-btn');
+  const progressContainer = document.getElementById('upload-progress-container');
+  const progressFill = document.getElementById('upload-progress-fill');
+  const progressPct = document.getElementById('upload-pct');
+  const statusLabel = document.getElementById('upload-status-label');
+  const statusMsg = document.getElementById('upload-status-msg');
+
+  uploadBtn.disabled = true;
+  templateBtn.disabled = true;
+  progressContainer.style.display = 'flex';
+  progressFill.style.width = '0%';
+  progressPct.textContent = '0%';
+  statusLabel.textContent = 'Processing CSV file...';
+  statusMsg.textContent = '';
+  statusMsg.className = 'upload-status-msg';
+
   const reader = new FileReader();
   reader.onload = async e => {
     try {
@@ -2818,12 +2855,12 @@ async function processExcelUpload() {
           sign_shape: wo.SignShape,
           sign_size: wo.SignSize,
           sign_material: wo.SignMaterial,
-          sign_qty: parseInt(wo.SignQty) || null,
+          sign_qty: wo.SignQty || null,
           post_type: wo.PostType,
           post_height: wo.PostHeight,
-          post_qty: parseInt(wo.PostQty) || null,
+          post_qty: wo.PostQty || null,
           found_size: wo.FoundSize,
-          found_qty: parseInt(wo.FoundQty) || null,
+          found_qty: wo.FoundQty || null,
           fab_status: wo.FabStatus,
           installation_date: wo.InstallationDate || null,
           scrap_removal: wo.ScrapRemoval,
@@ -2832,23 +2869,52 @@ async function processExcelUpload() {
 
         // Process in chunks
         const chunkSize = 100;
+        const totalChunks = Math.ceil(woData.length / chunkSize) + Math.ceil(mfgData.length / chunkSize);
+        let processedChunks = 0;
+
+        statusLabel.textContent = 'Uploading to database...';
+
+        const updateProgress = () => {
+          processedChunks++;
+          const pct = Math.round((processedChunks / totalChunks) * 100);
+          progressFill.style.width = `${pct}%`;
+          progressPct.textContent = `${pct}%`;
+        };
+
         for (let i = 0; i < woData.length; i += chunkSize) {
           const { error } = await supabaseClient.from('work_orders').upsert(woData.slice(i, i + chunkSize), { onConflict: 'work_order' });
           if (error) throw error;
+          updateProgress();
         }
         for (let i = 0; i < mfgData.length; i += chunkSize) {
           const { error } = await supabaseClient.from('manufacturing').upsert(mfgData.slice(i, i + chunkSize), { onConflict: 'work_order_number' });
           if (error) throw error;
+          updateProgress();
         }
       } else {
          localStorage.setItem('qbc_data', JSON.stringify(uniqueData));
       }
       
-      showToast(`Successfully uploaded ${upsertData.length} records`);
+      statusLabel.textContent = 'Complete';
+      statusMsg.textContent = `CSV file uploaded successfully. ${uniqueData.length} records processed.`;
+      statusMsg.classList.add('success');
+      showToast(`Successfully uploaded ${uniqueData.length} records`);
       fetchData();
+      
+      setTimeout(() => {
+        progressContainer.style.display = 'none';
+        uploadBtn.disabled = false;
+        templateBtn.disabled = false;
+      }, 3000);
+
     } catch(err) { 
       console.error(err);
+      statusLabel.textContent = 'Error';
+      statusMsg.textContent = 'Upload failed. Please try again.';
+      statusMsg.classList.add('error');
       showToast('Error: ' + (err.message || 'Excel processing failed'), 'error'); 
+      uploadBtn.disabled = false;
+      templateBtn.disabled = false;
     }
   };
   reader.readAsArrayBuffer(pendingExcelFile);
@@ -4493,7 +4559,7 @@ function showFabHistory(woId) {
 }
 
 async function saveEdit() {
-  const r = editingIdx !== null ? { ...allData[editingIdx] } : {};
+  const r = editingWO !== null ? { ...allData.find(x => x.WorkOrder === editingWO) } : {};
   [...MAIN_FIELDS, ...FAB_FIELDS].forEach(f => {
     const el = document.getElementById('ef_'+f.k);
     if (el) r[f.k] = el.value;
@@ -4511,12 +4577,12 @@ async function saveEdit() {
   }
 }
 
-function openEditModal(idx, mode = 'workorder') {
+function openEditModal(woId, mode = 'workorder') {
   if (!isAdmin) { showToast('Admin mode required','error'); return; }
-  editingIdx = idx; 
-  const r = idx !== null ? allData[idx] : {};
+  editingWO = woId; 
+  const r = woId !== null ? allData.find(x => x.WorkOrder === woId) : {};
   const emt = document.getElementById('editModalTitle');
-  if (emt) emt.textContent = idx !== null ? `Edit ${mode === 'workorder' ? 'WO' : 'Manufacturing'} – ${r.WorkOrder}` : 'Add New Work Order';
+  if (emt) emt.textContent = woId !== null ? `Edit ${mode === 'workorder' ? 'WO' : 'Manufacturing'} – ${r.WorkOrder}` : 'Add New Work Order';
   
   const formGrid = document.getElementById('editFormGrid');
   const fabSection = document.querySelector('.fab-section');
