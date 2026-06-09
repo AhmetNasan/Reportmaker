@@ -1,4 +1,4 @@
--- Corrected SQL Migration Script for QBC Platform Restructure
+-- Robust SQL Migration Script for QBC Platform Restructure (v3)
 
 -- 1. Update work_orders table with new operational columns and rename highway to location
 DO $$
@@ -21,6 +21,8 @@ ADD COLUMN IF NOT EXISTS expiry_date DATE,
 ADD COLUMN IF NOT EXISTS media_announcement TEXT;
 
 -- 2. Create the new manufacturing table
+-- We use TEXT for quantity fields to match potential legacy data and avoid casting errors during migration.
+-- The app logic handles parsing these as needed.
 CREATE TABLE IF NOT EXISTS manufacturing (
     id BIGSERIAL PRIMARY KEY,
     work_order_number TEXT NOT NULL UNIQUE REFERENCES work_orders(work_order) ON DELETE CASCADE,
@@ -30,12 +32,12 @@ CREATE TABLE IF NOT EXISTS manufacturing (
     sign_ref TEXT,
     sign_shape TEXT,
     sign_size TEXT,
-    sign_qty INTEGER,
+    sign_qty TEXT,
     post_type TEXT,
     post_height TEXT,
-    post_qty INTEGER,
+    post_qty TEXT,
     found_size TEXT,
-    found_qty INTEGER,
+    found_qty TEXT,
     fab_status TEXT DEFAULT 'Pending',
     installation_date DATE,
     scrap_removal TEXT,
@@ -45,7 +47,6 @@ CREATE TABLE IF NOT EXISTS manufacturing (
 );
 
 -- 3. Robust Data Migration from work_orders to manufacturing
--- This DO block checks for column existence in work_orders before migrating
 DO $$
 DECLARE
     source_columns text := '';
@@ -72,11 +73,12 @@ BEGIN
             WHERE table_name = source_table AND column_name = col_name
         ) THEN
             dest_columns := dest_columns || ', ' || col_name;
+            -- We just select the column directly since destination is now TEXT or matching DATE
             source_columns := source_columns || ', ' || col_name;
         END IF;
     END LOOP;
 
-    -- Execute the migration if we found any data to move
+    -- Execute the migration
     EXECUTE 'INSERT INTO ' || dest_table || ' (' || dest_columns || ') ' ||
             'SELECT ' || source_columns || ' FROM ' || source_table || ' ' ||
             'ON CONFLICT (work_order_number) DO NOTHING';
