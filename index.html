@@ -650,7 +650,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="nav-tab" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
-    <button class="nav-tab" onclick="showPage('fabrication')"><i class="fas fa-tools"></i> Fabrication Request</button>
+    <button class="nav-tab" onclick="showPage('manufacturing')"><i class="fas fa-industry"></i> Manufacturing</button>
     <button class="nav-tab" id="nav-tab-settings" onclick="showPage('settings')" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
   </div>
   <div class="nav-right">
@@ -678,7 +678,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="mobile-nav-item" onclick="showPage('workorders'); toggleMobileMenu();"><i class="fas fa-clipboard-list"></i> Work Orders</button>
     <button class="mobile-nav-item" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
-    <button class="mobile-nav-item" onclick="showPage('fabrication'); toggleMobileMenu();"><i class="fas fa-tools"></i> Fabrication Request</button>
+    <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing</button>
     <button class="mobile-nav-item" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0;">
     <button class="mobile-nav-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -843,10 +843,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <select class="filter-input" id="filterEng" onchange="applyFilters()">
         <option value="">All Engineers</option>
       </select>
-      <select class="filter-input" id="filterFab" onchange="applyFilters()">
-        <option value="">All Fabrication Status</option>
-        <option>Done</option><option>Pending</option><option>Ongoing</option>
-      </select>
       <button class="btn btn-ghost btn-sm" onclick="clearFilters()">✕ Clear</button>
     </div>
 
@@ -854,20 +850,27 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <table class="main-table" id="woTable">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Work Order</th>
+            <th>Work Order #</th>
             <th>Description</th>
             <th>Status</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Reported By</th>
+            <th>Reported Date</th>
             <th>PWA Engineer</th>
-            <th>Highway</th>
-            <th>Target Start</th>
-            <th>Target Finish</th>
-            <th>Sign Type</th>
-            <th>Sign Ref</th>
-            <th>Qty</th>
-            <th>Fabrication Status</th>
-            <th>Install Date</th>
-            <th>Photo</th>
+            <th>Location</th>
+            <th>Target Start Date</th>
+            <th>Month</th>
+            <th>Target Finish Date</th>
+            <th>Status Update Date</th>
+            <th>Completion Status</th>
+            <th>QBC Comments</th>
+            <th>RO</th>
+            <th>TDP</th>
+            <th>Application Date</th>
+            <th>TDP Status</th>
+            <th>Expiry Date</th>
+            <th>Media Announcement</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -1155,34 +1158,34 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<div class="page" id="page-fabrication">
+<div class="page" id="page-manufacturing">
   <div class="wrapper">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-      <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:18px;font-weight:700;">Fabrication Request <span id="fabCountLabel" style="font-size:13px;color:var(--muted)"></span></h2>
+      <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:18px;font-weight:700;">Manufacturing <span id="mfgCountLabel" style="font-size:13px;color:var(--muted)"></span></h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" onclick="exportTableCSV('fabrication')"><i class="fas fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportTableCSV('manufacturing')"><i class="fas fa-file-csv"></i> Export CSV</button>
       </div>
     </div>
 
     <div class="filters">
-      <input type="text" class="filter-input" placeholder="🔍 Search WO / Description…" id="fabSearchInput" oninput="applyFabFilters()" style="min-width:220px;">
-      <select class="filter-input" id="fabFilterStatus" onchange="applyFabFilters()">
+      <input type="text" class="filter-input" placeholder="🔍 Search WO / Description…" id="mfgSearchInput" oninput="applyManufacturingFilters()" style="min-width:220px;">
+      <select class="filter-input" id="mfgFilterStatus" onchange="applyManufacturingFilters()">
         <option value="">All Statuses</option>
         <option>COMP</option><option>INPRG</option><option>DISPATCH</option>
         <option>WPERM</option><option>RTNENG</option><option>APPR</option>
       </select>
-      <select class="filter-input" id="fabFilterEng" onchange="applyFabFilters()">
+      <select class="filter-input" id="mfgFilterEng" onchange="applyManufacturingFilters()">
         <option value="">All Engineers</option>
       </select>
-      <select class="filter-input" id="fabFilterFab" onchange="applyFabFilters()">
+      <select class="filter-input" id="mfgFilterFab" onchange="applyManufacturingFilters()">
         <option value="">All Fabrication Status</option>
         <option>Done</option><option>Pending</option><option>Ongoing</option>
       </select>
-      <button class="btn btn-ghost btn-sm" onclick="clearFabFilters()">✕ Clear</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearManufacturingFilters()">✕ Clear</button>
     </div>
 
     <div class="table-wrap">
-      <table class="main-table" id="fabTable">
+      <table class="main-table" id="mfgTable">
         <thead>
           <tr>
             <th>#</th>
@@ -1202,12 +1205,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody id="fabBody">
+        <tbody id="mfgBody">
           <tr class="loading-row"><td colspan="15">Loading data...</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="pagination" id="fabPagination"></div>
+    <div class="pagination" id="mfgPagination"></div>
   </div>
 </div>
 
@@ -1621,7 +1624,17 @@ async function fetchData() {
       FabDetails: r.fab_details || '',
       isSentToFab: r.is_sent_to_fab || false,
       fab_history: r.fab_history || [],
-      style_settings: r.style_settings || {}
+      style_settings: r.style_settings || {},
+      ReportedBy: r.reported_by || '',
+      ReportedDate: r.reported_date || '',
+      StatusUpdateDate: r.status_update_date || '',
+      QBCComments: r.qbc_comments || '',
+      RO: r.ro || '',
+      TDP: r.tdp || '',
+      ApplicationDate: r.application_date || '',
+      TDPStatus: r.tdp_status || '',
+      ExpiryDate: r.expiry_date || '',
+      MediaAnnouncement: r.media_announcement || ''
     }));
 
     const { data: photoData, error: photoError } = await supabaseClient
@@ -1708,7 +1721,17 @@ async function saveWorkOrderToSupabase(wo) {
     fab_details: wo.FabDetails,
     is_sent_to_fab: wo.isSentToFab || false,
     fab_history: wo.fab_history || [],
-    style_settings: wo.style_settings || {}
+    style_settings: wo.style_settings || {},
+    reported_by: wo.ReportedBy,
+    reported_date: wo.ReportedDate || null,
+    status_update_date: wo.StatusUpdateDate || null,
+    qbc_comments: wo.QBCComments,
+    ro: wo.RO,
+    tdp: wo.TDP,
+    application_date: wo.ApplicationDate || null,
+    tdp_status: wo.TDPStatus,
+    expiry_date: wo.ExpiryDate || null,
+    media_announcement: wo.MediaAnnouncement
   };
 
   // Try update first
@@ -1893,12 +1916,31 @@ function showPage(id) {
         });
      }, 100);
   }
-  if(id === 'fabrication') {
-    applyFabFilters();
+  if(id === 'manufacturing') {
+    applyManufacturingFilters();
   }
 }
 
 // DASHBOARD LOGIC
+function getCompletionStatusLabel(r) {
+  const targetFinish = (r.TargetFinish && r.TargetFinish !== '0' && r.TargetFinish !== 0) ? new Date(r.TargetFinish) : null;
+  const installDate = (r.InstallationDate && r.InstallationDate !== '0' && r.InstallationDate !== 0) ? new Date(r.InstallationDate) : null;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  if (r.Status === 'COMP') {
+    if (installDate && !isNaN(installDate.getTime()) && targetFinish && !isNaN(targetFinish.getTime())) {
+      return installDate <= targetFinish ? 'Completed Within Target' : 'Completed Behind Target';
+    }
+    return 'Completed Within Target'; 
+  } else {
+    if (targetFinish && !isNaN(targetFinish.getTime())) {
+      return today <= targetFinish ? 'Ongoing Within Target' : 'Ongoing Behind Target';
+    }
+    return 'Ongoing Within Target';
+  }
+}
+
 function getStatusCat(r) {
   const targetFinish = (r.TargetFinish && r.TargetFinish !== '0' && r.TargetFinish !== 0) ? new Date(r.TargetFinish) : null;
   const installDate = (r.InstallationDate && r.InstallationDate !== '0' && r.InstallationDate !== 0) ? new Date(r.InstallationDate) : null;
@@ -2029,18 +2071,18 @@ function buildEngineerFilter() {
     sel.innerHTML = '<option value="">All Engineers</option>';
     engs.forEach(e => { const o = document.createElement('option'); o.textContent = e; sel.appendChild(o); });
   }
-  const fabSel = document.getElementById('fabFilterEng');
-  if (fabSel) {
-    fabSel.innerHTML = '<option value="">All Engineers</option>';
-    engs.forEach(e => { const o = document.createElement('option'); o.textContent = e; fabSel.appendChild(o); });
+  const mfgSel = document.getElementById('mfgFilterEng');
+  if (mfgSel) {
+    mfgSel.innerHTML = '<option value="">All Engineers</option>';
+    engs.forEach(e => { const o = document.createElement('option'); o.textContent = e; mfgSel.appendChild(o); });
   }
 }
 
-function applyFabFilters() {
-  const q = document.getElementById('fabSearchInput').value.toLowerCase();
-  const st = document.getElementById('fabFilterStatus').value;
-  const eng = document.getElementById('fabFilterEng').value;
-  const fab = document.getElementById('fabFilterFab').value;
+function applyManufacturingFilters() {
+  const q = document.getElementById('mfgSearchInput').value.toLowerCase();
+  const st = document.getElementById('mfgFilterStatus').value;
+  const eng = document.getElementById('mfgFilterEng').value;
+  const fab = document.getElementById('mfgFilterFab').value;
   filteredFabData = allData.filter(r => {
     if (!r.isSentToFab || (r.FabStatus||'').toLowerCase() === 'done') return false;
     const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Highway||'').toLowerCase().includes(q);
@@ -2050,18 +2092,18 @@ function applyFabFilters() {
     return matchQ && matchSt && matchEng && matchFab;
   });
   fabCurrentPage = 1;
-  renderFabTable();
-  const label = document.getElementById('fabCountLabel');
+  renderManufacturingTable();
+  const label = document.getElementById('mfgCountLabel');
   if (label) label.textContent = `(${filteredFabData.length})`;
 }
 
-function renderFabTable() {
-  const tbody = document.getElementById('fabBody');
+function renderManufacturingTable() {
+  const tbody = document.getElementById('mfgBody');
   const start = (fabCurrentPage - 1) * PAGE_SIZE;
   const slice = filteredFabData.slice(start, start + PAGE_SIZE);
   if (slice.length === 0) {
     tbody.innerHTML = '<tr class="loading-row"><td colspan="15">No records found</td></tr>';
-    renderFabPagination(); return;
+    renderManufacturingPagination(); return;
   }
   tbody.innerHTML = slice.map((r, i) => {
     const stBadge = `<span class="status-badge badge-${r.Status||'COMP'}">${r.Status||'–'}</span>`;
@@ -2113,27 +2155,29 @@ function renderFabTable() {
       <td>
         <div class="action-btns">
           ${mapActions}
+          <button class="btn btn-ghost btn-sm" onclick="showPage('workorders'); selectWorkOrderRow('${r.WorkOrder}');" title="View Work Order"><i class="fas fa-clipboard-list"></i></button>
           <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
+          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal(${allData.indexOf(r)}, 'manufacturing')"><i class="fas fa-edit"></i></button>` : ''}
         </div>
       </td>
     </tr>`;
   }).join('');
-  renderFabPagination();
+  renderManufacturingPagination();
 }
 
-function renderFabPagination() {
+function renderManufacturingPagination() {
   const total = Math.ceil(filteredFabData.length / PAGE_SIZE);
-  const pg = document.getElementById('fabPagination');
+  const pg = document.getElementById('mfgPagination');
   if (total <= 1) { pg.innerHTML = ''; return; }
   let html = `<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; align-items:center;">
     <span class="pg-info" style="margin-right:10px;">Page ${fabCurrentPage} of ${total}</span>`;
   for (let p = 1; p <= total; p++) {
-    html += `<button class="pg-btn${p===fabCurrentPage?' active':''}" onclick="gotoFabPage(${p})">${p}</button>`;
+    html += `<button class="pg-btn${p===fabCurrentPage?' active':''}" onclick="gotoManufacturingPage(${p})">${p}</button>`;
   }
   html += `</div>`;
   pg.innerHTML = html;
 }
-function gotoFabPage(p) { fabCurrentPage = p; renderFabTable(); }
+function gotoManufacturingPage(p) { fabCurrentPage = p; renderManufacturingTable(); }
 
 async function updateFabStatus(woId, status) {
   const wo = allData.find(d => d.WorkOrder === woId);
@@ -2143,33 +2187,31 @@ async function updateFabStatus(woId, status) {
     await saveWorkOrderToSupabase(wo);
     showToast(`Status updated to ${status}`);
     if (status === 'Done') {
-       applyFabFilters(); // Remove from view
+       applyManufacturingFilters(); // Remove from view
     }
   } catch (err) {
     showToast('Error updating status', 'error');
   }
 }
 
-function clearFabFilters() {
-  document.getElementById('fabSearchInput').value = ''; 
-  document.getElementById('fabFilterStatus').value = '';
-  document.getElementById('fabFilterEng').value = ''; 
-  document.getElementById('fabFilterFab').value = '';
-  applyFabFilters();
+function clearManufacturingFilters() {
+  document.getElementById('mfgSearchInput').value = ''; 
+  document.getElementById('mfgFilterStatus').value = '';
+  document.getElementById('mfgFilterEng').value = ''; 
+  document.getElementById('mfgFilterFab').value = '';
+  applyManufacturingFilters();
 }
 
 function applyFilters() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   const st = document.getElementById('filterStatus').value;
   const eng = document.getElementById('filterEng').value;
-  const fab = document.getElementById('filterFab').value;
   filteredData = allData.filter(r => {
     const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Highway||'').toLowerCase().includes(q);
     let matchSt = !st || r.Status === st;
     if (st === 'NOT_COMP') matchSt = r.Status !== 'COMP';
     const matchEng = !eng || r.PWA_ENG === eng;
-    const matchFab = !fab || (r.FabStatus||'').toLowerCase() === fab.toLowerCase();
-    return matchQ && matchSt && matchEng && matchFab;
+    return matchQ && matchSt && matchEng;
   });
   currentPage = 1;
   renderTable();
@@ -2190,55 +2232,58 @@ function renderTable() {
   const start = (currentPage - 1) * PAGE_SIZE;
   const slice = filteredData.slice(start, start + PAGE_SIZE);
   if (slice.length === 0) {
-    tbody.innerHTML = '<tr class="loading-row"><td colspan="15">No records found</td></tr>';
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="22">No records found</td></tr>';
     renderPagination(); return;
   }
   tbody.innerHTML = slice.map((r, i) => {
     const stBadge = `<span class="status-badge badge-${r.Status||'COMP'}">${r.Status||'–'}</span>`;
-    const photo = photos[r.WorkOrder];
     const isSelected = selectedWorkOrder === r.WorkOrder;
 
-    let photoCell = '';
-    if (photo) {
-      photoCell = `
-        <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="event.stopPropagation(); viewPhoto('${r.WorkOrder}')">
-          <div class="photo-actions">
-            <button class="btn btn-ghost btn-icon" onclick="event.stopPropagation(); uploadPhotoFor('${r.WorkOrder}')" title="Replace Photo"><i class="fas fa-sync-alt"></i></button>
-            <button class="btn btn-red btn-icon" onclick="event.stopPropagation(); deletePhoto('${r.WorkOrder}')" title="Delete Photo"><i class="fas fa-trash"></i></button>
-          </div>
-        </div>
-      `;
-    } else {
-      photoCell = `<div style="cursor:pointer; color:var(--muted)" onclick="event.stopPropagation(); uploadPhotoFor('${r.WorkOrder}')"><i class="fas fa-camera"></i></div>`;
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    let monthLabel = "—";
+    if (r.TargetStart) {
+      const d = new Date(r.TargetStart);
+      if (!isNaN(d.getTime())) monthLabel = monthNames[d.getMonth()];
     }
+
+    const completionStatus = getCompletionStatusLabel(r);
 
     const mapActions = (r.Lat && r.Lng) ? `
       <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
-      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); copyCoords(${r.Lat}, ${r.Lng})" title="Copy Coordinates"><i class="fas fa-copy"></i></button>
     ` : '';
 
     return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')">
-      <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
       <td onclick="makeEditable(this, '${r.WorkOrder}', 'WorkOrder')"><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}" onclick="makeEditable(this, '${r.WorkOrder}', 'Description')"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td onclick="makeEditable(this, '${r.WorkOrder}', 'Status', 'select')">${stBadge}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Lat')">${r.Lat||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Lng')">${r.Lng||'—'}</td>
+      <td style="font-size:11px">${r.ReportedBy||'—'}</td>
+      <td style="font-size:11px">${r.ReportedDate||'—'}</td>
       <td style="font-size:11px;color:var(--muted)" onclick="makeEditable(this, '${r.WorkOrder}', 'PWA_ENG')">${r.PWA_ENG||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Highway')">${r.Highway||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TargetStart', 'date')">${r.TargetStart||'—'}</td>
+      <td style="font-size:11px">${monthLabel}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TargetFinish', 'date')">${r.TargetFinish||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignType')">${r.SignType||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignRef')">${r.SignRef||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignQty')">${r.SignQty||'—'}</td>
-      <td onclick="makeEditable(this, '${r.WorkOrder}', 'FabStatus', 'select_fab')">${r.FabStatus||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'InstallationDate', 'date')">${r.InstallationDate||'—'}</td>
-      <td>${photoCell}<input type="file" style="display:none" id="file_${r.WorkOrder}" accept="image/*" onchange="handlePhotoUpload(event,'${r.WorkOrder}')"></td>
+      <td style="font-size:11px">${r.StatusUpdateDate||'—'}</td>
+      <td style="font-size:11px">${completionStatus}</td>
+      <td>
+        <div style="display:flex; gap:4px; align-items:center;">
+          <textarea class="filter-input" style="min-width:120px; height:32px; font-size:11px; padding:4px;" 
+            onblur="updateQbcComments('${r.WorkOrder}', this.value)"
+            onkeydown="if(event.ctrlKey && event.key==='Enter') { this.blur(); }">${r.QBCComments||''}</textarea>
+        </div>
+      </td>
+      <td style="font-size:11px">${r.RO||'—'}</td>
+      <td style="font-size:11px">${r.TDP||'—'}</td>
+      <td style="font-size:11px">${r.ApplicationDate||'—'}</td>
+      <td style="font-size:11px">${r.TDPStatus||'—'}</td>
+      <td style="font-size:11px">${r.ExpiryDate||'—'}</td>
+      <td style="font-size:11px">${r.MediaAnnouncement||'—'}</td>
       <td>
         <div class="action-btns">
           ${mapActions}
-          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openFabModal('${r.WorkOrder}')" title="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
-          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); sendToFabrication('${r.WorkOrder}')" title="Send to Fabrication"><i class="fas fa-paper-plane"></i> Send ${r.fab_history && r.fab_history.length > 0 ? '(' + r.fab_history.length + ')' : ''}</button>
-          ${r.isSentToFab ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showFabHistory('${r.WorkOrder}')" title="View History"><i class="fas fa-history"></i></button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showManufacturingFor('${r.WorkOrder}')" title="View Manufacturing"><i class="fas fa-industry"></i></button>
           ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openEditModal(${allData.indexOf(r)})"><i class="fas fa-edit"></i></button>` : ''}
         </div>
       </td>
@@ -2263,8 +2308,14 @@ function gotoPage(p) { currentPage = p; renderTable(); }
 
 function clearFilters() {
   document.getElementById('searchInput').value = ''; document.getElementById('filterStatus').value = '';
-  document.getElementById('filterEng').value = ''; document.getElementById('filterFab').value = '';
+  document.getElementById('filterEng').value = '';
   applyFilters();
+}
+
+function showManufacturingFor(woId) {
+  showPage('manufacturing');
+  document.getElementById('mfgSearchInput').value = woId;
+  applyManufacturingFilters();
 }
 
 function toggleUserDropdown() {
@@ -2584,16 +2635,22 @@ async function processExcelUpload() {
 
       const upsertData = [];
       const MAP = { 
+        'work order #': 'WorkOrder', 'work order': 'WorkOrder', 'workorder': 'WorkOrder', 'wo': 'WorkOrder',
         'description': 'Description', 'status': 'Status', 'pwa engineer': 'PWA_ENG', 'engineer': 'PWA_ENG',
         'target start': 'TargetStart', 'target start date': 'TargetStart', 'target finish': 'TargetFinish', 'target finish date': 'TargetFinish', 'remaining': 'Remaining',
-        'highway': 'Highway', 'latitude': 'Lat', 'longitude': 'Lng', 'lat': 'Lat', 'lng': 'Lng',
+        'highway': 'Highway', 'location': 'Highway', 'latitude': 'Lat', 'longitude': 'Lng', 'lat': 'Lat', 'lng': 'Lng',
+        'latitudey': 'Lat', 'longitudex': 'Lng',
         'road category': 'RoadCatg', 'road catg': 'RoadCatg',
         'sign type': 'SignType', 'sign ref': 'SignRef', 'sign shape': 'SignShape', 
         'sign size': 'SignSize', 'sign material': 'SignMaterial',
         'sign qty': 'SignQty', 'post type': 'PostType', 'post height': 'PostHeight', 
         'post qty': 'PostQty', 'found size': 'FoundSize', 'found qty': 'FoundQty',
         'scrap removal': 'ScrapRemoval', 'fab status': 'FabStatus', 
-        'installation date': 'InstallationDate' 
+        'installation date': 'InstallationDate',
+        'reported by': 'ReportedBy', 'reported': 'ReportedBy', 'reported date': 'ReportedDate', 'reported da': 'ReportedDate',
+        'status update date': 'StatusUpdateDate', 'status upda': 'StatusUpdateDate', 'qbc comments': 'QBCComments',
+        'ro': 'RO', 'tdp': 'TDP', 'application date': 'ApplicationDate', 'application da': 'ApplicationDate',
+        'tdp status': 'TDPStatus', 'expiry date': 'ExpiryDate', 'expiry da': 'ExpiryDate', 'media announcement': 'MediaAnnouncement', 'media announceme': 'MediaAnnouncement'
       };
 
       dataRows.forEach(row => {
@@ -2614,7 +2671,7 @@ async function processExcelUpload() {
             if (k === 'Lat' || k === 'Lng') {
               const num = parseFloat(val);
               r[k] = isNaN(num) ? null : num;
-            } else if (k === 'TargetStart' || k === 'TargetFinish' || k === 'InstallationDate') {
+            } else if (k === 'TargetStart' || k === 'TargetFinish' || k === 'InstallationDate' || k === 'ReportedDate' || k === 'StatusUpdateDate' || k === 'ApplicationDate' || k === 'ExpiryDate') {
               r[k] = parseCSVDate(val);
             } else {
               r[k] = String(val).trim();
@@ -2629,8 +2686,27 @@ async function processExcelUpload() {
         return;
       }
 
+      // Validation
+      const errors = [];
+      const validStatuses = ['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR'];
+      upsertData.forEach((r, idx) => {
+        const rowNum = idx + 2;
+        if (!r.WorkOrder) errors.push(`Row ${rowNum}: Missing Work Order Number`);
+        if (r.Status && !validStatuses.includes(r.Status)) errors.push(`Row ${rowNum}: Invalid Status "${r.Status}"`);
+        if (r.Lat !== null && (r.Lat < -90 || r.Lat > 90)) errors.push(`Row ${rowNum}: Invalid Latitude "${r.Lat}"`);
+        if (r.Lng !== null && (r.Lng < -180 || r.Lng > 180)) errors.push(`Row ${rowNum}: Invalid Longitude "${r.Lng}"`);
+      });
+
+      if (errors.length > 0) {
+        alert("CSV Validation Errors:\n\n" + errors.slice(0, 10).join("\n") + (errors.length > 10 ? `\n...and ${errors.length - 10} more` : ""));
+        return;
+      }
+
       // Deduplicate upsertData by WorkOrder to avoid "ON CONFLICT" errors
       const uniqueData = Array.from(new Map(upsertData.map(item => [item.WorkOrder, item])).values());
+      if (uniqueData.length < upsertData.length) {
+        showToast(`Warning: ${upsertData.length - uniqueData.length} duplicate Work Orders removed`, "amber");
+      }
 
       if (supabaseClient) {
         // Map PascalCase to snake_case for Supabase
@@ -2659,7 +2735,17 @@ async function processExcelUpload() {
           found_qty: wo.FoundQty,
           fab_status: wo.FabStatus,
           installation_date: wo.InstallationDate || null,
-          scrap_removal: wo.ScrapRemoval
+          scrap_removal: wo.ScrapRemoval,
+          reported_by: wo.ReportedBy,
+          reported_date: wo.ReportedDate || null,
+          status_update_date: wo.StatusUpdateDate || null,
+          qbc_comments: wo.QBCComments,
+          ro: wo.RO,
+          tdp: wo.TDP,
+          application_date: wo.ApplicationDate || null,
+          tdp_status: wo.TDPStatus,
+          expiry_date: wo.ExpiryDate || null,
+          media_announcement: wo.MediaAnnouncement
         }));
 
         // Process in chunks to avoid payload size limits
@@ -2702,6 +2788,8 @@ function updateAdminUI() {
   const dz = document.getElementById('dangerous-zone');
 
   if (isAdmin) {
+    applyFilters();
+    applyManufacturingFilters();
     if (btn) btn.textContent = '🔓 Admin Active';
     if (btn) btn.classList.add('unlocked');
     if (status) status.textContent = 'Edit mode enabled';
@@ -3173,7 +3261,7 @@ function loadMarkers() {
         r.Lat = newPos.lat;
         r.Lng = newPos.lng;
         if (supabaseClient) {
-          await supabaseClient.from('work_orders').update({ Lat: newPos.lat, Lng: newPos.lng }).eq('work_order', r.WorkOrder);
+          await supabaseClient.from('work_orders').update({ lat: newPos.lat, lng: newPos.lng }).eq('work_order', r.WorkOrder);
         }
         showToast(`Marker moved to ${newPos.lat.toFixed(4)}, ${newPos.lng.toFixed(4)}`);
         saveMapHistory('move', { type: 'wo', id: r.WorkOrder, latlng: newPos });
@@ -4087,16 +4175,14 @@ function exportPDF() {
 
 function downloadCSVTemplate() {
   const headers = [
-    "Work Order", "Description", "Status", "PWA Engineer", "Highway", "Target Start", "Target Finish", 
-    "Remaining", "Latitude", "Longitude", "Road Category", "Sign Type", 
-    "Sign Ref", "Sign Shape", "Sign Size", "Sign Material", "Sign Qty", "Post Type", 
-    "Post Height", "Post Qty", "Found Size", "Found Qty", "Fabrication Status", "Installation Date", "Scrap Removal"
+    "Work Order #", "Description", "Status", "Latitude", "Longitude", "Reported By", "Reported Date",
+    "PWA Engineer", "Location", "Target Start Date", "Target Finish Date", "Status Update Date",
+    "QBC Comments", "RO", "TDP", "Application Date", "TDP Status", "Expiry Date", "Media Announcement"
   ];
   const sample = [
-    "WO12345", "Sample Description", "INPRG", "Engineer Name", "Dukhan Road", "01/01/2026", "10/01/2026",
-    "5", "25.285", "51.531", "Main Road", "Regulatory",
-    "R-101", "Circle", "600mm", "Aluminum", "1", "Steel",
-    "2000", "1", "400x400x600", "1", "Pending", "", "No"
+    "25003146", "Road Safety,Warning Sign,Signface,loss of reflectivity, 0.0", "COMP", "21.73040931", "49.2829842", "DHANJITL", "13/01/2026",
+    "Adnan Khdair", "Dukhan Road", "13/01/2026", "17/01/2026", "14/01/2026",
+    "Sample Comment", "RO-VAL", "TDP-VAL", "13/01/2026", "Approved", "13/01/2027", "Yes"
   ];
   const csvContent = headers.join(",") + "\n" + sample.join(",");
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -4110,12 +4196,41 @@ function downloadCSVTemplate() {
 }
 
 function exportTableCSV(mode = 'all') {
-    const data = mode === 'fabrication' ? filteredFabData : filteredData;
-    const filename = mode === 'fabrication' ? 'fabrication_request_export.csv' : 'work_orders_export.csv';
+    const data = mode === 'manufacturing' ? filteredFabData : filteredData;
+    const filename = mode === 'manufacturing' ? 'manufacturing_export.csv' : 'work_orders_export.csv';
     if (data.length === 0) return showToast('No data to export', 'error');
-    const headers = Object.keys(data[0]).join(',');
-    const rows = data.map(obj => Object.values(obj).map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
-    const csvContent = headers + "\n" + rows;
+    
+    let csvContent = "";
+    if (mode === 'manufacturing') {
+      const headers = ["Work Order", "Description", "Status", "PWA Engineer", "Highway", "Target Start", "Target Finish", "Sign Type", "Sign Ref", "Qty", "Fabrication Status", "Install Date", "Fabrication Details"];
+      csvContent = headers.join(",") + "\n";
+      csvContent += data.map(r => [
+        r.WorkOrder, r.Description, r.Status, r.PWA_ENG, r.Highway, r.TargetStart, r.TargetFinish,
+        r.SignType, r.SignRef, r.SignQty, r.FabStatus, r.InstallationDate, r.FabDetails
+      ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
+    } else {
+      const headers = [
+        "Work Order #", "Description", "Status", "Latitude", "Longitude", "Reported By", "Reported Date",
+        "PWA Engineer", "Location", "Target Start Date", "Month", "Target Finish Date", "Status Update Date",
+        "Completion Status", "QBC Comments", "RO", "TDP", "Application Date", "TDP Status", "Expiry Date", "Media Announcement"
+      ];
+      csvContent = headers.join(",") + "\n";
+      csvContent += data.map(r => {
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        let monthLabel = "—";
+        if (r.TargetStart) {
+          const d = new Date(r.TargetStart);
+          if (!isNaN(d.getTime())) monthLabel = monthNames[d.getMonth()];
+        }
+        const completionStatus = getCompletionStatusLabel(r);
+        return [
+          r.WorkOrder, r.Description, r.Status, r.Lat, r.Lng, r.ReportedBy, r.ReportedDate,
+          r.PWA_ENG, r.Highway, r.TargetStart, monthLabel, r.TargetFinish, r.StatusUpdateDate,
+          completionStatus, r.QBCComments, r.RO, r.TDP, r.ApplicationDate, r.TDPStatus, r.ExpiryDate, r.MediaAnnouncement
+        ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',');
+      }).join('\n');
+    }
+    
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -4134,13 +4249,22 @@ const MAIN_FIELDS = [
   {k:'WorkOrder',l:'Work Order'}, 
   {k:'Description',l:'Description',full:true}, 
   {k:'Status',l:'Status',type:'select',opts:['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR']}, 
+  {k:'Lat',l:'Latitude'}, 
+  {k:'Lng',l:'Longitude'},
+  {k:'ReportedBy',l:'Reported By'},
+  {k:'ReportedDate',l:'Reported Date',type:'date'},
   {k:'PWA_ENG',l:'PWA Engineer'}, 
   {k:'Highway',l:'Highway'}, 
   {k:'TargetStart',l:'Target Start',type:'date'}, 
   {k:'TargetFinish',l:'Target Finish',type:'date'}, 
-  {k:'Remaining',l:'Remaining'}, 
-  {k:'Lat',l:'Latitude'}, 
-  {k:'Lng',l:'Longitude'} 
+  {k:'StatusUpdateDate',l:'Status Update Date',type:'date'},
+  {k:'QBCComments',l:'QBC Comments',full:true},
+  {k:'RO',l:'RO'},
+  {k:'TDP',l:'TDP'},
+  {k:'ApplicationDate',l:'Application Date',type:'date'},
+  {k:'TDPStatus',l:'TDP Status'},
+  {k:'ExpiryDate',l:'Expiry Date',type:'date'},
+  {k:'MediaAnnouncement',l:'Media Announcement'}
 ];
 
 const FAB_FIELDS = [ 
@@ -4239,6 +4363,19 @@ async function updateFabDetails(woId, value) {
   }
 }
 
+async function updateQbcComments(woId, value) {
+  const wo = allData.find(d => d.WorkOrder === woId);
+  if (!wo) return;
+  if (wo.QBCComments === value) return;
+  wo.QBCComments = value;
+  try {
+    await saveWorkOrderToSupabase(wo);
+    showToast('QBC comments updated');
+  } catch (err) {
+    showToast('Error updating comments', 'error');
+  }
+}
+
 async function sendToFabrication(woId) {
   const wo = allData.find(d => d.WorkOrder === woId);
   if (!wo) return;
@@ -4271,7 +4408,7 @@ function showFabHistory(woId) {
 }
 
 async function saveEdit() {
-  const r = {};
+  const r = editingIdx !== null ? { ...allData[editingIdx] } : {};
   [...MAIN_FIELDS, ...FAB_FIELDS].forEach(f => {
     const el = document.getElementById('ef_'+f.k);
     if (el) r[f.k] = el.value;
@@ -4289,15 +4426,28 @@ async function saveEdit() {
   }
 }
 
-function openEditModal(idx) {
+function openEditModal(idx, mode = 'workorder') {
   if (!isAdmin) { showToast('Admin mode required','error'); return; }
   editingIdx = idx; 
   const r = idx !== null ? allData[idx] : {};
   const emt = document.getElementById('editModalTitle');
-  if (emt) emt.textContent = idx !== null ? `Edit WO – ${r.WorkOrder}` : 'Add New Work Order';
+  if (emt) emt.textContent = idx !== null ? `Edit ${mode === 'workorder' ? 'WO' : 'Manufacturing'} – ${r.WorkOrder}` : 'Add New Work Order';
   
-  document.getElementById('editFormGrid').innerHTML = MAIN_FIELDS.map(f => fieldHTML(f, r[f.k]||'', f.full?'grid-column:1/-1':'')).join('');
-  document.getElementById('editFabGrid').innerHTML = FAB_FIELDS.map(f => fieldHTML(f, r[f.k]||'')).join('');
+  const formGrid = document.getElementById('editFormGrid');
+  const fabSection = document.querySelector('.fab-section');
+  const fabGrid = document.getElementById('editFabGrid');
+
+  if (mode === 'workorder') {
+    formGrid.innerHTML = MAIN_FIELDS.map(f => fieldHTML(f, r[f.k]||'', f.full?'grid-column:1/-1':'')).join('');
+    fabSection.style.display = 'none';
+  } else {
+    formGrid.innerHTML = `
+      <div class="form-group"><label>Work Order</label><input type="text" value="${r.WorkOrder||''}" disabled></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Description</label><textarea disabled style="height:40px;">${r.Description||''}</textarea></div>
+    `;
+    fabSection.style.display = 'block';
+    fabGrid.innerHTML = FAB_FIELDS.map(f => fieldHTML(f, r[f.k]||'')).join('');
+  }
   openModal('editModal');
 }
 
@@ -4312,7 +4462,7 @@ function fieldHTML(f, val, extra='') {
     return `<div class="form-group" style="${extra}"><label>${f.l}</label><select id="${id}"><option value="">—</option>${opts}</select></div>`;
   }
   if (f.type === 'date') return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="date" id="${id}" value="${val}"></div>`;
-  if (f.k === 'FabDetails') return `<div class="form-group" style="${extra}; grid-column: 1/-1;"><label>${f.l}</label><textarea id="${id}" style="height:60px;">${val||''}</textarea></div>`;
+  if (f.k === 'FabDetails' || f.k === 'QBCComments') return `<div class="form-group" style="${extra}; grid-column: 1/-1;"><label>${f.l}</label><textarea id="${id}" style="height:60px;">${val||''}</textarea></div>`;
   return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="text" id="${id}" value="${val||''}"></div>`;
 }
 function parseCSVDate(val) {
