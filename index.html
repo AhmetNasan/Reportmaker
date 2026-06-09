@@ -648,9 +648,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="nav-tab" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
+      <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing</button>
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
-    <button class="nav-tab" onclick="showPage('manufacturing')"><i class="fas fa-industry"></i> Manufacturing</button>
     <button class="nav-tab" id="nav-tab-settings" onclick="showPage('settings')" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
   </div>
   <div class="nav-right">
@@ -676,9 +676,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div id="mobile-menu" class="mobile-menu">
     <button class="mobile-nav-item active" onclick="showPage('dashboard'); toggleMobileMenu();"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="mobile-nav-item" onclick="showPage('workorders'); toggleMobileMenu();"><i class="fas fa-clipboard-list"></i> Work Orders</button>
+    <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing</button>
     <button class="mobile-nav-item" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
-    <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing</button>
     <button class="mobile-nav-item" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0;">
     <button class="mobile-nav-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -875,7 +875,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           </tr>
         </thead>
         <tbody id="woBody">
-          <tr class="loading-row"><td colspan="15">Loading data...</td></tr>
+          <tr class="loading-row"><td colspan="22">Loading data...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1186,27 +1186,45 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
     <div class="table-wrap">
       <table class="main-table" id="mfgTable">
-        <thead>
+        <thead id="mfgHead">
           <tr>
-            <th>#</th>
-            <th>Work Order</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>PWA Engineer</th>
-            <th>Highway</th>
-            <th>Target Start</th>
-            <th>Target Finish</th>
-            <th>Sign Type</th>
-            <th>Sign Ref</th>
-            <th>Qty</th>
-            <th>Fabrication Status</th>
-            <th>Install Date</th>
-            <th>Photo</th>
-            <th>Actions</th>
+            <th rowspan="3">#</th>
+            <th rowspan="3">Work Order</th>
+            <th rowspan="3">Description</th>
+            <th rowspan="3">Status</th>
+            <th rowspan="3">PWA Engineer</th>
+            <th rowspan="3">Location</th>
+            <th rowspan="3">Target Start</th>
+            <th rowspan="3">Target Finish</th>
+            <th rowspan="3" style="background: #1b5e20; color: white;">Road Catg.</th>
+            <th rowspan="3" style="background: #1b5e20; color: white;">Sign Material</th>
+            <th colspan="13" style="background: #4a148c; color: white; text-align: center;">Fabrication</th>
+            <th rowspan="3">Photo</th>
+            <th rowspan="3">Actions</th>
+          </tr>
+          <tr>
+            <th colspan="5" style="background: #6a1b9a; color: white; text-align: center;">Sign Face Details</th>
+            <th colspan="3" style="background: #7b1fa2; color: white; text-align: center;">Post Details</th>
+            <th colspan="2" style="background: #8e24aa; color: white; text-align: center;">Foundation Details</th>
+            <th rowspan="2" style="background: #9c27b0; color: white; text-align: center;">Fab Status</th>
+            <th rowspan="2" style="background: #9c27b0; color: white; text-align: center;">Install Date</th>
+            <th rowspan="2" style="background: #9c27b0; color: white; text-align: center;">Details</th>
+          </tr>
+          <tr>
+            <th style="background: #ab47bc; color: white;">Sign Type</th>
+            <th style="background: #ab47bc; color: white;">Sign REF.</th>
+            <th style="background: #ab47bc; color: white;">Sign Shape</th>
+            <th style="background: #ab47bc; color: white;">SIZE (mm)</th>
+            <th style="background: #ab47bc; color: white;">QTY.</th>
+            <th style="background: #ba68c8; color: white;">TYPE</th>
+            <th style="background: #ba68c8; color: white;">HEIGHT (mm)</th>
+            <th style="background: #ba68c8; color: white;">QTY.</th>
+            <th style="background: #ce93d8; color: white;">Size L × W × H (mm)</th>
+            <th style="background: #ce93d8; color: white;">QTY.</th>
           </tr>
         </thead>
         <tbody id="mfgBody">
-          <tr class="loading-row"><td colspan="15">Loading data...</td></tr>
+          <tr class="loading-row"><td colspan="25">Loading data...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1342,7 +1360,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div class="modal-overlay" id="fabModal">
   <div class="modal pdf-modal">
     <button class="modal-close" onclick="closeModal('fabModal')">×</button>
-    <div class="modal-title">Fabrication Request – <span id="fabModalWO"></span></div>
+    <div class="modal-title">Fabrication – <span id="fabModalWO"></span></div>
     <div id="pdfPreview"></div>
     <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('fabModal')">Close</button>
@@ -1556,7 +1574,7 @@ async function onAuthenticated() {
 }
 
 async function fetchAllWorkOrders() {
-  let allRows = [];
+  let allWO = [];
   let page = 0;
   const pageSize = 1000;
   let moreRows = true;
@@ -1569,11 +1587,36 @@ async function fetchAllWorkOrders() {
       .order('work_order', { ascending: false });
 
     if (error) throw error;
-    allRows = allRows.concat(data);
+    allWO = allWO.concat(data);
     if (data.length < pageSize) moreRows = false;
     page++;
   }
-  return allRows;
+
+  let allMFG = [];
+  page = 0;
+  moreRows = true;
+  while (moreRows) {
+    const { data, error } = await supabaseClient
+      .from('manufacturing')
+      .select('*')
+      .range(page * pageSize, (page + 1) * pageSize - 1);
+
+    if (error) {
+      console.warn("Manufacturing table fetch failed (might not exist yet):", error);
+      moreRows = false;
+      break;
+    }
+    allMFG = allMFG.concat(data);
+    if (data.length < pageSize) moreRows = false;
+    page++;
+  }
+
+  // Merge
+  const mfgMap = new Map(allMFG.map(m => [m.work_order_number, m]));
+  return allWO.map(wo => ({
+    ...wo,
+    ...(mfgMap.get(wo.work_order) || {})
+  }));
 }
 
 async function fetchData() {
@@ -1589,13 +1632,13 @@ async function fetchData() {
   
   if (isAdmin) loadPendingUsers();
   try {
-    const woData = await fetchAllWorkOrders();
+    const combinedData = await fetchAllWorkOrders();
 
     if (connDot) connDot.style.background = 'var(--green)';
     if (connText) connText.textContent = 'Connected';
     
     // Map Supabase fields to app fields
-    allData = woData.map(r => ({
+    allData = combinedData.map(r => ({
       WorkOrder: r.work_order,
       Description: r.description,
       Status: r.status,
@@ -1603,7 +1646,7 @@ async function fetchData() {
       TargetStart: r.target_start,
       TargetFinish: r.target_finish,
       Remaining: r.remaining,
-      Highway: r.highway,
+      Location: r.location || r.highway || r.Highway, // Support both during migration
       Lat: r.lat,
       Lng: r.lng,
       RoadCatg: r.road_catg,
@@ -1675,8 +1718,8 @@ function useLocalFallback() {
   
   if (allData.length === 0) {
       allData = [
-        {"WorkOrder":"25289532","Description":"4701- AIR FORCE SIGNAL - CCTV camera down","Status":"COMP","PWA_ENG":"Mohd Fauzi Bin Mustapha","TargetStart":"2026-02-18","TargetFinish":"2026-02-19","Highway":"F Ring Road","Lat":25.2310103561,"Lng":51.5763480648,"FabStatus":"Pending","InstallationDate":"2026-02-18"},
-        {"WorkOrder":"24895830","Description":"Directional Signage,Directional,Signface","Status":"RTNENG","PWA_ENG":"Adnan Khdair","TargetStart":"2026-01-03","TargetFinish":"2027-01-03","Highway":"Dukhan Road","Lat":25.4263712743,"Lng":51.1591333125,"FabStatus":"Pending","InstallationDate":""}
+        {"WorkOrder":"25289532","Description":"4701- AIR FORCE SIGNAL - CCTV camera down","Status":"COMP","PWA_ENG":"Mohd Fauzi Bin Mustapha","TargetStart":"2026-02-18","TargetFinish":"2026-02-19","Location":"F Ring Road","Lat":25.2310103561,"Lng":51.5763480648,"FabStatus":"Pending","InstallationDate":"2026-02-18"},
+        {"WorkOrder":"24895830","Description":"Directional Signage,Directional,Signface","Status":"RTNENG","PWA_ENG":"Adnan Khdair","TargetStart":"2026-01-03","TargetFinish":"2027-01-03","Location":"Dukhan Road","Lat":25.4263712743,"Lng":51.1591333125,"FabStatus":"Pending","InstallationDate":""}
       ];
   }
   
@@ -1692,7 +1735,8 @@ async function saveWorkOrderToSupabase(wo) {
     localStorage.setItem('qbc_data', JSON.stringify(allData));
     return;
   }
-  const payload = {
+
+  const woPayload = {
     work_order: wo.WorkOrder,
     description: wo.Description,
     status: wo.Status,
@@ -1700,25 +1744,9 @@ async function saveWorkOrderToSupabase(wo) {
     target_start: wo.TargetStart || null,
     target_finish: wo.TargetFinish || null,
     remaining: wo.Remaining,
-    highway: wo.Highway,
+    location: wo.Location,
     lat: parseFloat(wo.Lat) || null,
     lng: parseFloat(wo.Lng) || null,
-    road_catg: wo.RoadCatg,
-    sign_type: wo.SignType,
-    sign_ref: wo.SignRef,
-    sign_shape: wo.SignShape,
-    sign_size: wo.SignSize,
-    sign_material: wo.SignMaterial,
-    sign_qty: wo.SignQty,
-    post_type: wo.PostType,
-    post_height: wo.PostHeight,
-    post_qty: wo.PostQty,
-    found_size: wo.FoundSize,
-    found_qty: wo.FoundQty,
-    fab_status: wo.FabStatus,
-    installation_date: wo.InstallationDate || null,
-    scrap_removal: wo.ScrapRemoval,
-    fab_details: wo.FabDetails,
     is_sent_to_fab: wo.isSentToFab || false,
     fab_history: wo.fab_history || [],
     style_settings: wo.style_settings || {},
@@ -1734,34 +1762,44 @@ async function saveWorkOrderToSupabase(wo) {
     media_announcement: wo.MediaAnnouncement
   };
 
-  // Try update first
-  const { data, error: updateError } = await supabaseClient
-    .from('work_orders')
-    .update(payload)
-    .eq('work_order', wo.WorkOrder)
-    .select();
+  const mfgPayload = {
+    work_order_number: wo.WorkOrder,
+    road_catg: wo.RoadCatg,
+    sign_type: wo.SignType,
+    sign_ref: wo.SignRef,
+    sign_shape: wo.SignShape,
+    sign_size: wo.SignSize,
+    sign_material: wo.SignMaterial,
+    sign_qty: parseInt(wo.SignQty) || null,
+    post_type: wo.PostType,
+    post_height: wo.PostHeight,
+    post_qty: parseInt(wo.PostQty) || null,
+    found_size: wo.FoundSize,
+    found_qty: parseInt(wo.FoundQty) || null,
+    fab_status: wo.FabStatus,
+    installation_date: wo.InstallationDate || null,
+    scrap_removal: wo.ScrapRemoval,
+    fab_details: wo.FabDetails
+  };
 
-  if (updateError) {
-    console.warn("Update failed, attempting upsert...", updateError);
-    // If update fails (maybe due to RLS on update vs insert), try upsert as fallback
-    const { error: upsertError } = await supabaseClient
-      .from('work_orders')
-      .upsert(payload, { onConflict: 'work_order' });
-    
-    if (upsertError) {
-      console.error("Supabase Save Error:", upsertError);
-      throw upsertError;
-    }
-  } else if (!data || data.length === 0) {
-    // No rows updated (maybe record didn't exist), try insert
-    const { error: insertError } = await supabaseClient
-      .from('work_orders')
-      .insert(payload);
-    
-    if (insertError) {
-      console.error("Supabase Insert Error:", insertError);
-      throw insertError;
-    }
+  // 1. Save Work Order
+  const { error: woError } = await supabaseClient
+    .from('work_orders')
+    .upsert(woPayload, { onConflict: 'work_order' });
+
+  if (woError) {
+    console.error("WO Save Error:", woError);
+    throw woError;
+  }
+
+  // 2. Save Manufacturing Details
+  const { error: mfgError } = await supabaseClient
+    .from('manufacturing')
+    .upsert(mfgPayload, { onConflict: 'work_order_number' });
+
+  if (mfgError) {
+    console.error("MFG Save Error:", mfgError);
+    throw mfgError;
   }
 }
 
@@ -2084,8 +2122,7 @@ function applyManufacturingFilters() {
   const eng = document.getElementById('mfgFilterEng').value;
   const fab = document.getElementById('mfgFilterFab').value;
   filteredFabData = allData.filter(r => {
-    if (!r.isSentToFab || (r.FabStatus||'').toLowerCase() === 'done') return false;
-    const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Highway||'').toLowerCase().includes(q);
+      const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Location||'').toLowerCase().includes(q);
     const matchSt = !st || r.Status === st;
     const matchEng = !eng || r.PWA_ENG === eng;
     const matchFab = !fab || (r.FabStatus||'').toLowerCase() === fab.toLowerCase();
@@ -2102,7 +2139,7 @@ function renderManufacturingTable() {
   const start = (fabCurrentPage - 1) * PAGE_SIZE;
   const slice = filteredFabData.slice(start, start + PAGE_SIZE);
   if (slice.length === 0) {
-    tbody.innerHTML = '<tr class="loading-row"><td colspan="15">No records found</td></tr>';
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="25">No records found</td></tr>';
     renderManufacturingPagination(); return;
   }
   tbody.innerHTML = slice.map((r, i) => {
@@ -2113,10 +2150,19 @@ function renderManufacturingTable() {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
           <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">
+          <div class="photo-actions">
+            <button class="btn btn-ghost btn-icon" onclick="uploadPhotoFor('${r.WorkOrder}')" title="Replace"><i class="fas fa-sync"></i></button>
+            <button class="btn btn-red btn-icon" onclick="deletePhoto('${r.WorkOrder}')" title="Delete"><i class="fas fa-trash"></i></button>
+          </div>
         </div>
       `;
     } else {
-      photoCell = `<div style="color:var(--muted)"><i class="fas fa-camera"></i></div>`;
+      photoCell = `
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <button class="btn btn-ghost btn-sm" onclick="uploadPhotoFor('${r.WorkOrder}')"><i class="fas fa-camera"></i> Attach</button>
+        </div>
+        <input type="file" id="file_${r.WorkOrder}" style="display:none" accept="image/*" onchange="handlePhotoUpload(event, '${r.WorkOrder}')">
+      `;
     }
 
     const mapActions = (r.Lat && r.Lng) ? `
@@ -2129,12 +2175,21 @@ function renderManufacturingTable() {
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td>${stBadge}</td>
       <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
-      <td style="font-size:11px">${r.Highway||'—'}</td>
+      <td style="font-size:11px">${r.Location||'—'}</td>
       <td style="font-size:11px">${r.TargetStart||'—'}</td>
       <td style="font-size:11px">${r.TargetFinish||'—'}</td>
-      <td style="font-size:11px">${r.SignType||'—'}</td>
-      <td style="font-size:11px">${r.SignRef||'—'}</td>
-      <td style="font-size:11px">${r.SignQty||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'RoadCatg')">${r.RoadCatg||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignMaterial')">${r.SignMaterial||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignType')">${r.SignType||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignRef')">${r.SignRef||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignShape')">${r.SignShape||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignSize')">${r.SignSize||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignQty', 'number')">${r.SignQty||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'PostType')">${r.PostType||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'PostHeight')">${r.PostHeight||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'PostQty', 'number')">${r.PostQty||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'FoundSize')">${r.FoundSize||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'FoundQty', 'number')">${r.FoundQty||'—'}</td>
       <td>
         <select class="filter-input" style="padding:4px; font-size:11px;" onchange="updateFabStatus('${r.WorkOrder}', this.value)">
            <option ${r.FabStatus==='Pending'?'selected':''}>Pending</option>
@@ -2142,13 +2197,12 @@ function renderManufacturingTable() {
            <option ${r.FabStatus==='Done'?'selected':''}>Done</option>
         </select>
       </td>
-      <td style="font-size:11px">${r.InstallationDate||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'InstallationDate', 'date')">${r.InstallationDate||'—'}</td>
       <td>
         <div style="display:flex; gap:4px; align-items:center;">
           <textarea class="filter-input" style="min-width:120px; height:32px; font-size:11px; padding:4px;" 
             onblur="updateFabDetails('${r.WorkOrder}', this.value)"
             onkeydown="if(event.ctrlKey && event.key==='Enter') { this.blur(); }">${r.FabDetails||''}</textarea>
-          <button class="btn btn-ghost btn-icon" onclick="updateFabDetails('${r.WorkOrder}', this.previousElementSibling.value)" title="Save"><i class="fas fa-save"></i></button>
         </div>
       </td>
       <td>${photoCell}</td>
@@ -2156,7 +2210,7 @@ function renderManufacturingTable() {
         <div class="action-btns">
           ${mapActions}
           <button class="btn btn-ghost btn-sm" onclick="showPage('workorders'); selectWorkOrderRow('${r.WorkOrder}');" title="View Work Order"><i class="fas fa-clipboard-list"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Fabrication Request"><i class="fas fa-file-pdf"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
           ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal(${allData.indexOf(r)}, 'manufacturing')"><i class="fas fa-edit"></i></button>` : ''}
         </div>
       </td>
@@ -2207,7 +2261,7 @@ function applyFilters() {
   const st = document.getElementById('filterStatus').value;
   const eng = document.getElementById('filterEng').value;
   filteredData = allData.filter(r => {
-    const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Highway||'').toLowerCase().includes(q);
+    const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Location||'').toLowerCase().includes(q);
     let matchSt = !st || r.Status === st;
     if (st === 'NOT_COMP') matchSt = r.Status !== 'COMP';
     const matchEng = !eng || r.PWA_ENG === eng;
@@ -2252,20 +2306,41 @@ function renderTable() {
       <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
     ` : '';
 
+    const photo = photos[r.WorkOrder];
+    let photoCell = '';
+    if (photo) {
+      photoCell = `
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">
+          <div class="photo-actions">
+            <button class="btn btn-ghost btn-icon" onclick="uploadPhotoFor('${r.WorkOrder}')" title="Replace"><i class="fas fa-sync"></i></button>
+            <button class="btn btn-red btn-icon" onclick="deletePhoto('${r.WorkOrder}')" title="Delete"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      `;
+    } else {
+      photoCell = `
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <button class="btn btn-ghost btn-sm" onclick="uploadPhotoFor('${r.WorkOrder}')"><i class="fas fa-camera"></i> Attach</button>
+        </div>
+        <input type="file" id="file_${r.WorkOrder}" style="display:none" accept="image/*" onchange="handlePhotoUpload(event, '${r.WorkOrder}')">
+      `;
+    }
+
     return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')">
       <td onclick="makeEditable(this, '${r.WorkOrder}', 'WorkOrder')"><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}" onclick="makeEditable(this, '${r.WorkOrder}', 'Description')"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td onclick="makeEditable(this, '${r.WorkOrder}', 'Status', 'select')">${stBadge}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Lat')">${r.Lat||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Lng')">${r.Lng||'—'}</td>
-      <td style="font-size:11px">${r.ReportedBy||'—'}</td>
-      <td style="font-size:11px">${r.ReportedDate||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'ReportedBy')">${r.ReportedBy||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'ReportedDate', 'date')">${r.ReportedDate||'—'}</td>
       <td style="font-size:11px;color:var(--muted)" onclick="makeEditable(this, '${r.WorkOrder}', 'PWA_ENG')">${r.PWA_ENG||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Highway')">${r.Highway||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Location')">${r.Location||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TargetStart', 'date')">${r.TargetStart||'—'}</td>
       <td style="font-size:11px">${monthLabel}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TargetFinish', 'date')">${r.TargetFinish||'—'}</td>
-      <td style="font-size:11px">${r.StatusUpdateDate||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'StatusUpdateDate', 'date')">${r.StatusUpdateDate||'—'}</td>
       <td style="font-size:11px">${completionStatus}</td>
       <td>
         <div style="display:flex; gap:4px; align-items:center;">
@@ -2274,16 +2349,19 @@ function renderTable() {
             onkeydown="if(event.ctrlKey && event.key==='Enter') { this.blur(); }">${r.QBCComments||''}</textarea>
         </div>
       </td>
-      <td style="font-size:11px">${r.RO||'—'}</td>
-      <td style="font-size:11px">${r.TDP||'—'}</td>
-      <td style="font-size:11px">${r.ApplicationDate||'—'}</td>
-      <td style="font-size:11px">${r.TDPStatus||'—'}</td>
-      <td style="font-size:11px">${r.ExpiryDate||'—'}</td>
-      <td style="font-size:11px">${r.MediaAnnouncement||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'RO')">${r.RO||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TDP')">${r.TDP||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'ApplicationDate', 'date')">${r.ApplicationDate||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TDPStatus')">${r.TDPStatus||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'ExpiryDate', 'date')">${r.ExpiryDate||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'MediaAnnouncement')">${r.MediaAnnouncement||'—'}</td>
       <td>
         <div class="action-btns">
           ${mapActions}
+          ${photoCell}
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); sendToFabrication('${r.WorkOrder}')" title="Send to Fabrication"><i class="fas fa-paper-plane"></i></button>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showManufacturingFor('${r.WorkOrder}')" title="View Manufacturing"><i class="fas fa-industry"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openFabModal('${r.WorkOrder}')" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
           ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openEditModal(${allData.indexOf(r)})"><i class="fas fa-edit"></i></button>` : ''}
         </div>
       </td>
@@ -2638,7 +2716,7 @@ async function processExcelUpload() {
         'work order #': 'WorkOrder', 'work order': 'WorkOrder', 'workorder': 'WorkOrder', 'wo': 'WorkOrder',
         'description': 'Description', 'status': 'Status', 'pwa engineer': 'PWA_ENG', 'engineer': 'PWA_ENG',
         'target start': 'TargetStart', 'target start date': 'TargetStart', 'target finish': 'TargetFinish', 'target finish date': 'TargetFinish', 'remaining': 'Remaining',
-        'highway': 'Highway', 'location': 'Highway', 'latitude': 'Lat', 'longitude': 'Lng', 'lat': 'Lat', 'lng': 'Lng',
+        'highway': 'Location', 'location': 'Location', 'latitude': 'Lat', 'longitude': 'Lng', 'lat': 'Lat', 'lng': 'Lng',
         'latitudey': 'Lat', 'longitudex': 'Lng',
         'road category': 'RoadCatg', 'road catg': 'RoadCatg',
         'sign type': 'SignType', 'sign ref': 'SignRef', 'sign shape': 'SignShape', 
@@ -2709,8 +2787,7 @@ async function processExcelUpload() {
       }
 
       if (supabaseClient) {
-        // Map PascalCase to snake_case for Supabase
-        const dbData = uniqueData.map(wo => ({
+        const woData = uniqueData.map(wo => ({
           work_order: wo.WorkOrder,
           description: wo.Description,
           status: wo.Status,
@@ -2718,24 +2795,9 @@ async function processExcelUpload() {
           target_start: wo.TargetStart || null,
           target_finish: wo.TargetFinish || null,
           remaining: wo.Remaining,
-          highway: wo.Highway,
+          location: wo.Location,
           lat: wo.Lat,
           lng: wo.Lng,
-          road_catg: wo.RoadCatg,
-          sign_type: wo.SignType,
-          sign_ref: wo.SignRef,
-          sign_shape: wo.SignShape,
-          sign_size: wo.SignSize,
-          sign_material: wo.SignMaterial,
-          sign_qty: wo.SignQty,
-          post_type: wo.PostType,
-          post_height: wo.PostHeight,
-          post_qty: wo.PostQty,
-          found_size: wo.FoundSize,
-          found_qty: wo.FoundQty,
-          fab_status: wo.FabStatus,
-          installation_date: wo.InstallationDate || null,
-          scrap_removal: wo.ScrapRemoval,
           reported_by: wo.ReportedBy,
           reported_date: wo.ReportedDate || null,
           status_update_date: wo.StatusUpdateDate || null,
@@ -2748,11 +2810,34 @@ async function processExcelUpload() {
           media_announcement: wo.MediaAnnouncement
         }));
 
-        // Process in chunks to avoid payload size limits
+        const mfgData = uniqueData.map(wo => ({
+          work_order_number: wo.WorkOrder,
+          road_catg: wo.RoadCatg,
+          sign_type: wo.SignType,
+          sign_ref: wo.SignRef,
+          sign_shape: wo.SignShape,
+          sign_size: wo.SignSize,
+          sign_material: wo.SignMaterial,
+          sign_qty: parseInt(wo.SignQty) || null,
+          post_type: wo.PostType,
+          post_height: wo.PostHeight,
+          post_qty: parseInt(wo.PostQty) || null,
+          found_size: wo.FoundSize,
+          found_qty: parseInt(wo.FoundQty) || null,
+          fab_status: wo.FabStatus,
+          installation_date: wo.InstallationDate || null,
+          scrap_removal: wo.ScrapRemoval,
+          fab_details: wo.FabDetails
+        }));
+
+        // Process in chunks
         const chunkSize = 100;
-        for (let i = 0; i < dbData.length; i += chunkSize) {
-          const chunk = dbData.slice(i, i + chunkSize);
-          const { error } = await supabaseClient.from('work_orders').upsert(chunk, { onConflict: 'work_order' });
+        for (let i = 0; i < woData.length; i += chunkSize) {
+          const { error } = await supabaseClient.from('work_orders').upsert(woData.slice(i, i + chunkSize), { onConflict: 'work_order' });
+          if (error) throw error;
+        }
+        for (let i = 0; i < mfgData.length; i += chunkSize) {
+          const { error } = await supabaseClient.from('manufacturing').upsert(mfgData.slice(i, i + chunkSize), { onConflict: 'work_order_number' });
           if (error) throw error;
         }
       } else {
@@ -4085,7 +4170,7 @@ function openFabModal(wo) {
     
     <div style="flex-shrink:0; border-bottom:3px solid var(--accent);padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;">
       <div>
-        <div style="font-size:24px;font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:1px;">Fabrication Request</div>
+        <div style="font-size:24px;font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:1px;">Fabrication</div>
         <div style="font-size:12px;color:#64748b;margin-top:4px;">Qatar Building Company – PWA Signage Works</div>
       </div>
       <div style="text-align:right;">
@@ -4102,7 +4187,7 @@ function openFabModal(wo) {
       <div style="flex:1;padding-right:20px;">
         <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Work Order Description</div>
         <div style="font-size:15px;font-weight:700;color:#0f172a;line-height:1.4;">${r.Description || '—'}</div>
-        <div style="font-size:12px;color:#475569;margin-top:6px;">Highway: <strong>${r.Highway || '—'}</strong> &nbsp;|&nbsp; Eng: <strong>${r.PWA_ENG || '—'}</strong></div>
+        <div style="font-size:12px;color:#475569;margin-top:6px;">Location: <strong>${r.Location || '—'}</strong> &nbsp;|&nbsp; Eng: <strong>${r.PWA_ENG || '—'}</strong></div>
       </div>
       <div style="text-align:right;border-left:2px solid #cbd5e1;padding-left:24px;min-width:140px;">
         <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Target Finish</div>
@@ -4176,13 +4261,13 @@ function exportPDF() {
 function downloadCSVTemplate() {
   const headers = [
     "Work Order #", "Description", "Status", "Latitude", "Longitude", "Reported By", "Reported Date",
-    "PWA Engineer", "Location", "Target Start Date", "Target Finish Date", "Status Update Date",
-    "QBC Comments", "RO", "TDP", "Application Date", "TDP Status", "Expiry Date", "Media Announcement"
+    "PWA Engineer", "Location", "Target Start Date", "Month", "Target Finish Date", "Status Update Date",
+    "Completion Status", "QBC Comments", "RO", "TDP", "Application Date", "TDP Status", "Expiry Date", "Media Announcement"
   ];
   const sample = [
     "25003146", "Road Safety,Warning Sign,Signface,loss of reflectivity, 0.0", "COMP", "21.73040931", "49.2829842", "DHANJITL", "13/01/2026",
-    "Adnan Khdair", "Dukhan Road", "13/01/2026", "17/01/2026", "14/01/2026",
-    "Sample Comment", "RO-VAL", "TDP-VAL", "13/01/2026", "Approved", "13/01/2027", "Yes"
+    "Adnan Khdair", "Dukhan Road", "13/01/2026", "January", "17/01/2026", "14/01/2026",
+    "Completed Within Target", "Sample Comment", "RO-VAL", "TDP-VAL", "13/01/2026", "Approved", "13/01/2027", "Yes"
   ];
   const csvContent = headers.join(",") + "\n" + sample.join(",");
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -4202,10 +4287,10 @@ function exportTableCSV(mode = 'all') {
     
     let csvContent = "";
     if (mode === 'manufacturing') {
-      const headers = ["Work Order", "Description", "Status", "PWA Engineer", "Highway", "Target Start", "Target Finish", "Sign Type", "Sign Ref", "Qty", "Fabrication Status", "Install Date", "Fabrication Details"];
+      const headers = ["Work Order", "Description", "Status", "PWA Engineer", "Location", "Target Start", "Target Finish", "Sign Type", "Sign Ref", "Qty", "Fabrication Status", "Install Date", "Fabrication Details"];
       csvContent = headers.join(",") + "\n";
       csvContent += data.map(r => [
-        r.WorkOrder, r.Description, r.Status, r.PWA_ENG, r.Highway, r.TargetStart, r.TargetFinish,
+        r.WorkOrder, r.Description, r.Status, r.PWA_ENG, r.Location, r.TargetStart, r.TargetFinish,
         r.SignType, r.SignRef, r.SignQty, r.FabStatus, r.InstallationDate, r.FabDetails
       ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
     } else {
@@ -4225,7 +4310,7 @@ function exportTableCSV(mode = 'all') {
         const completionStatus = getCompletionStatusLabel(r);
         return [
           r.WorkOrder, r.Description, r.Status, r.Lat, r.Lng, r.ReportedBy, r.ReportedDate,
-          r.PWA_ENG, r.Highway, r.TargetStart, monthLabel, r.TargetFinish, r.StatusUpdateDate,
+          r.PWA_ENG, r.Location, r.TargetStart, monthLabel, r.TargetFinish, r.StatusUpdateDate,
           completionStatus, r.QBCComments, r.RO, r.TDP, r.ApplicationDate, r.TDPStatus, r.ExpiryDate, r.MediaAnnouncement
         ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',');
       }).join('\n');
@@ -4254,10 +4339,10 @@ const MAIN_FIELDS = [
   {k:'ReportedBy',l:'Reported By'},
   {k:'ReportedDate',l:'Reported Date',type:'date'},
   {k:'PWA_ENG',l:'PWA Engineer'}, 
-  {k:'Highway',l:'Highway'}, 
+  {k:'Location',l:'Location'}, 
   {k:'TargetStart',l:'Target Start',type:'date'}, 
   {k:'TargetFinish',l:'Target Finish',type:'date'}, 
-  {k:'StatusUpdateDate',l:'Status Update Date',type:'date'},
+  {k:'StatusUpdateDate',l:'Status Update Date',type:'date',readonly:true},
   {k:'QBCComments',l:'QBC Comments',full:true},
   {k:'RO',l:'RO'},
   {k:'TDP',l:'TDP'},
@@ -4461,9 +4546,15 @@ function fieldHTML(f, val, extra='') {
     const opts = f.opts.map(o => `<option${o===val?' selected':''}>${o}</option>`).join('');
     return `<div class="form-group" style="${extra}"><label>${f.l}</label><select id="${id}"><option value="">—</option>${opts}</select></div>`;
   }
-  if (f.type === 'date') return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="date" id="${id}" value="${val}"></div>`;
-  if (f.k === 'FabDetails' || f.k === 'QBCComments') return `<div class="form-group" style="${extra}; grid-column: 1/-1;"><label>${f.l}</label><textarea id="${id}" style="height:60px;">${val||''}</textarea></div>`;
-  return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="text" id="${id}" value="${val||''}"></div>`;
+  const readonlyAttr = f.readonly ? 'readonly style="background:var(--surface2); cursor:not-allowed;"' : '';
+  if (f.type === 'select') {
+    const disabledAttr = f.readonly ? 'disabled' : '';
+    const opts = f.opts.map(o => `<option${o===val?' selected':''}>${o}</option>`).join('');
+    return `<div class="form-group" style="${extra}"><label>${f.l}</label><select id="${id}" ${disabledAttr}><option value="">—</option>${opts}</select></div>`;
+  }
+  if (f.type === 'date') return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="date" id="${id}" value="${val}" ${readonlyAttr}></div>`;
+  if (f.k === 'FabDetails' || f.k === 'QBCComments') return `<div class="form-group" style="${extra}; grid-column: 1/-1;"><label>${f.l}</label><textarea id="${id}" style="height:60px;" ${readonlyAttr}>${val||''}</textarea></div>`;
+  return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="text" id="${id}" value="${val||''}" ${readonlyAttr}></div>`;
 }
 function parseCSVDate(val) {
   if (!val) return null;
