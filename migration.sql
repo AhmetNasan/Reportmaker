@@ -1,4 +1,4 @@
--- SQL Migration Script for QBC Platform Restructure
+-- Corrected SQL Migration Script for QBC Platform Restructure
 
 -- 1. Update work_orders table with new operational columns and rename highway to location
 DO $$
@@ -44,23 +44,50 @@ CREATE TABLE IF NOT EXISTS manufacturing (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Migrate existing data from work_orders to manufacturing
-INSERT INTO manufacturing (
-    work_order_number, road_catg, sign_type, sign_ref, sign_shape, sign_size, sign_material, sign_qty,
-    post_type, post_height, post_qty, found_size, found_qty, fab_status, installation_date, scrap_removal, fab_details
-)
-SELECT
-    work_order, road_catg, sign_type, sign_ref, sign_shape, sign_size, sign_material, sign_qty,
-    post_type, post_height, post_qty, found_size, found_qty, fab_status, installation_date, scrap_removal, fab_details
-FROM work_orders
-ON CONFLICT (work_order_number) DO NOTHING;
+-- 3. Robust Data Migration from work_orders to manufacturing
+-- This DO block checks for column existence in work_orders before migrating
+DO $$
+DECLARE
+    source_columns text := '';
+    dest_columns text := '';
+    col_name text;
+    source_table text := 'work_orders';
+    dest_table text := 'manufacturing';
+BEGIN
+    -- Always migrate the primary link
+    dest_columns := 'work_order_number';
+    source_columns := 'work_order';
+
+    -- List of columns to potentially migrate
+    FOR col_name IN SELECT unnest(ARRAY[
+        'road_catg', 'sign_material', 'sign_type', 'sign_ref', 'sign_shape',
+        'sign_size', 'sign_qty', 'post_type', 'post_height', 'post_qty',
+        'found_size', 'found_qty', 'fab_status', 'installation_date',
+        'scrap_removal', 'fab_details'
+    ])
+    LOOP
+        -- Check if column exists in work_orders
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = source_table AND column_name = col_name
+        ) THEN
+            dest_columns := dest_columns || ', ' || col_name;
+            source_columns := source_columns || ', ' || col_name;
+        END IF;
+    END LOOP;
+
+    -- Execute the migration if we found any data to move
+    EXECUTE 'INSERT INTO ' || dest_table || ' (' || dest_columns || ') ' ||
+            'SELECT ' || source_columns || ' FROM ' || source_table || ' ' ||
+            'ON CONFLICT (work_order_number) DO NOTHING';
+
+    RAISE NOTICE 'Migration completed using columns: %', dest_columns;
+END $$;
 
 -- 4. Enable RLS on the new table
 ALTER TABLE manufacturing ENABLE ROW LEVEL SECURITY;
 
 -- 5. Create policies for manufacturing
--- These policies allow authenticated users to perform all actions.
--- In a production environment, you may want to restrict this further (e.g., only admins can delete).
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'manufacturing' AND policyname = 'Allow authenticated users to read manufacturing') THEN
