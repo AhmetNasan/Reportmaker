@@ -217,6 +217,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .main-table thead th{background:var(--surface2);padding:10px 12px;text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;border-bottom:1px solid var(--border);position:sticky;top:0;}
 .main-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
 .main-table tbody tr:hover{background:rgba(255,255,255,.03);}
+.main-table tbody tr.selected { background: rgba(0, 200, 255, 0.1) !important; }
 .main-table tbody td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
 .wo-num{font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-weight:700;font-size:13px;color:var(--accent);}
 .desc-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
@@ -670,7 +671,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
     <div class="user-menu">
       <span id="nav-user-name" style="font-size: 11px; font-weight: 600; color: var(--text); margin-right: 4px;">User</span>
-      <button class="user-avatar" id="nav-user-btn" onclick="toggleUserDropdown()" aria-label="User Menu" aria-haspopup="true" aria-expanded="false">U</button>
+      <button class="user-avatar" id="nav-user-btn" onclick="toggleUserDropdown()" aria-label="User Menu" aria-haspopup="true" aria-expanded="false"><span id="nav-user-initial">U</span></button>
       <div class="user-dropdown" id="user-dropdown" role="menu">
         <button class="dropdown-item" onclick="showProfile()" role="menuitem"><i class="fas fa-user-circle"></i> Profile</button>
         <button class="dropdown-item" onclick="showPage('settings')" role="menuitem"><i class="fas fa-sliders-h"></i> Settings</button>
@@ -2296,8 +2297,10 @@ function applyFilters() {
 function selectWorkOrderRow(woId) {
   selectedWorkOrder = woId;
   document.querySelectorAll('#woBody tr').forEach(tr => {
-    if (tr.getAttribute('data-wo') === woId) tr.classList.add('selected');
+    const isMatched = tr.getAttribute('data-wo') === woId;
+    if (isMatched) tr.classList.add('selected');
     else tr.classList.remove('selected');
+    tr.setAttribute('aria-selected', isMatched);
   });
 }
 
@@ -2347,7 +2350,7 @@ function renderTable() {
       `;
     }
 
-    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')">
+    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')" aria-selected="${isSelected}">
       <td onclick="makeEditable(this, '${r.WorkOrder}', 'WorkOrder')"><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}" onclick="makeEditable(this, '${r.WorkOrder}', 'Description')"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td onclick="makeEditable(this, '${r.WorkOrder}', 'Status', 'select')">${stBadge}</td>
