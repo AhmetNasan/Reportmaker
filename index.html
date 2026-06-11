@@ -241,7 +241,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .pg-info{font-size:11px;color:var(--muted);}
 
 /* ─── MODAL ─── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1100;align-items:center;justify-content:center;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2500;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:700px;width:90%;max-height:90vh;overflow-y:auto;position:relative;}
 @media (max-width: 600px) { .modal { width: 95%; padding: 20px; } .modal-title { font-size: 14px; } }
@@ -637,7 +637,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .fm-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; background: var(--surface2); padding: 12px; border-radius: 10px; }
 
 /* ─── TOAST ─── */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s; pointer-events: none;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:3000;opacity:0;transform:translateY(10px);transition:all .3s; pointer-events: none;}
 .toast.show{opacity:1;transform:translateY(0);}
 .toast.error{background:var(--red);color:#fff;}
 
@@ -1439,11 +1439,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
   <div class="detail-body">
     <div class="detail-toolbar">
-      <button class="btn btn-ghost btn-sm" onclick="openEditFromDetail()"><i class="fas fa-edit"></i> Edit</button>
+      <button class="btn btn-green btn-sm" onclick="saveDetailChanges()"><i class="fas fa-save"></i> Save Changes</button>
+      <button class="btn btn-ghost btn-sm" onclick="openDetail(selectedWorkOrder)"><i class="fas fa-times-circle"></i> Cancel Changes</button>
+      <div style="border-right: 1px solid var(--border); height: 24px; margin: 0 5px;"></div>
       <button class="btn btn-ghost btn-sm" onclick="printDetail()"><i class="fas fa-print"></i> Print</button>
       <button class="btn btn-ghost btn-sm" onclick="exportPDFFromDetail()"><i class="fas fa-file-pdf"></i> Export PDF</button>
       <button class="btn btn-ghost btn-sm" onclick="sendToFabFromDetail()"><i class="fas fa-paper-plane"></i> Send to Fabrication</button>
-      <button class="btn btn-ghost btn-sm" onclick="updateStatusFromDetail()"><i class="fas fa-sync-alt"></i> Update Status</button>
       <button class="btn btn-ghost btn-sm" onclick="attachFileFromDetail()"><i class="fas fa-paperclip"></i> Attach Files</button>
       <button class="btn btn-ghost btn-sm" onclick="duplicateWO()"><i class="fas fa-copy"></i> Duplicate</button>
       <button class="btn btn-red btn-sm" onclick="closeWO()"><i class="fas fa-check-circle"></i> Close WO</button>
@@ -1454,29 +1455,62 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <div class="detail-section">
           <div class="detail-section-title">General Information</div>
           <div class="detail-info-grid">
-            <div class="info-item"><label>Work Order Number</label><span id="det-wo"></span></div>
-            <div class="info-item"><label>Status</label><span id="det-status"></span></div>
-            <div class="info-item"><label>Priority</label><span id="det-priority">Normal</span></div>
-            <div class="info-item"><label>Reported Date</label><span id="det-created"></span></div>
-            <div class="info-item"><label>Target Finish Date</label><span id="det-target"></span></div>
-            <div class="info-item"><label>Assigned Team</label><span id="det-team"></span></div>
-            <div class="info-item"><label>Fabrication Status</label><span id="det-fab"></span></div>
-            <div class="info-item"><label>Installation Status</label><span id="det-install"></span></div>
+            <div class="info-item"><label>Work Order Number</label><input type="text" id="det-wo" class="filter-input" readonly></div>
+            <div class="info-item"><label>Status</label>
+              <select id="det-status" class="filter-input">
+                <option value="COMP">COMP</option><option value="INPRG">INPRG</option>
+                <option value="DISPATCH">DISPATCH</option><option value="WPERM">WPERM</option>
+                <option value="RTNENG">RTNENG</option><option value="APPR">APPR</option>
+              </select>
+            </div>
+            <div class="info-item"><label>Priority</label><input type="text" id="det-priority" class="filter-input"></div>
+            <div class="info-item"><label>Reported By</label><input type="text" id="det-reported-by" class="filter-input"></div>
+            <div class="info-item"><label>Reported Date</label><input type="date" id="det-created" class="filter-input"></div>
+            <div class="info-item"><label>Assigned Team / PWA Eng.</label><input type="text" id="det-team" class="filter-input"></div>
+            <div class="info-item"><label>Fabrication Status</label>
+              <select id="det-fab" class="filter-input">
+                <option value="Pending">Pending</option><option value="Ongoing">Ongoing</option><option value="Done">Done</option>
+              </select>
+            </div>
+            <div class="info-item"><label>Installation Date</label><input type="date" id="det-install" class="filter-input"></div>
           </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">Project Scheduling</div>
+            <div class="detail-info-grid">
+                <div class="info-item"><label>Target Start Date</label><input type="date" id="det-start" class="filter-input"></div>
+                <div class="info-item"><label>Target Finish Date</label><input type="date" id="det-target" class="filter-input"></div>
+                <div class="info-item"><label>Last Status Update</label><input type="date" id="det-update-date" class="filter-input" readonly style="background:var(--surface2);"></div>
+                <div class="info-item"><label>Description</label><textarea id="det-desc" class="filter-input" style="height: 60px; grid-column: span 2;"></textarea></div>
+                <div class="info-item"><label>QBC Comments</label><textarea id="det-qbc-comments" class="filter-input" style="height: 60px; grid-column: span 2;"></textarea></div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">Permits & Approvals</div>
+            <div class="detail-info-grid">
+                <div class="info-item"><label>RO</label><input type="text" id="det-ro" class="filter-input"></div>
+                <div class="info-item"><label>TDP</label><input type="text" id="det-tdp" class="filter-input"></div>
+                <div class="info-item"><label>Application Date</label><input type="date" id="det-app-date" class="filter-input"></div>
+                <div class="info-item"><label>TDP Status</label><input type="text" id="det-tdp-status" class="filter-input"></div>
+                <div class="info-item"><label>Expiry Date</label><input type="date" id="det-expiry" class="filter-input"></div>
+                <div class="info-item"><label>Media Announcement</label><input type="text" id="det-media" class="filter-input"></div>
+            </div>
         </div>
 
         <div class="detail-section">
           <div class="detail-section-title">Sign & Fabrication Details</div>
           <div class="detail-info-grid">
-            <div class="info-item"><label>Sign Type</label><span id="det-signtype"></span></div>
-            <div class="info-item"><label>Sign Reference</label><span id="det-signref"></span></div>
-            <div class="info-item"><label>Sign Shape</label><span id="det-signshape"></span></div>
-            <div class="info-item"><label>Dimensions (mm)</label><span id="det-signsize"></span></div>
-            <div class="info-item"><label>Material</label><span id="det-signmaterial"></span></div>
-            <div class="info-item"><label>Quantity</label><span id="det-signqty"></span></div>
-            <div class="info-item"><label>Pole Type</label><span id="det-posttype"></span></div>
-            <div class="info-item"><label>Pole Height</label><span id="det-postheight"></span></div>
-            <div class="info-item"><label>Foundation Size</label><span id="det-foundsize"></span></div>
+            <div class="info-item"><label>Sign Type</label><input type="text" id="det-signtype" class="filter-input"></div>
+            <div class="info-item"><label>Sign Reference</label><input type="text" id="det-signref" class="filter-input"></div>
+            <div class="info-item"><label>Sign Shape</label><input type="text" id="det-signshape" class="filter-input"></div>
+            <div class="info-item"><label>Dimensions (mm)</label><input type="text" id="det-signsize" class="filter-input"></div>
+            <div class="info-item"><label>Material</label><input type="text" id="det-signmaterial" class="filter-input"></div>
+            <div class="info-item"><label>Quantity</label><input type="number" id="det-signqty" class="filter-input"></div>
+            <div class="info-item"><label>Pole Type</label><input type="text" id="det-posttype" class="filter-input"></div>
+            <div class="info-item"><label>Pole Height</label><input type="text" id="det-postheight" class="filter-input"></div>
+            <div class="info-item"><label>Foundation Size</label><input type="text" id="det-foundsize" class="filter-input"></div>
           </div>
         </div>
 
@@ -1494,8 +1528,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <div class="static-map-marker"><i class="fas fa-map-marker-alt"></i></div>
           </div>
           <div style="margin-top: 16px;">
-            <div class="info-item"><label>Coordinates</label><span id="det-coords"></span></div>
-            <div class="info-item" style="margin-top: 8px;"><label>Location</label><span id="det-location"></span></div>
+            <div class="info-item"><label>Latitude</label><input type="text" id="det-lat" class="filter-input"></div>
+            <div class="info-item" style="margin-top: 8px;"><label>Longitude</label><input type="text" id="det-lng" class="filter-input"></div>
+            <div class="info-item" style="margin-top: 8px;"><label>Location / Highway</label><input type="text" id="det-location" class="filter-input"></div>
             <button class="btn btn-ghost btn-sm w-100 mt-3" onclick="openInGoogleMaps()"><i class="fab fa-google"></i> Open in Google Maps</button>
           </div>
         </div>
@@ -1554,6 +1589,7 @@ let fmView = 'grid';
 let fmSelected = new Set();
 let fmFiles = [];
 let selectedWorkOrder = null;
+let isAuthenticating = false;
 
 // INITIALIZATION
 window.addEventListener('paste', async (e) => {
@@ -1573,10 +1609,14 @@ window.addEventListener('paste', async (e) => {
 
 window.addEventListener('load', async () => {
   if (supabaseClient) {
-    // Set up auth state change listener for automatic session management
+    // Single source of truth for auth state
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth State Changed:", event, session ? "Session present" : "No session");
+      
       if (session) {
+        // Prevent redundant calls during the same auth transition
+        if (currentUser && currentUser.id === session.user.id) return;
+        
         currentUser = session.user;
         if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
           isAdmin = true;
@@ -1591,23 +1631,6 @@ window.addEventListener('load', async () => {
         document.getElementById('main-nav').style.display = 'none';
       }
     });
-
-    try {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (session) {
-        currentUser = session.user;
-        if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
-          isAdmin = true;
-          isApproved = true;
-        }
-        await onAuthenticated();
-      } else {
-        document.getElementById('auth-container').style.display = 'flex';
-      }
-    } catch(e) {
-      console.error("Initial session check failed:", e);
-      document.getElementById('auth-container').style.display = 'flex';
-    }
   } else {
     // Offline / Local Mode Fallback
     const authCont = document.getElementById('auth-container');
@@ -2480,28 +2503,45 @@ async function openDetail(woId) {
   document.getElementById('detail-status-badge').innerHTML = `<span class="status-badge badge-${wo.Status||'COMP'}">${wo.Status||'–'}</span>`;
 
   // General Info
-  document.getElementById('det-wo').textContent = wo.WorkOrder;
-  document.getElementById('det-status').textContent = wo.Status || '—';
-  document.getElementById('det-created').textContent = wo.ReportedDate || '—';
-  document.getElementById('det-target').textContent = wo.TargetFinish || '—';
-  document.getElementById('det-team').textContent = wo.PWA_ENG || '—';
-  document.getElementById('det-fab').textContent = wo.FabStatus || 'Pending';
-  document.getElementById('det-install').textContent = wo.InstallationDate || '—';
+  document.getElementById('det-wo').value = wo.WorkOrder;
+  document.getElementById('det-status').value = wo.Status || 'COMP';
+  document.getElementById('det-priority').value = 'Normal'; // Priority not in DB, fallback
+  document.getElementById('det-reported-by').value = wo.ReportedBy || '';
+  document.getElementById('det-created').value = wo.ReportedDate || '';
+  document.getElementById('det-team').value = wo.PWA_ENG || '';
+  document.getElementById('det-fab').value = wo.FabStatus || 'Pending';
+  document.getElementById('det-install').value = wo.InstallationDate || '';
+
+  // Scheduling
+  document.getElementById('det-start').value = wo.TargetStart || '';
+  document.getElementById('det-target').value = wo.TargetFinish || '';
+  document.getElementById('det-update-date').value = wo.StatusUpdateDate || '';
+  document.getElementById('det-desc').value = wo.Description || '';
+  document.getElementById('det-qbc-comments').value = wo.QBCComments || '';
+
+  // Permits
+  document.getElementById('det-ro').value = wo.RO || '';
+  document.getElementById('det-tdp').value = wo.TDP || '';
+  document.getElementById('det-app-date').value = wo.ApplicationDate || '';
+  document.getElementById('det-tdp-status').value = wo.TDPStatus || '';
+  document.getElementById('det-expiry').value = wo.ExpiryDate || '';
+  document.getElementById('det-media').value = wo.MediaAnnouncement || '';
 
   // Sign Details
-  document.getElementById('det-signtype').textContent = wo.SignType || '—';
-  document.getElementById('det-signref').textContent = wo.SignRef || '—';
-  document.getElementById('det-signshape').textContent = wo.SignShape || '—';
-  document.getElementById('det-signsize').textContent = wo.SignSize || '—';
-  document.getElementById('det-signmaterial').textContent = wo.SignMaterial || '—';
-  document.getElementById('det-signqty').textContent = wo.SignQty || '—';
-  document.getElementById('det-posttype').textContent = wo.PostType || '—';
-  document.getElementById('det-postheight').textContent = wo.PostHeight || '—';
-  document.getElementById('det-foundsize').textContent = wo.FoundSize || '—';
+  document.getElementById('det-signtype').value = wo.SignType || '';
+  document.getElementById('det-signref').value = wo.SignRef || '';
+  document.getElementById('det-signshape').value = wo.SignShape || '';
+  document.getElementById('det-signsize').value = wo.SignSize || '';
+  document.getElementById('det-signmaterial').value = wo.SignMaterial || '';
+  document.getElementById('det-signqty').value = wo.SignQty || '';
+  document.getElementById('det-posttype').value = wo.PostType || '';
+  document.getElementById('det-postheight').value = wo.PostHeight || '';
+  document.getElementById('det-foundsize').value = wo.FoundSize || '';
 
   // Location
-  document.getElementById('det-coords').textContent = (wo.Lat && wo.Lng) ? `${wo.Lat.toFixed(6)}, ${wo.Lng.toFixed(6)}` : '—';
-  document.getElementById('det-location').textContent = wo.Location || '—';
+  document.getElementById('det-lat').value = wo.Lat || '';
+  document.getElementById('det-lng').value = wo.Lng || '';
+  document.getElementById('det-location').value = wo.Location || '';
   
   const mapContainer = document.getElementById('detail-map');
   if (wo.Lat && wo.Lng) {
@@ -2548,8 +2588,60 @@ function navigateDetail(direction) {
   openDetail(nextWoId);
 }
 
-function openEditFromDetail() {
-  if (selectedWorkOrder) openEditModal(selectedWorkOrder);
+async function saveDetailChanges() {
+  if (!selectedWorkOrder) return;
+  const wo = allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder));
+  if (!wo) return;
+
+  const btn = document.querySelector('.detail-toolbar .btn-green');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+  const updatedData = {
+    ...wo,
+    Status: document.getElementById('det-status').value,
+    ReportedBy: document.getElementById('det-reported-by').value,
+    ReportedDate: document.getElementById('det-created').value,
+    PWA_ENG: document.getElementById('det-team').value,
+    FabStatus: document.getElementById('det-fab').value,
+    InstallationDate: document.getElementById('det-install').value,
+    TargetStart: document.getElementById('det-start').value,
+    TargetFinish: document.getElementById('det-target').value,
+    StatusUpdateDate: new Date().toISOString().split('T')[0], // Auto update on save
+    Description: document.getElementById('det-desc').value,
+    QBCComments: document.getElementById('det-qbc-comments').value,
+    RO: document.getElementById('det-ro').value,
+    TDP: document.getElementById('det-tdp').value,
+    ApplicationDate: document.getElementById('det-app-date').value,
+    TDPStatus: document.getElementById('det-tdp-status').value,
+    ExpiryDate: document.getElementById('det-expiry').value,
+    MediaAnnouncement: document.getElementById('det-media').value,
+    SignType: document.getElementById('det-signtype').value,
+    SignRef: document.getElementById('det-signref').value,
+    SignShape: document.getElementById('det-signshape').value,
+    SignSize: document.getElementById('det-signsize').value,
+    SignMaterial: document.getElementById('det-signmaterial').value,
+    SignQty: document.getElementById('det-signqty').value,
+    PostType: document.getElementById('det-posttype').value,
+    PostHeight: document.getElementById('det-postheight').value,
+    FoundSize: document.getElementById('det-foundsize').value,
+    Lat: parseFloat(document.getElementById('det-lat').value) || null,
+    Lng: parseFloat(document.getElementById('det-lng').value) || null,
+    Location: document.getElementById('det-location').value
+  };
+
+  try {
+    await saveWorkOrderToSupabase(updatedData);
+    showToast("Changes saved to Supabase");
+    fetchData(); // Sync local state
+    openDetail(selectedWorkOrder); // Refresh UI with fresh data
+  } catch (error) {
+    showToast("Error saving changes", "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
 }
 
 function printDetail() {
@@ -2562,31 +2654,6 @@ function exportPDFFromDetail() {
 
 function sendToFabFromDetail() {
   if (selectedWorkOrder) sendToFabrication(selectedWorkOrder);
-}
-
-function updateStatusFromDetail() {
-  if (!selectedWorkOrder) return;
-  const wo = allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder));
-  
-  // Use a more professional selection if possible, but for now simple prompt is quick
-  const statuses = ['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR'];
-  const newStatus = prompt(`Enter new status (${statuses.join(', ')}):`, wo.Status);
-  
-  if (newStatus && statuses.includes(newStatus.toUpperCase())) {
-    const prevStatus = wo.Status;
-    wo.Status = newStatus.toUpperCase();
-    wo.StatusUpdateDate = new Date().toISOString().split('T')[0];
-    
-    saveWorkOrderToSupabase(wo).then(() => {
-      showToast(`Status changed: ${prevStatus} → ${wo.Status}`);
-      openDetail(selectedWorkOrder);
-      renderTable();
-      updateDashboard();
-    }).catch(() => {
-      wo.Status = prevStatus;
-      showToast("Failed to update status", "error");
-    });
-  }
 }
 
 
@@ -3244,8 +3311,8 @@ async function processExcelUpload() {
 
       const upsertData = [];
       const MAP = { 
-        'work order #': 'WorkOrder', 'work order': 'WorkOrder', 'workorder': 'WorkOrder', 'wo': 'WorkOrder',
-        'description': 'Description', 'status': 'Status', 'pwa engineer': 'PWA_ENG', 'engineer': 'PWA_ENG',
+        'work order #': 'WorkOrder', 'work order': 'WorkOrder', 'workorder': 'WorkOrder', 'wo': 'WorkOrder', 'wo #': 'WorkOrder',
+        'description': 'Description', 'status': 'Status', 'pwa engineer': 'PWA_ENG', 'engineer': 'PWA_ENG', 'pwa eng': 'PWA_ENG',
         'target start': 'TargetStart', 'target start date': 'TargetStart', 'target finish': 'TargetFinish', 'target finish date': 'TargetFinish', 'remaining': 'Remaining',
         'highway': 'Location', 'location': 'Location', 'latitude': 'Lat', 'longitude': 'Lng', 'lat': 'Lat', 'lng': 'Lng',
         'latitudey': 'Lat', 'longitudex': 'Lng',
@@ -3255,11 +3322,12 @@ async function processExcelUpload() {
         'sign qty': 'SignQty', 'post type': 'PostType', 'post height': 'PostHeight', 
         'post qty': 'PostQty', 'found size': 'FoundSize', 'found qty': 'FoundQty',
         'scrap removal': 'ScrapRemoval', 'fab status': 'FabStatus', 
-        'installation date': 'InstallationDate',
+        'installation date': 'InstallationDate', 'install date': 'InstallationDate', 'installation': 'InstallationDate',
         'reported by': 'ReportedBy', 'reported': 'ReportedBy', 'reported date': 'ReportedDate', 'reported da': 'ReportedDate',
         'status update date': 'StatusUpdateDate', 'status upda': 'StatusUpdateDate', 'qbc comments': 'QBCComments',
-        'ro': 'RO', 'tdp': 'TDP', 'application date': 'ApplicationDate', 'application da': 'ApplicationDate',
-        'tdp status': 'TDPStatus', 'expiry date': 'ExpiryDate', 'expiry da': 'ExpiryDate', 'media announcement': 'MediaAnnouncement', 'media announceme': 'MediaAnnouncement'
+        'ro': 'RO', 'tdp': 'TDP', 'application date': 'ApplicationDate', 'application da': 'ApplicationDate', 'application': 'ApplicationDate',
+        'tdp status': 'TDPStatus', 'expiry date': 'ExpiryDate', 'expiry da': 'ExpiryDate', 'expiry': 'ExpiryDate',
+        'media announcement': 'MediaAnnouncement', 'media announceme': 'MediaAnnouncement'
       };
 
       dataRows.forEach(row => {
@@ -5120,10 +5188,16 @@ function parseCSVDate(val) {
   if (!val) return null;
   if (val instanceof Date) return isNaN(val.getTime()) ? null : val.toISOString().split('T')[0];
 
-  const s = String(val).trim();
-  if (!s || s === '0' || s.toLowerCase() === 'null') return null;
+  let s = String(val).trim();
+  if (!s || s === '0' || s.toLowerCase() === 'null' || s === '-') return null;
 
-  // Handle DD/MM/YYYY or DD-MM-YYYY
+  // Handle formats like "15-May-2025" or "15 May 2025" or "May 15, 2025"
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) {
+    return d.toISOString().split('T')[0];
+  }
+
+  // Handle DD/MM/YYYY or DD-MM-YYYY specifically if Date() fails
   const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
   if (dmyMatch) {
     const day = dmyMatch[1].padStart(2, '0');
@@ -5132,23 +5206,13 @@ function parseCSVDate(val) {
     return `${year}-${month}-${day}`;
   }
 
-  // Handle YYYY/MM/DD or YYYY-MM-DD
-  const ymdMatch = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
-  if (ymdMatch) {
-    const year = ymdMatch[1];
-    const month = ymdMatch[2].padStart(2, '0');
-    const day = ymdMatch[3].padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
   // Excel serial number
-  if (!isNaN(s) && s.length > 4 && s.length < 6) {
+  if (!isNaN(s) && s.length >= 5 && s.length <= 6) {
     const date = new Date((Number(s) - 25569) * 86400 * 1000);
     if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
   }
 
-  const d = new Date(s);
-  return isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+  return null;
 }
 
 function showToast(msg, type='') { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.className='toast'+(type?' '+type:''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
