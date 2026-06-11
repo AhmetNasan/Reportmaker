@@ -215,8 +215,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r); -webkit-overflow-scrolling: touch; }
 .main-table{width:100%;border-collapse:collapse;font-size:12px;}
 .main-table thead th{background:var(--surface2);padding:10px 12px;text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;border-bottom:1px solid var(--border);position:sticky;top:0;}
-.main-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
-.main-table tbody tr:hover{background:rgba(255,255,255,.03);}
+.main-table tbody tr{border-bottom:1px solid var(--border);transition:all .15s;cursor:pointer;}
+.main-table tbody tr:hover{background:rgba(0, 200, 255, 0.05);}
+.main-table tbody tr.selected { background: rgba(0, 200, 255, 0.1) !important; border-left: 4px solid var(--accent); }
 .main-table tbody td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
 .wo-num{font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-weight:700;font-size:13px;color:var(--accent);}
 .desc-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
@@ -252,6 +253,39 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .form-group label{font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;}
 .form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:12px;outline:none;transition:border .2s;}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+/* ─── DETAIL VIEW ─── */
+.detail-modal { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; animation: fadeUp 0.3s ease-out; }
+.detail-modal.open { display: flex; }
+.detail-header { height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; position: sticky; top: 0; z-index: 10; gap: 20px; }
+.detail-body { padding: 32px 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+.detail-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+@media (max-width: 1000px) { .detail-grid { grid-template-columns: 1fr; } }
+.detail-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 24px; margin-bottom: 24px; }
+.detail-section-title { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: 0.05em; }
+.detail-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.detail-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 24px; }
+.info-item label { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em; }
+.info-item span { font-size: 14px; color: var(--text); font-weight: 600; }
+.detail-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; }
+.comment-item { padding: 16px; background: var(--surface2); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
+.comment-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.comment-author { font-weight: 700; color: var(--accent); }
+.comment-text { font-size: 13px; line-height: 1.5; color: var(--text); }
+.attachment-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 12px; }
+.attachment-item { aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
+.attachment-item:hover { transform: scale(1.05); border-color: var(--accent); }
+.attachment-item:hover .attachment-overlay { opacity: 1; }
+.attachment-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.2s; gap: 10px; }
+.attachment-overlay i { color: #fff; font-size: 18px; }
+.attachment-item img { width: 100%; height: 100%; object-fit: cover; }
+.attachment-item.file { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface2); }
+.attachment-item.file i { font-size: 24px; color: var(--muted); margin-bottom: 8px; }
+.attachment-item.file span { font-size: 10px; text-align: center; padding: 0 4px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; width: 100%; }
+
+.static-map { width: 100%; height: 200px; background: var(--surface2); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; position: relative; }
+.static-map-img { width: 100%; height: 100%; object-fit: cover; }
+.static-map-marker { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); color: var(--red); font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
 .fab-section{margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
 .fab-section h4{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em;}
@@ -1389,6 +1423,96 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
+<div class="detail-modal" id="detailModal">
+  <div class="detail-header">
+    <button class="btn btn-ghost btn-sm" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Back</button>
+    <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
+      <h2 id="detail-wo-number" style="font-size: 18px; font-weight: 800; color: var(--accent);">WO #000000</h2>
+      <span id="detail-status-badge"></span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-ghost btn-sm" onclick="navigateDetail('prev')" title="Previous Work Order"><i class="fas fa-chevron-up"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="navigateDetail('next')" title="Next Work Order"><i class="fas fa-chevron-down"></i></button>
+      <button class="btn btn-primary btn-sm" onclick="closeDetail()"><i class="fas fa-times"></i> Close</button>
+    </div>
+  </div>
+
+  <div class="detail-body">
+    <div class="detail-toolbar">
+      <button class="btn btn-ghost btn-sm" onclick="openEditFromDetail()"><i class="fas fa-edit"></i> Edit</button>
+      <button class="btn btn-ghost btn-sm" onclick="printDetail()"><i class="fas fa-print"></i> Print</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportPDFFromDetail()"><i class="fas fa-file-pdf"></i> Export PDF</button>
+      <button class="btn btn-ghost btn-sm" onclick="sendToFabFromDetail()"><i class="fas fa-paper-plane"></i> Send to Fabrication</button>
+      <button class="btn btn-ghost btn-sm" onclick="updateStatusFromDetail()"><i class="fas fa-sync-alt"></i> Update Status</button>
+      <button class="btn btn-ghost btn-sm" onclick="attachFileFromDetail()"><i class="fas fa-paperclip"></i> Attach Files</button>
+      <button class="btn btn-ghost btn-sm" onclick="duplicateWO()"><i class="fas fa-copy"></i> Duplicate</button>
+      <button class="btn btn-red btn-sm" onclick="closeWO()"><i class="fas fa-check-circle"></i> Close WO</button>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-main">
+        <div class="detail-section">
+          <div class="detail-section-title">General Information</div>
+          <div class="detail-info-grid">
+            <div class="info-item"><label>Work Order Number</label><span id="det-wo"></span></div>
+            <div class="info-item"><label>Status</label><span id="det-status"></span></div>
+            <div class="info-item"><label>Priority</label><span id="det-priority">Normal</span></div>
+            <div class="info-item"><label>Reported Date</label><span id="det-created"></span></div>
+            <div class="info-item"><label>Target Finish Date</label><span id="det-target"></span></div>
+            <div class="info-item"><label>Assigned Team</label><span id="det-team"></span></div>
+            <div class="info-item"><label>Fabrication Status</label><span id="det-fab"></span></div>
+            <div class="info-item"><label>Installation Status</label><span id="det-install"></span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Sign & Fabrication Details</div>
+          <div class="detail-info-grid">
+            <div class="info-item"><label>Sign Type</label><span id="det-signtype"></span></div>
+            <div class="info-item"><label>Sign Reference</label><span id="det-signref"></span></div>
+            <div class="info-item"><label>Sign Shape</label><span id="det-signshape"></span></div>
+            <div class="info-item"><label>Dimensions (mm)</label><span id="det-signsize"></span></div>
+            <div class="info-item"><label>Material</label><span id="det-signmaterial"></span></div>
+            <div class="info-item"><label>Quantity</label><span id="det-signqty"></span></div>
+            <div class="info-item"><label>Pole Type</label><span id="det-posttype"></span></div>
+            <div class="info-item"><label>Pole Height</label><span id="det-postheight"></span></div>
+            <div class="info-item"><label>Foundation Size</label><span id="det-foundsize"></span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Photos and Attachments</div>
+          <div class="attachment-gallery" id="detail-attachments"></div>
+        </div>
+      </div>
+
+      <div class="detail-sidebar">
+        <div class="detail-section">
+          <div class="detail-section-title">Location Information</div>
+          <div class="static-map" id="detail-map">
+            <img id="detail-map-img" class="static-map-img" src="" alt="Location Map">
+            <div class="static-map-marker"><i class="fas fa-map-marker-alt"></i></div>
+          </div>
+          <div style="margin-top: 16px;">
+            <div class="info-item"><label>Coordinates</label><span id="det-coords"></span></div>
+            <div class="info-item" style="margin-top: 8px;"><label>Location</label><span id="det-location"></span></div>
+            <button class="btn btn-ghost btn-sm w-100 mt-3" onclick="openInGoogleMaps()"><i class="fab fa-google"></i> Open in Google Maps</button>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Internal Comments</div>
+          <div id="comment-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 16px;"></div>
+          <div class="form-group">
+            <textarea id="new-comment" placeholder="Add a comment..." style="height: 80px; resize: none;"></textarea>
+            <button class="btn btn-primary btn-sm mt-2 w-100" onclick="addComment()"><i class="fas fa-paper-plane"></i> Post Comment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -2293,12 +2417,382 @@ function applyFilters() {
   if (label) label.textContent = `(${filteredData.length} of ${allData.length})`;
 }
 
-function selectWorkOrderRow(woId) {
+function selectWorkOrderRow(woId, scrollIntoView = false) {
   selectedWorkOrder = woId;
-  document.querySelectorAll('#woBody tr').forEach(tr => {
-    if (tr.getAttribute('data-wo') === woId) tr.classList.add('selected');
-    else tr.classList.remove('selected');
+  const rows = document.querySelectorAll('#woBody tr');
+  rows.forEach(tr => {
+    if (tr.getAttribute('data-wo') === String(woId)) {
+      tr.classList.add('selected');
+      if (scrollIntoView) {
+        tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    } else {
+      tr.classList.remove('selected');
+    }
   });
+}
+
+function handleTableKeydown(e) {
+  if (!['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) return;
+
+  const isDetailOpen = document.getElementById('detailModal').classList.contains('open');
+  if (isDetailOpen && e.key === 'Escape') {
+    closeDetail();
+    return;
+  }
+
+  // Get current visible rows (filtered)
+  const rows = Array.from(document.querySelectorAll('#woBody tr:not(.loading-row)'));
+  if (rows.length === 0) return;
+
+  const currentIndex = rows.findIndex(tr => tr.getAttribute('data-wo') === String(selectedWorkOrder));
+
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : rows.length - 1;
+    const newWoId = rows[prevIndex].getAttribute('data-wo');
+    selectWorkOrderRow(newWoId, true);
+    if (isDetailOpen) openDetail(newWoId);
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const nextIndex = currentIndex < rows.length - 1 ? currentIndex + 1 : 0;
+    const newWoId = rows[nextIndex].getAttribute('data-wo');
+    selectWorkOrderRow(newWoId, true);
+    if (isDetailOpen) openDetail(newWoId);
+  } else if (e.key === 'Enter') {
+    if (selectedWorkOrder) openDetail(selectedWorkOrder);
+  }
+}
+
+window.addEventListener('keydown', handleTableKeydown);
+
+async function openDetail(woId) {
+  const wo = allData.find(d => String(d.WorkOrder) === String(woId));
+  if (!wo) return;
+
+  selectedWorkOrder = woId;
+  const modal = document.getElementById('detailModal');
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Header & Status
+  document.getElementById('detail-wo-number').textContent = `WO #${wo.WorkOrder}`;
+  document.getElementById('detail-status-badge').innerHTML = `<span class="status-badge badge-${wo.Status||'COMP'}">${wo.Status||'–'}</span>`;
+
+  // General Info
+  document.getElementById('det-wo').textContent = wo.WorkOrder;
+  document.getElementById('det-status').textContent = wo.Status || '—';
+  document.getElementById('det-created').textContent = wo.ReportedDate || '—';
+  document.getElementById('det-target').textContent = wo.TargetFinish || '—';
+  document.getElementById('det-team').textContent = wo.PWA_ENG || '—';
+  document.getElementById('det-fab').textContent = wo.FabStatus || 'Pending';
+  document.getElementById('det-install').textContent = wo.InstallationDate || '—';
+
+  // Sign Details
+  document.getElementById('det-signtype').textContent = wo.SignType || '—';
+  document.getElementById('det-signref').textContent = wo.SignRef || '—';
+  document.getElementById('det-signshape').textContent = wo.SignShape || '—';
+  document.getElementById('det-signsize').textContent = wo.SignSize || '—';
+  document.getElementById('det-signmaterial').textContent = wo.SignMaterial || '—';
+  document.getElementById('det-signqty').textContent = wo.SignQty || '—';
+  document.getElementById('det-posttype').textContent = wo.PostType || '—';
+  document.getElementById('det-postheight').textContent = wo.PostHeight || '—';
+  document.getElementById('det-foundsize').textContent = wo.FoundSize || '—';
+
+  // Location
+  document.getElementById('det-coords').textContent = (wo.Lat && wo.Lng) ? `${wo.Lat.toFixed(6)}, ${wo.Lng.toFixed(6)}` : '—';
+  document.getElementById('det-location').textContent = wo.Location || '—';
+
+  const mapContainer = document.getElementById('detail-map');
+  if (wo.Lat && wo.Lng) {
+    mapContainer.innerHTML = `
+      <iframe
+        width="100%"
+        height="200"
+        frameborder="0"
+        style="border:0; border-radius: 12px;"
+        src="https://maps.google.com/maps?q=${wo.Lat},${wo.Lng}&hl=es&z=14&output=embed"
+        allowfullscreen>
+      </iframe>`;
+  } else {
+    mapContainer.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--muted); font-size:12px;">No location coordinates</div>';
+  }
+
+  // Attachments
+  renderDetailAttachments(woId);
+
+  // Comments
+  loadComments(woId);
+}
+
+function closeDetail() {
+  document.getElementById('detailModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function navigateDetail(direction) {
+  const rows = Array.from(document.querySelectorAll('#woBody tr:not(.loading-row)'));
+  if (rows.length === 0) return;
+
+  const currentIndex = rows.findIndex(tr => tr.getAttribute('data-wo') === String(selectedWorkOrder));
+  let nextIndex;
+
+  if (direction === 'prev') {
+    nextIndex = currentIndex > 0 ? currentIndex - 1 : rows.length - 1;
+  } else {
+    nextIndex = currentIndex < rows.length - 1 ? currentIndex + 1 : 0;
+  }
+
+  const nextWoId = rows[nextIndex].getAttribute('data-wo');
+  selectWorkOrderRow(nextWoId, true);
+  openDetail(nextWoId);
+}
+
+function openEditFromDetail() {
+  if (selectedWorkOrder) openEditModal(selectedWorkOrder);
+}
+
+function printDetail() {
+  window.print();
+}
+
+function exportPDFFromDetail() {
+  if (selectedWorkOrder) openFabModal(selectedWorkOrder);
+}
+
+function sendToFabFromDetail() {
+  if (selectedWorkOrder) sendToFabrication(selectedWorkOrder);
+}
+
+function updateStatusFromDetail() {
+  if (!selectedWorkOrder) return;
+  const wo = allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder));
+
+  // Use a more professional selection if possible, but for now simple prompt is quick
+  const statuses = ['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR'];
+  const newStatus = prompt(`Enter new status (${statuses.join(', ')}):`, wo.Status);
+
+  if (newStatus && statuses.includes(newStatus.toUpperCase())) {
+    const prevStatus = wo.Status;
+    wo.Status = newStatus.toUpperCase();
+    wo.StatusUpdateDate = new Date().toISOString().split('T')[0];
+
+    saveWorkOrderToSupabase(wo).then(() => {
+      showToast(`Status changed: ${prevStatus} → ${wo.Status}`);
+      openDetail(selectedWorkOrder);
+      renderTable();
+      updateDashboard();
+    }).catch(() => {
+      wo.Status = prevStatus;
+      showToast("Failed to update status", "error");
+    });
+  }
+}
+
+
+function duplicateWO() {
+  showToast("Duplication requested. Administrator will consider and take action.", "amber");
+}
+
+function closeWO() {
+  if (!selectedWorkOrder) return;
+  if (confirm("Are you sure you want to close this Work Order?")) {
+    const wo = allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder));
+    wo.Status = 'COMP';
+    saveWorkOrderToSupabase(wo).then(() => {
+      showToast("Work Order Closed");
+      openDetail(selectedWorkOrder);
+      renderTable();
+    });
+  }
+}
+
+function openInGoogleMaps() {
+  const wo = allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder));
+  if (wo && wo.Lat && wo.Lng) {
+    window.open(`https://www.google.com/maps?q=${wo.Lat},${wo.Lng}`, '_blank');
+  } else {
+    showToast("Coordinates missing", "error");
+  }
+}
+
+async function renderDetailAttachments(woId) {
+  const container = document.getElementById('detail-attachments');
+  container.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+  const photo = photos[woId];
+  let html = '';
+
+  if (photo) {
+    html += `
+      <div class="attachment-item" title="Main Photo">
+        <img src="${photo}" alt="Work Order Photo">
+        <div class="attachment-overlay">
+          <i class="fas fa-search-plus" onclick="viewPhoto('${woId}')"></i>
+          <a href="${photo}" download target="_blank" style="color:white;"><i class="fas fa-download"></i></a>
+        </div>
+      </div>
+    `;
+  }
+
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from('work_order_attachments')
+        .select('*')
+        .eq('work_order', woId);
+
+      if (!error && data) {
+        data.forEach(file => {
+          const isImg = /\.(jpg|jpeg|png|webp|gif)$/i.test(file.url);
+          if (isImg) {
+            html += `
+              <div class="attachment-item" title="${file.filename}">
+                <img src="${file.url}">
+                <div class="attachment-overlay">
+                  <i class="fas fa-search-plus" onclick="window.open('${file.url}', '_blank')"></i>
+                  <a href="${file.url}" download target="_blank" style="color:white;"><i class="fas fa-download"></i></a>
+                </div>
+              </div>`;
+          } else {
+            html += `
+              <div class="attachment-item file" title="${file.filename}">
+                <i class="fas fa-file-alt"></i>
+                <span>${file.filename || 'Document'}</span>
+                <div class="attachment-overlay">
+                  <a href="${file.url}" download target="_blank" style="color:white;"><i class="fas fa-download"></i></a>
+                </div>
+              </div>
+            `;
+          }
+        });
+      }
+    } catch(e) {}
+  }
+
+  container.innerHTML = html + `
+    <div class="attachment-item file" onclick="attachFileFromDetail()" style="border: 2px dashed var(--border); background: transparent;">
+      <i class="fas fa-plus"></i>
+      <span>Add File</span>
+    </div>
+    <input type="file" id="detail-file-upload" style="display:none" multiple onchange="handleDetailFileUpload(event, '${woId}')">
+  `;
+}
+
+async function handleDetailFileUpload(evt, wo) {
+  const files = Array.from(evt.target.files);
+  if (files.length === 0) return;
+
+  if (!supabaseClient) {
+    showToast("Upload unavailable offline", "error");
+    return;
+  }
+
+  for (const file of files) {
+    try {
+      const isImg = file.type.startsWith('image/');
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${wo}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}.${fileExt}`;
+      const filePath = `attachments/${fileName}`;
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from('qbc-storage')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabaseClient.storage
+        .from('qbc-storage')
+        .getPublicUrl(filePath);
+
+      // Save to attachments table
+      await supabaseClient.from('work_order_attachments').insert({
+        work_order: wo,
+        url: publicUrl,
+        filename: file.name,
+        file_type: file.type,
+        uploader_id: currentUser.id
+      });
+
+      showToast(`Uploaded ${file.name}`);
+    } catch (error) {
+      console.error(error);
+      showToast(`Upload failed for ${file.name}`, "error");
+    }
+  }
+  renderDetailAttachments(wo);
+}
+
+function attachFileFromDetail() {
+  const input = document.getElementById('detail-file-upload');
+  if (input) input.click();
+}
+
+async function loadComments(woId) {
+  const list = document.getElementById('comment-list');
+  list.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+  if (!supabaseClient) {
+    list.innerHTML = '<p style="color:var(--muted); font-size:12px;">Comments unavailable offline.</p>';
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('work_order_comments')
+      .select('*')
+      .eq('work_order', woId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      list.innerHTML = '<p style="color:var(--muted); font-size:12px;">No comments yet.</p>';
+      return;
+    }
+
+    list.innerHTML = data.map(c => `
+      <div class="comment-item">
+        <div class="comment-meta">
+          <span class="comment-author">${c.author_name || 'System User'}</span>
+          <span>${new Date(c.created_at).toLocaleString()}</span>
+        </div>
+        <div class="comment-text">${c.content}</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = '<p style="color:var(--red); font-size:12px;">Failed to load comments.</p>';
+  }
+}
+
+async function addComment() {
+  const input = document.getElementById('new-comment');
+  const content = input.value.trim();
+  if (!content || !selectedWorkOrder) return;
+
+  if (!supabaseClient) {
+    showToast("Comments unavailable offline", "error");
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('work_order_comments')
+      .insert({
+        work_order: selectedWorkOrder,
+        content: content,
+        author_id: currentUser.id,
+        author_name: currentUser.user_metadata?.full_name || currentUser.email
+      });
+
+    if (error) throw error;
+
+    input.value = '';
+    loadComments(selectedWorkOrder);
+    showToast("Comment posted");
+  } catch (e) {
+    showToast("Failed to post comment", "error");
+  }
 }
 
 function renderTable() {
@@ -2347,7 +2841,7 @@ function renderTable() {
       `;
     }
 
-    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')">
+    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')" ondblclick="openDetail('${r.WorkOrder}')">
       <td onclick="makeEditable(this, '${r.WorkOrder}', 'WorkOrder')"><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}" onclick="makeEditable(this, '${r.WorkOrder}', 'Description')"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td onclick="makeEditable(this, '${r.WorkOrder}', 'Status', 'select')">${stBadge}</td>
