@@ -190,6 +190,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .drop-zone .file-name{font-size:11px;color:var(--accent);margin-top:6px;}
 
 /* ─── BUTTONS ─── */
+.btn-reset{background:none;border:none;padding:0;cursor:pointer;color:inherit;font:inherit;}
+.btn-reset:focus-visible{outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px;}
 .btn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:12px;font-weight:500;transition:all .2s; display: inline-flex; align-items: center; gap: 8px; min-height: 36px;}
 .btn-primary{background:var(--accent);color:#000;}
 .btn-primary:hover{opacity: 0.9;}
@@ -655,12 +657,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <button class="hamburger" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Toggle Navigation Menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
   <div class="nav-brand" id="nav-brand-container"> QBC <span>Platform</span></div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
-    <button class="nav-tab" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
-      <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing</button>
-    <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
-    <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
-    <button class="nav-tab" id="nav-tab-settings" onclick="showPage('settings')" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
+    <button class="nav-tab active" data-page="dashboard" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
+    <button class="nav-tab" data-page="workorders" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
+    <button class="nav-tab" data-page="manufacturing" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing</button>
+    <button class="nav-tab" data-page="map" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
+    <button class="nav-tab" data-page="filemanager" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
+    <button class="nav-tab" data-page="settings" id="nav-tab-settings" onclick="showPage('settings')" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
   </div>
   <div class="nav-right">
     <div id="conn-status" title="Connection Status" style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); padding-right: 10px; border-right: 1px solid var(--border);">
@@ -683,12 +685,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div id="mobile-menu-overlay" class="mobile-overlay-bg" onclick="toggleMobileMenu()"></div>
 <div id="mobile-menu" class="mobile-menu">
-    <button class="mobile-nav-item active" onclick="showPage('dashboard'); toggleMobileMenu();"><i class="fas fa-chart-bar"></i> Dashboard</button>
-    <button class="mobile-nav-item" onclick="showPage('workorders'); toggleMobileMenu();"><i class="fas fa-clipboard-list"></i> Work Orders</button>
-    <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing</button>
-    <button class="mobile-nav-item" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
-    <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
-    <button class="mobile-nav-item" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
+    <button class="mobile-nav-item active" data-page="dashboard" onclick="showPage('dashboard'); toggleMobileMenu();"><i class="fas fa-chart-bar"></i> Dashboard</button>
+    <button class="mobile-nav-item" data-page="workorders" onclick="showPage('workorders'); toggleMobileMenu();"><i class="fas fa-clipboard-list"></i> Work Orders</button>
+    <button class="mobile-nav-item" data-page="manufacturing" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing</button>
+    <button class="mobile-nav-item" data-page="map" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
+    <button class="mobile-nav-item" data-page="filemanager" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
+    <button class="mobile-nav-item" data-page="settings" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0;">
     <button class="mobile-nav-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
 </div>
@@ -800,7 +802,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="form-group mb-3">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <label>Current Password <span style="color:var(--red); font-size:10px;">(Required)</span></label>
-        <button class="btn-reset" style="font-size:10px; color:var(--accent);" onclick="handleProfileForgotPwd()">Forgot?</button>
+        <button class="btn-reset" style="font-size:10px; color:var(--accent);" onclick="handleProfileForgotPwd()" aria-label="Forgot password?">Forgot?</button>
       </div>
       <input type="password" id="prof-pwd-current" class="filter-input w-100" placeholder="Enter current password">
     </div>
@@ -899,7 +901,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="gis-search-wrap" style="flex: 1; max-width: 600px; display: flex; align-items: center; background: var(--surface2); border-radius: 8px; padding: 0 12px; border: 1px solid var(--border);">
         <i class="fas fa-search" style="color:var(--muted)"></i>
         <input type="text" id="map-search-input" class="gis-search-input" placeholder="Search Asset ID, coordinates, or locations..." onkeydown="if(event.key==='Enter')searchCoordinates()" style="background: transparent; border: none; color: var(--text); flex: 1; padding: 8px; outline: none; font-size: 13px;">
-        <button class="btn-reset" onclick="searchCoordinates()"><i class="fas fa-arrow-right" style="color:var(--accent)"></i></button>
+        <button class="btn-reset" onclick="searchCoordinates()" aria-label="Search coordinates"><i class="fas fa-arrow-right" style="color:var(--accent)"></i></button>
       </div>
       <div style="flex: 1;"></div>
       <div class="gis-top-actions">
@@ -938,7 +940,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
                     <span class="gis-layer-name">Work Orders</span>
                     <span class="gis-layer-count" id="gis-count-wo">0 items</span>
                   </div>
-                  <button class="btn-reset" style="color:var(--muted)"><i class="fas fa-ellipsis-v"></i></button>
+                  <button class="btn-reset" style="color:var(--muted)" aria-label="Layer options"><i class="fas fa-ellipsis-v"></i></button>
                 </div>
               </div>
             </div>
@@ -1944,17 +1946,19 @@ function showPage(id) {
     return;
   }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.mobile-nav-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => { t.classList.remove('active'); t.removeAttribute('aria-current'); });
+  document.querySelectorAll('.mobile-nav-item').forEach(t => { t.classList.remove('active'); t.removeAttribute('aria-current'); });
   
   const targetPage = document.getElementById('page-' + id);
   if (targetPage) targetPage.classList.add('active');
   
-  const navBtn = document.querySelector(`.nav-tab[onclick*="showPage('${id}')"]`);
-  if (navBtn) navBtn.classList.add('active');
+  const navBtn = document.querySelector(`.nav-tab[data-page="${id}"]`);
+  if (navBtn) { navBtn.classList.add('active'); navBtn.setAttribute('aria-current', 'page'); }
   
-  const mobileBtn = document.querySelector(`.mobile-nav-item[onclick*="showPage('${id}')"]`);
-  if (mobileBtn) mobileBtn.classList.add('active');
+  const mobileBtn = document.querySelector(`.mobile-nav-item[data-page="${id}"]`);
+  if (mobileBtn) { mobileBtn.classList.add('active'); mobileBtn.setAttribute('aria-current', 'page'); }
+
+  window.scrollTo(0, 0);
 
   const gisToggle = document.getElementById('gis-sidebar-toggle');
   if (id === 'map') {
