@@ -198,6 +198,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
 .btn-green{background:var(--green);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
+.btn-reset{background:none;border:none;padding:0;cursor:pointer;font-family:inherit;color:inherit;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 
 /* ─── UPLOAD PROGRESS ─── */
 .upload-progress-container { margin-top: 16px; display: none; flex-direction: column; gap: 8px; }
@@ -2086,22 +2088,35 @@ function toggleMobileMenu() {
 }
 
 function showPage(id) {
+  window.scrollTo(0, 0);
   if (id === 'settings' && !isAdmin) {
     showToast("Access Denied", "error");
     return;
   }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.mobile-nav-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    t.classList.remove('active');
+    t.removeAttribute('aria-current');
+  });
+  document.querySelectorAll('.mobile-nav-item').forEach(t => {
+    t.classList.remove('active');
+    t.removeAttribute('aria-current');
+  });
   
   const targetPage = document.getElementById('page-' + id);
   if (targetPage) targetPage.classList.add('active');
   
   const navBtn = document.querySelector(`.nav-tab[onclick*="showPage('${id}')"]`);
-  if (navBtn) navBtn.classList.add('active');
+  if (navBtn) {
+    navBtn.classList.add('active');
+    navBtn.setAttribute('aria-current', 'page');
+  }
   
   const mobileBtn = document.querySelector(`.mobile-nav-item[onclick*="showPage('${id}')"]`);
-  if (mobileBtn) mobileBtn.classList.add('active');
+  if (mobileBtn) {
+    mobileBtn.classList.add('active');
+    mobileBtn.setAttribute('aria-current', 'page');
+  }
 
   const gisToggle = document.getElementById('gis-sidebar-toggle');
   if (id === 'map') {
