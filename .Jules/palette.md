@@ -1,0 +1,3 @@
+## 2025-05-15 - SPA Navigation and Accessibility Enhancements
+**Learning:** In Single Page Applications (SPAs) that use manual DOM manipulation for "page" switching, it's critical to explicitly manage scroll state and semantic markers. Without `window.scrollTo(0, 0)`, users might land deep in a new "page" if they were scrolled down on the previous one. Additionally, ARIA attributes like `aria-current="page"` must be manually updated to maintain parity with multi-page navigation for screen readers. Global `:focus-visible` styles ensure accessibility without cluttering the UI for mouse users.
+**Action:** Always include scroll reset and `aria-current` updates in navigation handlers for SPA architectures. Apply `:focus-visible` globally to ensure keyboard accessibility.
