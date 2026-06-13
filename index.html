@@ -1889,7 +1889,7 @@ window.addEventListener('load', async () => {
   }
   
   const dateBadge = document.getElementById('dateBadge');
-  if (dateBadge) dateBadge.textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  if (dateBadge) dateBadge.textContent = formatDate(new Date());
 
   // Handle password reset redirection
   if (window.location.hash && window.location.hash.includes('type=recovery')) {
@@ -2526,7 +2526,7 @@ function updateDashboard() {
     if (r.TargetStart && r.TargetStart !== '0' && r.TargetStart !== 0) {
        const d = new Date(r.TargetStart);
        if(!isNaN(d.getTime())) {
-         mName = d.toLocaleString('default', { month: 'short', year:'numeric' });
+         mName = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
          sortKey = d.getFullYear() * 100 + d.getMonth();
        }
     }
@@ -2700,7 +2700,8 @@ function drillDown(type, val = null) {
   else if (type === 'month') { 
     list = list.filter(r => {
       if (!r.TargetStart) return false;
-      return new Date(r.TargetStart).toLocaleString('default', { month: 'short', year:'numeric' }) === val;
+      const d = new Date(r.TargetStart);
+      return (d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')) === val;
     });
     title = `Work Orders for ${val}`;
   }
@@ -2717,7 +2718,7 @@ function drillDown(type, val = null) {
         <td><span class="status-badge badge-${r.Status}">${r.Status}</span></td>
         <td>${r.Location}</td>
         <td style="color:var(--muted);">${r.PWA_ENG || '--'}</td>
-        <td>${r.TargetFinish || '--'}</td>
+        <td>${formatDate(r.TargetFinish)}</td>
         <td><button class="btn btn-ghost btn-sm" onclick="openDetail('${r.WorkOrder}')"><i class="fas fa-external-link-alt"></i></button></td>
       </tr>
     `).join('');
@@ -2834,8 +2835,8 @@ function renderManufacturingTable() {
       <td>${stBadge}</td>
       <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
       <td style="font-size:11px">${r.Location||'—'}</td>
-      <td style="font-size:11px">${r.TargetStart||'—'}</td>
-      <td style="font-size:11px">${r.TargetFinish||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.TargetStart)}</td>
+      <td style="font-size:11px">${formatDate(r.TargetFinish)}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'RoadCatg')">${r.RoadCatg||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignMaterial')">${r.SignMaterial||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignType')">${r.SignType||'—'}</td>
@@ -2855,7 +2856,7 @@ function renderManufacturingTable() {
            <option ${r.FabStatus==='Done'?'selected':''}>Done</option>
         </select>
       </td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'InstallationDate', 'date')">${r.InstallationDate||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'InstallationDate', 'date')">${formatDate(r.InstallationDate)}</td>
       <td>
         <div style="display:flex; gap:4px; align-items:center;">
           <textarea class="filter-input" style="min-width:120px; height:32px; font-size:11px; padding:4px;" 
@@ -3011,8 +3012,8 @@ async function openDetail(woId) {
   document.getElementById('top-wo-num').textContent = wo.WorkOrder;
   document.getElementById('top-status').innerHTML = stBadge;
   document.getElementById('top-priority').textContent = wo.Priority || 'Normal';
-  document.getElementById('top-created').textContent = wo.created_at ? new Date(wo.created_at).toLocaleDateString() : (wo.ReportedDate || '--');
-  document.getElementById('top-updated').textContent = wo.last_modified_at ? new Date(wo.last_modified_at).toLocaleString() : '--';
+  document.getElementById('top-created').textContent = wo.created_at ? formatDate(wo.created_at) : (wo.ReportedDate || '--');
+  document.getElementById('top-updated').textContent = wo.last_modified_at ? formatDateTime(wo.last_modified_at) : '--';
 
   // Fill Values & Inputs
   const fields = {
@@ -3066,9 +3067,9 @@ async function openDetail(woId) {
 
   // Audit
   document.getElementById('val-created-by').textContent = wo.created_by_name || 'System';
-  document.getElementById('val-created-date').textContent = wo.created_at ? new Date(wo.created_at).toLocaleString() : '--';
+  document.getElementById('val-created-date').textContent = wo.created_at ? formatDateTime(wo.created_at) : '--';
   document.getElementById('val-modified-by').textContent = wo.last_modified_by_name || '--';
-  document.getElementById('val-modified-date').textContent = wo.last_modified_at ? new Date(wo.last_modified_at).toLocaleString() : '--';
+  document.getElementById('val-modified-date').textContent = wo.last_modified_at ? formatDateTime(wo.last_modified_at) : '--';
 
   // Map
   const mapContainer = document.getElementById('detail-map');
@@ -3083,7 +3084,7 @@ async function openDetail(woId) {
   if (wo.fab_history && wo.fab_history.length > 0) {
     historyList.innerHTML = wo.fab_history.map(h => `
       <div style="padding:8px; background:var(--surface2); border-radius:8px; margin-bottom:4px;">
-        <b>${new Date(h.date).toLocaleString()}</b> by ${h.user}
+        <b>${formatDateTime(h.date)}</b> by ${h.user}
       </div>
     `).join('');
   } else {
@@ -3126,11 +3127,6 @@ function closeDetail() {
   if (document.getElementById('detailModal').classList.contains('editing')) {
     if (!confirm("Discard unsaved changes?")) return;
   }
-  document.getElementById('detailModal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function closeDetail() {
   document.getElementById('detailModal').classList.remove('open');
   document.body.style.overflow = '';
 }
@@ -3398,7 +3394,7 @@ async function loadComments(woId) {
       <div class="comment-item">
         <div class="comment-meta">
           <span class="comment-author">${c.author_name || 'System User'}</span>
-          <span>${new Date(c.created_at).toLocaleString()}</span>
+          <span>${formatDateTime(c.created_at)}</span>
         </div>
         <div class="comment-text">${c.content}</div>
       </div>
@@ -3491,22 +3487,22 @@ function renderTable() {
       <td style="font-size:11px">${r.Lat||'—'}</td>
       <td style="font-size:11px">${r.Lng||'—'}</td>
       <td style="font-size:11px">${r.ReportedBy||'—'}</td>
-      <td style="font-size:11px">${r.ReportedDate||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.ReportedDate)}</td>
       <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
       <td style="font-size:11px">${r.Location||'—'}</td>
-      <td style="font-size:11px">${r.TargetStart||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.TargetStart)}</td>
       <td style="font-size:11px">${monthLabel}</td>
-      <td style="font-size:11px">${r.TargetFinish||'—'}</td>
-      <td style="font-size:11px">${r.StatusUpdateDate||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.TargetFinish)}</td>
+      <td style="font-size:11px">${formatDate(r.StatusUpdateDate)}</td>
       <td style="font-size:11px">${completionStatus}</td>
       <td>
         <div style="font-size:11px; color:var(--muted); max-width:120px; overflow:hidden; text-overflow:ellipsis;">${r.QBCComments||'—'}</div>
       </td>
       <td style="font-size:11px">${r.RO||'—'}</td>
       <td style="font-size:11px">${r.TDP||'—'}</td>
-      <td style="font-size:11px">${r.ApplicationDate||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.ApplicationDate)}</td>
       <td style="font-size:11px">${r.TDPStatus||'—'}</td>
-      <td style="font-size:11px">${r.ExpiryDate||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.ExpiryDate)}</td>
       <td style="font-size:11px">${r.MediaAnnouncement||'—'}</td>
       <td>
         <div class="action-btns">
@@ -5284,7 +5280,7 @@ async function showFolder(type) {
         fmFiles = data.map(f => ({
           id: f.id,
           name: f.filename,
-          date: new Date(f.created_at).toLocaleDateString(),
+          date: formatDate(f.created_at),
           type: 'pdf'
         }));
         renderFolderFiles();
@@ -5565,7 +5561,7 @@ function openFabModal(wo) {
   const fmw = document.getElementById('fabModalWO');
   if (fmw) fmw.textContent = wo;
   const photo = photos[wo];
-  const today = new Date().toLocaleDateString('en-GB');
+  const today = formatDate(new Date());
 
   // Strict A4 proportions (Width: 794px, Height: 1123px)
   document.getElementById('pdfPreview').innerHTML = `
@@ -5716,8 +5712,8 @@ function exportTableCSV(mode = 'all') {
       const headers = ["Work Order", "Description", "Status", "PWA Engineer", "Location", "Target Start", "Target Finish", "Sign Type", "Sign Ref", "Qty", "Fabrication Status", "Install Date", "Fabrication Details"];
       csvContent = headers.join(",") + "\n";
       csvContent += data.map(r => [
-        r.WorkOrder, r.Description, r.Status, r.PWA_ENG, r.Location, r.TargetStart, r.TargetFinish,
-        r.SignType, r.SignRef, r.SignQty, r.FabStatus, r.InstallationDate, r.FabDetails
+        r.WorkOrder, r.Description, r.Status, r.PWA_ENG, r.Location, formatDate(r.TargetStart), formatDate(r.TargetFinish),
+        r.SignType, r.SignRef, r.SignQty, r.FabStatus, formatDate(r.InstallationDate), r.FabDetails
       ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
     } else {
       const headers = [
@@ -5727,17 +5723,16 @@ function exportTableCSV(mode = 'all') {
       ];
       csvContent = headers.join(",") + "\n";
       csvContent += data.map(r => {
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         let monthLabel = "—";
         if (r.TargetStart) {
           const d = new Date(r.TargetStart);
-          if (!isNaN(d.getTime())) monthLabel = monthNames[d.getMonth()];
+          if (!isNaN(d.getTime())) monthLabel = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
         }
         const completionStatus = getCompletionStatusLabel(r);
         return [
-          r.WorkOrder, r.Description, r.Status, r.Lat, r.Lng, r.ReportedBy, r.ReportedDate,
-          r.PWA_ENG, r.Location, r.TargetStart, monthLabel, r.TargetFinish, r.StatusUpdateDate,
-          completionStatus, r.QBCComments, r.RO, r.TDP, r.ApplicationDate, r.TDPStatus, r.ExpiryDate, r.MediaAnnouncement
+          r.WorkOrder, r.Description, r.Status, r.Lat, r.Lng, r.ReportedBy, formatDate(r.ReportedDate),
+          r.PWA_ENG, r.Location, formatDate(r.TargetStart), monthLabel, formatDate(r.TargetFinish), formatDate(r.StatusUpdateDate),
+          completionStatus, r.QBCComments, r.RO, r.TDP, formatDate(r.ApplicationDate), r.TDPStatus, formatDate(r.ExpiryDate), r.MediaAnnouncement
         ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',');
       }).join('\n');
     }
@@ -5916,7 +5911,7 @@ function showFabHistory(woId) {
     showToast("No submission history", "info");
     return;
   }
-  const historyStr = wo.fab_history.map(h => `${new Date(h.date).toLocaleString()} by ${h.user}`).join('\n');
+  const historyStr = wo.fab_history.map(h => `${formatDateTime(h.date)} by ${h.user}`).join('\n');
   alert(`Fabrication Submission History for WO ${woId}:\n\n${historyStr}`);
 }
 
@@ -5986,23 +5981,29 @@ function fieldHTML(f, val, extra='') {
 }
 function parseCSVDate(val) {
   if (val === undefined || val === null || String(val).trim() === '') return null;
-  if (val instanceof Date) return isNaN(val.getTime()) ? 'INVALID' : val.toISOString().split('T')[0];
+  
+  // If it's already a Date object
+  if (val instanceof Date) {
+    if (isNaN(val.getTime())) return 'INVALID';
+    return val.toISOString().split('T')[0];
+  }
 
   let s = String(val).trim();
-  if (s === '0' || s.toLowerCase() === 'null' || s === '-') return null;
+  if (s === '0' || s.toLowerCase() === 'null' || s === '-' || s === '') return null;
 
-  // Handle 4-digit year heuristic: "2025" -> "2025-01-01"
-  if (/^\d{4}$/.test(s)) {
-    return `${s}-01-01`;
+  // Excel serial number (typically 5 digits for current dates)
+  // We check if it's a pure number and within a reasonable range for Excel dates
+  if (/^\d{5,6}$/.test(s)) {
+    const serial = Number(s);
+    // Excel's 1900 leap year bug: Excel thinks 1900 was a leap year.
+    // 25569 is 1970-01-01 in Excel's system.
+    const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
+    }
   }
 
-  // Excel serial number (5 or 6 digits)
-  if (!isNaN(s) && /^\d{5,6}$/.test(s)) {
-    const date = new Date((Number(s) - 25569) * 86400 * 1000);
-    if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
-  }
-
-  // Handle DD/MM/YYYY or DD-MM-YYYY specifically
+  // Handle DD/MM/YYYY or DD-MM-YYYY specifically (common in CSVs)
   const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
   if (dmyMatch) {
     const day = dmyMatch[1].padStart(2, '0');
@@ -6011,7 +6012,16 @@ function parseCSVDate(val) {
     return `${year}-${month}-${day}`;
   }
 
-  // Handle formats like "15-May-2025" or "15 May 2025" or "May 15, 2025"
+  // Handle YYYY-MM-DD specifically
+  const ymdMatch = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  if (ymdMatch) {
+    const year = ymdMatch[1];
+    const month = ymdMatch[2].padStart(2, '0');
+    const day = ymdMatch[3].padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Fallback to JS Date parsing
   const d = new Date(s);
   if (!isNaN(d.getTime())) {
     return d.toISOString().split('T')[0];
@@ -6021,6 +6031,20 @@ function parseCSVDate(val) {
 }
 
 function showToast(msg, type='') { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.className='toast'+(type?' '+type:''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
+
+function formatDate(val) {
+  if (!val) return '—';
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return val;
+  return d.toISOString().split('T')[0];
+}
+
+function formatDateTime(val) {
+  if (!val) return '—';
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return val;
+  return d.toISOString().split('T')[0] + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+}
 
 // NOTIFICATIONS
 function toggleNotifPanel() {
@@ -6115,7 +6139,7 @@ function formatNotifTime(isoString) {
   if (diff < 60) return 'just now';
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return d.toLocaleDateString();
+  return formatDate(d);
 }
 
 function handleNotifClick(id) {
