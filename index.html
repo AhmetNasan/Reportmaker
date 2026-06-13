@@ -255,19 +255,38 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
 
 /* ─── DETAIL VIEW ─── */
-.detail-modal { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; animation: fadeUp 0.3s ease-out; }
+.detail-modal { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; flex-direction: column; overflow: hidden; animation: fadeUp 0.3s ease-out; }
 .detail-modal.open { display: flex; }
-.detail-header { height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; position: sticky; top: 0; z-index: 10; gap: 20px; }
-.detail-body { padding: 32px 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+.detail-header { height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; flex-shrink: 0; z-index: 10; gap: 20px; }
+.detail-body { flex: 1; overflow-y: auto; padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 24px; }
+.detail-top-info { background: var(--surface); border: 1px solid var(--border); padding: 20px 24px; border-radius: 16px; display: flex; flex-wrap: wrap; gap: 32px; align-items: center; }
+.detail-top-stat { display: flex; flex-direction: column; gap: 4px; }
+.detail-top-stat label { font-size: 9px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.08em; }
+.detail-top-stat span { font-size: 14px; font-weight: 700; color: var(--text); }
+
+.detail-tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); padding: 6px; border-radius: 12px; position: sticky; top: 0; z-index: 5; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.detail-tab { padding: 10px 18px; border-radius: 8px; border: none; background: none; color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+.detail-tab:hover { background: var(--surface2); color: var(--text); }
+.detail-tab.active { background: var(--surface2); color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+.detail-pane { display: none; animation: fadeIn 0.3s ease; }
+.detail-pane.active { display: block; }
+
 .detail-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
 @media (max-width: 1000px) { .detail-grid { grid-template-columns: 1fr; } }
 .detail-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 24px; margin-bottom: 24px; }
+.detail-section:last-child { margin-bottom: 0; }
 .detail-section-title { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: 0.05em; }
 .detail-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .detail-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 24px; }
 .info-item label { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em; }
-.info-item span { font-size: 14px; color: var(--text); font-weight: 600; }
-.detail-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; }
+.info-item span { font-size: 14px; color: var(--text); font-weight: 600; display: block; min-height: 20px; }
+.info-item input, .info-item select, .info-item textarea { width: 100%; display: none; }
+.detail-modal.editing .info-item span { display: none; }
+.detail-modal.editing .info-item input, .detail-modal.editing .info-item select, .detail-modal.editing .info-item textarea { display: block; background: var(--surface2); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.detail-modal.editing .info-item.modified input, .detail-modal.editing .info-item.modified select, .detail-modal.editing .info-item.modified textarea { background: rgba(0, 200, 255, 0.05); }
+
+.detail-toolbar { display: flex; gap: 10px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; align-items: center; }
 .comment-item { padding: 16px; background: var(--surface2); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
 .comment-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
 .comment-author { font-weight: 700; color: var(--accent); }
@@ -641,6 +660,30 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .toast.show{opacity:1;transform:translateY(0);}
 .toast.error{background:var(--red);color:#fff;}
 
+/* ─── NOTIFICATION CENTER ─── */
+.notif-btn { position: relative; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: 0.2s; }
+.notif-btn:hover { background: var(--surface2); color: var(--text); }
+.notif-badge { position: absolute; top: 0; right: 0; background: var(--red); color: #fff; font-size: 9px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--surface); transform: translate(25%, -25%); }
+.notif-badge.show { display: flex; }
+
+.notif-panel { position: fixed; top: var(--header-h); right: -360px; width: 360px; height: calc(100vh - var(--header-h)); background: var(--surface); border-left: 1px solid var(--border); z-index: 1500; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.3); }
+.notif-panel.open { right: 0; }
+.notif-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.notif-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.notif-tabs { display: flex; padding: 8px; gap: 8px; background: var(--surface2); }
+.notif-tab { flex: 1; padding: 6px; font-size: 11px; border: none; background: none; color: var(--muted); cursor: pointer; border-radius: 6px; transition: 0.2s; }
+.notif-tab.active { background: var(--surface); color: var(--accent); font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.notif-list { flex: 1; overflow-y: auto; padding: 10px; }
+.notif-item { padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid transparent; cursor: pointer; transition: 0.2s; position: relative; }
+.notif-item:hover { background: var(--surface2); border-color: var(--border); }
+.notif-item.unread { background: rgba(0, 200, 255, 0.05); border-color: rgba(0, 200, 255, 0.1); }
+.notif-item.unread::before { content: ''; position: absolute; left: 6px; top: 50%; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; transform: translateY(-50%); }
+.notif-user { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.notif-action { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.notif-action b { color: var(--accent); }
+.notif-meta { font-size: 10px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 8px; }
+.notif-footer { padding: 12px 20px; border-top: 1px solid var(--border); background: var(--surface2); display: flex; gap: 10px; }
+
 .pulse-marker {
   width: 24px;
   height: 24px;
@@ -690,7 +733,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="nav-brand" id="nav-brand-container"> QBC <span>Platform</span></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
-    <button class="nav-tab" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
+    <button class="nav-tab" id="nav-workorders-btn" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
       <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing</button>
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
@@ -702,6 +745,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <span id="conn-text">Checking...</span>
     </div>
     <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
+
+    <button class="notif-btn" id="notif-trigger" onclick="toggleNotifPanel()" aria-label="Notifications">
+      <i class="fas fa-bell"></i>
+      <span class="notif-badge" id="notif-badge">0</span>
+    </button>
+
     <div class="user-menu">
       <span id="nav-user-name" style="font-size: 11px; font-weight: 600; color: var(--text); margin-right: 4px;">User</span>
       <button class="user-avatar" id="nav-user-btn" onclick="toggleUserDropdown()" aria-label="User Menu" aria-haspopup="true" aria-expanded="false">U</button>
@@ -716,6 +765,30 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 </nav>
 
 <div id="mobile-menu-overlay" class="mobile-overlay-bg" onclick="toggleMobileMenu()"></div>
+<div id="notif-panel" class="notif-panel">
+  <div class="notif-header">
+    <div class="notif-title">Notifications</div>
+    <button class="btn-reset" onclick="toggleNotifPanel()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="notif-tabs">
+    <button class="notif-tab active" onclick="switchNotifTab('all')">All</button>
+    <button class="notif-tab" onclick="switchNotifTab('workorders')">Work</button>
+    <button class="notif-tab" onclick="switchNotifTab('manufacturing')">Fab</button>
+    <button class="notif-tab" onclick="switchNotifTab('system')">Alerts</button>
+  </div>
+  <div class="notif-list" id="notif-list">
+    <!-- Notifications will be injected here -->
+    <div style="padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px;">
+      <i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 12px; opacity: 0.3;"></i>
+      <p>No notifications yet</p>
+    </div>
+  </div>
+  <div class="notif-footer">
+    <button class="btn btn-ghost btn-sm flex-1" onclick="markAllNotifsRead()">Mark all as read</button>
+    <button class="btn btn-ghost btn-sm flex-1" onclick="clearAllNotifs()">Clear all</button>
+  </div>
+</div>
+
 <div id="mobile-menu" class="mobile-menu">
     <button class="mobile-nav-item active" onclick="showPage('dashboard'); toggleMobileMenu();"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="mobile-nav-item" onclick="showPage('workorders'); toggleMobileMenu();"><i class="fas fa-clipboard-list"></i> Work Orders</button>
@@ -733,41 +806,72 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <header class="dash-header">
       <div class="header-left">
         <div class="tag">▸ Qatar Building Company</div>
-        <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Work Order Performance<br><span style="color:var(--accent)">Dashboard</span></h1>
+        <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Control <span style="color:var(--accent)">Center</span></h1>
       </div>
-      <div class="header-right" style="text-align:right">
-        <div class="company" style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-weight:700;font-size:14px;color:var(--accent);letter-spacing:0.05em;">PBC - RF0001 </div>
-        <div class="prepared" style="font-size:12px;color:var(--muted);margin-top:4px;">Prepared by: Eng. Ahmet Nasan</div>
-        <div class="date-badge" id="dateBadge" style="display:inline-block;margin-top:8px;padding:4px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:100px;font-size:11px;color:var(--muted); font-weight: 700;">Loading…</div>
+      <div class="header-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
+        <div class="dash-search-wrap" style="width:300px; position:relative;">
+          <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:12px;"></i>
+          <input type="text" id="dash-global-search" class="filter-input" placeholder="Quick search records..." style="width:100%; padding-left:34px; height:40px; border-radius:10px;">
+        </div>
+        <div style="font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px;">
+          <i class="fas fa-sync-alt"></i> Last updated: <span id="dash-last-refresh">--:--</span>
+        </div>
       </div>
     </header>
 
+    <!-- Global Filters -->
+    <div class="detail-toolbar" style="margin-bottom:24px; padding:16px 20px;">
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:1;">
+        <div class="form-group" style="width:180px;">
+          <label style="font-size:9px;">Date Range</label>
+          <select id="dash-filter-date" class="filter-input" onchange="updateDashboard()"><option value="all">All Time</option><option value="this-month">This Month</option><option value="last-month">Last Month</option><option value="this-year">This Year</option></select>
+        </div>
+        <div class="form-group" style="width:140px;">
+          <label style="font-size:9px;">Status</label>
+          <select id="dash-filter-status" class="filter-input" onchange="updateDashboard()"><option value="">All Status</option><option>COMP</option><option>INPRG</option><option>DISPATCH</option></select>
+        </div>
+        <div class="form-group" style="width:140px;">
+          <label style="font-size:9px;">Priority</label>
+          <select id="dash-filter-priority" class="filter-input" onchange="updateDashboard()"><option value="">All Priorities</option><option>High</option><option>Normal</option><option>Low</option></select>
+        </div>
+        <div class="form-group" style="width:140px;">
+          <label style="font-size:9px;">Assigned Team</label>
+          <select id="dash-filter-team" class="filter-input" onchange="updateDashboard()"><option value="">All Teams</option></select>
+        </div>
+        <div class="form-group" style="width:180px;">
+          <label style="font-size:9px;">Location / Area</label>
+          <input type="text" id="dash-filter-location" class="filter-input" placeholder="Filter area..." oninput="updateDashboard()">
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="resetDashFilters()"><i class="fas fa-undo"></i> Reset</button>
+    </div>
+
     <div class="kpi-grid">
-      <div class="kpi-card total" style="background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 200, 255, 0.05) 100%);">
+      <div class="kpi-card total cursor-pointer" onclick="drillDown('all')" style="background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 200, 255, 0.05) 100%); cursor:pointer;">
         <div class="kpi-label">Total Work Orders</div>
         <div class="kpi-value" id="kpiTotal">-</div>
         <div class="kpi-pct" id="kpiTotalLabel">System Records</div>
         <div class="kpi-icon">📋</div>
       </div>
-      <div class="kpi-card on-time">
+      <div class="kpi-card on-time cursor-pointer" onclick="drillDown('on-time')" style="cursor:pointer;">
         <div class="kpi-label">On-Time</div>
         <div class="kpi-value" id="kpiGreen">-</div>
         <div class="kpi-pct" id="kpiGreenPct">-%</div>
         <div class="kpi-icon">✅</div>
       </div>
-      <div class="kpi-card breached">
+      <div class="kpi-card breached cursor-pointer" onclick="drillDown('breached-comp')" style="cursor:pointer;">
         <div class="kpi-label">Completed (Breached)</div>
         <div class="kpi-value" id="kpiAmber">-</div>
         <div class="kpi-pct" id="kpiAmberPct">-%</div>
         <div class="kpi-icon">⚠️</div>
       </div>
-      <div class="kpi-card failed">
+      <div class="kpi-card failed cursor-pointer" onclick="drillDown('breached-pending')" style="cursor:pointer;">
         <div class="kpi-label">Not Completed (Breached)</div>
         <div class="kpi-value" id="kpiRed">-</div>
         <div class="kpi-pct" id="kpiRedPct">-%</div>
         <div class="kpi-icon">❌</div>
       </div>
-      <div class="kpi-card pending">
+      <div class="kpi-card pending cursor-pointer" onclick="drillDown('pending')" style="cursor:pointer;">
         <div class="kpi-label">Pending within Target Date</div>
         <div class="kpi-value" id="kpiBlue">-</div>
         <div class="kpi-pct" id="kpiBluePct">-%</div>
@@ -775,36 +879,108 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
     </div>
 
-    <div class="section-title">Monthly Breakdown</div>
-    <div class="two-col">
-      <div class="card">
-        <div class="card-title">Monthly Volume — Stacked</div>
-        <div class="bar-chart" id="barChart"></div>
-        <div style="display:flex;gap:16px;margin-top:16px;flex-wrap:wrap;">
-          <div class="eng-stat"><span class="dot green"></span><span style="color:var(--muted);font-size:11px">On-Time</span></div>
-          <div class="eng-stat"><span class="dot amber"></span><span style="color:var(--muted);font-size:11px">Comp (Breached)</span></div>
-          <div class="eng-stat"><span class="dot red"></span><span style="color:var(--muted);font-size:11px">Not Comp (Breached)</span></div>
-          <div class="eng-stat"><span class="dot blue"></span><span style="color:var(--muted);font-size:11px">Pending</span></div>
+    <div class="two-col" style="grid-template-columns: 2fr 1fr;">
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <div class="section-title">Performance Analytics</div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title">Monthly Volume — Stacked</div>
+            <div class="bar-chart" id="barChart"></div>
+            <div style="display:flex;gap:16px;margin-top:16px;flex-wrap:wrap;">
+              <div class="eng-stat"><span class="dot green"></span><span style="color:var(--muted);font-size:11px">On-Time</span></div>
+              <div class="eng-stat"><span class="dot amber"></span><span style="color:var(--muted);font-size:11px">Comp (Breached)</span></div>
+              <div class="eng-stat"><span class="dot red"></span><span style="color:var(--muted);font-size:11px">Not Comp (Breached)</span></div>
+              <div class="eng-stat"><span class="dot blue"></span><span style="color:var(--muted);font-size:11px">Pending</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Monthly Summary Table</div>
+            <div class="table-wrap" style="border:none;">
+              <table class="dash-table">
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Total</th>
+                    <th>✅ On-Time</th>
+                    <th>⚠️ Comp(B)</th>
+                    <th>❌ NotComp(B)</th>
+                    <th>⏳ Pending</th>
+                  </tr>
+                </thead>
+                <tbody id="monthlyTable"></tbody>
+                <tfoot id="monthlyFoot" style="font-weight:700; background:var(--surface2);"></tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">Quick Search Results</div>
+        <div class="card" id="dash-search-panel" style="display:none; max-height:400px; overflow-y:auto;">
+          <div id="dash-search-results"></div>
+        </div>
+
+        <div id="dash-recent-activity-section">
+          <div class="section-title">Recent Activity</div>
+          <div class="card" style="padding:0;">
+            <div id="dash-recent-list" style="max-height:400px; overflow-y:auto;">
+              <div style="padding:40px; text-align:center; color:var(--muted);">No recent activity</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-title">Monthly Summary Table</div>
-        <table class="dash-table">
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Total</th>
-              <th>✅ On-Time</th>
-              <th>⚠️ Comp(B)</th>
-              <th>❌ NotComp(B)</th>
-              <th>⏳ Pending</th>
-              <th>Rate</th>
-            </tr>
-          </thead>
-          <tbody id="monthlyTable"></tbody>
-          <tfoot id="monthlyFoot"></tfoot>
-        </table>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <div class="section-title">Operational Health</div>
+        <div class="card">
+          <div class="card-title">Top Pending Items</div>
+          <div id="dash-pending-items" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Due Soon / Overdue</div>
+          <div id="dash-overdue-items" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Work Orders by Area</div>
+          <div id="dash-area-stats" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Quick Actions</div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button class="btn btn-ghost btn-sm" onclick="showPage('manufacturing')"><i class="fas fa-industry"></i> Manufacturing</button>
+            <button class="btn btn-primary btn-sm" onclick="openAddModal()"><i class="fas fa-plus"></i> New WO</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportTableCSV()"><i class="fas fa-download"></i> Export Data</button>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('settings')"><i class="fas fa-cog"></i> Settings</button>
+          </div>
+        </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Drill-Down Modal -->
+<div class="modal-overlay" id="drillDownModal">
+  <div class="modal" style="max-width:1200px; width:95%;">
+    <button class="modal-close" onclick="closeModal('drillDownModal')">×</button>
+    <div class="modal-title" id="drill-modal-title">Filtered Work Orders</div>
+    <div class="filters" style="margin-bottom:16px;">
+      <input type="text" class="filter-input" id="drill-search" placeholder="Search in results..." style="flex:1;">
+      <button class="btn btn-ghost btn-sm" onclick="exportDrillResults()"><i class="fas fa-file-excel"></i> Export</button>
+    </div>
+    <div class="table-wrap">
+      <table class="main-table">
+        <thead>
+          <tr>
+            <th>WO #</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Location</th>
+            <th>Engineer</th>
+            <th>Finish Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="drill-table-body"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -957,44 +1133,46 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <button class="gis-tab" onclick="switchGisTab('assets')" title="Asset Info"><i class="fas fa-info-circle"></i><span>Assets</span></button>
           <button class="gis-tab" onclick="switchGisTab('measure')" title="Measure"><i class="fas fa-ruler-combined"></i><span>Measure</span></button>
           <button class="gis-tab" onclick="switchGisTab('workorders')" title="Work Orders"><i class="fas fa-clipboard-list"></i><span>Work</span></button>
-          <button class="gis-tab" onclick="switchGisTab('search')" title="Search Results"><i class="fas fa-list-ul"></i><span>Results</span></button>
+          <button class="gis-tab" onclick="switchGisTab('results')" title="Operational Results"><i class="fas fa-list-ul"></i><span>Results</span></button>
         </div>
 
         <div class="gis-sidebar-content">
           <!-- LAYERS PANEL -->
           <div class="gis-tab-panel active" id="gis-panel-layers">
             <div class="gis-panel-section">
-              <div class="gis-panel-section-title">Data Layers <i class="fas fa-chevron-down"></i></div>
-              <div id="gis-layers-list">
-                <div class="gis-layer-item">
-                  <input type="checkbox" checked onchange="toggleLayer('workorders', this.checked)">
-                  <div class="gis-layer-info">
-                    <span class="gis-layer-name">Work Orders</span>
-                    <span class="gis-layer-count" id="gis-count-wo">0 items</span>
-                  </div>
-                  <button class="btn-reset" style="color:var(--muted)"><i class="fas fa-ellipsis-v"></i></button>
-                </div>
+              <div class="gis-panel-section-title">Base Layers</div>
+              <div class="gis-layer-item">
+                <input type="checkbox" checked onchange="toggleLayer('workorders', this.checked)">
+                <div class="gis-layer-info"><span class="gis-layer-name">All Work Orders</span><span class="gis-layer-count" id="gis-count-wo">0 items</span></div>
+              </div>
+              <div class="gis-layer-item">
+                <input type="checkbox" checked onchange="toggleLayer('manufacturing', this.checked)">
+                <div class="gis-layer-info"><span class="gis-layer-name">Manufacturing Layer</span></div>
+              </div>
+              <div class="gis-layer-item">
+                <input type="checkbox" checked id="toggle-boundary" onchange="toggleBoundaryVisibility()">
+                <div class="gis-layer-info"><span class="gis-layer-name">Project Boundary</span></div>
               </div>
             </div>
 
             <div class="gis-panel-section">
-              <div class="gis-panel-section-title">Boundaries <i class="fas fa-chevron-down"></i></div>
+              <div class="gis-panel-section-title">Status Layers</div>
               <div class="gis-layer-item">
-                <input type="checkbox" checked id="toggle-boundary" onchange="toggleBoundaryVisibility()">
-                <div class="gis-layer-info">
-                  <span class="gis-layer-name">Project Boundary</span>
-                </div>
-                <div style="width:12px; height:12px; border:1px dashed var(--accent); background:rgba(0,200,255,0.1)"></div>
+                <input type="checkbox" checked onchange="filterMapByStatus('COMP', this.checked)">
+                <div class="gis-layer-info"><span class="gis-layer-name">Completed</span></div>
+                <span class="dot green"></span>
+              </div>
+              <div class="gis-layer-item">
+                <input type="checkbox" checked onchange="filterMapByStatus('INPRG', this.checked)">
+                <div class="gis-layer-info"><span class="gis-layer-name">In Progress</span></div>
+                <span class="dot amber"></span>
               </div>
             </div>
 
-            <div class="gis-panel-section" id="legend-section">
-              <div class="gis-panel-section-title">Legend</div>
-              <div style="display:flex; flex-direction:column; gap:10px; font-size:12px;">
-                <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--green); border-radius:50%"></span> On-Time</div>
-                <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--amber); border-radius:50%"></span> Comp (Breached)</div>
-                <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--red); border-radius:50%"></span> Not Comp (Breached)</div>
-                <div style="display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:var(--blue); border-radius:50%"></span> Pending</div>
+            <div class="gis-panel-section">
+              <div class="gis-panel-section-title">User Layers</div>
+              <div id="gis-user-layers">
+                 <p style="font-size:10px; color:var(--muted); text-align:center;">No custom layers imported</p>
               </div>
             </div>
             
@@ -1025,86 +1203,65 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <!-- ASSET INFO PANEL -->
           <div class="gis-tab-panel" id="gis-panel-assets">
             <div class="gis-panel-section">
-               <div class="gis-panel-section-title">Asset Information <i class="fas fa-info-circle"></i></div>
-               <div id="point-details" style="font-size:12px; color:var(--text); line-height:1.6;">
-                  <p style="color: var(--muted); padding: 20px; text-align: center;">Select an asset on the map to view details.</p>
+               <div class="gis-panel-section-title">Asset Search & Filter</div>
+               <div class="gis-search-input-wrap glass-panel" style="margin-bottom:12px;">
+                 <input type="text" id="asset-search" class="gis-search-input" placeholder="Search Asset ID / WO..." oninput="updateAssetList()">
                </div>
             </div>
-            <div class="gis-panel-section" id="road-chainage-section">
-               <div class="gis-panel-section-title">Engineering Data <i class="fas fa-drafting-compass"></i></div>
-               <div style="font-size: 11px; color: var(--muted); padding: 10px; background: var(--surface2); border-radius: 6px; border: 1px dashed var(--border);">
-                  <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-                     <span>Road Chainage:</span> <span style="color: var(--text);">--</span>
-                  </div>
-                  <div style="display:flex; justify-content:space-between;">
-                     <span>Elevation:</span> <span style="color: var(--text);">--</span>
-                  </div>
+            <div id="asset-info-content">
+               <div id="point-details" style="font-size:12px; color:var(--text); line-height:1.6;">
+                  <p style="color: var(--muted); padding: 20px; text-align: center;">Select an asset on the map or search above.</p>
                </div>
+            </div>
+            <div class="gis-panel-section" id="asset-photo-gallery" style="display:none;">
+               <div class="gis-panel-section-title">Asset Photos</div>
+               <div id="asset-photos" class="attachment-gallery"></div>
             </div>
           </div>
 
           <!-- MEASUREMENT PANEL -->
           <div class="gis-tab-panel" id="gis-panel-measure">
             <div class="gis-panel-section">
-               <div class="gis-panel-section-title">Active Measurement <i class="fas fa-ruler-combined"></i></div>
-               <div id="measure-results" style="background: var(--surface2); border-radius: 8px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border);">
-                  <p style="color: var(--muted); font-size: 12px; text-align: center;">Measurement mode inactive</p>
-               </div>
-               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                  <button class="btn btn-primary btn-sm" onclick="toggleMeasure()" id="measure-btn-main"><i class="fas fa-play"></i> Start</button>
-                  <button class="btn btn-ghost btn-sm" onclick="clearMeasurements()"><i class="fas fa-eraser"></i> Clear</button>
-                  <button class="btn btn-red btn-sm" onclick="stopMeasurement()" style="grid-column: span 2;"><i class="fas fa-times-circle"></i> Exit Mode</button>
+               <div class="gis-panel-section-title">Measurement Tools</div>
+               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom:16px;">
+                  <button class="btn btn-ghost btn-sm" onclick="startGisMeasure('polyline')"><i class="fas fa-ruler"></i> Distance</button>
+                  <button class="btn btn-ghost btn-sm" onclick="startGisMeasure('polygon')"><i class="fas fa-draw-polygon"></i> Area</button>
+                  <button class="btn btn-ghost btn-sm" onclick="startGisMeasure('marker')"><i class="fas fa-crosshairs"></i> Coordinate</button>
+                  <button class="btn btn-red btn-sm" onclick="clearMapMeasurements()"><i class="fas fa-trash"></i> Clear</button>
                </div>
             </div>
             <div class="gis-panel-section">
-               <div class="gis-panel-section-title">Instructions</div>
-               <ul style="font-size: 11px; color: var(--muted); padding-left: 16px; line-height: 1.6;">
-                  <li>Click on the map to place measurement points.</li>
-                  <li>Double-click to finish the current measurement.</li>
-                  <li>Use "Clear" to reset current drawing.</li>
-               </ul>
+               <div class="gis-panel-section-title">Active Results</div>
+               <div id="gis-measure-output" style="background:var(--surface2); border-radius:12px; padding:16px; min-height:100px;">
+                  <p style="color:var(--muted); font-size:12px; text-align:center;">No active measurements</p>
+               </div>
+            </div>
+            <div class="gis-panel-section">
+               <div class="gis-panel-section-title">Saved Sessions</div>
+               <div id="gis-saved-measures" style="display:flex; flex-direction:column; gap:8px;"></div>
             </div>
           </div>
 
           <!-- WORK ORDERS PANEL -->
           <div class="gis-tab-panel" id="gis-panel-workorders">
              <div class="gis-panel-section">
-                <div class="gis-panel-section-title">Inspection Records <i class="fas fa-file-invoice"></i></div>
-                <div style="font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
-                   <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Last Inspection:</span> <span style="color:var(--text)">15 May 2025</span></div>
-                   <div style="display:flex; justify-content:space-between;"><span>Status:</span> <span class="status-badge badge-COMP">Compliant</span></div>
+                <div class="gis-panel-section-title">Work Order Management</div>
+                <div class="gis-search-input-wrap glass-panel" style="margin-bottom:12px;">
+                  <input type="text" id="gis-wo-search" class="gis-search-input" placeholder="Search Work Orders..." oninput="updateGisWoList()">
                 </div>
-                <button class="btn btn-ghost btn-sm w-100" onclick="showToast('Loading Inspection History...')"><i class="fas fa-history"></i> View Full History</button>
-             </div>
-             
-             <div class="gis-panel-section">
-                <div class="gis-panel-section-title">Nearby Work Orders <i class="fas fa-clipboard-list"></i></div>
-                <div id="gis-nearby-wo-list">
-                   <p style="color: var(--muted); font-size: 12px; padding: 20px; text-align: center;">Click on the map to find nearby work orders.</p>
-                </div>
-             </div>
-
-             <div class="gis-panel-section">
-                <div class="gis-panel-section-title">Utility & Inventory <i class="fas fa-database"></i></div>
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                   <div class="gis-layer-item">
-                      <input type="checkbox" onchange="showToast('Utility Layer coming soon')">
-                      <div class="gis-layer-info"><span class="gis-layer-name">Electrical Cables</span></div>
-                   </div>
-                   <div class="gis-layer-item">
-                      <input type="checkbox" onchange="showToast('Water Network coming soon')">
-                      <div class="gis-layer-info"><span class="gis-layer-name">Water Pipelines</span></div>
-                   </div>
-                </div>
+                <div id="gis-wo-list" style="display:flex; flex-direction:column; gap:8px;"></div>
              </div>
           </div>
 
-          <!-- SEARCH RESULTS PANEL -->
-          <div class="gis-tab-panel" id="gis-panel-search">
+          <!-- RESULTS PANEL -->
+          <div class="gis-tab-panel" id="gis-panel-results">
              <div class="gis-panel-section">
-                <div class="gis-panel-section-title">Search Results <i class="fas fa-list-ul"></i></div>
-                <div id="gis-search-results">
-                   <p style="color: var(--muted); font-size: 12px; padding: 20px; text-align: center;">Search by ID or Coordinates above.</p>
+                <div class="gis-panel-section-title">Operational Output</div>
+                <div id="gis-results-summary" style="margin-bottom:12px; font-size:11px; color:var(--muted);">Select items or run a query to see results.</div>
+                <div id="gis-results-list" style="display:flex; flex-direction:column; gap:8px; max-height:400px; overflow-y:auto; margin-bottom:16px;"></div>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn btn-ghost btn-sm flex-1" onclick="exportGisResults('csv')"><i class="fas fa-file-csv"></i> CSV</button>
+                  <button class="btn btn-ghost btn-sm flex-1" onclick="exportGisResults('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
                 </div>
              </div>
           </div>
@@ -1440,7 +1597,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="btn btn-ghost btn-sm" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Back</button>
     <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
       <h2 id="detail-wo-number" style="font-size: 18px; font-weight: 800; color: var(--accent);">WO #000000</h2>
-      <span id="detail-status-badge"></span>
+      <div id="detail-status-badge"></div>
     </div>
     <div style="display: flex; gap: 8px;">
       <button class="btn btn-ghost btn-sm" onclick="navigateDetail('prev')" title="Previous Work Order"><i class="fas fa-chevron-up"></i></button>
@@ -1449,111 +1606,189 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     </div>
   </div>
 
-  <div class="detail-body">
+  <div class="detail-body" id="detail-scroll-container">
+    <!-- Top Stats Row -->
+    <div class="detail-top-info">
+      <div class="detail-top-stat">
+        <label>Work Order #</label>
+        <span id="top-wo-num">--</span>
+      </div>
+      <div class="detail-top-stat">
+        <label>Current Status</label>
+        <span id="top-status">--</span>
+      </div>
+      <div class="detail-top-stat">
+        <label>Priority</label>
+        <span id="top-priority">Normal</span>
+      </div>
+      <div class="detail-top-stat">
+        <label>Submission Date</label>
+        <span id="top-created">--</span>
+      </div>
+      <div class="detail-top-stat">
+        <label>Last Updated</label>
+        <span id="top-updated">--</span>
+      </div>
+    </div>
+
+    <!-- Sticky Tabs -->
+    <div class="detail-tabs">
+      <button class="detail-tab active" onclick="switchDetailTab('general')"><i class="fas fa-info-circle"></i> General</button>
+      <button class="detail-tab" onclick="switchDetailTab('location')"><i class="fas fa-map-marker-alt"></i> Location</button>
+      <button class="detail-tab" onclick="switchDetailTab('sign')"><i class="fas fa-traffic-light"></i> Sign Details</button>
+      <button class="detail-tab" onclick="switchDetailTab('installation')"><i class="fas fa-tools"></i> Installation</button>
+      <button class="detail-tab" onclick="switchDetailTab('photos')"><i class="fas fa-images"></i> Photos</button>
+      <button class="detail-tab" onclick="switchDetailTab('manufacturing')"><i class="fas fa-industry"></i> Manufacturing</button>
+      <button class="detail-tab" onclick="switchDetailTab('history')"><i class="fas fa-history"></i> History</button>
+      <button class="detail-tab" onclick="switchDetailTab('comments')"><i class="fas fa-comments"></i> Comments</button>
+    </div>
+
+    <!-- Toolbar -->
     <div class="detail-toolbar">
-      <button class="btn btn-green btn-sm" onclick="saveDetailChanges()"><i class="fas fa-save"></i> Save Changes</button>
-      <button class="btn btn-ghost btn-sm" onclick="openDetail(selectedWorkOrder)"><i class="fas fa-times-circle"></i> Cancel Changes</button>
-      <div style="border-right: 1px solid var(--border); height: 24px; margin: 0 5px;"></div>
+      <button class="btn btn-primary btn-sm" id="detail-edit-btn" onclick="toggleDetailEdit()"><i class="fas fa-edit"></i> Edit Record</button>
+      <button class="btn btn-green btn-sm" id="detail-save-btn" onclick="saveDetailChanges()" style="display:none;"><i class="fas fa-save"></i> Save Changes</button>
+      <button class="btn btn-ghost btn-sm" id="detail-cancel-btn" onclick="cancelDetailEdit()" style="display:none;"><i class="fas fa-times-circle"></i> Cancel</button>
+      <div style="flex:1;"></div>
       <button class="btn btn-ghost btn-sm" onclick="printDetail()"><i class="fas fa-print"></i> Print</button>
       <button class="btn btn-ghost btn-sm" onclick="exportPDFFromDetail()"><i class="fas fa-file-pdf"></i> Export PDF</button>
       <button class="btn btn-ghost btn-sm" onclick="sendToFabFromDetail()"><i class="fas fa-paper-plane"></i> Send to Fabrication</button>
-      <button class="btn btn-ghost btn-sm" onclick="attachFileFromDetail()"><i class="fas fa-paperclip"></i> Attach Files</button>
       <button class="btn btn-ghost btn-sm" onclick="duplicateWO()"><i class="fas fa-copy"></i> Duplicate</button>
       <button class="btn btn-red btn-sm" onclick="closeWO()"><i class="fas fa-check-circle"></i> Close WO</button>
     </div>
 
-    <div class="detail-grid">
-      <div class="detail-main">
-        <div class="detail-section">
-          <div class="detail-section-title">General Information</div>
-          <div class="detail-info-grid">
-            <div class="info-item"><label>Work Order Number</label><input type="text" id="det-wo" class="filter-input" readonly></div>
-            <div class="info-item"><label>Status</label>
-              <select id="det-status" class="filter-input">
-                <option value="COMP">COMP</option><option value="INPRG">INPRG</option>
-                <option value="DISPATCH">DISPATCH</option><option value="WPERM">WPERM</option>
-                <option value="RTNENG">RTNENG</option><option value="APPR">APPR</option>
-              </select>
-            </div>
-            <div class="info-item"><label>Priority</label><input type="text" id="det-priority" class="filter-input"></div>
-            <div class="info-item"><label>Reported By</label><input type="text" id="det-reported-by" class="filter-input"></div>
-            <div class="info-item"><label>Reported Date</label><input type="date" id="det-created" class="filter-input"></div>
-            <div class="info-item"><label>Assigned Team / PWA Eng.</label><input type="text" id="det-team" class="filter-input"></div>
-            <div class="info-item"><label>Fabrication Status</label>
-              <select id="det-fab" class="filter-input">
-                <option value="Pending">Pending</option><option value="Ongoing">Ongoing</option><option value="Done">Done</option>
-              </select>
-            </div>
-            <div class="info-item"><label>Installation Date</label><input type="date" id="det-install" class="filter-input"></div>
+    <!-- Tab Panes -->
+    <div class="detail-pane active" id="pane-general">
+      <div class="detail-section">
+        <div class="detail-section-title">General Information</div>
+        <div class="detail-info-grid">
+          <div class="info-item"><label>Work Order Number</label><span id="val-wo">--</span><input type="text" id="det-wo" readonly></div>
+          <div class="info-item"><label>Status</label><span id="val-status">--</span>
+            <select id="det-status">
+              <option value="COMP">COMP</option><option value="INPRG">INPRG</option>
+              <option value="DISPATCH">DISPATCH</option><option value="WPERM">WPERM</option>
+              <option value="RTNENG">RTNENG</option><option value="APPR">APPR</option>
+            </select>
           </div>
-        </div>
-
-        <div class="detail-section">
-            <div class="detail-section-title">Project Scheduling</div>
-            <div class="detail-info-grid">
-                <div class="info-item"><label>Target Start Date</label><input type="date" id="det-start" class="filter-input"></div>
-                <div class="info-item"><label>Target Finish Date</label><input type="date" id="det-target" class="filter-input"></div>
-                <div class="info-item"><label>Last Status Update</label><input type="date" id="det-update-date" class="filter-input" readonly style="background:var(--surface2);"></div>
-                <div class="info-item"><label>Description</label><textarea id="det-desc" class="filter-input" style="height: 60px; grid-column: span 2;"></textarea></div>
-                <div class="info-item"><label>QBC Comments</label><textarea id="det-qbc-comments" class="filter-input" style="height: 60px; grid-column: span 2;"></textarea></div>
-            </div>
-        </div>
-
-        <div class="detail-section">
-            <div class="detail-section-title">Permits & Approvals</div>
-            <div class="detail-info-grid">
-                <div class="info-item"><label>RO</label><input type="text" id="det-ro" class="filter-input"></div>
-                <div class="info-item"><label>TDP</label><input type="text" id="det-tdp" class="filter-input"></div>
-                <div class="info-item"><label>Application Date</label><input type="date" id="det-app-date" class="filter-input"></div>
-                <div class="info-item"><label>TDP Status</label><input type="text" id="det-tdp-status" class="filter-input"></div>
-                <div class="info-item"><label>Expiry Date</label><input type="date" id="det-expiry" class="filter-input"></div>
-                <div class="info-item"><label>Media Announcement</label><input type="text" id="det-media" class="filter-input"></div>
-            </div>
-        </div>
-
-        <div class="detail-section">
-          <div class="detail-section-title">Sign & Fabrication Details</div>
-          <div class="detail-info-grid">
-            <div class="info-item"><label>Sign Type</label><input type="text" id="det-signtype" class="filter-input"></div>
-            <div class="info-item"><label>Sign Reference</label><input type="text" id="det-signref" class="filter-input"></div>
-            <div class="info-item"><label>Sign Shape</label><input type="text" id="det-signshape" class="filter-input"></div>
-            <div class="info-item"><label>Dimensions (mm)</label><input type="text" id="det-signsize" class="filter-input"></div>
-            <div class="info-item"><label>Material</label><input type="text" id="det-signmaterial" class="filter-input"></div>
-            <div class="info-item"><label>Quantity</label><input type="number" id="det-signqty" class="filter-input"></div>
-            <div class="info-item"><label>Pole Type</label><input type="text" id="det-posttype" class="filter-input"></div>
-            <div class="info-item"><label>Pole Height</label><input type="text" id="det-postheight" class="filter-input"></div>
-            <div class="info-item"><label>Foundation Size</label><input type="text" id="det-foundsize" class="filter-input"></div>
+          <div class="info-item"><label>Priority</label><span id="val-priority">Normal</span>
+            <select id="det-priority">
+              <option>High</option><option selected>Normal</option><option>Low</option>
+            </select>
           </div>
-        </div>
-
-        <div class="detail-section">
-          <div class="detail-section-title">Photos and Attachments</div>
-          <div class="attachment-gallery" id="detail-attachments"></div>
+          <div class="info-item"><label>Reported By</label><span id="val-reported-by">--</span><input type="text" id="det-reported-by"></div>
+          <div class="info-item"><label>Reported Date</label><span id="val-created">--</span><input type="date" id="det-created"></div>
+          <div class="info-item"><label>PWA Engineer</label><span id="val-team">--</span><input type="text" id="det-team"></div>
+          <div class="info-item" style="grid-column: span 2;"><label>Description</label><span id="val-desc">--</span><textarea id="det-desc" rows="3"></textarea></div>
         </div>
       </div>
+    </div>
 
-      <div class="detail-sidebar">
+    <div class="detail-pane" id="pane-location">
+      <div class="detail-grid">
         <div class="detail-section">
-          <div class="detail-section-title">Location Information</div>
-          <div class="static-map" id="detail-map">
-            <img id="detail-map-img" class="static-map-img" src="" alt="Location Map">
-            <div class="static-map-marker"><i class="fas fa-map-marker-alt"></i></div>
-          </div>
-          <div style="margin-top: 16px;">
-            <div class="info-item"><label>Latitude</label><input type="text" id="det-lat" class="filter-input"></div>
-            <div class="info-item" style="margin-top: 8px;"><label>Longitude</label><input type="text" id="det-lng" class="filter-input"></div>
-            <div class="info-item" style="margin-top: 8px;"><label>Location / Highway</label><input type="text" id="det-location" class="filter-input"></div>
-            <button class="btn btn-ghost btn-sm w-100 mt-3" onclick="openInGoogleMaps()"><i class="fab fa-google"></i> Open in Google Maps</button>
+          <div class="detail-section-title">Map View</div>
+          <div class="static-map" id="detail-map" style="height: 400px;">
+            <div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--muted);">Select a work order with coordinates</div>
           </div>
         </div>
-
         <div class="detail-section">
-          <div class="detail-section-title">Internal Comments</div>
-          <div id="comment-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 16px;"></div>
-          <div class="form-group">
-            <textarea id="new-comment" placeholder="Add a comment..." style="height: 80px; resize: none;"></textarea>
-            <button class="btn btn-primary btn-sm mt-2 w-100" onclick="addComment()"><i class="fas fa-paper-plane"></i> Post Comment</button>
+          <div class="detail-section-title">Location Details</div>
+          <div class="detail-info-grid" style="grid-template-columns: 1fr;">
+            <div class="info-item"><label>Location / Highway</label><span id="val-location">--</span><input type="text" id="det-location"></div>
+            <div class="info-item"><label>Latitude</label><span id="val-lat">--</span><input type="text" id="det-lat"></div>
+            <div class="info-item"><label>Longitude</label><span id="val-lng">--</span><input type="text" id="det-lng"></div>
+            <button class="btn btn-ghost btn-sm w-100" onclick="openInGoogleMaps()"><i class="fab fa-google"></i> Open in Google Maps</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-pane" id="pane-sign">
+      <div class="detail-section">
+        <div class="detail-section-title">Sign Specifications</div>
+        <div class="detail-info-grid">
+          <div class="info-item"><label>Sign Type</label><span id="val-signtype">--</span><input type="text" id="det-signtype"></div>
+          <div class="info-item"><label>Sign Reference</label><span id="val-signref">--</span><input type="text" id="det-signref"></div>
+          <div class="info-item"><label>Sign Shape</label><span id="val-signshape">--</span><input type="text" id="det-signshape"></div>
+          <div class="info-item"><label>Dimensions (mm)</label><span id="val-signsize">--</span><input type="text" id="det-signsize"></div>
+          <div class="info-item"><label>Material</label><span id="val-signmaterial">--</span><input type="text" id="det-signmaterial"></div>
+          <div class="info-item"><label>Quantity</label><span id="val-signqty">--</span><input type="number" id="det-signqty"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-pane" id="pane-installation">
+      <div class="detail-section">
+        <div class="detail-section-title">Project Scheduling & Installation</div>
+        <div class="detail-info-grid">
+          <div class="info-item"><label>Target Start Date</label><span id="val-start">--</span><input type="date" id="det-start"></div>
+          <div class="info-item"><label>Target Finish Date</label><span id="val-target">--</span><input type="date" id="det-target"></div>
+          <div class="info-item"><label>Installation Date</label><span id="val-install">--</span><input type="date" id="det-install"></div>
+          <div class="info-item"><label>Status Update Date</label><span id="val-update-date">--</span><input type="date" id="det-update-date" readonly></div>
+          <div class="info-item" style="grid-column: span 2;"><label>QBC Comments</label><span id="val-qbc-comments">--</span><textarea id="det-qbc-comments" rows="3"></textarea></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Permits & Approvals</div>
+        <div class="detail-info-grid">
+          <div class="info-item"><label>RO</label><span id="val-ro">--</span><input type="text" id="det-ro"></div>
+          <div class="info-item"><label>TDP</label><span id="val-tdp">--</span><input type="text" id="det-tdp"></div>
+          <div class="info-item"><label>Application Date</label><span id="val-app-date">--</span><input type="date" id="det-app-date"></div>
+          <div class="info-item"><label>TDP Status</label><span id="val-tdp-status">--</span><input type="text" id="det-tdp-status"></div>
+          <div class="info-item"><label>Expiry Date</label><span id="val-expiry">--</span><input type="date" id="det-expiry"></div>
+          <div class="info-item"><label>Media Announcement</label><span id="val-media">--</span><input type="text" id="det-media"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-pane" id="pane-photos">
+      <div class="detail-section">
+        <div class="detail-section-title">Photos and Attachments</div>
+        <div class="attachment-gallery" id="detail-attachments"></div>
+      </div>
+    </div>
+
+    <div class="detail-pane" id="pane-manufacturing">
+      <div class="detail-section">
+        <div class="detail-section-title">Fabrication Details</div>
+        <div class="detail-info-grid">
+          <div class="info-item"><label>Road Category</label><span id="val-roadcat">--</span><input type="text" id="det-roadcat"></div>
+          <div class="info-item"><label>Fabrication Status</label><span id="val-fab">--</span>
+            <select id="det-fab">
+              <option value="Pending">Pending</option><option value="Ongoing">Ongoing</option><option value="Done">Done</option>
+            </select>
+          </div>
+          <div class="info-item"><label>Pole Type</label><span id="val-posttype">--</span><input type="text" id="det-posttype"></div>
+          <div class="info-item"><label>Pole Height</label><span id="val-postheight">--</span><input type="text" id="det-postheight"></div>
+          <div class="info-item"><label>Foundation Size</label><span id="val-foundsize">--</span><input type="text" id="det-foundsize"></div>
+          <div class="info-item"><label>Scrap Removal</label><span id="val-scrap">--</span><input type="text" id="det-scrap"></div>
+          <div class="info-item" style="grid-column: span 2;"><label>Fabrication Notes</label><span id="val-fabdetails">--</span><textarea id="det-fabdetails" rows="3"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-pane" id="pane-history">
+      <div class="detail-section">
+        <div class="detail-section-title">Audit Trail & Audit Metadata</div>
+        <div class="detail-info-grid">
+          <div class="info-item"><label>Created By</label><span id="val-created-by">System</span></div>
+          <div class="info-item"><label>Created Date</label><span id="val-created-date">--</span></div>
+          <div class="info-item"><label>Last Modified By</label><span id="val-modified-by">--</span></div>
+          <div class="info-item"><label>Last Modified Date</label><span id="val-modified-date">--</span></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Fabrication History</div>
+        <div id="fab-history-list" style="font-size: 12px; color: var(--muted);">No history recorded</div>
+      </div>
+    </div>
+
+    <div class="detail-pane" id="pane-comments">
+      <div class="detail-section">
+        <div class="detail-section-title">Internal Comments</div>
+        <div id="comment-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
+        <div class="form-group">
+          <textarea id="new-comment" placeholder="Type your comment here..." style="height: 100px; resize: none; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: var(--text); width: 100%;"></textarea>
+          <button class="btn btn-primary btn-sm mt-3 w-100" onclick="addComment()"><i class="fas fa-paper-plane"></i> Post Comment</button>
         </div>
       </div>
     </div>
@@ -1604,6 +1839,8 @@ let selectedWorkOrder = null;
 let isAuthenticating = false;
 let contractStartDate = '2026-01-01';
 let uploadErrors = [];
+let notifications = [];
+let notifTab = 'all';
 
 // INITIALIZATION
 window.addEventListener('paste', async (e) => {
@@ -1652,7 +1889,7 @@ window.addEventListener('load', async () => {
   }
   
   const dateBadge = document.getElementById('dateBadge');
-  if (dateBadge) dateBadge.textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  if (dateBadge) dateBadge.textContent = formatDate(new Date());
 
   // Handle password reset redirection
   if (window.location.hash && window.location.hash.includes('type=recovery')) {
@@ -1751,6 +1988,8 @@ async function onAuthenticated() {
 
   await loadSystemSettings();
   loadLogo();
+  await loadNotifications();
+  setupNotifListener();
   showPage('dashboard');
   fetchData();
 }
@@ -1856,7 +2095,7 @@ async function fetchData() {
     return;
   }
   
-  if (isAdmin) loadPendingUsers();
+  if (userRole === 'Administrator') loadPendingUsers();
   try {
     const combinedData = await fetchAllWorkOrders();
 
@@ -1903,7 +2142,12 @@ async function fetchData() {
       ApplicationDate: r.application_date || '',
       TDPStatus: r.tdp_status || '',
       ExpiryDate: r.expiry_date || '',
-      MediaAnnouncement: r.media_announcement || ''
+      MediaAnnouncement: r.media_announcement,
+      created_at: r.created_at,
+      created_by_name: r.created_by_name,
+      last_modified_at: r.last_modified_at,
+      last_modified_by_name: r.last_modified_by_name,
+      Priority: r.priority || 'Normal'
     }));
 
     const { data: photoData, error: photoError } = await supabaseClient
@@ -1985,7 +2229,12 @@ async function saveWorkOrderToSupabase(wo) {
     application_date: wo.ApplicationDate || null,
     tdp_status: wo.TDPStatus,
     expiry_date: wo.ExpiryDate || null,
-    media_announcement: wo.MediaAnnouncement
+    media_announcement: wo.MediaAnnouncement,
+    created_at: wo.created_at || new Date().toISOString(),
+    created_by_name: wo.created_by_name || (currentUser ? (currentUser.user_metadata?.full_name || currentUser.email) : 'System'),
+    last_modified_at: new Date().toISOString(),
+    last_modified_by_name: currentUser ? (currentUser.user_metadata?.full_name || currentUser.email) : 'System',
+    priority: wo.Priority || 'Normal'
   };
 
   const mfgPayload = {
@@ -2145,7 +2394,7 @@ function toggleMobileMenu() {
 }
 
 function showPage(id) {
-  if (id === 'settings' && !isAdmin) {
+  if (id === 'settings' && userRole !== 'Administrator') {
     showToast("Access Denied", "error");
     return;
   }
@@ -2230,101 +2479,280 @@ function getStatusCat(r) {
   }
 }
 
+let dashFilteredRecords = [];
+
 function updateDashboard() {
-  let stats = { total: allData.length, green: 0, amber: 0, red: 0, blue: 0 };
+  const dateRange = document.getElementById('dash-filter-date').value;
+  const status = document.getElementById('dash-filter-status').value;
+  const priority = document.getElementById('dash-filter-priority').value;
+  const team = document.getElementById('dash-filter-team').value;
+  const locationQ = document.getElementById('dash-filter-location').value.toLowerCase();
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+  dashFilteredRecords = allData.filter(r => {
+    // Basic filters
+    if (status && r.Status !== status) return false;
+    if (priority && r.Priority !== priority) return false;
+    if (team && r.PWA_ENG !== team) return false;
+    if (locationQ && !(r.Location||'').toLowerCase().includes(locationQ)) return false;
+
+    // Date Range
+    if (dateRange !== 'all') {
+      const d = r.TargetStart ? new Date(r.TargetStart) : null;
+      if (!d || isNaN(d.getTime())) return false;
+      if (dateRange === 'this-month' && d < startOfMonth) return false;
+      if (dateRange === 'last-month' && (d < startOfLastMonth || d > endOfLastMonth)) return false;
+      if (dateRange === 'this-year' && d < startOfYear) return false;
+    }
+    return true;
+  });
+
+  let stats = { total: dashFilteredRecords.length, green: 0, amber: 0, red: 0, blue: 0 };
   let monthsObj = {};
+  let areaStats = {};
   
-  allData.forEach(r => {
+  dashFilteredRecords.forEach(r => {
     const cat = getStatusCat(r);
     stats[cat]++;
     
-    // Dashboard grouping strictly based on Target Start Date
-    let mName = "No Date";
-    let sortKey = 9999999999999; // Default for No Date
-    
+    // Monthly
+    let mName = null;
+    let sortKey = 9999999999999;
     if (r.TargetStart && r.TargetStart !== '0' && r.TargetStart !== 0) {
        const d = new Date(r.TargetStart);
        if(!isNaN(d.getTime())) {
-         mName = d.toLocaleString('default', { month: 'short', year:'numeric' });
-         // Create a sortable key (YYYYMM)
+         mName = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
          sortKey = d.getFullYear() * 100 + d.getMonth();
        }
     }
     
-    if (!monthsObj[mName]) {
-      monthsObj[mName] = { month: mName, total: 0, green: 0, amber: 0, red: 0, blue: 0, sortKey: sortKey };
+    if (mName) {
+      if (!monthsObj[mName]) monthsObj[mName] = { month: mName, total: 0, green: 0, amber: 0, red: 0, blue: 0, sortKey: sortKey };
+      monthsObj[mName].total++;
+      monthsObj[mName][cat]++;
     }
-    monthsObj[mName].total++;
-    monthsObj[mName][cat]++;
+
+    // Area stats
+    const area = r.Location || 'Unknown';
+    areaStats[area] = (areaStats[area] || 0) + 1;
   });
 
-  const kpiTotal = document.getElementById('kpiTotal');
-  if (kpiTotal) kpiTotal.textContent = stats.total.toLocaleString();
-  const kpiTotalLabel = document.getElementById('kpiTotalLabel');
-  if (kpiTotalLabel) kpiTotalLabel.textContent = supabaseClient ? "Cloud Synchronized" : "Local Database Only";
-  const kpiGreen = document.getElementById('kpiGreen');
-  if (kpiGreen) kpiGreen.textContent = stats.green.toLocaleString();
-  const kpiAmber = document.getElementById('kpiAmber');
-  if (kpiAmber) kpiAmber.textContent = stats.amber.toLocaleString();
-  const kpiRed = document.getElementById('kpiRed');
-  if (kpiRed) kpiRed.textContent = stats.red.toLocaleString();
-  const kpiBlue = document.getElementById('kpiBlue');
-  if (kpiBlue) kpiBlue.textContent = stats.blue.toLocaleString();
+  // KPI UI
+  document.getElementById('kpiTotal').textContent = stats.total.toLocaleString();
+  document.getElementById('kpiGreen').textContent = stats.green.toLocaleString();
+  document.getElementById('kpiAmber').textContent = stats.amber.toLocaleString();
+  document.getElementById('kpiRed').textContent = stats.red.toLocaleString();
+  document.getElementById('kpiBlue').textContent = stats.blue.toLocaleString();
 
   const getPct = (v) => stats.total ? ((v / stats.total) * 100).toFixed(1) + ' %' : '0 %';
-  const kpiGreenPct = document.getElementById('kpiGreenPct');
-  if (kpiGreenPct) kpiGreenPct.textContent = getPct(stats.green);
-  const kpiAmberPct = document.getElementById('kpiAmberPct');
-  if (kpiAmberPct) kpiAmberPct.textContent = getPct(stats.amber);
-  const kpiRedPct = document.getElementById('kpiRedPct');
-  if (kpiRedPct) kpiRedPct.textContent = getPct(stats.red);
-  const kpiBluePct = document.getElementById('kpiBluePct');
-  if (kpiBluePct) kpiBluePct.textContent = getPct(stats.blue);
+  document.getElementById('kpiGreenPct').textContent = getPct(stats.green);
+  document.getElementById('kpiAmberPct').textContent = getPct(stats.amber);
+  document.getElementById('kpiRedPct').textContent = getPct(stats.red);
+  document.getElementById('kpiBluePct').textContent = getPct(stats.blue);
 
-  // Chronological sort
   let mArr = Object.values(monthsObj).sort((a, b) => a.sortKey - b.sortKey);
-  renderMonthly(mArr, stats);
+  renderMonthly(mArr);
+  renderAreaStats(areaStats);
+  renderOperationalItems();
+  updateRecentActivity();
+
+  document.getElementById('dash-last-refresh').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function renderMonthly(mArr, grandTotal) {
+function renderMonthly(mArr) {
   const tbody = document.getElementById('monthlyTable');
   const tfoot = document.getElementById('monthlyFoot');
   const barChart = document.getElementById('barChart');
-  tbody.innerHTML = ''; barChart.innerHTML = '';
+  tbody.innerHTML = ''; barChart.innerHTML = ''; tfoot.innerHTML = '';
+
   if (mArr.length === 0) return;
   const maxTotal = Math.max(...mArr.map(d => d.total));
 
+  let totals = { total: 0, green: 0, amber: 0, red: 0, blue: 0 };
+
   mArr.forEach(d => {
-    const rate = d.total ? ((d.green / d.total) * 100).toFixed(1) : 0;
-    tbody.innerHTML += `<tr>
+    totals.total += d.total; totals.green += d.green; totals.amber += d.amber; totals.red += d.red; totals.blue += d.blue;
+    tbody.innerHTML += `<tr class="cursor-pointer" onclick="drillDown('month', '${d.month}')">
       <td><span class="month-name">${d.month}</span></td>
-      <td><span class="total-num">${d.total.toLocaleString()}</span></td>
-      <td><span class="num-green" style="color:var(--green); font-weight:600;">${d.green.toLocaleString()}</span></td>
-      <td><span class="num-amber" style="color:var(--amber); font-weight:600;">${d.amber.toLocaleString()}</span></td>
-      <td><span class="num-red" style="color:var(--red); font-weight:600;">${d.red.toLocaleString()}</span></td>
-      <td><span class="num-blue" style="color:var(--blue); font-weight:600;">${d.blue.toLocaleString()}</span></td>
-      <td>
-        <div style="font-size:12px;color:var(--green);margin-bottom:3px;">${rate}%</div>
-        <div class="progress-wrap"><div class="progress-fill" style="width:${rate}%;background:var(--green)"></div></div>
-      </td>
+      <td><span class="total-num">${d.total}</span></td>
+      <td><span class="num-green">${d.green}</span></td>
+      <td><span class="num-amber">${d.amber}</span></td>
+      <td><span class="num-red">${d.red}</span></td>
+      <td><span class="num-blue">${d.blue}</span></td>
     </tr>`;
     
-    const gW = (d.green / maxTotal * 100).toFixed(1);
-    const aW = (d.amber / maxTotal * 100).toFixed(1);
-    const rW = (d.red / maxTotal * 100).toFixed(1);
-    const bW = (d.blue / maxTotal * 100).toFixed(1);
-    
-    barChart.innerHTML += `<div class="bar-row">
+    const gW = (d.green / maxTotal * 100).toFixed(1), aW = (d.amber / maxTotal * 100).toFixed(1), rW = (d.red / maxTotal * 100).toFixed(1), bW = (d.blue / maxTotal * 100).toFixed(1);
+    barChart.innerHTML += `<div class="bar-row cursor-pointer" onclick="drillDown('month', '${d.month}')">
       <span class="bar-label">${d.month}</span>
       <div class="bar-track">
-        <div class="bar-seg green" data-w="${gW}" style="width:${gW}%"></div>
-        <div class="bar-seg amber" data-w="${aW}" style="width:${aW}%"></div>
-        <div class="bar-seg red" data-w="${rW}" style="width:${rW}%"></div>
-        <div class="bar-seg blue" data-w="${bW}" style="width:${bW}%"></div>
+        <div class="bar-seg green" style="width:${gW}%"></div><div class="bar-seg amber" style="width:${aW}%"></div><div class="bar-seg red" style="width:${rW}%"></div><div class="bar-seg blue" style="width:${bW}%"></div>
       </div>
       <span class="bar-total">${d.total}</span>
     </div>`;
   });
+
+  tfoot.innerHTML = `<tr>
+    <td>TOTAL</td><td>${totals.total}</td><td>${totals.green}</td><td>${totals.amber}</td><td>${totals.red}</td><td>${totals.blue}</td>
+  </tr>`;
+}
+
+function renderAreaStats(areaStats) {
+  const container = document.getElementById('dash-area-stats');
+  const sorted = Object.entries(areaStats).sort((a,b) => b[1] - a[1]).slice(0, 10);
+  container.innerHTML = sorted.map(([area, count]) => `
+    <div class="cursor-pointer" onclick="drillDown('area', '${area}')" style="display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+      <span style="color:var(--muted);">${area}</span>
+      <span style="font-weight:700; color:var(--accent);">${count}</span>
+    </div>
+  `).join('');
+}
+
+function renderOperationalItems() {
+  const pending = dashFilteredRecords.filter(r => r.Status !== 'COMP').slice(0, 5);
+  document.getElementById('dash-pending-items').innerHTML = pending.map(r => `
+    <div class="cursor-pointer" onclick="openDetail('${r.WorkOrder}')" style="padding:10px; background:var(--surface2); border-radius:8px; font-size:11px;">
+      <div style="font-weight:700; color:var(--accent);">#${r.WorkOrder}</div>
+      <div style="margin-top:2px;">${(r.Description||'').substring(0,40)}...</div>
+    </div>
+  `).join('');
+
+  const today = new Date();
+  const overdue = dashFilteredRecords.filter(r => {
+    if (r.Status === 'COMP') return false;
+    const target = r.TargetFinish ? new Date(r.TargetFinish) : null;
+    return target && target < today;
+  }).slice(0, 5);
+  document.getElementById('dash-overdue-items').innerHTML = overdue.map(r => `
+    <div class="cursor-pointer" onclick="openDetail('${r.WorkOrder}')" style="padding:10px; background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.1); border-radius:8px; font-size:11px;">
+      <div style="font-weight:700; color:var(--red);">#${r.WorkOrder} - OVERDUE</div>
+      <div style="margin-top:2px;">${r.Location}</div>
+    </div>
+  `).join('');
+}
+
+function resetDashFilters() {
+  document.getElementById('dash-filter-date').value = 'all';
+  document.getElementById('dash-filter-status').value = '';
+  document.getElementById('dash-filter-priority').value = '';
+  document.getElementById('dash-filter-team').value = '';
+  document.getElementById('dash-filter-location').value = '';
+  updateDashboard();
+}
+
+function updateRecentActivity() {
+  const list = document.getElementById('dash-recent-list');
+  // Use notifications as the source for recent activity
+  if (notifications.length === 0) {
+    list.innerHTML = '<div style="padding:40px; text-align:center; color:var(--muted);">No recent activity</div>';
+    return;
+  }
+  list.innerHTML = notifications.slice(0, 15).map(n => `
+    <div class="notif-item" onclick="handleNotifClick(${n.id})" style="border-bottom:1px solid var(--border); border-radius:0; margin:0;">
+      <div class="notif-user">${n.user} <span style="font-weight:400; color:var(--muted); font-size:10px; margin-left:8px;">${formatNotifTime(n.time)}</span></div>
+      <div class="notif-action">${n.action}</div>
+    </div>
+  `).join('');
+}
+
+// Global search handling
+document.getElementById('dash-global-search').oninput = function(e) {
+  const q = e.target.value.toLowerCase();
+  const panel = document.getElementById('dash-search-panel');
+  const results = document.getElementById('dash-search-results');
+
+  if (q.length < 2) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  const matches = allData.filter(r =>
+    r.WorkOrder.includes(q) ||
+    (r.Description||'').toLowerCase().includes(q) ||
+    (r.Location||'').toLowerCase().includes(q)
+  ).slice(0, 10);
+
+  panel.style.display = 'block';
+  if (matches.length === 0) {
+    results.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted); font-size:12px;">No matches found</div>';
+  } else {
+    results.innerHTML = matches.map(r => `
+      <div class="cursor-pointer" onclick="openDetail('${r.WorkOrder}')" style="padding:12px; border-bottom:1px solid var(--border); font-size:12px;">
+        <div style="font-weight:700; color:var(--accent);">#${r.WorkOrder}</div>
+        <div style="color:var(--muted); font-size:11px;">${r.Location} - ${r.Status}</div>
+      </div>
+    `).join('');
+  }
+};
+
+function drillDown(type, val = null) {
+  let list = [...dashFilteredRecords];
+  let title = "Work Orders";
+
+  if (type === 'on-time') { list = list.filter(r => getStatusCat(r) === 'green'); title = "On-Time Work Orders"; }
+  else if (type === 'breached-comp') { list = list.filter(r => getStatusCat(r) === 'amber'); title = "Completed (Breached)"; }
+  else if (type === 'breached-pending') { list = list.filter(r => getStatusCat(r) === 'red'); title = "Not Completed (Breached)"; }
+  else if (type === 'pending') { list = list.filter(r => getStatusCat(r) === 'blue'); title = "Pending within Target"; }
+  else if (type === 'month') {
+    list = list.filter(r => {
+      if (!r.TargetStart) return false;
+      const d = new Date(r.TargetStart);
+      return (d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')) === val;
+    });
+    title = `Work Orders for ${val}`;
+  }
+  else if (type === 'area') { list = list.filter(r => (r.Location || 'Unknown') === val); title = `Work Orders in ${val}`; }
+
+  document.getElementById('drill-modal-title').textContent = `${title} (${list.length})`;
+  const tbody = document.getElementById('drill-table-body');
+
+  const renderDrill = (data) => {
+    tbody.innerHTML = data.map(r => `
+      <tr>
+        <td><span class="wo-num">${r.WorkOrder}</span></td>
+        <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.Description}</td>
+        <td><span class="status-badge badge-${r.Status}">${r.Status}</span></td>
+        <td>${r.Location}</td>
+        <td style="color:var(--muted);">${r.PWA_ENG || '--'}</td>
+        <td>${formatDate(r.TargetFinish)}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openDetail('${r.WorkOrder}')"><i class="fas fa-external-link-alt"></i></button></td>
+      </tr>
+    `).join('');
+  };
+
+  renderDrill(list);
+
+  document.getElementById('drill-search').oninput = (e) => {
+    const q = e.target.value.toLowerCase();
+    renderDrill(list.filter(r => r.WorkOrder.includes(q) || (r.Description||'').toLowerCase().includes(q)));
+  };
+
+  openModal('drillDownModal');
+}
+
+function exportDrillResults() {
+  const tbody = document.getElementById('drill-table-body');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  if (rows.length === 0) return;
+
+  let csv = "Work Order,Description,Status,Location,Engineer,Finish Date\n";
+  csv += rows.map(tr => {
+    return Array.from(tr.querySelectorAll('td')).slice(0, 6).map(td => {
+      const txt = td.textContent.trim().replace(/"/g, '""');
+      return txt.includes(',') ? `"${txt}"` : txt;
+    }).join(',');
+  }).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `filtered_results_${new Date().getTime()}.csv`;
+  a.click();
 }
 
 // WORK ORDERS LOGIC
@@ -2339,6 +2767,11 @@ function buildEngineerFilter() {
   if (mfgSel) {
     mfgSel.innerHTML = '<option value="">All Engineers</option>';
     engs.forEach(e => { const o = document.createElement('option'); o.textContent = e; mfgSel.appendChild(o); });
+  }
+  const dashSel = document.getElementById('dash-filter-team');
+  if (dashSel) {
+    dashSel.innerHTML = '<option value="">All Teams</option>';
+    engs.forEach(e => { const o = document.createElement('option'); o.textContent = e; dashSel.appendChild(o); });
   }
 }
 
@@ -2402,8 +2835,8 @@ function renderManufacturingTable() {
       <td>${stBadge}</td>
       <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
       <td style="font-size:11px">${r.Location||'—'}</td>
-      <td style="font-size:11px">${r.TargetStart||'—'}</td>
-      <td style="font-size:11px">${r.TargetFinish||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.TargetStart)}</td>
+      <td style="font-size:11px">${formatDate(r.TargetFinish)}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'RoadCatg')">${r.RoadCatg||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignMaterial')">${r.SignMaterial||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignType')">${r.SignType||'—'}</td>
@@ -2423,7 +2856,7 @@ function renderManufacturingTable() {
            <option ${r.FabStatus==='Done'?'selected':''}>Done</option>
         </select>
       </td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'InstallationDate', 'date')">${r.InstallationDate||'—'}</td>
+      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'InstallationDate', 'date')">${formatDate(r.InstallationDate)}</td>
       <td>
         <div style="display:flex; gap:4px; align-items:center;">
           <textarea class="filter-input" style="min-width:120px; height:32px; font-size:11px; padding:4px;" 
@@ -2465,6 +2898,7 @@ async function updateFabStatus(woId, status) {
   wo.FabStatus = status;
   try {
     await saveWorkOrderToSupabase(wo);
+    addNotification(`Manufacturing status changed to ${status}`, woId, 'manufacturing');
     showToast(`Status updated to ${status}`);
     if (status === 'Done') {
        applyManufacturingFilters(); // Remove from view
@@ -2516,12 +2950,9 @@ function selectWorkOrderRow(woId, scrollIntoView = false) {
 
 function handleTableKeydown(e) {
   if (!['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
   
   const isDetailOpen = document.getElementById('detailModal').classList.contains('open');
-  if (isDetailOpen && e.key === 'Escape') {
-    closeDetail();
-    return;
-  }
 
   // Get current visible rows (filtered)
   const rows = Array.from(document.querySelectorAll('#woBody tr:not(.loading-row)'));
@@ -2546,7 +2977,19 @@ function handleTableKeydown(e) {
   }
 }
 
-window.addEventListener('keydown', handleTableKeydown);
+window.addEventListener('keydown', (e) => {
+  const isDetailOpen = document.getElementById('detailModal').classList.contains('open');
+  if (isDetailOpen) {
+    if (e.key === 'Escape') closeDetail();
+    if (e.ctrlKey && e.key === 's') {
+      e.preventDefault();
+      if (document.getElementById('detailModal').classList.contains('editing')) {
+        saveDetailChanges();
+      }
+    }
+  }
+  handleTableKeydown(e);
+});
 
 async function openDetail(woId) {
   const wo = allData.find(d => String(d.WorkOrder) === String(woId));
@@ -2555,76 +2998,135 @@ async function openDetail(woId) {
   selectedWorkOrder = woId;
   const modal = document.getElementById('detailModal');
   modal.classList.add('open');
+  modal.classList.remove('editing');
   document.body.style.overflow = 'hidden';
 
-  // Header & Status
+  switchDetailTab('general');
+  document.getElementById('detail-scroll-container').scrollTop = 0;
+
+  // Header & Stats
+  const stBadge = `<span class="status-badge badge-${wo.Status||'COMP'}">${wo.Status||'–'}</span>`;
   document.getElementById('detail-wo-number').textContent = `WO #${wo.WorkOrder}`;
-  document.getElementById('detail-status-badge').innerHTML = `<span class="status-badge badge-${wo.Status||'COMP'}">${wo.Status||'–'}</span>`;
+  document.getElementById('detail-status-badge').innerHTML = stBadge;
 
-  // General Info
-  document.getElementById('det-wo').value = wo.WorkOrder;
-  document.getElementById('det-status').value = wo.Status || 'COMP';
-  document.getElementById('det-priority').value = 'Normal'; // Priority not in DB, fallback
-  document.getElementById('det-reported-by').value = wo.ReportedBy || '';
-  document.getElementById('det-created').value = wo.ReportedDate || '';
-  document.getElementById('det-team').value = wo.PWA_ENG || '';
-  document.getElementById('det-fab').value = wo.FabStatus || 'Pending';
-  document.getElementById('det-install').value = wo.InstallationDate || '';
+  document.getElementById('top-wo-num').textContent = wo.WorkOrder;
+  document.getElementById('top-status').innerHTML = stBadge;
+  document.getElementById('top-priority').textContent = wo.Priority || 'Normal';
+  document.getElementById('top-created').textContent = wo.created_at ? formatDate(wo.created_at) : (wo.ReportedDate || '--');
+  document.getElementById('top-updated').textContent = wo.last_modified_at ? formatDateTime(wo.last_modified_at) : '--';
 
-  // Scheduling
-  document.getElementById('det-start').value = wo.TargetStart || '';
-  document.getElementById('det-target').value = wo.TargetFinish || '';
-  document.getElementById('det-update-date').value = wo.StatusUpdateDate || '';
-  document.getElementById('det-desc').value = wo.Description || '';
-  document.getElementById('det-qbc-comments').value = wo.QBCComments || '';
+  // Fill Values & Inputs
+  const fields = {
+    'wo': wo.WorkOrder,
+    'status': wo.Status || 'COMP',
+    'priority': wo.Priority || 'Normal',
+    'reported-by': wo.ReportedBy || '',
+    'created': wo.ReportedDate || '',
+    'team': wo.PWA_ENG || '',
+    'desc': wo.Description || '',
+    'location': wo.Location || '',
+    'lat': wo.Lat || '',
+    'lng': wo.Lng || '',
+    'signtype': wo.SignType || '',
+    'signref': wo.SignRef || '',
+    'signshape': wo.SignShape || '',
+    'signsize': wo.SignSize || '',
+    'signmaterial': wo.SignMaterial || '',
+    'signqty': wo.SignQty || '',
+    'start': wo.TargetStart || '',
+    'target': wo.TargetFinish || '',
+    'install': wo.InstallationDate || '',
+    'update-date': wo.StatusUpdateDate || '',
+    'qbc-comments': wo.QBCComments || '',
+    'ro': wo.RO || '',
+    'tdp': wo.TDP || '',
+    'app-date': wo.ApplicationDate || '',
+    'tdp-status': wo.TDPStatus || '',
+    'expiry': wo.ExpiryDate || '',
+    'media': wo.MediaAnnouncement || '',
+    'roadcat': wo.RoadCatg || '',
+    'fab': wo.FabStatus || 'Pending',
+    'posttype': wo.PostType || '',
+    'postheight': wo.PostHeight || '',
+    'foundsize': wo.FoundSize || '',
+    'scrap': wo.ScrapRemoval || '',
+    'fabdetails': wo.FabDetails || ''
+  };
 
-  // Permits
-  document.getElementById('det-ro').value = wo.RO || '';
-  document.getElementById('det-tdp').value = wo.TDP || '';
-  document.getElementById('det-app-date').value = wo.ApplicationDate || '';
-  document.getElementById('det-tdp-status').value = wo.TDPStatus || '';
-  document.getElementById('det-expiry').value = wo.ExpiryDate || '';
-  document.getElementById('det-media').value = wo.MediaAnnouncement || '';
-
-  // Sign Details
-  document.getElementById('det-signtype').value = wo.SignType || '';
-  document.getElementById('det-signref').value = wo.SignRef || '';
-  document.getElementById('det-signshape').value = wo.SignShape || '';
-  document.getElementById('det-signsize').value = wo.SignSize || '';
-  document.getElementById('det-signmaterial').value = wo.SignMaterial || '';
-  document.getElementById('det-signqty').value = wo.SignQty || '';
-  document.getElementById('det-posttype').value = wo.PostType || '';
-  document.getElementById('det-postheight').value = wo.PostHeight || '';
-  document.getElementById('det-foundsize').value = wo.FoundSize || '';
-
-  // Location
-  document.getElementById('det-lat').value = wo.Lat || '';
-  document.getElementById('det-lng').value = wo.Lng || '';
-  document.getElementById('det-location').value = wo.Location || '';
-  
-  const mapContainer = document.getElementById('detail-map');
-  if (wo.Lat && wo.Lng) {
-    mapContainer.innerHTML = `
-      <iframe 
-        width="100%" 
-        height="200" 
-        frameborder="0" 
-        style="border:0; border-radius: 12px;" 
-        src="https://maps.google.com/maps?q=${wo.Lat},${wo.Lng}&hl=es&z=14&output=embed" 
-        allowfullscreen>
-      </iframe>`;
-  } else {
-    mapContainer.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--muted); font-size:12px;">No location coordinates</div>';
+  for (const [id, val] of Object.entries(fields)) {
+    const span = document.getElementById(`val-${id}`);
+    const input = document.getElementById(`det-${id}`);
+    if (span) span.textContent = val || '--';
+    if (input) {
+      input.value = val;
+      input.parentElement.classList.remove('modified');
+      // Add change listener to highlight modification
+      input.onchange = () => input.parentElement.classList.add('modified');
+    }
   }
 
-  // Attachments
-  renderDetailAttachments(woId);
+  // Audit
+  document.getElementById('val-created-by').textContent = wo.created_by_name || 'System';
+  document.getElementById('val-created-date').textContent = wo.created_at ? formatDateTime(wo.created_at) : '--';
+  document.getElementById('val-modified-by').textContent = wo.last_modified_by_name || '--';
+  document.getElementById('val-modified-date').textContent = wo.last_modified_at ? formatDateTime(wo.last_modified_at) : '--';
 
-  // Comments
+  // Map
+  const mapContainer = document.getElementById('detail-map');
+  if (wo.Lat && wo.Lng) {
+    mapContainer.innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0; border-radius:12px;" src="https://maps.google.com/maps?q=${wo.Lat},${wo.Lng}&hl=en&z=16&output=embed" allowfullscreen></iframe>`;
+  } else {
+    mapContainer.innerHTML = `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--muted);">No coordinates available</div>`;
+  }
+
+  // Fab History
+  const historyList = document.getElementById('fab-history-list');
+  if (wo.fab_history && wo.fab_history.length > 0) {
+    historyList.innerHTML = wo.fab_history.map(h => `
+      <div style="padding:8px; background:var(--surface2); border-radius:8px; margin-bottom:4px;">
+        <b>${formatDateTime(h.date)}</b> by ${h.user}
+      </div>
+    `).join('');
+  } else {
+    historyList.innerHTML = 'No history recorded';
+  }
+
+  renderDetailAttachments(woId);
   loadComments(woId);
+
+  // Update UI mode
+  document.getElementById('detail-edit-btn').style.display = 'block';
+  document.getElementById('detail-save-btn').style.display = 'none';
+  document.getElementById('detail-cancel-btn').style.display = 'none';
+}
+
+function switchDetailTab(tabId) {
+  document.querySelectorAll('.detail-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${tabId}'`));
+  });
+  document.querySelectorAll('.detail-pane').forEach(p => {
+    p.classList.toggle('active', p.id === `pane-${tabId}`);
+  });
+}
+
+function toggleDetailEdit() {
+  document.getElementById('detailModal').classList.add('editing');
+  document.getElementById('detail-edit-btn').style.display = 'none';
+  document.getElementById('detail-save-btn').style.display = 'block';
+  document.getElementById('detail-cancel-btn').style.display = 'block';
+}
+
+function cancelDetailEdit() {
+  if (document.querySelector('.info-item.modified')) {
+    if (!confirm("Discard unsaved changes?")) return;
+  }
+  openDetail(selectedWorkOrder);
 }
 
 function closeDetail() {
+  if (document.getElementById('detailModal').classList.contains('editing')) {
+    if (!confirm("Discard unsaved changes?")) return;
+  }
   document.getElementById('detailModal').classList.remove('open');
   document.body.style.overflow = '';
 }
@@ -2652,7 +3154,7 @@ async function saveDetailChanges() {
   const wo = allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder));
   if (!wo) return;
 
-  const btn = document.querySelector('.detail-toolbar .btn-green');
+  const btn = document.getElementById('detail-save-btn');
   const originalText = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
@@ -2660,15 +3162,24 @@ async function saveDetailChanges() {
   const updatedData = {
     ...wo,
     Status: document.getElementById('det-status').value,
+    Priority: document.getElementById('det-priority').value,
     ReportedBy: document.getElementById('det-reported-by').value,
     ReportedDate: document.getElementById('det-created').value,
     PWA_ENG: document.getElementById('det-team').value,
-    FabStatus: document.getElementById('det-fab').value,
-    InstallationDate: document.getElementById('det-install').value,
+    Description: document.getElementById('det-desc').value,
+    Location: document.getElementById('det-location').value,
+    Lat: parseFloat(document.getElementById('det-lat').value) || null,
+    Lng: parseFloat(document.getElementById('det-lng').value) || null,
+    SignType: document.getElementById('det-signtype').value,
+    SignRef: document.getElementById('det-signref').value,
+    SignShape: document.getElementById('det-signshape').value,
+    SignSize: document.getElementById('det-signsize').value,
+    SignMaterial: document.getElementById('det-signmaterial').value,
+    SignQty: document.getElementById('det-signqty').value,
     TargetStart: document.getElementById('det-start').value,
     TargetFinish: document.getElementById('det-target').value,
-    StatusUpdateDate: new Date().toISOString().split('T')[0], // Auto update on save
-    Description: document.getElementById('det-desc').value,
+    InstallationDate: document.getElementById('det-install').value,
+    StatusUpdateDate: new Date().toISOString().split('T')[0],
     QBCComments: document.getElementById('det-qbc-comments').value,
     RO: document.getElementById('det-ro').value,
     TDP: document.getElementById('det-tdp').value,
@@ -2676,25 +3187,27 @@ async function saveDetailChanges() {
     TDPStatus: document.getElementById('det-tdp-status').value,
     ExpiryDate: document.getElementById('det-expiry').value,
     MediaAnnouncement: document.getElementById('det-media').value,
-    SignType: document.getElementById('det-signtype').value,
-    SignRef: document.getElementById('det-signref').value,
-    SignShape: document.getElementById('det-signshape').value,
-    SignSize: document.getElementById('det-signsize').value,
-    SignMaterial: document.getElementById('det-signmaterial').value,
-    SignQty: document.getElementById('det-signqty').value,
+    RoadCatg: document.getElementById('det-roadcat').value,
+    FabStatus: document.getElementById('det-fab').value,
     PostType: document.getElementById('det-posttype').value,
     PostHeight: document.getElementById('det-postheight').value,
     FoundSize: document.getElementById('det-foundsize').value,
-    Lat: parseFloat(document.getElementById('det-lat').value) || null,
-    Lng: parseFloat(document.getElementById('det-lng').value) || null,
-    Location: document.getElementById('det-location').value
+    ScrapRemoval: document.getElementById('det-scrap').value,
+    FabDetails: document.getElementById('det-fabdetails').value
   };
 
   try {
     await saveWorkOrderToSupabase(updatedData);
-    showToast("Changes saved to Supabase");
-    fetchData(); // Sync local state
-    openDetail(selectedWorkOrder); // Refresh UI with fresh data
+    addNotification(`Updated Work Order ${wo.WorkOrder}`, wo.WorkOrder, 'workorders');
+    showToast("Changes saved successfully");
+
+    // Update local state without full reload
+    const idx = allData.findIndex(d => d.WorkOrder === wo.WorkOrder);
+    if (idx !== -1) allData[idx] = updatedData;
+
+    applyFilters();
+    updateDashboard();
+    openDetail(selectedWorkOrder);
   } catch (error) {
     showToast("Error saving changes", "error");
   } finally {
@@ -2881,7 +3394,7 @@ async function loadComments(woId) {
       <div class="comment-item">
         <div class="comment-meta">
           <span class="comment-author">${c.author_name || 'System User'}</span>
-          <span>${new Date(c.created_at).toLocaleString()}</span>
+          <span>${formatDateTime(c.created_at)}</span>
         </div>
         <div class="comment-text">${c.content}</div>
       </div>
@@ -2968,41 +3481,37 @@ function renderTable() {
     }
 
     return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')" ondblclick="openDetail('${r.WorkOrder}')">
-      <td onclick="makeEditable(this, '${r.WorkOrder}', 'WorkOrder')"><span class="wo-num">${r.WorkOrder}</span></td>
-      <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}" onclick="makeEditable(this, '${r.WorkOrder}', 'Description')"><span>${(r.Description||'').substring(0,40)}</span></td>
-      <td onclick="makeEditable(this, '${r.WorkOrder}', 'Status', 'select')">${stBadge}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Lat')">${r.Lat||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Lng')">${r.Lng||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'ReportedBy')">${r.ReportedBy||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'ReportedDate', 'date')">${r.ReportedDate||'—'}</td>
-      <td style="font-size:11px;color:var(--muted)" onclick="makeEditable(this, '${r.WorkOrder}', 'PWA_ENG')">${r.PWA_ENG||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'Location')">${r.Location||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TargetStart', 'date')">${r.TargetStart||'—'}</td>
+      <td><span class="wo-num">${r.WorkOrder}</span></td>
+      <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
+      <td>${stBadge}</td>
+      <td style="font-size:11px">${r.Lat||'—'}</td>
+      <td style="font-size:11px">${r.Lng||'—'}</td>
+      <td style="font-size:11px">${r.ReportedBy||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.ReportedDate)}</td>
+      <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
+      <td style="font-size:11px">${r.Location||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.TargetStart)}</td>
       <td style="font-size:11px">${monthLabel}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TargetFinish', 'date')">${r.TargetFinish||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'StatusUpdateDate', 'date')">${r.StatusUpdateDate||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.TargetFinish)}</td>
+      <td style="font-size:11px">${formatDate(r.StatusUpdateDate)}</td>
       <td style="font-size:11px">${completionStatus}</td>
       <td>
-        <div style="display:flex; gap:4px; align-items:center;">
-          <textarea class="filter-input" style="min-width:120px; height:32px; font-size:11px; padding:4px;" 
-            onblur="updateQbcComments('${r.WorkOrder}', this.value)"
-            onkeydown="if(event.ctrlKey && event.key==='Enter') { this.blur(); }">${r.QBCComments||''}</textarea>
-        </div>
+        <div style="font-size:11px; color:var(--muted); max-width:120px; overflow:hidden; text-overflow:ellipsis;">${r.QBCComments||'—'}</div>
       </td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'RO')">${r.RO||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TDP')">${r.TDP||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'ApplicationDate', 'date')">${r.ApplicationDate||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'TDPStatus')">${r.TDPStatus||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'ExpiryDate', 'date')">${r.ExpiryDate||'—'}</td>
-      <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'MediaAnnouncement')">${r.MediaAnnouncement||'—'}</td>
+      <td style="font-size:11px">${r.RO||'—'}</td>
+      <td style="font-size:11px">${r.TDP||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.ApplicationDate)}</td>
+      <td style="font-size:11px">${r.TDPStatus||'—'}</td>
+      <td style="font-size:11px">${formatDate(r.ExpiryDate)}</td>
+      <td style="font-size:11px">${r.MediaAnnouncement||'—'}</td>
       <td>
         <div class="action-btns">
           ${mapActions}
           ${photoCell}
-          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); sendToFabrication('${r.WorkOrder}')" title="Send to Fabrication"><i class="fas fa-paper-plane"></i></button>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openDetail('${r.WorkOrder}')" title="View / Edit Details"><i class="fas fa-external-link-alt"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); sendToFabrication('${r.WorkOrder}')" title="Send to Fabrication"><i class="fas fa-paper-plane"></i></button>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showManufacturingFor('${r.WorkOrder}')" title="View Manufacturing"><i class="fas fa-industry"></i></button>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openFabModal('${r.WorkOrder}')" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
-          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openEditModal('${r.WorkOrder}')"><i class="fas fa-edit"></i></button>` : ''}
         </div>
       </td>
     </tr>`;
@@ -3552,6 +4061,7 @@ async function processExcelUpload() {
       }
       statusMsg.classList.add('success');
       showToast(`Finished processing ${uniqueData.length + uploadErrors.length} records`);
+      addNotification(`Imported ${uniqueData.length} records from CSV`, null, 'system');
       fetchData();
       
       setTimeout(() => {
@@ -3590,25 +4100,39 @@ function updateAdminUI() {
   const btn = document.getElementById('adminBtn'), status = document.getElementById('adminStatus'), addBtn = document.getElementById('addWoBtn');
   const ap = document.getElementById('admin-panel');
   const dz = document.getElementById('dangerous-zone');
+  const contractInp = document.getElementById('contract-start-setting');
+  const saveSystemBtn = document.getElementById('save-system-settings-btn');
 
-  if (isAdmin) {
+  const isFullAdmin = userRole === 'Administrator' || isAdmin;
+  const isPowerUser = isFullAdmin || userRole === 'Manager' || userRole === 'Supervisor' || userRole === 'Engineer';
+
+  if (isPowerUser) {
     applyFilters();
     applyManufacturingFilters();
-    if (btn) btn.textContent = '🔓 Admin Active';
+    if (btn) btn.textContent = isFullAdmin ? '🔓 Admin Active' : '🔓 Power User';
     if (btn) btn.classList.add('unlocked');
-    if (status) status.textContent = 'Edit mode enabled';
+    if (status) status.textContent = `${userRole} Access`;
     if (addBtn) addBtn.style.display = '';
-    if (ap) ap.style.display = 'block';
-    if (dz) dz.style.display = 'block';
+
+    // Admin only sections
+    if (ap) ap.style.display = isFullAdmin ? 'block' : 'none';
+    if (dz) dz.style.display = isFullAdmin ? 'block' : 'none';
+    if (contractInp) contractInp.disabled = !isFullAdmin;
+    if (saveSystemBtn) saveSystemBtn.style.display = isFullAdmin ? 'block' : 'none';
+
     const savePresetBtn = document.getElementById('admin-save-presets');
-    if (savePresetBtn) savePresetBtn.style.display = 'block';
+    if (savePresetBtn) savePresetBtn.style.display = isFullAdmin ? 'block' : 'none';
   } else {
     if (btn) btn.textContent = '🔒 Locked';
     if (btn) btn.classList.remove('unlocked');
-    if (status) status.textContent = 'Login to edit records';
+    if (status) status.textContent = 'Read-only access';
     if (addBtn) addBtn.style.display = 'none';
     if (ap) ap.style.display = 'none';
     if (dz) dz.style.display = 'none';
+    if (contractInp) contractInp.disabled = true;
+    if (saveSystemBtn) saveSystemBtn.style.display = 'none';
+    const savePresetBtn = document.getElementById('admin-save-presets');
+    if (savePresetBtn) savePresetBtn.style.display = 'none';
   }
 }
 
@@ -3984,8 +4508,16 @@ async function exportMapKML() {
   <Document>
     <name>QBC Map Export</name>`;
   
+  const statusFilters = Array.from(document.querySelectorAll('.gis-tab-panel#gis-panel-layers input[type="checkbox"][onchange*="filterMapByStatus"]'))
+    .filter(i => !i.checked).map(i => i.getAttribute('onchange').match(/'([^']+)'/)[1]);
+
+  const statusCheckboxes = Array.from(document.querySelectorAll('input[onchange*="filterMapByStatus"]'));
+  const disabledStatuses = statusCheckboxes.length > 0 ? statusCheckboxes.filter(i => !i.checked).map(i => i.getAttribute('onchange').match(/'([^']+)'/)[1]) : [];
+
   allData.forEach(r => {
     if (r.Lat && r.Lng) {
+      if (disabledStatuses.includes(r.Status)) return;
+      if (statusFilters.includes(r.Status)) return;
       kml += `
     <Placemark>
       <name>${r.WorkOrder}</name>
@@ -4013,7 +4545,7 @@ function exportMapCSV() {
   exportTableCSV();
 }
 
-function loadMarkers() {
+function loadMarkers(statusFilter = null, isVisible = true) {
   if (!markersLayer) return;
   markersLayer.clearLayers();
   
@@ -4026,8 +4558,12 @@ function loadMarkers() {
     maxClusterRadius: 50
   });
 
+  const statusCheckboxes = Array.from(document.querySelectorAll('input[onchange*="filterMapByStatus"]'));
+  const disabledStatuses = statusCheckboxes.length > 0 ? statusCheckboxes.filter(i => !i.checked).map(i => i.getAttribute('onchange').match(/'([^']+)'/)[1]) : [];
+
   allData.forEach(r => {
     if (r.Lat && r.Lng) {
+      if (disabledStatuses.includes(r.Status)) return;
       const cat = getStatusCat(r);
       const defaultColor = cat === 'green' ? 'var(--green)' : (cat === 'amber' ? 'var(--amber)' : (cat === 'red' ? 'var(--red)' : 'var(--blue)'));
       const style = r.style_settings || {};
@@ -4059,6 +4595,27 @@ function loadMarkers() {
         L.DomEvent.stopPropagation(e);
         showPointInfo(r.Lat, r.Lng, r);
       });
+
+      const popupHtml = `
+        <div class="map-card" style="width:280px; padding:0; border:none; background:none;">
+          <div style="background:var(--surface2); padding:12px; border-radius:12px 12px 0 0; border-bottom:1px solid var(--border);">
+            <div style="font-weight:800; color:var(--accent); display:flex; justify-content:space-between;">
+              <span>WO #${r.WorkOrder}</span>
+              <span class="status-badge badge-${r.Status}" style="font-size:9px;">${r.Status}</span>
+            </div>
+            <div style="font-size:10px; color:var(--muted); margin-top:4px;">${r.Location}</div>
+          </div>
+          <div style="padding:12px; background:var(--surface); border-radius:0 0 12px 12px;">
+            ${photos[r.WorkOrder] ? `<img src="${photos[r.WorkOrder]}" style="width:100%; height:120px; object-fit:cover; border-radius:8px; margin-bottom:10px;">` : ''}
+            <div style="font-size:11px; margin-bottom:12px; line-height:1.4;">${(r.Description||'').substring(0,60)}...</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <button class="btn btn-primary btn-sm" style="font-size:10px;" onclick="openDetail('${r.WorkOrder}')">Detailed View</button>
+              <button class="btn btn-ghost btn-sm" style="font-size:10px;" onclick="copyCoords(${r.Lat}, ${r.Lng})">Copy Coords</button>
+            </div>
+          </div>
+        </div>
+      `;
+      m.bindPopup(popupHtml, { maxWidth: 300, className: 'custom-map-popup' });
 
       m.on('dragend', async (e) => {
         const newPos = e.target.getLatLng();
@@ -4510,6 +5067,126 @@ function switchGisTab(tabId) {
   }
 }
 
+let gisMeasureLayer = null;
+
+function startGisMeasure(type) {
+  if (!map) return;
+  if (gisMeasureLayer) map.removeLayer(gisMeasureLayer);
+
+  showToast(`Measurement started: ${type}`);
+  if (type === 'polyline') map.pm.enableDraw('Line');
+  else if (type === 'polygon') map.pm.enableDraw('Polygon');
+  else if (type === 'marker') map.pm.enableDraw('Marker');
+
+  map.once('pm:create', e => {
+    const layer = e.layer;
+    gisMeasureLayer = layer;
+    let output = '';
+
+    if (type === 'polyline') {
+      const distance = L.GeometryUtil.accumulatedLengths(layer.getLatLngs());
+      const total = distance[distance.length - 1];
+      output = `
+        <div style="font-size:12px;">
+          <div style="margin-bottom:8px; color:var(--accent); font-weight:700;">Distance Results</div>
+          <div>Meters: <b>${total.toFixed(2)} m</b></div>
+          <div>Kilometers: <b>${(total/1000).toFixed(3)} km</b></div>
+          <div>Feet: <b>${(total*3.28084).toFixed(1)} ft</b></div>
+        </div>
+      `;
+    } else if (type === 'polygon') {
+      const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
+      output = `
+        <div style="font-size:12px;">
+          <div style="margin-bottom:8px; color:var(--accent); font-weight:700;">Area Results</div>
+          <div>Sq Meters: <b>${area.toFixed(2)} m²</b></div>
+          <div>Hectares: <b>${(area/10000).toFixed(3)} ha</b></div>
+          <div>Perimeter: <b>${L.GeometryUtil.accumulatedLengths(layer.getLatLngs()[0]).slice(-1)[0].toFixed(1)} m</b></div>
+        </div>
+      `;
+    } else if (type === 'marker') {
+      const ll = layer.getLatLng();
+      output = `
+        <div style="font-size:12px;">
+          <div style="margin-bottom:8px; color:var(--accent); font-weight:700;">Coordinates</div>
+          <div>Lat: <b>${ll.lat.toFixed(6)}</b></div>
+          <div>Lng: <b>${ll.lng.toFixed(6)}</b></div>
+        </div>
+      `;
+    }
+
+    document.getElementById('gis-measure-output').innerHTML = output;
+  });
+}
+
+function clearMapMeasurements() {
+  if (gisMeasureLayer) {
+    map.removeLayer(gisMeasureLayer);
+    gisMeasureLayer = null;
+  }
+  document.getElementById('gis-measure-output').innerHTML = '<p style="color:var(--muted); font-size:12px; text-align:center;">No active measurements</p>';
+}
+
+function updateAssetList() {
+  const q = document.getElementById('asset-search').value.toLowerCase();
+  const list = allData.filter(r => r.WorkOrder.includes(q) || (r.Location||'').toLowerCase().includes(q));
+  const container = document.getElementById('asset-info-content');
+
+  if (q.length < 2) {
+    container.innerHTML = '<p style="color: var(--muted); padding: 20px; text-align: center;">Type to search assets...</p>';
+    return;
+  }
+
+  container.innerHTML = list.slice(0, 20).map(r => `
+    <div class="notif-item" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')">
+      <div style="font-weight:700; color:var(--accent);">#${r.WorkOrder}</div>
+      <div style="font-size:11px;">${r.Location}</div>
+      <div style="font-size:10px; color:var(--muted);">${r.SignType || 'No Type'}</div>
+    </div>
+  `).join('');
+}
+
+function updateGisWoList() {
+  const q = document.getElementById('gis-wo-search').value.toLowerCase();
+  const list = allData.filter(r => r.WorkOrder.includes(q) || (r.Description||'').toLowerCase().includes(q));
+  const container = document.getElementById('gis-wo-list');
+
+  container.innerHTML = list.slice(0, 15).map(r => `
+    <div class="notif-item" style="border:1px solid var(--border);" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:800; color:var(--accent);">#${r.WorkOrder}</span>
+        <span class="status-badge badge-${r.Status}">${r.Status}</span>
+      </div>
+      <div style="font-size:11px; margin-top:4px; color:var(--muted);">${r.Location}</div>
+    </div>
+  `).join('');
+}
+
+function filterMapByStatus(status, visible) {
+  // Logic to hide/show markers of specific status
+  // For simplicity, we refresh markers but with a filter
+  loadMarkers(status, visible);
+}
+
+function exportGisResults(format) {
+  const q = document.getElementById('gis-wo-search').value.toLowerCase();
+  const list = allData.filter(r => r.WorkOrder.includes(q) || (r.Description||'').toLowerCase().includes(q));
+  if (list.length === 0) return showToast("No data to export", "error");
+
+  if (format === 'csv') {
+    let csv = "Work Order,Location,Status,Description\n";
+    csv += list.map(r => `"${r.WorkOrder}","${r.Location}","${r.Status}","${(r.Description||'').replace(/"/g,'""')}"`).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gis_export_${new Date().getTime()}.csv`;
+    a.click();
+  } else {
+    showToast("PDF Export coming soon for GIS", "info");
+  }
+}
+
 async function updateObjectStyle(type, id, key, value) {
   if (type === 'wo') {
     const wo = allData.find(d => String(d.WorkOrder) === String(id));
@@ -4603,7 +5280,7 @@ async function showFolder(type) {
         fmFiles = data.map(f => ({
           id: f.id,
           name: f.filename,
-          date: new Date(f.created_at).toLocaleDateString(),
+          date: formatDate(f.created_at),
           type: 'pdf'
         }));
         renderFolderFiles();
@@ -4697,6 +5374,7 @@ function toggleFmView() {
 }
 
 async function deleteSelectedFiles() {
+  if (userRole === 'Viewer' || userRole === 'Inspector') { showToast("Permission denied", "error"); return; }
   if (!confirm(`Are you sure you want to delete ${fmSelected.size} files?`)) return;
   
   if (fmType === 'images') {
@@ -4785,6 +5463,7 @@ async function handlePhotoUpload(evt, wo) {
       }
 
       photos[wo] = publicUrl;
+      addNotification(`Uploaded new photo`, wo, 'photos');
       renderTable();
       updateFileManagerStats();
       showToast("Photo uploaded successfully");
@@ -4811,6 +5490,7 @@ function viewPhoto(wo) {
 }
 
 async function deletePhoto(wo) {
+  if (userRole === 'Viewer' || userRole === 'Inspector') { showToast("Permission denied", "error"); return; }
   if (!confirm(`Are you sure you want to delete the photo for WO: ${wo}?`)) return;
   
   if (supabaseClient) {
@@ -4881,7 +5561,7 @@ function openFabModal(wo) {
   const fmw = document.getElementById('fabModalWO');
   if (fmw) fmw.textContent = wo;
   const photo = photos[wo];
-  const today = new Date().toLocaleDateString('en-GB');
+  const today = formatDate(new Date());
 
   // Strict A4 proportions (Width: 794px, Height: 1123px)
   document.getElementById('pdfPreview').innerHTML = `
@@ -5032,8 +5712,8 @@ function exportTableCSV(mode = 'all') {
       const headers = ["Work Order", "Description", "Status", "PWA Engineer", "Location", "Target Start", "Target Finish", "Sign Type", "Sign Ref", "Qty", "Fabrication Status", "Install Date", "Fabrication Details"];
       csvContent = headers.join(",") + "\n";
       csvContent += data.map(r => [
-        r.WorkOrder, r.Description, r.Status, r.PWA_ENG, r.Location, r.TargetStart, r.TargetFinish,
-        r.SignType, r.SignRef, r.SignQty, r.FabStatus, r.InstallationDate, r.FabDetails
+        r.WorkOrder, r.Description, r.Status, r.PWA_ENG, r.Location, formatDate(r.TargetStart), formatDate(r.TargetFinish),
+        r.SignType, r.SignRef, r.SignQty, r.FabStatus, formatDate(r.InstallationDate), r.FabDetails
       ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
     } else {
       const headers = [
@@ -5043,17 +5723,16 @@ function exportTableCSV(mode = 'all') {
       ];
       csvContent = headers.join(",") + "\n";
       csvContent += data.map(r => {
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         let monthLabel = "—";
         if (r.TargetStart) {
           const d = new Date(r.TargetStart);
-          if (!isNaN(d.getTime())) monthLabel = monthNames[d.getMonth()];
+          if (!isNaN(d.getTime())) monthLabel = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
         }
         const completionStatus = getCompletionStatusLabel(r);
         return [
-          r.WorkOrder, r.Description, r.Status, r.Lat, r.Lng, r.ReportedBy, r.ReportedDate,
-          r.PWA_ENG, r.Location, r.TargetStart, monthLabel, r.TargetFinish, r.StatusUpdateDate,
-          completionStatus, r.QBCComments, r.RO, r.TDP, r.ApplicationDate, r.TDPStatus, r.ExpiryDate, r.MediaAnnouncement
+          r.WorkOrder, r.Description, r.Status, r.Lat, r.Lng, r.ReportedBy, formatDate(r.ReportedDate),
+          r.PWA_ENG, r.Location, formatDate(r.TargetStart), monthLabel, formatDate(r.TargetFinish), formatDate(r.StatusUpdateDate),
+          completionStatus, r.QBCComments, r.RO, r.TDP, formatDate(r.ApplicationDate), r.TDPStatus, formatDate(r.ExpiryDate), r.MediaAnnouncement
         ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',');
       }).join('\n');
     }
@@ -5184,6 +5863,7 @@ async function updateFabDetails(woId, value) {
   wo.FabDetails = value;
   try {
     await saveWorkOrderToSupabase(wo);
+    addNotification(`Updated fabrication details`, woId, 'manufacturing');
     showToast('Fabrication details updated');
   } catch (err) {
     showToast('Error updating details', 'error');
@@ -5197,6 +5877,7 @@ async function updateQbcComments(woId, value) {
   wo.QBCComments = value;
   try {
     await saveWorkOrderToSupabase(wo);
+    addNotification(`Updated comments`, woId, 'comments');
     showToast('QBC comments updated');
   } catch (err) {
     showToast('Error updating comments', 'error');
@@ -5230,7 +5911,7 @@ function showFabHistory(woId) {
     showToast("No submission history", "info");
     return;
   }
-  const historyStr = wo.fab_history.map(h => `${new Date(h.date).toLocaleString()} by ${h.user}`).join('\n');
+  const historyStr = wo.fab_history.map(h => `${formatDateTime(h.date)} by ${h.user}`).join('\n');
   alert(`Fabrication Submission History for WO ${woId}:\n\n${historyStr}`);
 }
 
@@ -5300,23 +5981,29 @@ function fieldHTML(f, val, extra='') {
 }
 function parseCSVDate(val) {
   if (val === undefined || val === null || String(val).trim() === '') return null;
-  if (val instanceof Date) return isNaN(val.getTime()) ? 'INVALID' : val.toISOString().split('T')[0];
+
+  // If it's already a Date object
+  if (val instanceof Date) {
+    if (isNaN(val.getTime())) return 'INVALID';
+    return val.toISOString().split('T')[0];
+  }
 
   let s = String(val).trim();
-  if (s === '0' || s.toLowerCase() === 'null' || s === '-') return null;
+  if (s === '0' || s.toLowerCase() === 'null' || s === '-' || s === '') return null;
 
-  // Handle 4-digit year heuristic: "2025" -> "2025-01-01"
-  if (/^\d{4}$/.test(s)) {
-    return `${s}-01-01`;
+  // Excel serial number (typically 5 digits for current dates)
+  // We check if it's a pure number and within a reasonable range for Excel dates
+  if (/^\d{5,6}$/.test(s)) {
+    const serial = Number(s);
+    // Excel's 1900 leap year bug: Excel thinks 1900 was a leap year.
+    // 25569 is 1970-01-01 in Excel's system.
+    const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
+    }
   }
 
-  // Excel serial number (5 or 6 digits)
-  if (!isNaN(s) && /^\d{5,6}$/.test(s)) {
-    const date = new Date((Number(s) - 25569) * 86400 * 1000);
-    if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
-  }
-
-  // Handle DD/MM/YYYY or DD-MM-YYYY specifically
+  // Handle DD/MM/YYYY or DD-MM-YYYY specifically (common in CSVs)
   const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
   if (dmyMatch) {
     const day = dmyMatch[1].padStart(2, '0');
@@ -5325,7 +6012,16 @@ function parseCSVDate(val) {
     return `${year}-${month}-${day}`;
   }
 
-  // Handle formats like "15-May-2025" or "15 May 2025" or "May 15, 2025"
+  // Handle YYYY-MM-DD specifically
+  const ymdMatch = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  if (ymdMatch) {
+    const year = ymdMatch[1];
+    const month = ymdMatch[2].padStart(2, '0');
+    const day = ymdMatch[3].padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Fallback to JS Date parsing
   const d = new Date(s);
   if (!isNaN(d.getTime())) {
     return d.toISOString().split('T')[0];
@@ -5335,6 +6031,187 @@ function parseCSVDate(val) {
 }
 
 function showToast(msg, type='') { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.className='toast'+(type?' '+type:''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
+
+function formatDate(val) {
+  if (!val) return '—';
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return val;
+  return d.toISOString().split('T')[0];
+}
+
+function formatDateTime(val) {
+  if (!val) return '—';
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return val;
+  return d.toISOString().split('T')[0] + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+// NOTIFICATIONS
+function toggleNotifPanel() {
+  const panel = document.getElementById('notif-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    renderNotifications();
+  }
+}
+
+async function addNotification(action, woId = null, category = 'system') {
+  const notif = {
+    id: Date.now(),
+    user: currentUser ? (currentUser.user_metadata?.full_name || currentUser.email) : 'System',
+    action: action,
+    woId: woId,
+    category: category,
+    time: new Date().toISOString(),
+    read: false
+  };
+
+  notifications.unshift(notif);
+
+  // Persist to Supabase if possible
+  if (supabaseClient) {
+    try {
+      await supabaseClient.from('notifications').insert({
+        user_name: notif.user,
+        action_text: action,
+        work_order: woId,
+        category: category,
+        user_id: currentUser ? currentUser.id : null
+      });
+    } catch(e) { console.warn("Supabase notif save failed", e); }
+  }
+
+  updateNotifBadge();
+  if (document.getElementById('notif-panel').classList.contains('open')) {
+    renderNotifications();
+  }
+
+  // Show toast for real-time awareness
+  showToast(`${notif.user}: ${action}`);
+}
+
+function updateNotifBadge() {
+  const unreadCount = notifications.filter(n => !n.read).length;
+  const badge = document.getElementById('notif-badge');
+  badge.textContent = unreadCount;
+  badge.classList.toggle('show', unreadCount > 0);
+}
+
+function switchNotifTab(tab) {
+  notifTab = tab;
+  document.querySelectorAll('.notif-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${tab}'`));
+  });
+  renderNotifications();
+}
+
+function renderNotifications() {
+  const list = document.getElementById('notif-list');
+  const filtered = notifications.filter(n => notifTab === 'all' || n.category === notifTab);
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div style="padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px;">
+        <i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 12px; opacity: 0.3;"></i>
+        <p>No notifications in this category</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = filtered.map(n => `
+    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="handleNotifClick(${n.id})">
+      <div class="notif-user">${n.user}</div>
+      <div class="notif-action">${n.action}</div>
+      <div class="notif-meta">
+        <span><i class="far fa-clock"></i> ${formatNotifTime(n.time)}</span>
+        ${n.woId ? `<span><i class="fas fa-hashtag"></i> ${n.woId}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function formatNotifTime(isoString) {
+  const d = new Date(isoString);
+  const now = new Date();
+  const diff = Math.floor((now - d) / 1000);
+
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return formatDate(d);
+}
+
+function handleNotifClick(id) {
+  const n = notifications.find(notif => notif.id === id);
+  if (!n) return;
+  n.read = true;
+  updateNotifBadge();
+  renderNotifications();
+  if (n.woId) {
+    openDetail(n.woId);
+  }
+}
+
+function markAllNotifsRead() {
+  notifications.forEach(n => n.read = true);
+  updateNotifBadge();
+  renderNotifications();
+}
+
+function clearAllNotifs() {
+  notifications = [];
+  updateNotifBadge();
+  renderNotifications();
+}
+
+async function loadNotifications() {
+  if (!supabaseClient) return;
+  try {
+    const { data } = await supabaseClient.from('notifications').select('*').order('created_at', { ascending: false }).limit(50);
+    if (data) {
+      notifications = data.map(d => ({
+        id: d.id,
+        user: d.user_name,
+        action: d.action_text,
+        woId: d.work_order,
+        category: d.category,
+        time: d.created_at,
+        read: d.is_read || false
+      }));
+      updateNotifBadge();
+    }
+  } catch(e) {}
+}
+
+// Set up real-time listener
+function setupNotifListener() {
+  if (!supabaseClient) return;
+  supabaseClient
+    .channel('public:notifications')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, payload => {
+      const d = payload.new;
+      // Avoid notifying the person who made the change
+      if (currentUser && d.user_id === currentUser.id) return;
+
+      const notif = {
+        id: d.id,
+        user: d.user_name,
+        action: d.action_text,
+        woId: d.work_order,
+        category: d.category,
+        time: d.created_at,
+        read: false
+      };
+      notifications.unshift(notif);
+      updateNotifBadge();
+      showToast(`${notif.user}: ${notif.action}`);
+      if (document.getElementById('notif-panel').classList.contains('open')) {
+        renderNotifications();
+      }
+    })
+    .subscribe();
+}
 
 </script>
 </body>
