@@ -1816,6 +1816,7 @@ try {
 const PRIMARY_ADMIN_EMAIL = 'ahmetnasan1993@gmail.com';
 let currentUser = null;
 let isAdmin = false;
+let userRole = 'User';
 let isApproved = false;
 let pendingApprovalCount = 0;
 let allData = [];
@@ -1905,13 +1906,14 @@ async function onAuthenticated() {
   if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
     isAdmin = true;
     isApproved = true;
+    userRole = 'Administrator';
   } else {
     // Check approval status in profiles table
     if (supabaseClient) {
       try {
         const { data, error } = await supabaseClient
           .from('profiles')
-          .select('is_approved, is_admin')
+          .select('is_approved, is_admin, role')
           .eq('id', currentUser.id)
           .maybeSingle();
         
@@ -1922,28 +1924,39 @@ async function onAuthenticated() {
               await supabaseClient.from('profiles').insert({ 
                 id: currentUser.id, 
                 email: currentUser.email, 
-                is_approved: false 
+                is_approved: false,
+                role: 'User'
               });
            }
            isApproved = false;
         } else if (data) {
           isApproved = data.is_approved;
           isAdmin = data.is_admin || isAdmin;
+          // Set userRole based on isAdmin or profile.role
+          if (isAdmin) {
+            userRole = 'Administrator';
+          } else {
+            userRole = data.role || 'User';
+          }
         } else {
           // Auto-create profile if missing
           await supabaseClient.from('profiles').insert({ 
             id: currentUser.id, 
             email: currentUser.email, 
-            is_approved: false 
+            is_approved: false,
+            role: 'User'
           });
           isApproved = false;
+          userRole = isAdmin ? 'Administrator' : 'User';
         }
       } catch (e) { 
         console.error("Profile check failed:", e);
         isApproved = false; 
+        userRole = isAdmin ? 'Administrator' : 'User';
       }
     } else {
       isApproved = true; // Offline fallback
+      userRole = isAdmin ? 'Administrator' : 'User';
     }
   }
 
@@ -2095,7 +2108,7 @@ async function fetchData() {
     return;
   }
   
-  if (userRole === 'Administrator') loadPendingUsers();
+  if (hasPermission('admin')) loadPendingUsers();
   try {
     const combinedData = await fetchAllWorkOrders();
 
@@ -2394,7 +2407,7 @@ function toggleMobileMenu() {
 }
 
 function showPage(id) {
-  if (id === 'settings' && userRole !== 'Administrator') {
+  if (id === 'settings' && !hasPermission('view_settings')) {
     showToast("Access Denied", "error");
     return;
   }
@@ -3605,7 +3618,8 @@ async function handleAuth() {
           full_name: fullName,
           mobile: mobile,
           position: position,
-          is_approved: false 
+          is_approved: false,
+          role: 'User'
         });
       }
       
@@ -4103,13 +4117,13 @@ function updateAdminUI() {
   const contractInp = document.getElementById('contract-start-setting');
   const saveSystemBtn = document.getElementById('save-system-settings-btn');
 
-  const isFullAdmin = userRole === 'Administrator' || isAdmin;
-  const isPowerUser = isFullAdmin || userRole === 'Manager' || userRole === 'Supervisor' || userRole === 'Engineer';
+  const isFullAdmin = hasPermission('admin');
+  const isPowerUser = hasPermission('edit');
 
   if (isPowerUser) {
     applyFilters();
     applyManufacturingFilters();
-    if (btn) btn.textContent = isFullAdmin ? '🔓 Admin Active' : '🔓 Power User';
+    if (btn) btn.textContent = isFullAdmin ? '🔓 Admin Active' : `🔓 ${userRole}`;
     if (btn) btn.classList.add('unlocked');
     if (status) status.textContent = `${userRole} Access`;
     if (addBtn) addBtn.style.display = '';
@@ -5374,7 +5388,7 @@ function toggleFmView() {
 }
 
 async function deleteSelectedFiles() {
-  if (userRole === 'Viewer' || userRole === 'Inspector') { showToast("Permission denied", "error"); return; }
+  if (!hasPermission('edit')) { showToast("Permission denied", "error"); return; }
   if (!confirm(`Are you sure you want to delete ${fmSelected.size} files?`)) return;
   
   if (fmType === 'images') {
@@ -5490,7 +5504,7 @@ function viewPhoto(wo) {
 }
 
 async function deletePhoto(wo) {
-  if (userRole === 'Viewer' || userRole === 'Inspector') { showToast("Permission denied", "error"); return; }
+  if (!hasPermission('edit')) { showToast("Permission denied", "error"); return; }
   if (!confirm(`Are you sure you want to delete the photo for WO: ${wo}?`)) return;
   
   if (supabaseClient) {
@@ -5745,6 +5759,19 @@ function exportTableCSV(mode = 'all') {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+// PERMISSIONS & ROLES
+function hasPermission(permissionType) {
+  const isFullAdmin = userRole === 'Administrator';
+  const isPowerUser = isFullAdmin || ['Manager', 'Supervisor', 'Engineer'].includes(userRole);
+  
+  switch(permissionType) {
+    case 'admin': return isFullAdmin;
+    case 'edit': return isPowerUser;
+    case 'view_settings': return isFullAdmin;
+    default: return false;
+  }
 }
 
 // UTILS
