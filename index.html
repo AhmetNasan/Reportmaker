@@ -1311,6 +1311,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           </div>
           <div id="upload-status-msg" class="upload-status-msg"></div>
         </div>
+
+        <div id="upload-error-actions" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+          <p style="color:var(--red); font-size:11px; margin-bottom:8px;"><i class="fas fa-exclamation-circle"></i> Some rows failed validation.</p>
+          <button class="btn btn-red btn-sm w-100" onclick="exportUploadErrors()"><i class="fas fa-file-export"></i> Export Problematic Rows (.csv)</button>
+        </div>
       </div>
 
       <div class="upload-card">
@@ -1337,6 +1342,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <div style="display:flex; gap:10px; margin-top:8px;">
             <button class="btn btn-ghost btn-sm flex-1" onclick="setTheme('dark')">Dark Mode</button>
             <button class="btn btn-ghost btn-sm flex-1" onclick="setTheme('light')">Light Mode</button>
+          </div>
+        </div>
+        <div class="form-group mb-3" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <label>Contract Start Date (Min. Valid Date)</label>
+          <div style="display:flex; gap:10px; margin-top:8px;">
+            <input type="date" id="contract-start-setting" class="filter-input flex-1" value="2026-01-01">
+            <button class="btn btn-primary btn-sm" id="save-system-settings-btn" onclick="saveSystemSettings()"><i class="fas fa-save"></i> Save</button>
           </div>
         </div>
       </div>
@@ -1590,6 +1602,8 @@ let fmSelected = new Set();
 let fmFiles = [];
 let selectedWorkOrder = null;
 let isAuthenticating = false;
+let contractStartDate = '2026-01-01';
+let uploadErrors = [];
 
 // INITIALIZATION
 window.addEventListener('paste', async (e) => {
@@ -1735,9 +1749,54 @@ async function onAuthenticated() {
     loadPendingUsers();
   }
 
+  await loadSystemSettings();
   loadLogo();
   showPage('dashboard');
   fetchData();
+}
+
+async function loadSystemSettings() {
+  if (!supabaseClient) return;
+  try {
+    const { data } = await supabaseClient.from('project_boundaries').select('style_settings').eq('id', 0).maybeSingle();
+    if (data && data.style_settings) {
+      if (data.style_settings.contract_start_date) {
+        contractStartDate = data.style_settings.contract_start_date;
+        const el = document.getElementById('contract-start-setting');
+        if (el) el.value = contractStartDate;
+      }
+    }
+  } catch(e) { console.error("Load system settings failed:", e); }
+}
+
+async function saveSystemSettings() {
+  if (!supabaseClient || !isAdmin) {
+    showToast("Admin access required", "error");
+    return;
+  }
+  const dateVal = document.getElementById('contract-start-setting').value;
+  if (!dateVal) {
+    showToast("Please select a valid date", "error");
+    return;
+  }
+
+  try {
+    const { data } = await supabaseClient.from('project_boundaries').select('style_settings').eq('id', 0).maybeSingle();
+    const currentSettings = (data && data.style_settings) ? data.style_settings : {};
+    currentSettings.contract_start_date = dateVal;
+
+    await supabaseClient.from('project_boundaries').upsert({
+      id: 0,
+      name: 'MAP_PRESETS',
+      style_settings: currentSettings
+    });
+
+    contractStartDate = dateVal;
+    showToast("System settings saved");
+  } catch(e) {
+    console.error(e);
+    showToast("Failed to save settings", "error");
+  }
 }
 
 async function fetchAllWorkOrders() {
@@ -3287,6 +3346,8 @@ async function processExcelUpload() {
   statusLabel.textContent = 'Processing CSV file...';
   statusMsg.textContent = '';
   statusMsg.className = 'upload-status-msg';
+  uploadErrors = [];
+  document.getElementById('upload-error-actions').style.display = 'none';
 
   const reader = new FileReader();
   reader.onload = async e => {
@@ -3299,7 +3360,8 @@ async function processExcelUpload() {
 
       if (rows.length < 2) { showToast('File is empty or invalid', 'error'); return; }
 
-      const headers = rows[0].map(h => String(h || '').toLowerCase().trim());
+      const rawHeaders = rows[0];
+      const headers = rawHeaders.map(h => String(h || '').toLowerCase().trim());
       const dataRows = rows.slice(1);
       const woIdx = headers.findIndex(h => h === 'work order' || h === 'workorder' || h === 'wo');
       
@@ -3329,17 +3391,21 @@ async function processExcelUpload() {
         'tdp status': 'TDPStatus', 'expiry date': 'ExpiryDate', 'expiry da': 'ExpiryDate', 'expiry': 'ExpiryDate',
         'media announcement': 'MediaAnnouncement', 'media announceme': 'MediaAnnouncement'
       };
+      const DATE_KEYS = ['TargetStart', 'TargetFinish', 'InstallationDate', 'ReportedDate', 'StatusUpdateDate', 'ApplicationDate', 'ExpiryDate'];
+      const VALID_STATUSES = ['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR'];
 
-      dataRows.forEach(row => {
+      dataRows.forEach((row, rowIndex) => {
         const wo = String(row[woIdx] || '').trim(); 
         if (!wo) return;
         
         const r = { WorkOrder: wo };
+        let rowHasError = false;
+        const rowNum = rowIndex + 2;
+
         headers.forEach((h, i) => {
           const k = MAP[h];
           if (k) {
             let val = row[i];
-            // Treat empty strings as null
             if (val === undefined || val === null || String(val).trim() === '') {
               r[k] = null;
               return;
@@ -3347,43 +3413,64 @@ async function processExcelUpload() {
 
             if (k === 'Lat' || k === 'Lng') {
               const num = parseFloat(val);
-              r[k] = isNaN(num) ? null : num;
-            } else if (k === 'TargetStart' || k === 'TargetFinish' || k === 'InstallationDate' || k === 'ReportedDate' || k === 'StatusUpdateDate' || k === 'ApplicationDate' || k === 'ExpiryDate') {
-              r[k] = parseCSVDate(val);
+              if (isNaN(num)) {
+                 // Skip strict validation for Lat/Lng if it's just garbage, but keep it null
+                 r[k] = null;
+              } else {
+                 if (k === 'Lat' && (num < -90 || num > 90)) { rowHasError = true; }
+                 if (k === 'Lng' && (num < -180 || num > 180)) { rowHasError = true; }
+                 r[k] = num;
+              }
+            } else if (DATE_KEYS.includes(k)) {
+              const parsed = parseCSVDate(val);
+              if (parsed === 'INVALID') {
+                rowHasError = true;
+                console.error(`Row ${rowNum}: Invalid date format in column "${rawHeaders[i]}" for WO ${wo}`);
+              } else if (parsed && parsed < contractStartDate) {
+                rowHasError = true;
+                console.error(`Row ${rowNum}: Date ${parsed} is before Contract Start Date (${contractStartDate}) in column "${rawHeaders[i]}" for WO ${wo}`);
+              } else {
+                r[k] = parsed;
+              }
+            } else if (k === 'Status') {
+              const st = String(val).trim().toUpperCase();
+              if (!VALID_STATUSES.includes(st)) {
+                rowHasError = true;
+              } else {
+                r[k] = st;
+              }
             } else {
               r[k] = String(val).trim();
             }
           }
         });
-        upsertData.push(r);
+
+        if (rowHasError) {
+          uploadErrors.push({ headers: rawHeaders, row: row });
+        } else {
+          upsertData.push(r);
+        }
       });
 
-      if (upsertData.length === 0) {
-        showToast('No valid data rows found', 'error');
+      if (upsertData.length === 0 && uploadErrors.length > 0) {
+        statusLabel.textContent = 'Validation Failed';
+        statusMsg.textContent = `All ${uploadErrors.length} rows failed validation. No data imported.`;
+        statusMsg.className = 'upload-status-msg error';
+        document.getElementById('upload-error-actions').style.display = 'block';
+        uploadBtn.disabled = false;
+        templateBtn.disabled = false;
         return;
       }
 
-      // Validation
-      const errors = [];
-      const validStatuses = ['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR'];
-      upsertData.forEach((r, idx) => {
-        const rowNum = idx + 2;
-        if (!r.WorkOrder) errors.push(`Row ${rowNum}: Missing Work Order Number`);
-        if (r.Status && !validStatuses.includes(r.Status)) errors.push(`Row ${rowNum}: Invalid Status "${r.Status}"`);
-        if (r.Lat !== null && (r.Lat < -90 || r.Lat > 90)) errors.push(`Row ${rowNum}: Invalid Latitude "${r.Lat}"`);
-        if (r.Lng !== null && (r.Lng < -180 || r.Lng > 180)) errors.push(`Row ${rowNum}: Invalid Longitude "${r.Lng}"`);
-      });
-
-      if (errors.length > 0) {
-        alert("CSV Validation Errors:\n\n" + errors.slice(0, 10).join("\n") + (errors.length > 10 ? `\n...and ${errors.length - 10} more` : ""));
+      if (upsertData.length === 0) {
+        showToast('No valid data rows found', 'error');
+        uploadBtn.disabled = false;
+        templateBtn.disabled = false;
         return;
       }
 
       // Deduplicate upsertData by WorkOrder to avoid "ON CONFLICT" errors
       const uniqueData = Array.from(new Map(upsertData.map(item => [item.WorkOrder, item])).values());
-      if (uniqueData.length < upsertData.length) {
-        showToast(`Warning: ${upsertData.length - uniqueData.length} duplicate Work Orders removed`, "amber");
-      }
 
       if (supabaseClient) {
         const woData = uniqueData.map(wo => ({
@@ -3458,9 +3545,13 @@ async function processExcelUpload() {
       }
       
       statusLabel.textContent = 'Complete';
-      statusMsg.textContent = `CSV file uploaded successfully. ${uniqueData.length} records processed.`;
+      statusMsg.textContent = `Upload finished. ${uniqueData.length} rows imported successfully.`;
+      if (uploadErrors.length > 0) {
+        statusMsg.textContent += ` ${uploadErrors.length} rows skipped due to validation errors.`;
+        document.getElementById('upload-error-actions').style.display = 'block';
+      }
       statusMsg.classList.add('success');
-      showToast(`Successfully uploaded ${uniqueData.length} records`);
+      showToast(`Finished processing ${uniqueData.length + uploadErrors.length} records`);
       fetchData();
       
       setTimeout(() => {
@@ -4886,6 +4977,29 @@ function exportPDF() {
   });
 }
 
+function exportUploadErrors() {
+  if (uploadErrors.length === 0) return;
+
+  const headers = uploadErrors[0].headers;
+  let csvContent = headers.join(",") + "\n";
+
+  csvContent += uploadErrors.map(err => {
+    return err.row.map(v => {
+      const s = String(v || '').replace(/"/g, '""');
+      return s.includes(',') ? `"${s}"` : s;
+    }).join(',');
+  }).join("\n");
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `upload_errors_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 function downloadCSVTemplate() {
   const headers = [
     "Work Order #", "Description", "Status", "Latitude", "Longitude", "Reported By", "Reported Date",
@@ -5185,19 +5299,24 @@ function fieldHTML(f, val, extra='') {
   return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="text" id="${id}" value="${val||''}" ${readonlyAttr}></div>`;
 }
 function parseCSVDate(val) {
-  if (!val) return null;
-  if (val instanceof Date) return isNaN(val.getTime()) ? null : val.toISOString().split('T')[0];
+  if (val === undefined || val === null || String(val).trim() === '') return null;
+  if (val instanceof Date) return isNaN(val.getTime()) ? 'INVALID' : val.toISOString().split('T')[0];
 
   let s = String(val).trim();
-  if (!s || s === '0' || s.toLowerCase() === 'null' || s === '-') return null;
+  if (s === '0' || s.toLowerCase() === 'null' || s === '-') return null;
 
-  // Handle formats like "15-May-2025" or "15 May 2025" or "May 15, 2025"
-  const d = new Date(s);
-  if (!isNaN(d.getTime())) {
-    return d.toISOString().split('T')[0];
+  // Handle 4-digit year heuristic: "2025" -> "2025-01-01"
+  if (/^\d{4}$/.test(s)) {
+    return `${s}-01-01`;
   }
 
-  // Handle DD/MM/YYYY or DD-MM-YYYY specifically if Date() fails
+  // Excel serial number (5 or 6 digits)
+  if (!isNaN(s) && /^\d{5,6}$/.test(s)) {
+    const date = new Date((Number(s) - 25569) * 86400 * 1000);
+    if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+  }
+
+  // Handle DD/MM/YYYY or DD-MM-YYYY specifically
   const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
   if (dmyMatch) {
     const day = dmyMatch[1].padStart(2, '0');
@@ -5206,13 +5325,13 @@ function parseCSVDate(val) {
     return `${year}-${month}-${day}`;
   }
 
-  // Excel serial number
-  if (!isNaN(s) && s.length >= 5 && s.length <= 6) {
-    const date = new Date((Number(s) - 25569) * 86400 * 1000);
-    if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+  // Handle formats like "15-May-2025" or "15 May 2025" or "May 15, 2025"
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) {
+    return d.toISOString().split('T')[0];
   }
 
-  return null;
+  return 'INVALID';
 }
 
 function showToast(msg, type='') { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.className='toast'+(type?' '+type:''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
