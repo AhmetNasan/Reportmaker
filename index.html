@@ -147,7 +147,10 @@ body {
   gap: 8px;
   flex-shrink: 0;
   z-index: 100;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
 }
 .sidebar-logo {
   width: 32px; height: 32px;
@@ -176,7 +179,7 @@ body {
 .sidebar-spacer { flex: 1; }
 
 /* ─── MAIN LAYOUT ─── */
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; position: relative; }
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; margin-left: 52px; }
 
 /* ─── TOPBAR ─── */
 .topbar {
@@ -188,6 +191,10 @@ body {
   gap: 16px;
   flex-shrink: 0;
   z-index: 50;
+  position: fixed;
+  top: 0;
+  left: 52px;
+  right: 0;
 }
 .topbar-brand { display: flex; align-items: center; gap: 10px; }
 .topbar-brand-icon {
@@ -310,6 +317,7 @@ body {
 
 .page { display: none; min-height: 100vh; position: relative; z-index: 1; }
 .page.active { display: block; }
+#page-map.active { display: flex; flex-direction: column; height: calc(100vh - var(--header-h)); }
 .wrapper { max-width: 100%; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 
 /* ─── KPI ROW ─── */
@@ -322,7 +330,7 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 10px 12px;
   position: relative;
   overflow: hidden;
 }
@@ -348,10 +356,10 @@ body {
 [data-theme="dark"] .badge-up { background: rgba(34,197,94,0.15); color: #4ade80; }
 [data-theme="dark"] .badge-down { background: rgba(239,68,68,0.15); color: #f87171; }
 
-.kpi-value { font-size: 26px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; letter-spacing: -0.5px; }
-.kpi-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
-.kpi-sub { font-size: 10px; color: var(--text-muted); margin-top: 6px; }
-.kpi-sparkline { height: 36px; margin-top: 10px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; letter-spacing: -0.5px; }
+.kpi-label { font-size: 10px; color: var(--text-secondary); font-weight: 500; }
+.kpi-sub { font-size: 9px; color: var(--text-muted); margin-top: 4px; }
+.kpi-sparkline { height: 28px; margin-top: 6px; }
 
 /* ─── CARDS ─── */
 .chart-card, .card, .donut-card, .queue-card, .bars-card, .cadence-card, .stats-card, .upload-card {
@@ -567,6 +575,17 @@ body {
   outline: none; transition: all 0.2s;
 }
 .filter-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 2px var(--glow-blue); }
+.col-filter, .mfg-col-filter {
+  width: 100%;
+  margin-top: 5px;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  padding: 2px;
+  outline: none;
+}
 
 .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); }
 .main-table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -1058,6 +1077,32 @@ body {
 .notif-meta { font-size: 10px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 8px; }
 .notif-footer { padding: 12px 20px; border-top: 1px solid var(--border); background: var(--bg-card2); display: flex; gap: 10px; }
 
+/* ─── CONTEXT MENU ─── */
+.context-menu {
+  position: fixed;
+  z-index: 3000;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+  padding: 6px;
+  display: none;
+}
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.context-menu-item:hover { background: var(--surface2); color: var(--accent); }
+.context-menu-item i { width: 16px; font-size: 14px; text-align: center; }
+
 .pulse-marker {
   width: 24px;
   height: 24px;
@@ -1088,7 +1133,9 @@ body {
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .two-col { grid-template-columns: 1fr !important; }
   .topbar-search, .topbar-alerts { display: none; }
-  .sidebar { display: none; }
+  .sidebar { display: none !important; }
+  .main { margin-left: 0; }
+  .topbar { left: 0; padding: 0 12px; gap: 8px; }
   .hamburger { display: block; }
 }
 
@@ -1131,13 +1178,13 @@ body {
     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
   </button>
   <button class="sidebar-icon" onclick="showPage('manufacturing')" title="Manufacturing" id="nav-icon-manufacturing">
-    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 20V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v16"/><path d="M7 10h10"/><path d="M7 14h10"/><path d="M7 18h10"/></svg>
   </button>
   <button class="sidebar-icon" onclick="showPage('map')" title="GIS Mapping" id="nav-icon-map">
-    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
   </button>
   <button class="sidebar-icon" onclick="showPage('filemanager')" title="File Manager" id="nav-icon-filemanager">
-    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
   </button>
   <div class="sidebar-spacer"></div>
   <button class="sidebar-icon" onclick="showPage('settings')" title="Settings" id="nav-icon-settings" style="display: none;">
@@ -1156,23 +1203,21 @@ body {
         <h1>QBC Platform</h1>
         <p>Qatar Building Company</p>
       </div>
-      <div class="live-badge" id="conn-status"><div class="live-dot" id="conn-dot"></div> <span id="conn-text">Live sync</span></div>
     </div>
     <div class="topbar-spacer"></div>
     <div class="topbar-search">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="global-search-input" placeholder="Search records, locations..." onkeydown="if(event.key==='Enter')handleGlobalSearch()">
     </div>
-    <div class="topbar-alerts" onclick="toggleNotifPanel()">
+    <div class="topbar-alerts" onclick="toggleNotifPanel()" title="Notifications">
       <div class="alert-dot" id="notif-dot" style="display: none;"></div>
-      Alerts
-      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     </div>
     <div class="topbar-user" id="nav-user-btn" onclick="toggleUserDropdown()">
       <div class="user-avatar" id="nav-user-initial">U</div>
       <div class="user-info">
         <div class="name" id="nav-user-name">Ops team</div>
-        <div class="time" id="dash-last-refresh">Updated just now</div>
+        <div class="live-badge" id="conn-status" style="margin-top: 2px;"><div class="live-dot" id="conn-dot"></div> <span id="conn-text">Live sync</span></div>
       </div>
       <div class="user-dropdown" id="user-dropdown" role="menu">
         <button class="dropdown-item" onclick="showProfile()" role="menuitem"><i class="fas fa-user-circle"></i> Profile</button>
@@ -1184,7 +1229,7 @@ body {
     </div>
   </header>
 
-  <main class="content">
+  <main class="content" style="margin-top: 52px;">
 <div id="notif-panel" class="notif-panel">
   <div class="notif-header">
     <div class="notif-title">Notifications</div>
@@ -1207,6 +1252,11 @@ body {
     <button class="btn btn-ghost btn-sm flex-1" onclick="markAllNotifsRead()">Mark all as read</button>
     <button class="btn btn-ghost btn-sm flex-1" onclick="clearAllNotifs()">Clear all</button>
   </div>
+</div>
+
+<!-- Context Menu -->
+<div id="context-menu" class="context-menu glass-panel">
+  <div id="context-menu-items"></div>
 </div>
 
 <div id="mobile-menu" class="mobile-menu">
@@ -1275,59 +1325,35 @@ body {
       </div>
     </div>
 
-    <!-- FILTERS -->
-    <div class="card" style="padding: 12px 16px;">
-      <div class="filters" style="margin-bottom: 0;">
-        <div class="form-group" style="width:160px;">
-          <label style="font-size:9px;">Date Range</label>
-          <select id="dash-filter-date" class="filter-input" onchange="updateDashboard()"><option value="all">All Time</option><option value="this-month">This Month</option><option value="last-month">Last Month</option><option value="this-year">This Year</option></select>
-        </div>
-        <div class="form-group" style="width:130px;">
-          <label style="font-size:9px;">Status</label>
-          <select id="dash-filter-status" class="filter-input" onchange="updateDashboard()"><option value="">All Status</option><option>COMP</option><option>INPRG</option><option>DISPATCH</option></select>
-        </div>
-        <div class="form-group" style="width:130px;">
-          <label style="font-size:9px;">Priority</label>
-          <select id="dash-filter-priority" class="filter-input" onchange="updateDashboard()"><option value="">All Priorities</option><option>High</option><option>Normal</option><option>Low</option></select>
-        </div>
-        <div class="form-group" style="width:140px;">
-          <label style="font-size:9px;">Team</label>
-          <select id="dash-filter-team" class="filter-input" onchange="updateDashboard()"><option value="">All Teams</option></select>
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label style="font-size:9px;">Location</label>
-          <input type="text" id="dash-filter-location" class="filter-input" placeholder="Search area..." oninput="updateDashboard()" style="width: 100%;">
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="resetDashFilters()" style="margin-top: 15px;"><i class="fas fa-undo"></i></button>
-      </div>
-    </div>
 
     <!-- MIDDLE ROW -->
     <div class="two-col" style="grid-template-columns: 1fr 340px;">
-      <!-- Main Analytics -->
-      <div class="chart-card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Work Order Flow</div>
-            <div class="card-subtitle">Volume trend by month</div>
-          </div>
-          <div class="chart-controls">
-            <button class="btn-period active" onclick="setPeriod('6m',this)">6M</button>
-            <button class="btn-period" onclick="setPeriod('12m',this)">12M</button>
-          </div>
+      <!-- Monthly Summary Table -->
+      <div class="card" style="padding: 24px;">
+        <div class="card-header" style="margin-bottom: 20px;">
+          <div class="card-title">Monthly Summary Table</div>
         </div>
-        <div class="chart-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--accent-blue);"></div>On-Time</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--accent-green);"></div>Completed</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--accent-amber);"></div>Pending</div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="mainTrendChart"></canvas>
-        </div>
-        <div class="chart-footer">
-          <div class="chart-footer-item"><div class="footer-dot" style="background:var(--accent-green);"></div><span style="color:var(--text-secondary)">Completed</span>&nbsp;<strong id="footer-completed">0</strong></div>
-          <div class="chart-footer-item"><div class="footer-dot" style="background:var(--accent-blue);"></div><span style="color:var(--text-secondary)">Pending</span>&nbsp;<strong id="footer-pending">0</strong></div>
-          <div class="chart-footer-item"><div class="footer-dot" style="background:var(--accent-amber);"></div><span style="color:var(--text-secondary)">Breached</span>&nbsp;<strong id="footer-breached">0</strong></div>
+        <div class="table-container" style="max-height: none; overflow: visible;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border); text-align: left; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;">
+                <th style="padding: 12px 8px;">Month</th>
+                <th style="padding: 12px 8px;">Total</th>
+                <th style="padding: 12px 8px;"><span style="color: var(--accent-green);">●</span> On-Time</th>
+                <th style="padding: 12px 8px;"><span style="color: var(--accent-amber);">●</span> Comp(B)</th>
+                <th style="padding: 12px 8px;"><span style="color: #ef4444;">●</span> NotComp(B)</th>
+                <th style="padding: 12px 8px;"><span style="color: var(--accent-blue);">●</span> Pending</th>
+              </tr>
+            </thead>
+            <tbody id="monthly-summary-body">
+              <!-- Dynamically filled -->
+            </tbody>
+            <tfoot>
+              <tr id="monthly-summary-footer" style="background: var(--surface2); font-weight: 700; border-radius: 8px;">
+                <!-- Dynamically filled -->
+              </tr>
+            </tfoot>
+          </table>
         </div>
       </div>
 
@@ -1369,18 +1395,15 @@ body {
     </div>
 
     <!-- BOTTOM ROW -->
-    <div class="two-col" style="grid-template-columns: 1fr 1fr 340px;">
-      <div class="bars-card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Top Locations</div>
-            <div class="card-subtitle">Volume by area</div>
-          </div>
-        </div>
-        <div class="bar-items" id="dash-area-stats">
-          <!-- Dynamically filled -->
-        </div>
+    <div class="card" style="padding: 16px; min-height: 400px; display: flex; flex-direction: column;">
+      <div class="card-header">
+        <div class="card-title">GIS Overview</div>
+        <div class="card-subtitle">Project coverage and work order locations</div>
       </div>
+      <div id="dash-map" style="flex: 1; border-radius: 12px; margin-top: 12px; min-height: 350px; z-index: 1;"></div>
+    </div>
+
+    <div class="two-col" style="grid-template-columns: 1fr 1fr 340px; display: none;">
 
       <div class="cadence-card">
         <div class="card-header">
@@ -1516,44 +1539,35 @@ body {
     </div>
 
     <div class="filters card" style="padding: 12px 16px;">
-      <input type="text" class="filter-input" placeholder="🔍 Search WO / Description…" id="searchInput" oninput="applyFilters()" style="min-width:220px; flex: 1;">
-      <select class="filter-input" id="filterStatus" onchange="applyFilters()">
-        <option value="">All Statuses</option>
-        <option value="NOT_COMP">All Except COMP</option>
-        <option>COMP</option><option>INPRG</option><option>DISPATCH</option>
-        <option>WPERM</option><option>RTNENG</option><option>APPR</option>
-      </select>
-      <select class="filter-input" id="filterEng" onchange="applyFilters()">
-        <option value="">All Engineers</option>
-      </select>
-      <button class="btn btn-ghost btn-sm" onclick="clearFilters()">✕ Clear</button>
+      <input type="text" class="filter-input" placeholder="🔍 Global search (WO, Location, Description...)" id="searchInput" oninput="applyFilters()" style="flex: 1;">
+      <button class="btn btn-ghost btn-sm" onclick="clearFilters()">✕ Clear All Filters</button>
     </div>
 
     <div class="table-wrap">
       <table class="main-table" id="woTable">
         <thead>
           <tr>
-            <th>Work Order #</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Latitude</th>
-            <th>Longitude</th>
-            <th>Reported By</th>
-            <th>Reported Date</th>
-            <th>PWA Engineer</th>
-            <th>Location</th>
-            <th>Target Start Date</th>
-            <th>Month</th>
-            <th>Target Finish Date</th>
-            <th>Status Update Date</th>
-            <th>Completion Status</th>
-            <th>QBC Comments</th>
-            <th>RO</th>
-            <th>TDP</th>
-            <th>Application Date</th>
-            <th>TDP Status</th>
-            <th>Expiry Date</th>
-            <th>Media Announcement</th>
+            <th>Work Order #<br><select class="col-filter" data-col="WorkOrder" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Description<br><select class="col-filter" data-col="Description" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Status<br><select class="col-filter" data-col="Status" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Latitude<br><select class="col-filter" data-col="Lat" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Longitude<br><select class="col-filter" data-col="Lng" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Reported By<br><select class="col-filter" data-col="ReportedBy" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Reported Date<br><select class="col-filter" data-col="ReportedDate" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>PWA Engineer<br><select class="col-filter" data-col="PWA_ENG" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Location<br><select class="col-filter" data-col="Location" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Target Start Date<br><select class="col-filter" data-col="TargetStart" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Month<br><select class="col-filter" data-col="Month" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Target Finish Date<br><select class="col-filter" data-col="TargetFinish" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Status Update Date<br><select class="col-filter" data-col="StatusUpdateDate" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Completion Status<br><select class="col-filter" data-col="CompletionStatus" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>QBC Comments<br><select class="col-filter" data-col="QBCComments" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>RO<br><select class="col-filter" data-col="RO" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>TDP<br><select class="col-filter" data-col="TDP" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Application Date<br><select class="col-filter" data-col="ApplicationDate" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>TDP Status<br><select class="col-filter" data-col="TDPStatus" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Expiry Date<br><select class="col-filter" data-col="ExpiryDate" onchange="applyFilters()"><option value="">All</option></select></th>
+            <th>Media Announcement<br><select class="col-filter" data-col="MediaAnnouncement" onchange="applyFilters()"><option value="">All</option></select></th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -1836,20 +1850,8 @@ body {
     </div>
 
     <div class="filters card" style="padding: 12px 16px;">
-      <input type="text" class="filter-input" placeholder="🔍 Search WO / Description…" id="mfgSearchInput" oninput="applyManufacturingFilters()" style="min-width:220px; flex: 1;">
-      <select class="filter-input" id="mfgFilterStatus" onchange="applyManufacturingFilters()">
-        <option value="">All Statuses</option>
-        <option>COMP</option><option>INPRG</option><option>DISPATCH</option>
-        <option>WPERM</option><option>RTNENG</option><option>APPR</option>
-      </select>
-      <select class="filter-input" id="mfgFilterEng" onchange="applyManufacturingFilters()">
-        <option value="">All Engineers</option>
-      </select>
-      <select class="filter-input" id="mfgFilterFab" onchange="applyManufacturingFilters()">
-        <option value="">All Fabrication Status</option>
-        <option>Done</option><option>Pending</option><option>Ongoing</option>
-      </select>
-      <button class="btn btn-ghost btn-sm" onclick="clearManufacturingFilters()">✕ Clear</button>
+      <input type="text" class="filter-input" placeholder="🔍 Global search (WO, Location, Description...)" id="mfgSearchInput" oninput="applyManufacturingFilters()" style="flex: 1;">
+      <button class="btn btn-ghost btn-sm" onclick="clearManufacturingFilters()">✕ Clear All Filters</button>
     </div>
 
     <div class="table-wrap">
@@ -1857,15 +1859,15 @@ body {
         <thead id="mfgHead">
           <tr>
             <th rowspan="3">#</th>
-            <th rowspan="3">Work Order</th>
-            <th rowspan="3">Description</th>
-            <th rowspan="3">Status</th>
-            <th rowspan="3">PWA Engineer</th>
-            <th rowspan="3">Location</th>
-            <th rowspan="3">Target Start</th>
-            <th rowspan="3">Target Finish</th>
-            <th rowspan="3" style="background: #1b5e20; color: white;">Road Catg.</th>
-            <th rowspan="3" style="background: #1b5e20; color: white;">Sign Material</th>
+            <th rowspan="3">Work Order<br><select class="mfg-col-filter" data-col="WorkOrder" onchange="applyManufacturingFilters()"><option value="">All</option></select></th>
+            <th rowspan="3">Description<br><select class="mfg-col-filter" data-col="Description" onchange="applyManufacturingFilters()"><option value="">All</option></select></th>
+            <th rowspan="3">Status<br><select class="mfg-col-filter" data-col="Status" onchange="applyManufacturingFilters()"><option value="">All</option></select></th>
+            <th rowspan="3">PWA Engineer<br><select class="mfg-col-filter" data-col="PWA_ENG" onchange="applyManufacturingFilters()"><option value="">All</option></select></th>
+            <th rowspan="3">Location<br><select class="mfg-col-filter" data-col="Location" onchange="applyManufacturingFilters()"><option value="">All</option></select></th>
+            <th rowspan="3">Target Start<br><select class="mfg-col-filter" data-col="TargetStart" onchange="applyManufacturingFilters()"><option value="">All</option></select></th>
+            <th rowspan="3">Target Finish<br><select class="mfg-col-filter" data-col="TargetFinish" onchange="applyManufacturingFilters()"><option value="">All</option></select></th>
+            <th rowspan="3" style="background: #1b5e20; color: white;">Road Catg.<br><select class="mfg-col-filter" data-col="RoadCatg" onchange="applyManufacturingFilters()" style="background: #1b5e20; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
+            <th rowspan="3" style="background: #1b5e20; color: white;">Sign Material<br><select class="mfg-col-filter" data-col="SignMaterial" onchange="applyManufacturingFilters()" style="background: #1b5e20; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
             <th colspan="13" style="background: #4a148c; color: white; text-align: center;">Fabrication</th>
             <th rowspan="3">Photo</th>
             <th rowspan="3">Actions</th>
@@ -1879,16 +1881,16 @@ body {
             <th rowspan="2" style="background: #9c27b0; color: white; text-align: center;">Details</th>
           </tr>
           <tr>
-            <th style="background: #ab47bc; color: white;">Sign Type</th>
-            <th style="background: #ab47bc; color: white;">Sign REF.</th>
-            <th style="background: #ab47bc; color: white;">Sign Shape</th>
-            <th style="background: #ab47bc; color: white;">SIZE (mm)</th>
-            <th style="background: #ab47bc; color: white;">QTY.</th>
-            <th style="background: #ba68c8; color: white;">TYPE</th>
-            <th style="background: #ba68c8; color: white;">HEIGHT (mm)</th>
-            <th style="background: #ba68c8; color: white;">QTY.</th>
-            <th style="background: #ce93d8; color: white;">Size L × W × H (mm)</th>
-            <th style="background: #ce93d8; color: white;">QTY.</th>
+            <th style="background: #ab47bc; color: white;">Sign Type<br><select class="mfg-col-filter" data-col="SignType" onchange="applyManufacturingFilters()" style="background: #ab47bc; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
+            <th style="background: #ab47bc; color: white;">Sign REF.<br><select class="mfg-col-filter" data-col="SignRef" onchange="applyManufacturingFilters()" style="background: #ab47bc; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
+            <th style="background: #ab47bc; color: white;">Sign Shape<br><select class="mfg-col-filter" data-col="SignShape" onchange="applyManufacturingFilters()" style="background: #ab47bc; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
+            <th style="background: #ab47bc; color: white;">SIZE (mm)<br><select class="mfg-col-filter" data-col="SignSize" onchange="applyManufacturingFilters()" style="background: #ab47bc; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
+            <th style="background: #ab47bc; color: white;">QTY.<br><select class="mfg-col-filter" data-col="SignQty" onchange="applyManufacturingFilters()" style="background: #ab47bc; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
+            <th style="background: #ba68c8; color: white;">TYPE<br><select class="mfg-col-filter" data-col="PostType" onchange="applyManufacturingFilters()" style="background: #ba68c8; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
+            <th style="background: #ba68c8; color: white;">HEIGHT (mm)<br><select class="mfg-col-filter" data-col="PostHeight" onchange="applyManufacturingFilters()" style="background: #ba68c8; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
+            <th style="background: #ba68c8; color: white;">QTY.<br><select class="mfg-col-filter" data-col="PostQty" onchange="applyManufacturingFilters()" style="background: #ba68c8; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
+            <th style="background: #ce93d8; color: white;">Size L × W × H (mm)<br><select class="mfg-col-filter" data-col="FoundSize" onchange="applyManufacturingFilters()" style="background: #ce93d8; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
+            <th style="background: #ce93d8; color: white;">QTY.<br><select class="mfg-col-filter" data-col="FoundQty" onchange="applyManufacturingFilters()" style="background: #ce93d8; border-color: rgba(255,255,255,0.3); color: white;"><option value="">All</option></select></th>
           </tr>
         </thead>
         <tbody id="mfgBody">
@@ -2372,7 +2374,7 @@ window.addEventListener('load', async () => {
 
 async function onAuthenticated() {
   document.getElementById('auth-container').style.display = 'none';
-  document.body.style.display = 'flex'; // Ensure body is flex for sidebar layout
+  document.body.style.display = 'block'; // Fixed layout, don't force flex on body
   
   // Check for Admin Rights
   if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
@@ -2454,7 +2456,7 @@ async function onAuthenticated() {
   }
 
   const sidebar = document.getElementById('sidebar');
-  if (sidebar) sidebar.style.display = 'flex';
+  if (sidebar && window.innerWidth > 900) sidebar.style.display = 'flex';
   const mainLayout = document.getElementById('main-layout');
   if (mainLayout) mainLayout.style.display = 'flex';
   
@@ -2868,7 +2870,7 @@ function applyLogo() {
     if (previewPlaceholder) previewPlaceholder.style.display = 'none';
     if (removeBtn) removeBtn.style.display = 'block';
   } else {
-    if (brandContainer) brandContainer.innerHTML = `QBC <span>Platform</span>`;
+    if (brandContainer) brandContainer.innerHTML = `<h1>QBC Platform</h1><p>Qatar Building Company</p>`;
     if (previewImg) { previewImg.src = ''; previewImg.style.display = 'none'; }
     if (previewPlaceholder) previewPlaceholder.style.display = 'block';
     if (removeBtn) removeBtn.style.display = 'none';
@@ -2973,35 +2975,7 @@ function getStatusCat(r) {
 let dashFilteredRecords = [];
 
 function updateDashboard() {
-  const dateRange = document.getElementById('dash-filter-date').value;
-  const status = document.getElementById('dash-filter-status').value;
-  const priority = document.getElementById('dash-filter-priority').value;
-  const team = document.getElementById('dash-filter-team').value;
-  const locationQ = document.getElementById('dash-filter-location').value.toLowerCase();
-  
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
-
-  dashFilteredRecords = allData.filter(r => {
-    // Basic filters
-    if (status && r.Status !== status) return false;
-    if (priority && r.Priority !== priority) return false;
-    if (team && r.PWA_ENG !== team) return false;
-    if (locationQ && !(r.Location||'').toLowerCase().includes(locationQ)) return false;
-    
-    // Date Range
-    if (dateRange !== 'all') {
-      const d = r.TargetStart ? new Date(r.TargetStart) : null;
-      if (!d || isNaN(d.getTime())) return false;
-      if (dateRange === 'this-month' && d < startOfMonth) return false;
-      if (dateRange === 'last-month' && (d < startOfLastMonth || d > endOfLastMonth)) return false;
-      if (dateRange === 'this-year' && d < startOfYear) return false;
-    }
-    return true;
-  });
+  dashFilteredRecords = [...allData];
 
   let stats = { total: dashFilteredRecords.length, green: 0, amber: 0, red: 0, blue: 0 };
   let monthsObj = {};
@@ -3047,11 +3021,89 @@ function updateDashboard() {
   let mArr = Object.values(monthsObj).sort((a, b) => a.sortKey - b.sortKey);
   
   // Render Dashboard
-  updateMainCharts(mArr, stats, areaStats);
+  renderMonthlySummaryTable(mArr);
+  updateDashboardMap();
   renderOperationalItems();
   renderEngineerStats();
   
   document.getElementById('dash-last-refresh').textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+let dashMap = null;
+function updateDashboardMap() {
+  if (!dashMap) {
+    dashMap = L.map('dash-map', { 
+      dragging: false, 
+      scrollWheelZoom: false, 
+      doubleClickZoom: false, 
+      zoomControl: false,
+      touchZoom: false
+    }).setView([25.2854, 51.5310], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dashMap);
+    
+    // Boundary
+    if (window.projectBoundary) {
+      L.geoJSON(window.projectBoundary, { style: { color: '#2563eb', weight: 2, fillOpacity: 0.1 } }).addTo(dashMap);
+    }
+  }
+
+  // Clear previous markers
+  dashMap.eachLayer(layer => { if (layer instanceof L.CircleMarker) dashMap.removeLayer(layer); });
+
+  const colors = { green: '#16a34a', amber: '#d97706', red: '#ef4444', blue: '#2563eb' };
+  allData.forEach(r => {
+    if (r.Lat && r.Lng) {
+      const cat = getStatusCat(r);
+      L.circleMarker([r.Lat, r.Lng], {
+        radius: 4,
+        fillColor: colors[cat],
+        color: '#fff',
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).addTo(dashMap);
+    }
+  });
+  
+  // Adjust view to fit markers if any
+  const markers = [];
+  allData.forEach(r => { if(r.Lat && r.Lng) markers.push([r.Lat, r.Lng]); });
+  if (markers.length > 0) dashMap.fitBounds(markers, { padding: [20, 20] });
+}
+
+function renderMonthlySummaryTable(mArr) {
+  const tbody = document.getElementById('monthly-summary-body');
+  const tfoot = document.getElementById('monthly-summary-footer');
+  
+  let totals = { total: 0, green: 0, amber: 0, red: 0, blue: 0 };
+  
+  tbody.innerHTML = mArr.map(m => {
+    totals.total += m.total;
+    totals.green += m.green;
+    totals.amber += m.amber;
+    totals.red += m.red;
+    totals.blue += m.blue;
+    
+    return `
+      <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
+        <td style="padding: 12px 8px; font-weight: 700;">${m.month}</td>
+        <td style="padding: 12px 8px; color: var(--accent-blue); font-weight: 500;">${m.total}</td>
+        <td style="padding: 12px 8px; color: var(--accent-green); font-weight: 500;">${m.green}</td>
+        <td style="padding: 12px 8px; color: var(--accent-amber); font-weight: 500;">${m.amber}</td>
+        <td style="padding: 12px 8px; color: #ef4444; font-weight: 500;">${m.red}</td>
+        <td style="padding: 12px 8px; color: var(--accent-blue); font-weight: 500;">${m.blue}</td>
+      </tr>
+    `;
+  }).join('');
+
+  tfoot.innerHTML = `
+    <td style="padding: 12px 8px;">TOTAL</td>
+    <td style="padding: 12px 8px;">${totals.total}</td>
+    <td style="padding: 12px 8px;">${totals.green}</td>
+    <td style="padding: 12px 8px;">${totals.amber}</td>
+    <td style="padding: 12px 8px;">${totals.red}</td>
+    <td style="padding: 12px 8px;">${totals.blue}</td>
+  `;
 }
 
 
@@ -3117,11 +3169,6 @@ function renderOperationalItems() {
 }
 
 function resetDashFilters() {
-  document.getElementById('dash-filter-date').value = 'all';
-  document.getElementById('dash-filter-status').value = '';
-  document.getElementById('dash-filter-priority').value = '';
-  document.getElementById('dash-filter-team').value = '';
-  document.getElementById('dash-filter-location').value = '';
   updateDashboard();
 }
 
@@ -3258,20 +3305,41 @@ function buildEngineerFilter() {
 
 function applyManufacturingFilters() {
   const q = document.getElementById('mfgSearchInput').value.toLowerCase();
-  const st = document.getElementById('mfgFilterStatus').value;
-  const eng = document.getElementById('mfgFilterEng').value;
-  const fab = document.getElementById('mfgFilterFab').value;
+  const colFilters = document.querySelectorAll('.mfg-col-filter');
+
   filteredFabData = allData.filter(r => {
-      const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Location||'').toLowerCase().includes(q);
-    const matchSt = !st || r.Status === st;
-    const matchEng = !eng || r.PWA_ENG === eng;
-    const matchFab = !fab || (r.FabStatus||'').toLowerCase() === fab.toLowerCase();
-    return matchQ && matchSt && matchEng && matchFab;
+    // Global Keyword Search
+    const matchGlobal = !q || Object.values(r).some(val => String(val).toLowerCase().includes(q));
+
+    // Column-level Filters
+    let matchCols = true;
+    colFilters.forEach(select => {
+      const col = select.getAttribute('data-col');
+      const val = select.value;
+      if (val && String(r[col] || '') !== val) {
+        matchCols = false;
+      }
+    });
+
+    return matchGlobal && matchCols;
   });
+
   fabCurrentPage = 1;
   renderManufacturingTable();
+  updateMfgColFilterOptions();
   const label = document.getElementById('mfgCountLabel');
   if (label) label.textContent = `(${filteredFabData.length})`;
+}
+
+function updateMfgColFilterOptions() {
+  const colFilters = document.querySelectorAll('.mfg-col-filter');
+  colFilters.forEach(select => {
+    const col = select.getAttribute('data-col');
+    const currentVal = select.value;
+    const uniqueValues = [...new Set(allData.map(r => String(r[col] || '')))].sort();
+    const optionsHtml = ['<option value="">All</option>', ...uniqueValues.map(v => `<option value="${v.replace(/"/g, '&quot;')}" ${v === currentVal ? 'selected' : ''}>${v || '(Empty)'}</option>`)].join('');
+    select.innerHTML = optionsHtml;
+  });
 }
 
 function renderManufacturingTable() {
@@ -3309,7 +3377,7 @@ function renderManufacturingTable() {
       <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
     ` : '';
 
-    return `<tr>
+    return `<tr oncontextmenu="handleContextMenu(event, '${r.WorkOrder}', 'manufacturing')" ontouchstart="handleTouchStart(event, '${r.WorkOrder}', 'manufacturing')" ontouchend="handleTouchEnd()">
       <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
       <td><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
@@ -3391,9 +3459,7 @@ async function updateFabStatus(woId, status) {
 
 function clearManufacturingFilters() {
   document.getElementById('mfgSearchInput').value = ''; 
-  document.getElementById('mfgFilterStatus').value = '';
-  document.getElementById('mfgFilterEng').value = ''; 
-  document.getElementById('mfgFilterFab').value = '';
+  document.querySelectorAll('.mfg-col-filter').forEach(s => s.value = '');
   applyManufacturingFilters();
 }
 
@@ -3409,19 +3475,63 @@ function handleGlobalSearch() {
 
 function applyFilters() {
   const q = document.getElementById('searchInput').value.toLowerCase();
-  const st = document.getElementById('filterStatus').value;
-  const eng = document.getElementById('filterEng').value;
+  const colFilters = document.querySelectorAll('.col-filter');
+  
   filteredData = allData.filter(r => {
-    const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Location||'').toLowerCase().includes(q);
-    let matchSt = !st || r.Status === st;
-    if (st === 'NOT_COMP') matchSt = r.Status !== 'COMP';
-    const matchEng = !eng || r.PWA_ENG === eng;
-    return matchQ && matchSt && matchEng;
+    // Global Keyword Search
+    const matchGlobal = !q || Object.values(r).some(val => String(val).toLowerCase().includes(q));
+    
+    // Column-level Filters
+    let matchCols = true;
+    colFilters.forEach(select => {
+      const col = select.getAttribute('data-col');
+      const val = select.value;
+      if (val) {
+        if (col === 'Month') {
+          const d = new Date(r.TargetStart);
+          const m = isNaN(d.getTime()) ? '—' : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][d.getMonth()];
+          if (m !== val) matchCols = false;
+        } else if (col === 'CompletionStatus') {
+          if (getCompletionStatusLabel(r) !== val) matchCols = false;
+        } else if (String(r[col] || '') !== val) {
+          matchCols = false;
+        }
+      }
+    });
+    
+    return matchGlobal && matchCols;
   });
+  
   currentPage = 1;
   renderTable();
+  updateColFilterOptions();
   const label = document.getElementById('woCountLabel');
   if (label) label.textContent = `(${filteredData.length} of ${allData.length})`;
+}
+
+function updateColFilterOptions() {
+  const colFilters = document.querySelectorAll('.col-filter');
+  colFilters.forEach(select => {
+    const col = select.getAttribute('data-col');
+    const currentVal = select.value;
+    
+    let uniqueValues = [];
+    if (col === 'Month') {
+      uniqueValues = [...new Set(allData.map(r => {
+        const d = new Date(r.TargetStart);
+        return isNaN(d.getTime()) ? '—' : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][d.getMonth()];
+      }))];
+    } else if (col === 'CompletionStatus') {
+      uniqueValues = [...new Set(allData.map(r => getCompletionStatusLabel(r)))];
+    } else {
+      uniqueValues = [...new Set(allData.map(r => String(r[col] || '')))];
+    }
+    
+    uniqueValues.sort();
+    
+    const optionsHtml = ['<option value="">All</option>', ...uniqueValues.map(v => `<option value="${v.replace(/"/g, '&quot;')}" ${v === currentVal ? 'selected' : ''}>${v || '(Empty)'}</option>`)].join('');
+    select.innerHTML = optionsHtml;
+  });
 }
 
 function selectWorkOrderRow(woId, scrollIntoView = false) {
@@ -3971,7 +4081,7 @@ function renderTable() {
       `;
     }
 
-    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')" ondblclick="openDetail('${r.WorkOrder}')">
+    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')" ondblclick="openDetail('${r.WorkOrder}')" oncontextmenu="handleContextMenu(event, '${r.WorkOrder}', 'workorders')" ontouchstart="handleTouchStart(event, '${r.WorkOrder}', 'workorders')" ontouchend="handleTouchEnd()">
       <td><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td>${stBadge}</td>
@@ -4025,8 +4135,8 @@ function renderPagination() {
 function gotoPage(p) { currentPage = p; renderTable(); }
 
 function clearFilters() {
-  document.getElementById('searchInput').value = ''; document.getElementById('filterStatus').value = '';
-  document.getElementById('filterEng').value = '';
+  document.getElementById('searchInput').value = '';
+  document.querySelectorAll('.col-filter').forEach(s => s.value = '');
   applyFilters();
 }
 
@@ -4051,7 +4161,57 @@ window.addEventListener('click', (e) => {
     dropdown.classList.remove('show');
     btn.setAttribute('aria-expanded', 'false');
   }
+  
+  const ctx = document.getElementById('context-menu');
+  if (ctx && ctx.style.display === 'block') {
+    ctx.style.display = 'none';
+  }
 });
+
+let longPressTimer;
+function handleTouchStart(e, woId, type) {
+  longPressTimer = setTimeout(() => {
+    handleContextMenu(e.touches[0], woId, type);
+  }, 800);
+}
+function handleTouchEnd() {
+  clearTimeout(longPressTimer);
+}
+
+function handleContextMenu(e, woId, type) {
+  e.preventDefault();
+  const ctx = document.getElementById('context-menu');
+  const items = document.getElementById('context-menu-items');
+  const r = allData.find(x => x.WorkOrder === woId);
+  if (!r) return;
+
+  let html = '';
+  if (type === 'workorders') {
+    html += `<div class="context-menu-item" onclick="openDetail('${woId}')"><i class="fas fa-eye"></i> View Details</div>`;
+    html += `<div class="context-menu-item" onclick="openEditModal('${woId}')"><i class="fas fa-edit"></i> Edit Work Order</div>`;
+    if (r.Lat && r.Lng) html += `<div class="context-menu-item" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${woId}')"><i class="fas fa-map-marker-alt"></i> Show on Map</div>`;
+    html += `<div class="context-menu-item" onclick="sendToFabrication('${woId}')"><i class="fas fa-paper-plane"></i> Send to Fabrication</div>`;
+    if (isAdmin) html += `<div class="context-menu-item" style="color:#ef4444" onclick="deleteWorkOrder('${woId}')"><i class="fas fa-trash"></i> Delete</div>`;
+  } else {
+    html += `<div class="context-menu-item" onclick="showManufacturingFor('${woId}')"><i class="fas fa-eye"></i> View Fabrication</div>`;
+    if (isAdmin) html += `<div class="context-menu-item" onclick="openEditModal('${woId}', 'manufacturing')"><i class="fas fa-edit"></i> Edit Fabrication</div>`;
+    html += `<div class="context-menu-item" onclick="uploadPhotoFor('${woId}')"><i class="fas fa-camera"></i> Attach Photo</div>`;
+  }
+
+  items.innerHTML = html;
+  ctx.style.display = 'block';
+  
+  // Position menu
+  let x = e.clientX || (e.touches && e.touches[0].clientX);
+  let y = e.clientY || (e.touches && e.touches[0].clientY);
+  
+  // Keep within bounds
+  if (x + 200 > window.innerWidth) x -= 200;
+  if (y + 200 > window.innerHeight) y -= 200;
+  
+  ctx.style.left = x + 'px';
+  ctx.style.top = y + 'px';
+}
 
 // MODIFIED AUTH HANDLER
 async function handleAuth() {
