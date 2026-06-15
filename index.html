@@ -318,20 +318,49 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(0, 200, 255, 0.1);
 }
-.th-filter-select {
+.th-filter-dropdown {
+  position: relative;
+  width: 100%;
+}
+.th-filter-btn {
   width: 100%;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 4px;
+  padding: 4px 8px;
   font-size: 10px;
   color: var(--text);
-  outline: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.th-filter-select option {
+.th-filter-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
   background: var(--surface);
-  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  z-index: 100;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+.th-filter-menu.open { display: block; }
+.th-filter-item {
+  padding: 4px 8px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.th-filter-item:hover { background: var(--surface2); }
+.th-filter-item input { pointer-events: none; }
 
 .mfg-hide-cols { display: none; }
 .mfg-show-details .mfg-hide-cols { display: table-cell; }
@@ -1677,15 +1706,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 </div>
 
 <div class="detail-modal" id="detailModal">
-  <div class="detail-header">
+    <div class="detail-header" oncontextmenu="showContextMenu(event, 'detail-modal')">
     <button class="btn btn-ghost btn-sm" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Back</button>
     <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
       <h2 id="detail-wo-number" style="font-size: 18px; font-weight: 800; color: var(--accent);">WO #000000</h2>
       <div id="detail-status-badge"></div>
     </div>
-    <div style="display: flex; gap: 8px;">
+      <div style="display: flex; gap: 8px; align-items: center;">
       <button class="btn btn-ghost btn-sm" onclick="navigateDetail('prev')" title="Previous Work Order"><i class="fas fa-chevron-up"></i></button>
       <button class="btn btn-ghost btn-sm" onclick="navigateDetail('next')" title="Next Work Order"><i class="fas fa-chevron-down"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="showContextMenu(event, 'detail-modal')"><i class="fas fa-ellipsis-v"></i></button>
       <button class="btn btn-primary btn-sm" onclick="closeDetail()"><i class="fas fa-times"></i> Close</button>
     </div>
   </div>
@@ -1728,16 +1758,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     </div>
 
     <!-- Toolbar -->
-    <div class="detail-toolbar">
-      <button class="btn btn-primary btn-sm" id="detail-edit-btn" onclick="toggleDetailEdit()"><i class="fas fa-edit"></i> Edit Record</button>
-      <button class="btn btn-green btn-sm" id="detail-save-btn" onclick="saveDetailChanges()" style="display:none;"><i class="fas fa-save"></i> Save Changes</button>
-      <button class="btn btn-ghost btn-sm" id="detail-cancel-btn" onclick="cancelDetailEdit()" style="display:none;"><i class="fas fa-times-circle"></i> Cancel</button>
-      <div style="flex:1;"></div>
-      <button class="btn btn-ghost btn-sm" onclick="printDetail()"><i class="fas fa-print"></i> Print</button>
-      <button class="btn btn-ghost btn-sm" onclick="exportPDFFromDetail()"><i class="fas fa-file-pdf"></i> Export PDF</button>
-      <button class="btn btn-ghost btn-sm" onclick="sendToFabFromDetail()"><i class="fas fa-paper-plane"></i> Send to Fabrication</button>
-      <button class="btn btn-ghost btn-sm" onclick="duplicateWO()"><i class="fas fa-copy"></i> Duplicate</button>
-      <button class="btn btn-red btn-sm" onclick="closeWO()"><i class="fas fa-check-circle"></i> Close WO</button>
+    <div class="detail-toolbar" style="display:none;">
+      <!-- Hidden as per requirement to use context menu, but kept in DOM if needed for logic -->
     </div>
 
     <!-- Tab Panes -->
@@ -1933,7 +1955,7 @@ let notifications = [];
 let notifTab = 'all';
 
 let dashMap = null;
-let columnFilters = {};
+let columnFilters = {}; // Maps col to Set of selected values
 let columnSearches = {};
 let mfgShowDetails = false;
 let currentMfgTab = 'active';
@@ -2250,57 +2272,104 @@ function buildColumnFilters(tableId, data) {
   const table = document.getElementById(tableId);
   if (!table) return;
   const headers = table.querySelectorAll('thead th[data-col]');
+  
   headers.forEach(th => {
     const col = th.getAttribute('data-col');
     if (!col) return;
 
-    const existing = th.querySelector('.th-filter-wrap');
-    if (existing) existing.remove();
+    let wrap = th.querySelector('.th-filter-wrap');
+    let search, btn, menu;
 
-    const wrap = document.createElement('div');
-    wrap.className = 'th-filter-wrap';
-    wrap.onclick = (e) => e.stopPropagation();
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.className = 'th-filter-wrap';
+      wrap.onclick = (e) => e.stopPropagation();
 
-    const search = document.createElement('input');
-    search.type = 'text';
-    search.className = 'th-search-input';
-    search.placeholder = 'Search...';
-    search.value = columnSearches[col] || '';
+      search = document.createElement('input');
+      search.type = 'text';
+      search.className = 'th-search-input';
+      search.placeholder = 'Search...';
+      
+      const dropdown = document.createElement('div');
+      dropdown.className = 'th-filter-dropdown';
+      
+      btn = document.createElement('div');
+      btn.className = 'th-filter-btn';
+      btn.innerHTML = '<span>All</span> <i class="fas fa-chevron-down"></i>';
+      btn.onclick = () => {
+        const isOpen = menu.classList.contains('open');
+        document.querySelectorAll('.th-filter-menu').forEach(m => m.classList.remove('open'));
+        if (!isOpen) menu.classList.add('open');
+      };
+
+      menu = document.createElement('div');
+      menu.className = 'th-filter-menu';
+
+      dropdown.appendChild(btn);
+      dropdown.appendChild(menu);
+      wrap.appendChild(search);
+      wrap.appendChild(dropdown);
+      th.appendChild(wrap);
+    } else {
+      search = wrap.querySelector('.th-search-input');
+      btn = wrap.querySelector('.th-filter-btn');
+      menu = wrap.querySelector('.th-filter-menu');
+    }
+
+    // Update handlers to avoid re-creation
     search.oninput = (e) => {
       columnSearches[col] = e.target.value;
+      if (tableId === 'mfgTable') applyManufacturingFilters(false);
+      else applyFilters(false);
+    };
+
+    // Populate Menu
+    const uniqueValues = [...new Set(data.map(r => r[col] || ''))].sort();
+    const selected = columnFilters[col] || new Set();
+    
+    menu.innerHTML = '';
+    
+    // Select All / Clear option
+    const allItem = document.createElement('div');
+    allItem.className = 'th-filter-item';
+    allItem.innerHTML = `<input type="checkbox" ${selected.size === 0 ? 'checked' : ''}> <i>(All)</i>`;
+    allItem.onclick = () => {
+      columnFilters[col] = new Set();
       if (tableId === 'mfgTable') applyManufacturingFilters();
       else applyFilters();
     };
+    menu.appendChild(allItem);
 
-    const select = document.createElement('select');
-    select.className = 'th-filter-select';
-    const values = [...new Set(data.map(r => r[col] || ''))].sort();
-    
-    const optAll = document.createElement('option');
-    optAll.value = '';
-    optAll.textContent = 'All';
-    select.appendChild(optAll);
-
-    values.forEach(v => {
-      if (v === '') return;
-      const opt = document.createElement('option');
-      opt.value = v;
-      opt.textContent = v;
-      if (columnFilters[col] === v) opt.selected = true;
-      select.appendChild(opt);
+    uniqueValues.forEach(v => {
+      if (v === '' || v === null) return;
+      const item = document.createElement('div');
+      item.className = 'th-filter-item';
+      const isChecked = selected.has(String(v));
+      item.innerHTML = `<input type="checkbox" ${isChecked ? 'checked' : ''}> <span>${v}</span>`;
+      item.onclick = () => {
+        if (selected.has(String(v))) selected.delete(String(v));
+        else selected.add(String(v));
+        columnFilters[col] = selected;
+        if (tableId === 'mfgTable') applyManufacturingFilters();
+        else applyFilters();
+      };
+      menu.appendChild(item);
     });
 
-    select.onchange = (e) => {
-      columnFilters[col] = e.target.value;
-      if (tableId === 'mfgTable') applyManufacturingFilters();
-      else applyFilters();
-    };
-
-    wrap.appendChild(search);
-    wrap.appendChild(select);
-    th.appendChild(wrap);
+    // Update button label
+    const label = btn.querySelector('span');
+    if (selected.size === 0) label.textContent = 'All';
+    else if (selected.size === 1) label.textContent = Array.from(selected)[0];
+    else label.textContent = `${selected.size} selected`;
   });
 }
+
+// Global click to close filter menus
+window.addEventListener('click', (e) => {
+  if (!e.target.closest('.th-filter-dropdown')) {
+    document.querySelectorAll('.th-filter-menu').forEach(m => m.classList.remove('open'));
+  }
+});
 
 function showContextMenu(e, context, woId = null) {
   e.preventDefault();
@@ -2322,10 +2391,36 @@ function showContextMenu(e, context, woId = null) {
       { label: 'View Details', icon: 'fa-eye', action: () => openDetail(woId) },
       { label: 'Copy WO Number', icon: 'fa-copy', action: () => { navigator.clipboard.writeText(woId); showToast("Copied to clipboard"); } },
       { divider: true },
+      { label: 'Show on Map', icon: 'fa-map-marker-alt', action: () => { 
+        const r = allData.find(d => d.WorkOrder === woId);
+        if (r && r.Lat && r.Lng) showOnMap(r.Lat, r.Lng, woId);
+        else showToast("Coordinates missing", "error");
+      }},
+      { label: 'Fabrication PDF', icon: 'fa-file-pdf', action: () => openFabModal(woId) },
+      { label: 'Send to Fabrication', icon: 'fa-paper-plane', action: () => sendToFabrication(woId) },
+      { divider: true },
       { label: 'Print Record', icon: 'fa-print', action: () => { selectedWorkOrder = woId; printDetail(); } },
       { divider: true },
       { label: 'Delete Record', icon: 'fa-trash', action: () => deleteWO(woId), danger: true }
     ];
+  } else if (context === 'detail-modal') {
+    const isEditing = document.getElementById('detailModal').classList.contains('editing');
+    if (isEditing) {
+      items = [
+        { label: 'Save Changes', icon: 'fa-save', action: () => saveDetailChanges() },
+        { label: 'Cancel Edit', icon: 'fa-times-circle', action: () => cancelDetailEdit() }
+      ];
+    } else {
+      items = [
+        { label: 'Edit Record', icon: 'fa-edit', action: () => toggleDetailEdit() },
+        { label: 'Print Record', icon: 'fa-print', action: () => printDetail() },
+        { label: 'Export PDF', icon: 'fa-file-pdf', action: () => exportPDFFromDetail() },
+        { label: 'Send to Fabrication', icon: 'fa-paper-plane', action: () => sendToFabFromDetail() },
+        { label: 'Duplicate WO', icon: 'fa-copy', action: () => duplicateWO() },
+        { divider: true },
+        { label: 'Close WO', icon: 'fa-check-circle', action: () => closeWO() }
+      ];
+    }
   }
   
   items.forEach(item => {
@@ -2347,13 +2442,26 @@ function showContextMenu(e, context, woId = null) {
   
   menu.style.display = 'flex';
   
-  const menuWidth = 200;
-  const menuHeight = menu.offsetHeight || items.length * 40;
+  // Position it
+  const rect = menu.getBoundingClientRect();
+  const menuWidth = rect.width || 200;
+  const menuHeight = rect.height || items.length * 40;
+  
   let x = e.clientX;
   let y = e.clientY;
+
+  // If triggered by a left click on a button, align to button bottom-left
+  if (e.button === 0 && e.currentTarget && e.currentTarget.tagName === 'BUTTON') {
+    const btnRect = e.currentTarget.getBoundingClientRect();
+    x = btnRect.left;
+    y = btnRect.bottom + 5;
+  }
   
-  if (x + menuWidth > window.innerWidth) x -= menuWidth;
-  if (y + menuHeight > window.innerHeight) y -= menuHeight;
+  // Boundary checks
+  if (x + menuWidth > window.innerWidth) x = window.innerWidth - menuWidth - 10;
+  if (y + menuHeight > window.innerHeight) y = window.innerHeight - menuHeight - 10;
+  if (x < 0) x = 10;
+  if (y < 0) y = 10;
   
   menu.style.left = `${x}px`;
   menu.style.top = `${y}px`;
@@ -2363,6 +2471,30 @@ window.addEventListener('click', () => {
   const menu = document.getElementById('contextMenu');
   if (menu) menu.style.display = 'none';
 });
+
+// Mobile long-press support
+let touchTimer;
+window.addEventListener('touchstart', (e) => {
+  const row = e.target.closest('tr[data-wo]');
+  if (row) {
+    touchTimer = setTimeout(() => {
+      const woId = row.getAttribute('data-wo');
+      const table = row.closest('table');
+      const context = table && table.id === 'mfgTable' ? 'row-mfg' : 'row-wo';
+      const touch = e.touches[0];
+      showContextMenu({
+        preventDefault: () => {},
+        stopPropagation: () => {},
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      }, context, woId);
+    }, 700);
+  }
+}, {passive: true});
+
+window.addEventListener('touchend', () => {
+  clearTimeout(touchTimer);
+}, {passive: true});
 
 async function fetchData() {
   const connDot = document.getElementById('conn-dot');
@@ -2762,35 +2894,7 @@ function getStatusCat(r) {
 let dashFilteredRecords = [];
 
 function updateDashboard() {
-  const dateRange = document.getElementById('dash-filter-date').value;
-  const status = document.getElementById('dash-filter-status').value;
-  const priority = document.getElementById('dash-filter-priority').value;
-  const team = document.getElementById('dash-filter-team').value;
-  const locationQ = document.getElementById('dash-filter-location').value.toLowerCase();
-  
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
-
-  dashFilteredRecords = allData.filter(r => {
-    // Basic filters
-    if (status && r.Status !== status) return false;
-    if (priority && r.Priority !== priority) return false;
-    if (team && r.PWA_ENG !== team) return false;
-    if (locationQ && !(r.Location||'').toLowerCase().includes(locationQ)) return false;
-    
-    // Date Range
-    if (dateRange !== 'all') {
-      const d = r.TargetStart ? new Date(r.TargetStart) : null;
-      if (!d || isNaN(d.getTime())) return false;
-      if (dateRange === 'this-month' && d < startOfMonth) return false;
-      if (dateRange === 'last-month' && (d < startOfLastMonth || d > endOfLastMonth)) return false;
-      if (dateRange === 'this-year' && d < startOfYear) return false;
-    }
-    return true;
-  });
+  dashFilteredRecords = allData;
 
   let stats = { total: dashFilteredRecords.length, green: 0, amber: 0, red: 0, blue: 0 };
   let monthsObj = {};
@@ -3055,7 +3159,7 @@ function buildEngineerFilter() {
   }
 }
 
-function applyManufacturingFilters() {
+function applyManufacturingFilters(rebuildFilters = true) {
   filteredFabData = allData.filter(r => {
     if (!r.isSentToFab) return false;
     
@@ -3067,15 +3171,15 @@ function applyManufacturingFilters() {
       if (val && !String(r[col] || '').toLowerCase().includes(val.toLowerCase())) return false;
     }
     for (let col in columnFilters) {
-      const val = columnFilters[col];
-      if (val && String(r[col] || '') !== val) return false;
+      const selectedSet = columnFilters[col];
+      if (selectedSet && selectedSet.size > 0 && !selectedSet.has(String(r[col] || ''))) return false;
     }
     return true;
   });
   
   fabCurrentPage = 1;
   renderManufacturingTable();
-  buildColumnFilters('mfgTable', allData.filter(r => r.isSentToFab));
+  if (rebuildFilters) buildColumnFilters('mfgTable', allData.filter(r => r.isSentToFab));
   const label = document.getElementById('mfgCountLabel');
   if (label) label.textContent = `(${filteredFabData.length})`;
 }
@@ -3095,11 +3199,7 @@ function renderManufacturingTable() {
     if (photo) {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">
-          <div class="photo-actions">
-            <button class="btn btn-ghost btn-icon" onclick="uploadPhotoFor('${r.WorkOrder}')" title="Replace"><i class="fas fa-sync"></i></button>
-            <button class="btn btn-red btn-icon" onclick="deletePhoto('${r.WorkOrder}')" title="Delete"><i class="fas fa-trash"></i></button>
-          </div>
+          <img src="${photo}" style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
         </div>
       `;
     } else {
@@ -3115,14 +3215,14 @@ function renderManufacturingTable() {
       <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
     ` : '';
 
-    return `<tr>
+    return `<tr oncontextmenu="showContextMenu(event, 'row-mfg', '${r.WorkOrder}')">
       <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
       <td><span class="wo-num">${r.WorkOrder}</span></td>
-      <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
-      <td>${stBadge}</td>
-      <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
-      <td style="font-size:11px">${r.Location||'—'}</td>
-      <td style="font-size:11px">${formatDate(r.TargetStart)}</td>
+      <td class="desc-cell mfg-hide-cols" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
+      <td class="mfg-hide-cols">${stBadge}</td>
+      <td class="mfg-hide-cols">${r.PWA_ENG||'—'}</td>
+      <td class="mfg-hide-cols">${r.Location||'—'}</td>
+      <td class="mfg-hide-cols">${formatDate(r.TargetStart)}</td>
       <td style="font-size:11px">${formatDate(r.TargetFinish)}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'RoadCatg')">${r.RoadCatg||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignMaterial')">${r.SignMaterial||'—'}</td>
@@ -3152,14 +3252,6 @@ function renderManufacturingTable() {
         </div>
       </td>
       <td>${photoCell}</td>
-      <td>
-        <div class="action-btns">
-          ${mapActions}
-          <button class="btn btn-ghost btn-sm" onclick="showPage('workorders'); selectWorkOrderRow('${r.WorkOrder}');" title="View Work Order"><i class="fas fa-clipboard-list"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
-          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal('${r.WorkOrder}', 'manufacturing')"><i class="fas fa-edit"></i></button>` : ''}
-        </div>
-      </td>
     </tr>`;
   }).join('');
   renderManufacturingPagination();
@@ -3196,29 +3288,27 @@ async function updateFabStatus(woId, status) {
 }
 
 function clearManufacturingFilters() {
-  document.getElementById('mfgSearchInput').value = ''; 
-  document.getElementById('mfgFilterStatus').value = '';
-  document.getElementById('mfgFilterEng').value = ''; 
-  document.getElementById('mfgFilterFab').value = '';
+  columnFilters = {};
+  columnSearches = {};
   applyManufacturingFilters();
 }
 
-function applyFilters() {
+function applyFilters(rebuildFilters = true) {
   filteredData = allData.filter(r => {
     for (let col in columnSearches) {
       const val = columnSearches[col];
       if (val && !String(r[col] || '').toLowerCase().includes(val.toLowerCase())) return false;
     }
     for (let col in columnFilters) {
-      const val = columnFilters[col];
-      if (val && String(r[col] || '') !== val) return false;
+      const selectedSet = columnFilters[col];
+      if (selectedSet && selectedSet.size > 0 && !selectedSet.has(String(r[col] || ''))) return false;
     }
     return true;
   });
   
   currentPage = 1;
   renderTable();
-  buildColumnFilters('woTable', allData);
+  if (rebuildFilters) buildColumnFilters('woTable', allData);
   const label = document.getElementById('woCountLabel');
   if (label) label.textContent = `(${filteredData.length} of ${allData.length})`;
 }
@@ -3754,11 +3844,7 @@ function renderTable() {
     if (photo) {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">
-          <div class="photo-actions">
-            <button class="btn btn-ghost btn-icon" onclick="uploadPhotoFor('${r.WorkOrder}')" title="Replace"><i class="fas fa-sync"></i></button>
-            <button class="btn btn-red btn-icon" onclick="deletePhoto('${r.WorkOrder}')" title="Delete"><i class="fas fa-trash"></i></button>
-          </div>
+          <img src="${photo}" style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
         </div>
       `;
     } else {
@@ -3770,7 +3856,10 @@ function renderTable() {
       `;
     }
 
-    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')" ondblclick="openDetail('${r.WorkOrder}')">
+    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" 
+      onclick="selectWorkOrderRow('${r.WorkOrder}')" 
+      ondblclick="openDetail('${r.WorkOrder}')"
+      oncontextmenu="showContextMenu(event, 'row-wo', '${r.WorkOrder}')">
       <td><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td>${stBadge}</td>
@@ -3794,16 +3883,6 @@ function renderTable() {
       <td style="font-size:11px">${r.TDPStatus||'—'}</td>
       <td style="font-size:11px">${formatDate(r.ExpiryDate)}</td>
       <td style="font-size:11px">${r.MediaAnnouncement||'—'}</td>
-      <td>
-        <div class="action-btns">
-          ${mapActions}
-          ${photoCell}
-          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openDetail('${r.WorkOrder}')" title="View / Edit Details"><i class="fas fa-external-link-alt"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); sendToFabrication('${r.WorkOrder}')" title="Send to Fabrication"><i class="fas fa-paper-plane"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showManufacturingFor('${r.WorkOrder}')" title="View Manufacturing"><i class="fas fa-industry"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openFabModal('${r.WorkOrder}')" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
-        </div>
-      </td>
     </tr>`;
   }).join('');
   renderPagination();
@@ -3824,8 +3903,8 @@ function renderPagination() {
 function gotoPage(p) { currentPage = p; renderTable(); }
 
 function clearFilters() {
-  document.getElementById('searchInput').value = ''; document.getElementById('filterStatus').value = '';
-  document.getElementById('filterEng').value = '';
+  columnFilters = {};
+  columnSearches = {};
   applyFilters();
 }
 
