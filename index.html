@@ -109,8 +109,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; padding-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; animation: fadeDown 0.6s ease both; }
 @media (max-width: 600px) { .dash-header { flex-direction: column; align-items: flex-start; margin-bottom: 32px; } .dash-header .header-right { text-align: left !important; } }
 .dash-header .tag { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
-@media (max-width: 500px) { .kpi-grid { grid-template-columns: 1fr; } }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 32px; }
+@media (max-width: 500px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
 .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 24px; position: relative; overflow: hidden; animation: fadeUp 0.6s ease both; transition: transform 0.2s, box-shadow 0.2s; }
 .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
 .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 3px 3px 0 0; }
@@ -214,13 +214,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .filter-input:focus{border-color:var(--accent);}
 .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r); -webkit-overflow-scrolling: touch; }
 .main-table{width:100%;border-collapse:collapse;font-size:12px;}
-.main-table thead th{background:var(--surface2);padding:10px 12px;text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;border-bottom:1px solid var(--border);position:sticky;top:0;}
+.main-table thead th{background:var(--surface2);padding:6px 8px;text-align:left;font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);white-space:normal; vertical-align: top; border-bottom:1px solid var(--border);position:sticky;top:0; z-index: 10;}
 .main-table tbody tr{border-bottom:1px solid var(--border);transition:all .15s;cursor:pointer;}
 .main-table tbody tr:hover{background:rgba(0, 200, 255, 0.05);}
 .main-table tbody tr.selected { background: rgba(0, 200, 255, 0.1) !important; border-left: 4px solid var(--accent); }
-.main-table tbody td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
-.wo-num{font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-weight:700;font-size:13px;color:var(--accent);}
-.desc-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.main-table tbody td{padding:6px 8px;vertical-align:middle;white-space:normal; word-break: break-word; font-size: 11px;}
+.wo-num{font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-weight:700;font-size:13px;color:var(--accent); white-space: nowrap;}
+.desc-cell{min-width:150px; max-width:300px; color:var(--text);}
 .status-badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600;letter-spacing:.04em;}
 .badge-COMP{background:rgba(34,197,94,.15);color:var(--green);}
 .badge-INPRG{background:rgba(245,158,11,.15);color:var(--amber);}
@@ -233,6 +233,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .fab-ongoing{color:var(--amber);font-size:11px;}
 .fab-empty{color:var(--muted);font-size:11px;}
 .action-btns{display:flex;gap:4px;flex-wrap:nowrap;min-width:max-content;}
+.mfg-col-description, .mfg-col-status, .mfg-col-eng, .mfg-col-location, .mfg-col-start {
+  display: table-cell;
+}
+.mfg-hide-cols .mfg-col-description, 
+.mfg-hide-cols .mfg-col-status, 
+.mfg-hide-cols .mfg-col-eng, 
+.mfg-hide-cols .mfg-col-location, 
+.mfg-hide-cols .mfg-col-start {
+  display: none !important;
+}
 .photo-actions { display: flex; gap: 4px; margin-top: 4px; }
 .btn-icon { padding: 4px; font-size: 10px; min-width: 24px; justify-content: center; }
 .pagination{display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:flex-end;}
@@ -253,6 +263,73 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .form-group label{font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;}
 .form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:12px;outline:none;transition:border .2s;}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+/* ─── CONTEXT MENU ─── */
+.context-menu {
+  position: fixed;
+  z-index: 5000;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  display: none;
+  flex-direction: column;
+  padding: 8px 0;
+  min-width: 180px;
+}
+.context-menu-item {
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.context-menu-item:hover {
+  background: var(--surface2);
+  color: var(--accent);
+}
+.context-menu-item.danger:hover {
+  color: var(--red);
+}
+
+/* ─── EXCEL FILTERS ─── */
+.th-filter-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+  min-width: 80px;
+}
+.th-search-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 9px;
+  color: var(--text);
+  outline: none;
+}
+.th-search-input:focus {
+  border-color: var(--accent);
+}
+.th-filter-select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px;
+  font-size: 9px;
+  color: var(--text);
+  outline: none;
+}
+.th-filter-select option {
+  background: var(--surface);
+  color: var(--text);
+}
 
 /* ─── DETAIL VIEW ─── */
 .detail-modal { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; flex-direction: column; overflow: hidden; animation: fadeUp 0.3s ease-out; }
@@ -809,42 +886,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Control <span style="color:var(--accent)">Center</span></h1>
       </div>
       <div class="header-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
-        <div class="dash-search-wrap" style="width:300px; position:relative;">
-          <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:12px;"></i>
-          <input type="text" id="dash-global-search" class="filter-input" placeholder="Quick search records..." style="width:100%; padding-left:34px; height:40px; border-radius:10px;">
-        </div>
         <div style="font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px;">
           <i class="fas fa-sync-alt"></i> Last updated: <span id="dash-last-refresh">--:--</span>
         </div>
       </div>
     </header>
-
-    <!-- Global Filters -->
-    <div class="detail-toolbar" style="margin-bottom:24px; padding:16px 20px;">
-      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:1;">
-        <div class="form-group" style="width:180px;">
-          <label style="font-size:9px;">Date Range</label>
-          <select id="dash-filter-date" class="filter-input" onchange="updateDashboard()"><option value="all">All Time</option><option value="this-month">This Month</option><option value="last-month">Last Month</option><option value="this-year">This Year</option></select>
-        </div>
-        <div class="form-group" style="width:140px;">
-          <label style="font-size:9px;">Status</label>
-          <select id="dash-filter-status" class="filter-input" onchange="updateDashboard()"><option value="">All Status</option><option>COMP</option><option>INPRG</option><option>DISPATCH</option></select>
-        </div>
-        <div class="form-group" style="width:140px;">
-          <label style="font-size:9px;">Priority</label>
-          <select id="dash-filter-priority" class="filter-input" onchange="updateDashboard()"><option value="">All Priorities</option><option>High</option><option>Normal</option><option>Low</option></select>
-        </div>
-        <div class="form-group" style="width:140px;">
-          <label style="font-size:9px;">Assigned Team</label>
-          <select id="dash-filter-team" class="filter-input" onchange="updateDashboard()"><option value="">All Teams</option></select>
-        </div>
-        <div class="form-group" style="width:180px;">
-          <label style="font-size:9px;">Location / Area</label>
-          <input type="text" id="dash-filter-location" class="filter-input" placeholder="Filter area..." oninput="updateDashboard()">
-        </div>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="resetDashFilters()"><i class="fas fa-undo"></i> Reset</button>
-    </div>
 
     <div class="kpi-grid">
       <div class="kpi-card total cursor-pointer" onclick="drillDown('all')" style="background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 200, 255, 0.05) 100%); cursor:pointer;">
@@ -877,6 +923,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <div class="kpi-pct" id="kpiBluePct">-%</div>
         <div class="kpi-icon">⏳</div>
       </div>
+    </div>
+
+    <div class="section-title">GIS Overview Map</div>
+    <div class="card" style="padding:0; height:400px; overflow:hidden; margin-bottom:24px; border:1px solid var(--border);">
+      <div id="dashMap" style="width:100%; height:100%; z-index:1;"></div>
     </div>
 
     <div class="two-col" style="grid-template-columns: 2fr 1fr;">
