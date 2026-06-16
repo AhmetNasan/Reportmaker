@@ -903,7 +903,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <span class="dot" id="conn-dot" style="background: var(--muted); width: 8px; height: 8px;"></span>
       <span id="conn-text">Checking...</span>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
+    <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode" aria-label="Toggle Light/Dark Mode"><i class="fas fa-sun" id="theme-icon"></i></button>
     
     <button class="notif-btn" id="notif-trigger" onclick="toggleNotifPanel()" aria-label="Notifications">
       <i class="fas fa-bell"></i>
@@ -1389,32 +1389,32 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="gis-map-canvas">
         <div id="map"></div>
         <div class="gis-toolbar glass-panel">
-      <button class="gis-tool-btn" onclick="map.zoomIn()" title="Zoom In"><i class="fas fa-plus"></i></button>
-      <button class="gis-tool-btn" onclick="map.zoomOut()" title="Zoom Out"><i class="fas fa-minus"></i></button>
+      <button class="gis-tool-btn" onclick="map.zoomIn()" title="Zoom In" aria-label="Zoom In"><i class="fas fa-plus"></i></button>
+      <button class="gis-tool-btn" onclick="map.zoomOut()" title="Zoom Out" aria-label="Zoom Out"><i class="fas fa-minus"></i></button>
       
       <div style="height:1px; background:var(--border); margin:4px 0;"></div>
       
-      <button class="gis-tool-btn" id="tool-marker" onclick="toggleDrawMode('Marker')" title="Add Pin"><i class="fas fa-map-marker-alt"></i></button>
-      <button class="gis-tool-btn" id="tool-line" onclick="toggleDrawMode('Line')" title="Draw Polyline"><i class="fas fa-project-diagram"></i></button>
-      <button class="gis-tool-btn" id="tool-rect" onclick="toggleDrawMode('Rectangle')" title="Draw Rectangle"><i class="far fa-square"></i></button>
-      <button class="gis-tool-btn" id="tool-poly" onclick="toggleDrawMode('Polygon')" title="Draw Polygon"><i class="fas fa-draw-polygon"></i></button>
-      <button class="gis-tool-btn" id="tool-circle" onclick="toggleDrawMode('Circle')" title="Draw Circle"><i class="far fa-circle"></i></button>
-      <button class="gis-tool-btn" id="tool-text" onclick="showToast('Text Tool Coming Soon')" title="Text Tool"><i class="fas fa-font"></i></button>
+      <button class="gis-tool-btn" id="tool-marker" onclick="toggleDrawMode('Marker')" title="Add Pin" aria-label="Add Pin"><i class="fas fa-map-marker-alt"></i></button>
+      <button class="gis-tool-btn" id="tool-line" onclick="toggleDrawMode('Line')" title="Draw Polyline" aria-label="Draw Polyline"><i class="fas fa-project-diagram"></i></button>
+      <button class="gis-tool-btn" id="tool-rect" onclick="toggleDrawMode('Rectangle')" title="Draw Rectangle" aria-label="Draw Rectangle"><i class="far fa-square"></i></button>
+      <button class="gis-tool-btn" id="tool-poly" onclick="toggleDrawMode('Polygon')" title="Draw Polygon" aria-label="Draw Polygon"><i class="fas fa-draw-polygon"></i></button>
+      <button class="gis-tool-btn" id="tool-circle" onclick="toggleDrawMode('Circle')" title="Draw Circle" aria-label="Draw Circle"><i class="far fa-circle"></i></button>
+      <button class="gis-tool-btn" id="tool-text" onclick="showToast('Text Tool Coming Soon')" title="Text Tool" aria-label="Text Tool"><i class="fas fa-font"></i></button>
       
       <div style="height:1px; background:var(--border); margin:4px 0;"></div>
       
-      <button class="gis-tool-btn" id="tool-edit" onclick="toggleGlobalEdit()" title="Edit Geometry"><i class="fas fa-mouse-pointer"></i></button>
-      <button class="gis-tool-btn" id="tool-drag" onclick="map.pm.disableDraw(); map.pm.disableGlobalEditMode();" title="Drag Map"><i class="fas fa-arrows-alt"></i></button>
-      <button class="gis-tool-btn" id="tool-cut" onclick="toggleDrawMode('Cut')" title="Cut Polygon"><i class="fas fa-scissors"></i></button>
-      <button class="gis-tool-btn" id="tool-delete" onclick="map.pm.toggleGlobalRemovalMode()" title="Delete Layer"><i class="fas fa-eraser"></i></button>
-      <button class="gis-tool-btn" onclick="resetMapView()" title="Reset View"><i class="fas fa-sync-alt"></i></button>
+      <button class="gis-tool-btn" id="tool-edit" onclick="toggleGlobalEdit()" title="Edit Geometry" aria-label="Edit Geometry"><i class="fas fa-mouse-pointer"></i></button>
+      <button class="gis-tool-btn" id="tool-drag" onclick="map.pm.disableDraw(); map.pm.disableGlobalEditMode();" title="Drag Map" aria-label="Drag Map"><i class="fas fa-arrows-alt"></i></button>
+      <button class="gis-tool-btn" id="tool-cut" onclick="toggleDrawMode('Cut')" title="Cut Polygon" aria-label="Cut Polygon"><i class="fas fa-scissors"></i></button>
+      <button class="gis-tool-btn" id="tool-delete" onclick="map.pm.toggleGlobalRemovalMode()" title="Delete Layer" aria-label="Delete Layer"><i class="fas fa-eraser"></i></button>
+      <button class="gis-tool-btn" onclick="resetMapView()" title="Reset View" aria-label="Reset View"><i class="fas fa-sync-alt"></i></button>
       
       <div style="height:1px; background:var(--border); margin:4px 0;"></div>
       
-      <button class="gis-tool-btn" onclick="map.pm.Draw.undo()" title="Undo"><i class="fas fa-undo"></i></button>
-      <button class="gis-tool-btn" onclick="exitGisModes()" title="Exit / Reset Tools"><i class="fas fa-times-circle"></i></button>
-      <button class="gis-tool-btn" id="tool-measure" onclick="toggleMeasure()" title="Measure"><i class="fas fa-ruler-combined"></i></button>
-      <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand"></i></button>
+      <button class="gis-tool-btn" onclick="map.pm.Draw.undo()" title="Undo" aria-label="Undo"><i class="fas fa-undo"></i></button>
+      <button class="gis-tool-btn" onclick="exitGisModes()" title="Exit / Reset Tools" aria-label="Exit / Reset Tools"><i class="fas fa-times-circle"></i></button>
+      <button class="gis-tool-btn" id="tool-measure" onclick="toggleMeasure()" title="Measure" aria-label="Measure"><i class="fas fa-ruler-combined"></i></button>
+      <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Fullscreen" aria-label="Fullscreen"><i class="fas fa-expand"></i></button>
     </div>
 
       </div>
@@ -1715,7 +1715,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div style="display: flex; gap: 8px; align-items: center;">
       <button class="btn btn-ghost btn-sm" onclick="navigateDetail('prev')" title="Previous Work Order"><i class="fas fa-chevron-up"></i></button>
       <button class="btn btn-ghost btn-sm" onclick="navigateDetail('next')" title="Next Work Order"><i class="fas fa-chevron-down"></i></button>
-        <button class="btn btn-ghost btn-sm" onclick="showContextMenu(event, 'detail-modal')"><i class="fas fa-ellipsis-v"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="showContextMenu(event, 'detail-modal')" title="More Actions" aria-label="More Actions"><i class="fas fa-ellipsis-v"></i></button>
       <button class="btn btn-primary btn-sm" onclick="closeDetail()"><i class="fas fa-times"></i> Close</button>
     </div>
   </div>
@@ -1977,6 +1977,9 @@ window.addEventListener('paste', async (e) => {
 });
 
 window.addEventListener('load', async () => {
+  const savedTheme = localStorage.getItem('qbc_theme');
+  if (savedTheme) setTheme(savedTheme);
+
   if (supabaseClient) {
     // Single source of truth for auth state
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -2698,6 +2701,7 @@ function toggleTheme() {
 function setTheme(theme) {
   currentTheme = theme;
   document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('qbc_theme', theme);
   const icon = document.getElementById('theme-icon');
   if (theme === 'dark') {
     icon.className = 'fas fa-moon';
