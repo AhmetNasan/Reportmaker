@@ -109,8 +109,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; padding-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; animation: fadeDown 0.6s ease both; }
 @media (max-width: 600px) { .dash-header { flex-direction: column; align-items: flex-start; margin-bottom: 32px; } .dash-header .header-right { text-align: left !important; } }
 .dash-header .tag { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
-@media (max-width: 500px) { .kpi-grid { grid-template-columns: 1fr; } }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 32px; }
+@media (max-width: 500px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
 .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 24px; position: relative; overflow: hidden; animation: fadeUp 0.6s ease both; transition: transform 0.2s, box-shadow 0.2s; }
 .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
 .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 3px 3px 0 0; }
@@ -214,13 +214,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .filter-input:focus{border-color:var(--accent);}
 .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r); -webkit-overflow-scrolling: touch; }
 .main-table{width:100%;border-collapse:collapse;font-size:12px;}
-.main-table thead th{background:var(--surface2);padding:10px 12px;text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;border-bottom:1px solid var(--border);position:sticky;top:0;}
+.main-table thead th{background:var(--surface2);padding:6px 8px;text-align:left;font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);white-space:normal; vertical-align: top; border-bottom:1px solid var(--border);position:sticky;top:0; z-index: 10;}
 .main-table tbody tr{border-bottom:1px solid var(--border);transition:all .15s;cursor:pointer;}
 .main-table tbody tr:hover{background:rgba(0, 200, 255, 0.05);}
 .main-table tbody tr.selected { background: rgba(0, 200, 255, 0.1) !important; border-left: 4px solid var(--accent); }
-.main-table tbody td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
-.wo-num{font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-weight:700;font-size:13px;color:var(--accent);}
-.desc-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.main-table tbody td{padding:6px 8px;vertical-align:middle;white-space:normal; word-break: break-word; font-size: 11px;}
+.wo-num{font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-weight:700;font-size:13px;color:var(--accent); white-space: nowrap;}
+.desc-cell{min-width:150px; max-width:300px; color:var(--text);}
 .status-badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600;letter-spacing:.04em;}
 .badge-COMP{background:rgba(34,197,94,.15);color:var(--green);}
 .badge-INPRG{background:rgba(245,158,11,.15);color:var(--amber);}
@@ -233,6 +233,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .fab-ongoing{color:var(--amber);font-size:11px;}
 .fab-empty{color:var(--muted);font-size:11px;}
 .action-btns{display:flex;gap:4px;flex-wrap:nowrap;min-width:max-content;}
+.mfg-col-description, .mfg-col-status, .mfg-col-eng, .mfg-col-location, .mfg-col-start {
+  display: table-cell;
+}
+.mfg-hide-cols .mfg-col-description,
+.mfg-hide-cols .mfg-col-status,
+.mfg-hide-cols .mfg-col-eng,
+.mfg-hide-cols .mfg-col-location,
+.mfg-hide-cols .mfg-col-start {
+  display: none !important;
+}
 .photo-actions { display: flex; gap: 4px; margin-top: 4px; }
 .btn-icon { padding: 4px; font-size: 10px; min-width: 24px; justify-content: center; }
 .pagination{display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:flex-end;}
@@ -253,6 +263,132 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .form-group label{font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;}
 .form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:12px;outline:none;transition:border .2s;}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+/* ─── CONTEXT MENU ─── */
+
+/* ─── EXCEL FILTERS ─── */
+.th-filter-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 0;
+  min-width: 100px;
+  position: relative;
+}
+.th-search-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.th-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0, 200, 255, 0.1);
+}
+.th-filter-dropdown-btn {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 10px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.th-filter-dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 180px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 1000;
+  padding: 8px;
+}
+.th-filter-dropdown-content.show {
+  display: block;
+}
+.th-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text);
+}
+.th-filter-option:hover {
+  background: var(--hover-bg);
+}
+.th-filter-option input {
+  cursor: pointer;
+}
+
+.mfg-hide-cols { display: none; }
+.mfg-show-details .mfg-hide-cols { display: table-cell; }
+
+.context-menu {
+  position: fixed;
+  z-index: 5000;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  display: none;
+  flex-direction: column;
+  padding: 6px 0;
+  min-width: 200px;
+  backdrop-filter: blur(10px);
+}
+.context-menu-item {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.context-menu-item:hover {
+  background: var(--surface2);
+  color: var(--accent);
+}
+.context-menu-item i {
+  width: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+.context-menu-item:hover i {
+  color: var(--accent);
+}
+.context-menu-item.danger:hover {
+  color: var(--red);
+}
+.context-menu-item.danger:hover i {
+  color: var(--red);
+}
+.context-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
 
 /* ─── DETAIL VIEW ─── */
 .detail-modal { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; flex-direction: column; overflow: hidden; animation: fadeUp 0.3s ease-out; }
@@ -809,42 +945,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Control <span style="color:var(--accent)">Center</span></h1>
       </div>
       <div class="header-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
-        <div class="dash-search-wrap" style="width:300px; position:relative;">
-          <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:12px;"></i>
-          <input type="text" id="dash-global-search" class="filter-input" placeholder="Quick search records..." style="width:100%; padding-left:34px; height:40px; border-radius:10px;">
-        </div>
         <div style="font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px;">
           <i class="fas fa-sync-alt"></i> Last updated: <span id="dash-last-refresh">--:--</span>
         </div>
       </div>
     </header>
-
-    <!-- Global Filters -->
-    <div class="detail-toolbar" style="margin-bottom:24px; padding:16px 20px;">
-      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:1;">
-        <div class="form-group" style="width:180px;">
-          <label style="font-size:9px;">Date Range</label>
-          <select id="dash-filter-date" class="filter-input" onchange="updateDashboard()"><option value="all">All Time</option><option value="this-month">This Month</option><option value="last-month">Last Month</option><option value="this-year">This Year</option></select>
-        </div>
-        <div class="form-group" style="width:140px;">
-          <label style="font-size:9px;">Status</label>
-          <select id="dash-filter-status" class="filter-input" onchange="updateDashboard()"><option value="">All Status</option><option>COMP</option><option>INPRG</option><option>DISPATCH</option></select>
-        </div>
-        <div class="form-group" style="width:140px;">
-          <label style="font-size:9px;">Priority</label>
-          <select id="dash-filter-priority" class="filter-input" onchange="updateDashboard()"><option value="">All Priorities</option><option>High</option><option>Normal</option><option>Low</option></select>
-        </div>
-        <div class="form-group" style="width:140px;">
-          <label style="font-size:9px;">Assigned Team</label>
-          <select id="dash-filter-team" class="filter-input" onchange="updateDashboard()"><option value="">All Teams</option></select>
-        </div>
-        <div class="form-group" style="width:180px;">
-          <label style="font-size:9px;">Location / Area</label>
-          <input type="text" id="dash-filter-location" class="filter-input" placeholder="Filter area..." oninput="updateDashboard()">
-        </div>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="resetDashFilters()"><i class="fas fa-undo"></i> Reset</button>
-    </div>
 
     <div class="kpi-grid">
       <div class="kpi-card total cursor-pointer" onclick="drillDown('all')" style="background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 200, 255, 0.05) 100%); cursor:pointer;">
@@ -877,6 +982,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <div class="kpi-pct" id="kpiBluePct">-%</div>
         <div class="kpi-icon">⏳</div>
       </div>
+    </div>
+
+    <div class="section-title">GIS Overview Map</div>
+    <div class="card" style="padding:0; height:400px; overflow:hidden; margin-bottom:24px; border:1px solid var(--border);">
+      <div id="dashMap" style="width:100%; height:100%; z-index:1;"></div>
     </div>
 
     <div class="two-col" style="grid-template-columns: 2fr 1fr;">
@@ -1045,52 +1155,37 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="wrapper">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
       <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:18px;font-weight:700;">Work Orders <span id="woCountLabel" style="font-size:13px;color:var(--muted)"></span></h2>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" onclick="exportTableCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
         <button class="btn btn-primary btn-sm" onclick="openAddModal()" id="addWoBtn" style="display:none"><i class="fas fa-plus"></i> Add WO</button>
+        <button class="btn btn-ghost btn-sm" id="wo-more-actions" onclick="showContextMenu(event, 'page-workorders')"><i class="fas fa-ellipsis-v"></i> More Actions</button>
       </div>
-    </div>
-
-    <div class="filters">
-      <input type="text" class="filter-input" placeholder="🔍 Search WO / Description…" id="searchInput" oninput="applyFilters()" style="min-width:220px;">
-      <select class="filter-input" id="filterStatus" onchange="applyFilters()">
-        <option value="">All Statuses</option>
-        <option value="NOT_COMP">All Except COMP</option>
-        <option>COMP</option><option>INPRG</option><option>DISPATCH</option>
-        <option>WPERM</option><option>RTNENG</option><option>APPR</option>
-      </select>
-      <select class="filter-input" id="filterEng" onchange="applyFilters()">
-        <option value="">All Engineers</option>
-      </select>
-      <button class="btn btn-ghost btn-sm" onclick="clearFilters()">✕ Clear</button>
     </div>
 
     <div class="table-wrap">
       <table class="main-table" id="woTable">
         <thead>
           <tr>
-            <th>Work Order #</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Latitude</th>
-            <th>Longitude</th>
-            <th>Reported By</th>
-            <th>Reported Date</th>
-            <th>PWA Engineer</th>
-            <th>Location</th>
-            <th>Target Start Date</th>
-            <th>Month</th>
-            <th>Target Finish Date</th>
-            <th>Status Update Date</th>
-            <th>Completion Status</th>
-            <th>QBC Comments</th>
-            <th>RO</th>
-            <th>TDP</th>
-            <th>Application Date</th>
-            <th>TDP Status</th>
-            <th>Expiry Date</th>
-            <th>Media Announcement</th>
-            <th>Actions</th>
+            <th data-col="WorkOrder">Work Order #</th>
+            <th data-col="Description">Description</th>
+            <th data-col="Status">Status</th>
+            <th data-col="Lat">Latitude</th>
+            <th data-col="Lng">Longitude</th>
+            <th data-col="ReportedBy">Reported By</th>
+            <th data-col="ReportedDate">Reported Date</th>
+            <th data-col="PWA_ENG">PWA Engineer</th>
+            <th data-col="Location">Location</th>
+            <th data-col="TargetStart">Target Start</th>
+            <th data-col="Month">Month</th>
+            <th data-col="TargetFinish">Target Finish</th>
+            <th data-col="StatusUpdateDate">Status Update</th>
+            <th data-col="CompletionStatus">Completion</th>
+            <th data-col="QBC_Comments">Comments</th>
+            <th data-col="RO">RO</th>
+            <th data-col="TDP">TDP</th>
+            <th data-col="ApplicationDate">App Date</th>
+            <th data-col="TDP_Status">TDP Status</th>
+            <th data-col="ExpiryDate">Expiry</th>
+            <th data-col="MediaAnnouncement">Media</th>
           </tr>
         </thead>
         <tbody id="woBody">
@@ -1362,26 +1457,22 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="wrapper">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
       <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:18px;font-weight:700;">Manufacturing <span id="mfgCountLabel" style="font-size:13px;color:var(--muted)"></span></h2>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" onclick="exportTableCSV('manufacturing')"><i class="fas fa-file-csv"></i> Export CSV</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-ghost btn-sm" onclick="toggleMfgDetails()"><i class="fas fa-eye"></i> More Details</button>
+        <button class="btn btn-ghost btn-sm" id="mfg-more-actions" onclick="showContextMenu(event, 'page-manufacturing')"><i class="fas fa-ellipsis-v"></i> More Actions</button>
       </div>
     </div>
 
-    <div class="filters">
-      <input type="text" class="filter-input" placeholder="🔍 Search WO / Description…" id="mfgSearchInput" oninput="applyManufacturingFilters()" style="min-width:220px;">
-      <select class="filter-input" id="mfgFilterStatus" onchange="applyManufacturingFilters()">
-        <option value="">All Statuses</option>
-        <option>COMP</option><option>INPRG</option><option>DISPATCH</option>
-        <option>WPERM</option><option>RTNENG</option><option>APPR</option>
-      </select>
-      <select class="filter-input" id="mfgFilterEng" onchange="applyManufacturingFilters()">
-        <option value="">All Engineers</option>
-      </select>
-      <select class="filter-input" id="mfgFilterFab" onchange="applyManufacturingFilters()">
-        <option value="">All Fabrication Status</option>
-        <option>Done</option><option>Pending</option><option>Ongoing</option>
-      </select>
-      <button class="btn btn-ghost btn-sm" onclick="clearManufacturingFilters()">✕ Clear</button>
+    <style>
+      .mfg-tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); padding: 6px; border-radius: 12px; margin-bottom: 20px; width: fit-content; }
+      .mfg-tab { padding: 10px 20px; border-radius: 8px; border: none; background: none; color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; }
+      .mfg-tab:hover { background: var(--surface2); color: var(--text); }
+      .mfg-tab.active { background: var(--bg); color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    </style>
+
+    <div class="mfg-tabs">
+      <button class="mfg-tab active" id="mfg-tab-active" onclick="switchMfgTab('active')">Active Fabrication</button>
+      <button class="mfg-tab" id="mfg-tab-completed" onclick="switchMfgTab('completed')">Completed Manufacturing</button>
     </div>
 
     <div class="table-wrap">
@@ -1389,18 +1480,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <thead id="mfgHead">
           <tr>
             <th rowspan="3">#</th>
-            <th rowspan="3">Work Order</th>
-            <th rowspan="3">Description</th>
-            <th rowspan="3">Status</th>
-            <th rowspan="3">PWA Engineer</th>
-            <th rowspan="3">Location</th>
-            <th rowspan="3">Target Start</th>
-            <th rowspan="3">Target Finish</th>
-            <th rowspan="3" style="background: #1b5e20; color: white;">Road Catg.</th>
-            <th rowspan="3" style="background: #1b5e20; color: white;">Sign Material</th>
+            <th rowspan="3" data-col="WorkOrder">Work Order</th>
+            <th rowspan="3" data-col="Description" class="mfg-hide-cols">Description</th>
+            <th rowspan="3" data-col="Status" class="mfg-hide-cols">Status</th>
+            <th rowspan="3" data-col="PWA_ENG" class="mfg-hide-cols">PWA Engineer</th>
+            <th rowspan="3" data-col="Location" class="mfg-hide-cols">Location</th>
+            <th rowspan="3" data-col="TargetStart" class="mfg-hide-cols">Target Start</th>
+            <th rowspan="3" data-col="TargetFinish">Target Finish</th>
+            <th rowspan="3" style="background: #1b5e20; color: white;" data-col="RoadCatg">Road Catg.</th>
+            <th rowspan="3" style="background: #1b5e20; color: white;" data-col="SignMaterial">Sign Material</th>
             <th colspan="13" style="background: #4a148c; color: white; text-align: center;">Fabrication</th>
             <th rowspan="3">Photo</th>
-            <th rowspan="3">Actions</th>
           </tr>
           <tr>
             <th colspan="5" style="background: #6a1b9a; color: white; text-align: center;">Sign Face Details</th>
@@ -1411,16 +1501,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <th rowspan="2" style="background: #9c27b0; color: white; text-align: center;">Details</th>
           </tr>
           <tr>
-            <th style="background: #ab47bc; color: white;">Sign Type</th>
-            <th style="background: #ab47bc; color: white;">Sign REF.</th>
-            <th style="background: #ab47bc; color: white;">Sign Shape</th>
-            <th style="background: #ab47bc; color: white;">SIZE (mm)</th>
-            <th style="background: #ab47bc; color: white;">QTY.</th>
-            <th style="background: #ba68c8; color: white;">TYPE</th>
-            <th style="background: #ba68c8; color: white;">HEIGHT (mm)</th>
-            <th style="background: #ba68c8; color: white;">QTY.</th>
-            <th style="background: #ce93d8; color: white;">Size L × W × H (mm)</th>
-            <th style="background: #ce93d8; color: white;">QTY.</th>
+            <th style="background: #ab47bc; color: white;" data-col="SignType">Sign Type</th>
+            <th style="background: #ab47bc; color: white;" data-col="SignRef">Sign REF.</th>
+            <th style="background: #ab47bc; color: white;" data-col="SignShape">Sign Shape</th>
+            <th style="background: #ab47bc; color: white;" data-col="SignSize">SIZE (mm)</th>
+            <th style="background: #ab47bc; color: white;" data-col="SignQty">QTY.</th>
+            <th style="background: #ba68c8; color: white;" data-col="PostType">TYPE</th>
+            <th style="background: #ba68c8; color: white;" data-col="PostHeight">HEIGHT (mm)</th>
+            <th style="background: #ba68c8; color: white;" data-col="PostQty">QTY.</th>
+            <th style="background: #ce93d8; color: white;" data-col="FoundSize">Size L × W × H (mm)</th>
+            <th style="background: #ce93d8; color: white;" data-col="FoundQty">QTY.</th>
           </tr>
         </thead>
         <tbody id="mfgBody">
@@ -1593,15 +1683,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 </div>
 
 <div class="detail-modal" id="detailModal">
-  <div class="detail-header">
+    <div class="detail-header" oncontextmenu="showContextMenu(event, 'detail-modal')">
     <button class="btn btn-ghost btn-sm" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Back</button>
     <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
       <h2 id="detail-wo-number" style="font-size: 18px; font-weight: 800; color: var(--accent);">WO #000000</h2>
       <div id="detail-status-badge"></div>
     </div>
-    <div style="display: flex; gap: 8px;">
+      <div style="display: flex; gap: 8px; align-items: center;">
       <button class="btn btn-ghost btn-sm" onclick="navigateDetail('prev')" title="Previous Work Order"><i class="fas fa-chevron-up"></i></button>
       <button class="btn btn-ghost btn-sm" onclick="navigateDetail('next')" title="Next Work Order"><i class="fas fa-chevron-down"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="showContextMenu(event, 'detail-modal')"><i class="fas fa-ellipsis-v"></i></button>
       <button class="btn btn-primary btn-sm" onclick="closeDetail()"><i class="fas fa-times"></i> Close</button>
     </div>
   </div>
@@ -1644,16 +1735,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     </div>
 
     <!-- Toolbar -->
-    <div class="detail-toolbar">
-      <button class="btn btn-primary btn-sm" id="detail-edit-btn" onclick="toggleDetailEdit()"><i class="fas fa-edit"></i> Edit Record</button>
-      <button class="btn btn-green btn-sm" id="detail-save-btn" onclick="saveDetailChanges()" style="display:none;"><i class="fas fa-save"></i> Save Changes</button>
-      <button class="btn btn-ghost btn-sm" id="detail-cancel-btn" onclick="cancelDetailEdit()" style="display:none;"><i class="fas fa-times-circle"></i> Cancel</button>
-      <div style="flex:1;"></div>
-      <button class="btn btn-ghost btn-sm" onclick="printDetail()"><i class="fas fa-print"></i> Print</button>
-      <button class="btn btn-ghost btn-sm" onclick="exportPDFFromDetail()"><i class="fas fa-file-pdf"></i> Export PDF</button>
-      <button class="btn btn-ghost btn-sm" onclick="sendToFabFromDetail()"><i class="fas fa-paper-plane"></i> Send to Fabrication</button>
-      <button class="btn btn-ghost btn-sm" onclick="duplicateWO()"><i class="fas fa-copy"></i> Duplicate</button>
-      <button class="btn btn-red btn-sm" onclick="closeWO()"><i class="fas fa-check-circle"></i> Close WO</button>
+    <div class="detail-toolbar" style="display:none;">
+      <!-- Hidden as per requirement to use context menu, but kept in DOM if needed for logic -->
     </div>
 
     <!-- Tab Panes -->
@@ -1797,6 +1880,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="toast" id="toast"></div>
 
+<!-- Context Menu -->
+<div id="contextMenu" class="context-menu">
+  <!-- Items will be injected dynamically based on context -->
+</div>
+
 <script>
 // CONFIG & STATE
 const SUPABASE_URL = 'https://srdxtvchpuncdkfabiid.supabase.co';
@@ -1842,6 +1930,12 @@ let contractStartDate = '2026-01-01';
 let uploadErrors = [];
 let notifications = [];
 let notifTab = 'all';
+
+let dashMap = null;
+let columnFilters = {};
+let columnSearches = {};
+let mfgShowDetails = false;
+let currentMfgTab = 'active';
 
 // INITIALIZATION
 window.addEventListener('paste', async (e) => {
@@ -2096,6 +2190,333 @@ async function fetchAllWorkOrders() {
     ...(mfgMap.get(wo.work_order) || {})
   }));
 }
+
+async function initDashMap() {
+  if (dashMap) {
+    dashMap.invalidateSize();
+    return;
+  }
+  const mapCont = document.getElementById('dashMap');
+  if (!mapCont) return;
+
+  dashMap = L.map('dashMap', {
+    zoomControl: false,
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    touchZoom: false,
+    attributionControl: false
+  }).setView([25.2854, 51.5310], 11);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dashMap);
+
+  // Load Boundary for Dash Map
+  if (supabaseClient) {
+    try {
+      const { data } = await supabaseClient.from('project_boundaries').select('*').limit(1).maybeSingle();
+      if (data && data.geojson) {
+        L.geoJSON(data.geojson, {
+          style: data.style_settings || { color: '#00c8ff', weight: 3, fillOpacity: 0.1 }
+        }).addTo(dashMap);
+      }
+    } catch(e) { console.error("Dash map boundary load failed", e); }
+  }
+
+  const catColors = {
+    'green': '#2ecc71', // On-Time
+    'amber': '#f1c40f', // Completed (Breached)
+    'red': '#e74c3c',   // Not Completed (Breached)
+    'blue': '#3498db'   // Pending
+  };
+
+  allData.forEach(r => {
+    if (r.Lat && r.Lng) {
+      const cat = getStatusCat(r);
+      const color = catColors[cat] || '#95a5a6';
+      const marker = L.circleMarker([r.Lat, r.Lng], {
+        radius: 6,
+        fillColor: color,
+        color: '#fff',
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).addTo(dashMap);
+    }
+  });
+
+  setTimeout(() => dashMap.invalidateSize(), 500);
+}
+
+function toggleMfgDetails() {
+  mfgShowDetails = !mfgShowDetails;
+  const table = document.getElementById('mfgTable');
+  if (table) {
+    table.classList.toggle('mfg-show-details', mfgShowDetails);
+  }
+}
+
+function switchMfgTab(tab) {
+  currentMfgTab = tab;
+  document.getElementById('mfg-tab-active').classList.toggle('active', tab === 'active');
+  document.getElementById('mfg-tab-completed').classList.toggle('active', tab === 'completed');
+  applyManufacturingFilters();
+}
+
+function buildColumnFilters(tableId, data) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const headers = table.querySelectorAll('thead th[data-col]');
+  headers.forEach(th => {
+    const col = th.getAttribute('data-col');
+    if (!col) return;
+
+    let wrap = th.querySelector('.th-filter-wrap');
+    let searchInput;
+    let dropBtn;
+
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.className = 'th-filter-wrap';
+      wrap.onclick = (e) => e.stopPropagation();
+
+      searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.className = 'th-search-input';
+      searchInput.placeholder = 'Search...';
+      searchInput.oninput = (e) => {
+        columnSearches[col] = e.target.value;
+        if (tableId === 'mfgTable') applyManufacturingFilters(false);
+        else applyFilters(false);
+      };
+      wrap.appendChild(searchInput);
+
+      dropBtn = document.createElement('div');
+      dropBtn.className = 'th-filter-dropdown-btn';
+      dropBtn.innerHTML = '<span>Filter...</span> <i class="fas fa-chevron-down"></i>';
+      dropBtn.onclick = (e) => {
+        const content = dropBtn.nextElementSibling;
+        const wasShown = content.classList.contains('show');
+        document.querySelectorAll('.th-filter-dropdown-content').forEach(c => c.classList.remove('show'));
+        if (!wasShown) content.classList.add('show');
+        e.stopPropagation();
+      };
+      wrap.appendChild(dropBtn);
+
+      const dropContent = document.createElement('div');
+      dropContent.className = 'th-filter-dropdown-content';
+      wrap.appendChild(dropContent);
+
+      th.appendChild(wrap);
+    } else {
+      searchInput = wrap.querySelector('.th-search-input');
+      dropBtn = wrap.querySelector('.th-filter-dropdown-btn');
+    }
+
+    // Always update search value
+    searchInput.value = columnSearches[col] || '';
+
+    // Re-build dropdown items
+    const dropContent = wrap.querySelector('.th-filter-dropdown-content');
+    const values = [...new Set(data.map(r => r[col] || ''))].sort();
+
+    dropContent.innerHTML = '';
+
+    // Clear All option
+    const clearOpt = document.createElement('div');
+    clearOpt.className = 'th-filter-option';
+    clearOpt.style.fontWeight = 'bold';
+    clearOpt.style.borderBottom = '1px solid var(--border)';
+    clearOpt.innerHTML = `<span>Clear Filter</span>`;
+    clearOpt.onclick = () => {
+      columnFilters[col] = new Set();
+      if (tableId === 'mfgTable') applyManufacturingFilters();
+      else applyFilters();
+    };
+    dropContent.appendChild(clearOpt);
+
+    values.forEach(v => {
+      const opt = document.createElement('div');
+      opt.className = 'th-filter-option';
+
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      const currentSet = columnFilters[col] || new Set();
+      chk.checked = currentSet.has(String(v));
+
+      chk.onchange = (e) => {
+        if (!columnFilters[col]) columnFilters[col] = new Set();
+        if (e.target.checked) columnFilters[col].add(String(v));
+        else columnFilters[col].delete(String(v));
+
+        if (tableId === 'mfgTable') applyManufacturingFilters();
+        else applyFilters();
+      };
+
+      opt.onclick = (e) => {
+        if (e.target !== chk) {
+          chk.checked = !chk.checked;
+          chk.dispatchEvent(new Event('change'));
+        }
+      };
+
+      opt.appendChild(chk);
+      const label = document.createElement('span');
+      label.textContent = v === '' ? '(Empty)' : v;
+      opt.appendChild(label);
+      dropContent.appendChild(opt);
+    });
+
+    // Update button text
+    const activeSet = columnFilters[col];
+    const btnSpan = dropBtn.querySelector('span');
+    if (activeSet && activeSet.size > 0) {
+      btnSpan.textContent = activeSet.size === 1 ? [...activeSet][0] : `${activeSet.size} selected`;
+      dropBtn.style.borderColor = 'var(--accent)';
+    } else {
+      btnSpan.textContent = 'Filter...';
+      dropBtn.style.borderColor = 'var(--border)';
+    }
+  });
+}
+
+function showContextMenu(e, context, woId = null) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const menu = document.getElementById('contextMenu');
+  if (!menu) return;
+  menu.innerHTML = '';
+
+  let items = [];
+
+  if (context === 'page-workorders' || context === 'page-manufacturing') {
+    items = [
+      { label: 'Export to CSV', icon: 'fa-file-csv', action: () => exportTableCSV(context === 'page-manufacturing' ? 'manufacturing' : 'all') },
+      { label: 'Refresh Data', icon: 'fa-sync', action: () => fetchData() }
+    ];
+  } else if (context === 'row-wo' || context === 'row-mfg') {
+    items = [
+      { label: 'View Details', icon: 'fa-eye', action: () => openDetail(woId) },
+      { label: 'Copy WO Number', icon: 'fa-copy', action: () => { navigator.clipboard.writeText(woId); showToast("Copied to clipboard"); } },
+      { divider: true },
+      { label: 'Show on Map', icon: 'fa-map-marker-alt', action: () => {
+        const r = allData.find(d => d.WorkOrder === woId);
+        if (r && r.Lat && r.Lng) showOnMap(r.Lat, r.Lng, woId);
+        else showToast("Coordinates missing", "error");
+      }},
+      { label: 'Fabrication PDF', icon: 'fa-file-pdf', action: () => openFabModal(woId) }
+    ];
+
+    if (hasPermission('edit')) {
+      items.push({ label: 'Send to Fabrication', icon: 'fa-paper-plane', action: () => sendToFabrication(woId) });
+    }
+
+    items.push({ divider: true });
+    items.push({ label: 'Print Record', icon: 'fa-print', action: () => { selectedWorkOrder = woId; printDetail(); } });
+
+    if (isAdmin) {
+      items.push({ divider: true });
+      items.push({ label: 'Delete Record', icon: 'fa-trash', action: () => deleteWO(woId), danger: true });
+    }
+  } else if (context === 'detail-modal') {
+    const isEditing = document.getElementById('detailModal').classList.contains('editing');
+    if (isEditing) {
+      items = [
+        { label: 'Save Changes', icon: 'fa-save', action: () => saveDetailChanges() },
+        { label: 'Cancel Edit', icon: 'fa-times-circle', action: () => cancelDetailEdit() }
+      ];
+    } else {
+      items = [
+        { label: 'Print Record', icon: 'fa-print', action: () => printDetail() },
+        { label: 'Export PDF', icon: 'fa-file-pdf', action: () => exportPDFFromDetail() }
+      ];
+
+      if (hasPermission('edit')) {
+        items.unshift({ label: 'Edit Record', icon: 'fa-edit', action: () => toggleDetailEdit() });
+        items.push({ label: 'Send to Fabrication', icon: 'fa-paper-plane', action: () => sendToFabFromDetail() });
+        items.push({ label: 'Duplicate WO', icon: 'fa-copy', action: () => duplicateWO() });
+      }
+
+      if (isAdmin) {
+        items.push({ divider: true });
+        items.push({ label: 'Close WO', icon: 'fa-check-circle', action: () => closeWO() });
+      }
+    }
+  }
+
+  items.forEach(item => {
+    if (item.divider) {
+      const div = document.createElement('div');
+      div.className = 'context-menu-divider';
+      menu.appendChild(div);
+      return;
+    }
+    const div = document.createElement('div');
+    div.className = `context-menu-item ${item.danger ? 'danger' : ''}`;
+    div.innerHTML = `<i class="fas ${item.icon}"></i> ${item.label}`;
+    div.onclick = () => {
+      item.action();
+      menu.style.display = 'none';
+    };
+    menu.appendChild(div);
+  });
+
+  menu.style.display = 'flex';
+
+  // Position it
+  const rect = menu.getBoundingClientRect();
+  const menuWidth = rect.width || 200;
+  const menuHeight = rect.height || items.length * 40;
+
+  let x = e.clientX;
+  let y = e.clientY;
+
+  // If triggered by a left click on a button, align to button bottom-left
+  if (e.button === 0 && e.currentTarget && e.currentTarget.tagName === 'BUTTON') {
+    const btnRect = e.currentTarget.getBoundingClientRect();
+    x = btnRect.left;
+    y = btnRect.bottom + 5;
+  }
+
+  // Boundary checks
+  if (x + menuWidth > window.innerWidth) x = window.innerWidth - menuWidth - 10;
+  if (y + menuHeight > window.innerHeight) y = window.innerHeight - menuHeight - 10;
+  if (x < 0) x = 10;
+  if (y < 0) y = 10;
+
+  menu.style.left = `${x}px`;
+  menu.style.top = `${y}px`;
+}
+
+window.addEventListener('click', () => {
+  const menu = document.getElementById('contextMenu');
+  if (menu) menu.style.display = 'none';
+});
+
+// Mobile long-press support
+let touchTimer;
+window.addEventListener('touchstart', (e) => {
+  const row = e.target.closest('tr[data-wo]');
+  if (row) {
+    touchTimer = setTimeout(() => {
+      const woId = row.getAttribute('data-wo');
+      const table = row.closest('table');
+      const context = table && table.id === 'mfgTable' ? 'row-mfg' : 'row-wo';
+      const touch = e.touches[0];
+      showContextMenu({
+        preventDefault: () => {},
+        stopPropagation: () => {},
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      }, context, woId);
+    }, 700);
+  }
+}, {passive: true});
+
+window.addEventListener('touchend', () => {
+  clearTimeout(touchTimer);
+}, {passive: true});
 
 async function fetchData() {
   const connDot = document.getElementById('conn-dot');
@@ -2440,6 +2861,7 @@ function showPage(id) {
         document.querySelectorAll('.bar-seg').forEach(el => {
           el.style.width = el.getAttribute('data-w') + '%';
         });
+        initDashMap();
      }, 100);
   }
   if(id === 'manufacturing') {
@@ -2495,35 +2917,7 @@ function getStatusCat(r) {
 let dashFilteredRecords = [];
 
 function updateDashboard() {
-  const dateRange = document.getElementById('dash-filter-date').value;
-  const status = document.getElementById('dash-filter-status').value;
-  const priority = document.getElementById('dash-filter-priority').value;
-  const team = document.getElementById('dash-filter-team').value;
-  const locationQ = document.getElementById('dash-filter-location').value.toLowerCase();
-  
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
-
-  dashFilteredRecords = allData.filter(r => {
-    // Basic filters
-    if (status && r.Status !== status) return false;
-    if (priority && r.Priority !== priority) return false;
-    if (team && r.PWA_ENG !== team) return false;
-    if (locationQ && !(r.Location||'').toLowerCase().includes(locationQ)) return false;
-    
-    // Date Range
-    if (dateRange !== 'all') {
-      const d = r.TargetStart ? new Date(r.TargetStart) : null;
-      if (!d || isNaN(d.getTime())) return false;
-      if (dateRange === 'this-month' && d < startOfMonth) return false;
-      if (dateRange === 'last-month' && (d < startOfLastMonth || d > endOfLastMonth)) return false;
-      if (dateRange === 'this-year' && d < startOfYear) return false;
-    }
-    return true;
-  });
+  dashFilteredRecords = allData;
 
   let stats = { total: dashFilteredRecords.length, green: 0, amber: 0, red: 0, blue: 0 };
   let monthsObj = {};
@@ -2648,14 +3042,6 @@ function renderOperationalItems() {
   `).join('');
 }
 
-function resetDashFilters() {
-  document.getElementById('dash-filter-date').value = 'all';
-  document.getElementById('dash-filter-status').value = '';
-  document.getElementById('dash-filter-priority').value = '';
-  document.getElementById('dash-filter-team').value = '';
-  document.getElementById('dash-filter-location').value = '';
-  updateDashboard();
-}
 
 function updateRecentActivity() {
   const list = document.getElementById('dash-recent-list');
@@ -2781,27 +3167,29 @@ function buildEngineerFilter() {
     mfgSel.innerHTML = '<option value="">All Engineers</option>';
     engs.forEach(e => { const o = document.createElement('option'); o.textContent = e; mfgSel.appendChild(o); });
   }
-  const dashSel = document.getElementById('dash-filter-team');
-  if (dashSel) {
-    dashSel.innerHTML = '<option value="">All Teams</option>';
-    engs.forEach(e => { const o = document.createElement('option'); o.textContent = e; dashSel.appendChild(o); });
-  }
 }
 
-function applyManufacturingFilters() {
-  const q = document.getElementById('mfgSearchInput').value.toLowerCase();
-  const st = document.getElementById('mfgFilterStatus').value;
-  const eng = document.getElementById('mfgFilterEng').value;
-  const fab = document.getElementById('mfgFilterFab').value;
+function applyManufacturingFilters(rebuildFilters = true) {
   filteredFabData = allData.filter(r => {
-      const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Location||'').toLowerCase().includes(q);
-    const matchSt = !st || r.Status === st;
-    const matchEng = !eng || r.PWA_ENG === eng;
-    const matchFab = !fab || (r.FabStatus||'').toLowerCase() === fab.toLowerCase();
-    return matchQ && matchSt && matchEng && matchFab;
+    if (!r.isSentToFab) return false;
+
+    if (currentMfgTab === 'active' && r.FabStatus === 'Done') return false;
+    if (currentMfgTab === 'completed' && r.FabStatus !== 'Done') return false;
+
+    for (let col in columnSearches) {
+      const val = columnSearches[col]?.toLowerCase();
+      if (val && !String(r[col] || '').toLowerCase().includes(val)) return false;
+    }
+    for (let col in columnFilters) {
+      const selectedSet = columnFilters[col];
+      if (selectedSet && selectedSet.size > 0 && !selectedSet.has(String(r[col] || ''))) return false;
+    }
+    return true;
   });
+
   fabCurrentPage = 1;
   renderManufacturingTable();
+  if (rebuildFilters) buildColumnFilters('mfgTable', allData.filter(r => r.isSentToFab));
   const label = document.getElementById('mfgCountLabel');
   if (label) label.textContent = `(${filteredFabData.length})`;
 }
@@ -2821,11 +3209,7 @@ function renderManufacturingTable() {
     if (photo) {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">
-          <div class="photo-actions">
-            <button class="btn btn-ghost btn-icon" onclick="uploadPhotoFor('${r.WorkOrder}')" title="Replace"><i class="fas fa-sync"></i></button>
-            <button class="btn btn-red btn-icon" onclick="deletePhoto('${r.WorkOrder}')" title="Delete"><i class="fas fa-trash"></i></button>
-          </div>
+          <img src="${photo}" style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
         </div>
       `;
     } else {
@@ -2841,14 +3225,14 @@ function renderManufacturingTable() {
       <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
     ` : '';
 
-    return `<tr>
+    return `<tr oncontextmenu="showContextMenu(event, 'row-mfg', '${r.WorkOrder}')">
       <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
       <td><span class="wo-num">${r.WorkOrder}</span></td>
-      <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
-      <td>${stBadge}</td>
-      <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
-      <td style="font-size:11px">${r.Location||'—'}</td>
-      <td style="font-size:11px">${formatDate(r.TargetStart)}</td>
+      <td class="desc-cell mfg-hide-cols" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
+      <td class="mfg-hide-cols">${stBadge}</td>
+      <td class="mfg-hide-cols">${r.PWA_ENG||'—'}</td>
+      <td class="mfg-hide-cols">${r.Location||'—'}</td>
+      <td class="mfg-hide-cols">${formatDate(r.TargetStart)}</td>
       <td style="font-size:11px">${formatDate(r.TargetFinish)}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'RoadCatg')">${r.RoadCatg||'—'}</td>
       <td style="font-size:11px" onclick="makeEditable(this, '${r.WorkOrder}', 'SignMaterial')">${r.SignMaterial||'—'}</td>
@@ -2878,14 +3262,6 @@ function renderManufacturingTable() {
         </div>
       </td>
       <td>${photoCell}</td>
-      <td>
-        <div class="action-btns">
-          ${mapActions}
-          <button class="btn btn-ghost btn-sm" onclick="showPage('workorders'); selectWorkOrderRow('${r.WorkOrder}');" title="View Work Order"><i class="fas fa-clipboard-list"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${r.WorkOrder}')" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
-          ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openEditModal('${r.WorkOrder}', 'manufacturing')"><i class="fas fa-edit"></i></button>` : ''}
-        </div>
-      </td>
     </tr>`;
   }).join('');
   renderManufacturingPagination();
@@ -2922,26 +3298,27 @@ async function updateFabStatus(woId, status) {
 }
 
 function clearManufacturingFilters() {
-  document.getElementById('mfgSearchInput').value = ''; 
-  document.getElementById('mfgFilterStatus').value = '';
-  document.getElementById('mfgFilterEng').value = ''; 
-  document.getElementById('mfgFilterFab').value = '';
+  columnFilters = {};
+  columnSearches = {};
   applyManufacturingFilters();
 }
 
-function applyFilters() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const st = document.getElementById('filterStatus').value;
-  const eng = document.getElementById('filterEng').value;
+function applyFilters(rebuildFilters = true) {
   filteredData = allData.filter(r => {
-    const matchQ = !q || String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q) || (r.Location||'').toLowerCase().includes(q);
-    let matchSt = !st || r.Status === st;
-    if (st === 'NOT_COMP') matchSt = r.Status !== 'COMP';
-    const matchEng = !eng || r.PWA_ENG === eng;
-    return matchQ && matchSt && matchEng;
+    for (let col in columnSearches) {
+      const val = columnSearches[col]?.toLowerCase();
+      if (val && !String(r[col] || '').toLowerCase().includes(val)) return false;
+    }
+    for (let col in columnFilters) {
+      const selectedSet = columnFilters[col];
+      if (selectedSet && selectedSet.size > 0 && !selectedSet.has(String(r[col] || ''))) return false;
+    }
+    return true;
   });
+
   currentPage = 1;
   renderTable();
+  if (rebuildFilters) buildColumnFilters('woTable', allData);
   const label = document.getElementById('woCountLabel');
   if (label) label.textContent = `(${filteredData.length} of ${allData.length})`;
 }
@@ -3477,11 +3854,7 @@ function renderTable() {
     if (photo) {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:30px; height:20px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="viewPhoto('${r.WorkOrder}')">
-          <div class="photo-actions">
-            <button class="btn btn-ghost btn-icon" onclick="uploadPhotoFor('${r.WorkOrder}')" title="Replace"><i class="fas fa-sync"></i></button>
-            <button class="btn btn-red btn-icon" onclick="deletePhoto('${r.WorkOrder}')" title="Delete"><i class="fas fa-trash"></i></button>
-          </div>
+          <img src="${photo}" style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
         </div>
       `;
     } else {
@@ -3493,7 +3866,10 @@ function renderTable() {
       `;
     }
 
-    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" onclick="selectWorkOrderRow('${r.WorkOrder}')" ondblclick="openDetail('${r.WorkOrder}')">
+    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}"
+      onclick="selectWorkOrderRow('${r.WorkOrder}')"
+      ondblclick="openDetail('${r.WorkOrder}')"
+      oncontextmenu="showContextMenu(event, 'row-wo', '${r.WorkOrder}')">
       <td><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td>${stBadge}</td>
@@ -3517,16 +3893,6 @@ function renderTable() {
       <td style="font-size:11px">${r.TDPStatus||'—'}</td>
       <td style="font-size:11px">${formatDate(r.ExpiryDate)}</td>
       <td style="font-size:11px">${r.MediaAnnouncement||'—'}</td>
-      <td>
-        <div class="action-btns">
-          ${mapActions}
-          ${photoCell}
-          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openDetail('${r.WorkOrder}')" title="View / Edit Details"><i class="fas fa-external-link-alt"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); sendToFabrication('${r.WorkOrder}')" title="Send to Fabrication"><i class="fas fa-paper-plane"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showManufacturingFor('${r.WorkOrder}')" title="View Manufacturing"><i class="fas fa-industry"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openFabModal('${r.WorkOrder}')" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
-        </div>
-      </td>
     </tr>`;
   }).join('');
   renderPagination();
@@ -3547,8 +3913,8 @@ function renderPagination() {
 function gotoPage(p) { currentPage = p; renderTable(); }
 
 function clearFilters() {
-  document.getElementById('searchInput').value = ''; document.getElementById('filterStatus').value = '';
-  document.getElementById('filterEng').value = '';
+  columnFilters = {};
+  columnSearches = {};
   applyFilters();
 }
 
