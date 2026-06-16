@@ -3059,6 +3059,7 @@ function updateRecentActivity() {
 }
 
 // Global search handling
+if (document.getElementById('dash-global-search')) {
 document.getElementById('dash-global-search').oninput = function(e) {
   const q = e.target.value.toLowerCase();
   const panel = document.getElementById('dash-search-panel');
@@ -3087,6 +3088,7 @@ document.getElementById('dash-global-search').oninput = function(e) {
     `).join('');
   }
 };
+}
 
 function drillDown(type, val = null) {
   let list = [...dashFilteredRecords];
