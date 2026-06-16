@@ -265,35 +265,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
 
 /* ─── CONTEXT MENU ─── */
-.context-menu {
-  position: fixed;
-  z-index: 5000;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-  display: none;
-  flex-direction: column;
-  padding: 8px 0;
-  min-width: 180px;
-}
-.context-menu-item {
-  padding: 10px 16px;
-  font-size: 12px;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.context-menu-item:hover {
-  background: var(--surface2);
-  color: var(--accent);
-}
-.context-menu-item.danger:hover {
-  color: var(--red);
-}
 
 /* ─── EXCEL FILTERS ─── */
 .th-filter-wrap {
@@ -2229,7 +2200,12 @@ async function initDashMap() {
   if (!mapCont) return;
 
   dashMap = L.map('dashMap', {
-    zoomControl: true,
+    zoomControl: false,
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    touchZoom: false,
     attributionControl: false
   }).setView([25.2854, 51.5310], 11);
 
@@ -2266,7 +2242,6 @@ async function initDashMap() {
         opacity: 1,
         fillOpacity: 0.8
       }).addTo(dashMap);
-      marker.bindPopup(`<b>WO: ${r.WorkOrder}</b><br>${r.Description}<br>Status: ${r.Status}`);
     }
   });
   
@@ -2430,13 +2405,20 @@ function showContextMenu(e, context, woId = null) {
         if (r && r.Lat && r.Lng) showOnMap(r.Lat, r.Lng, woId);
         else showToast("Coordinates missing", "error");
       }},
-      { label: 'Fabrication PDF', icon: 'fa-file-pdf', action: () => openFabModal(woId) },
-      { label: 'Send to Fabrication', icon: 'fa-paper-plane', action: () => sendToFabrication(woId) },
-      { divider: true },
-      { label: 'Print Record', icon: 'fa-print', action: () => { selectedWorkOrder = woId; printDetail(); } },
-      { divider: true },
-      { label: 'Delete Record', icon: 'fa-trash', action: () => deleteWO(woId), danger: true }
+      { label: 'Fabrication PDF', icon: 'fa-file-pdf', action: () => openFabModal(woId) }
     ];
+
+    if (hasPermission('edit')) {
+      items.push({ label: 'Send to Fabrication', icon: 'fa-paper-plane', action: () => sendToFabrication(woId) });
+    }
+
+    items.push({ divider: true });
+    items.push({ label: 'Print Record', icon: 'fa-print', action: () => { selectedWorkOrder = woId; printDetail(); } });
+
+    if (isAdmin) {
+      items.push({ divider: true });
+      items.push({ label: 'Delete Record', icon: 'fa-trash', action: () => deleteWO(woId), danger: true });
+    }
   } else if (context === 'detail-modal') {
     const isEditing = document.getElementById('detailModal').classList.contains('editing');
     if (isEditing) {
@@ -2446,14 +2428,20 @@ function showContextMenu(e, context, woId = null) {
       ];
     } else {
       items = [
-        { label: 'Edit Record', icon: 'fa-edit', action: () => toggleDetailEdit() },
         { label: 'Print Record', icon: 'fa-print', action: () => printDetail() },
-        { label: 'Export PDF', icon: 'fa-file-pdf', action: () => exportPDFFromDetail() },
-        { label: 'Send to Fabrication', icon: 'fa-paper-plane', action: () => sendToFabFromDetail() },
-        { label: 'Duplicate WO', icon: 'fa-copy', action: () => duplicateWO() },
-        { divider: true },
-        { label: 'Close WO', icon: 'fa-check-circle', action: () => closeWO() }
+        { label: 'Export PDF', icon: 'fa-file-pdf', action: () => exportPDFFromDetail() }
       ];
+
+      if (hasPermission('edit')) {
+        items.unshift({ label: 'Edit Record', icon: 'fa-edit', action: () => toggleDetailEdit() });
+        items.push({ label: 'Send to Fabrication', icon: 'fa-paper-plane', action: () => sendToFabFromDetail() });
+        items.push({ label: 'Duplicate WO', icon: 'fa-copy', action: () => duplicateWO() });
+      }
+
+      if (isAdmin) {
+        items.push({ divider: true });
+        items.push({ label: 'Close WO', icon: 'fa-check-circle', action: () => closeWO() });
+      }
     }
   }
   
@@ -3054,14 +3042,6 @@ function renderOperationalItems() {
   `).join('');
 }
 
-function resetDashFilters() {
-  document.getElementById('dash-filter-date').value = 'all';
-  document.getElementById('dash-filter-status').value = '';
-  document.getElementById('dash-filter-priority').value = '';
-  document.getElementById('dash-filter-team').value = '';
-  document.getElementById('dash-filter-location').value = '';
-  updateDashboard();
-}
 
 function updateRecentActivity() {
   const list = document.getElementById('dash-recent-list');
@@ -3187,11 +3167,6 @@ function buildEngineerFilter() {
     mfgSel.innerHTML = '<option value="">All Engineers</option>';
     engs.forEach(e => { const o = document.createElement('option'); o.textContent = e; mfgSel.appendChild(o); });
   }
-  const dashSel = document.getElementById('dash-filter-team');
-  if (dashSel) {
-    dashSel.innerHTML = '<option value="">All Teams</option>';
-    engs.forEach(e => { const o = document.createElement('option'); o.textContent = e; dashSel.appendChild(o); });
-  }
 }
 
 function applyManufacturingFilters(rebuildFilters = true) {
@@ -3203,10 +3178,7 @@ function applyManufacturingFilters(rebuildFilters = true) {
 
     for (let col in columnSearches) {
       const val = columnSearches[col]?.toLowerCase();
-      if (val) {
-        const match = Object.values(r).some(v => String(v || '').toLowerCase().includes(val));
-        if (!match) return false;
-      }
+      if (val && !String(r[col] || '').toLowerCase().includes(val)) return false;
     }
     for (let col in columnFilters) {
       const selectedSet = columnFilters[col];
@@ -3335,11 +3307,7 @@ function applyFilters(rebuildFilters = true) {
   filteredData = allData.filter(r => {
     for (let col in columnSearches) {
       const val = columnSearches[col]?.toLowerCase();
-      if (val) {
-        // Keyword search must scan all relevant fields as per requirement
-        const match = Object.values(r).some(v => String(v || '').toLowerCase().includes(val));
-        if (!match) return false;
-      }
+      if (val && !String(r[col] || '').toLowerCase().includes(val)) return false;
     }
     for (let col in columnFilters) {
       const selectedSet = columnFilters[col];
