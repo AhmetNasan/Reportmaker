@@ -302,6 +302,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   gap: 4px;
   padding: 6px 0;
   min-width: 100px;
+  position: relative;
 }
 .th-search-input {
   width: 100%;
@@ -318,49 +319,54 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(0, 200, 255, 0.1);
 }
-.th-filter-dropdown {
-  position: relative;
+.th-filter-dropdown-btn {
   width: 100%;
-}
-.th-filter-btn {
-  width: 100%;
-  background: var(--bg);
+  padding: 4px 8px;
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 10px;
+  background: var(--bg);
   color: var(--text);
+  font-size: 10px;
   text-align: left;
-  cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: pointer;
 }
-.th-filter-menu {
+.th-filter-dropdown-content {
+  display: none;
   position: absolute;
   top: 100%;
   left: 0;
-  width: 100%;
+  width: 180px;
   max-height: 200px;
   overflow-y: auto;
-  background: var(--surface);
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  z-index: 100;
-  display: none;
+  border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 1000;
+  padding: 8px;
 }
-.th-filter-menu.open { display: block; }
-.th-filter-item {
-  padding: 4px 8px;
-  font-size: 10px;
-  cursor: pointer;
+.th-filter-dropdown-content.show {
+  display: block;
+}
+.th-filter-option {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text);
 }
-.th-filter-item:hover { background: var(--surface2); }
-.th-filter-item input { pointer-events: none; }
+.th-filter-option:hover {
+  background: var(--hover-bg);
+}
+.th-filter-option input {
+  cursor: pointer;
+}
 
 .mfg-hide-cols { display: none; }
 .mfg-show-details .mfg-hide-cols { display: table-cell; }
@@ -1510,8 +1516,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <th rowspan="3" data-col="Location" class="mfg-hide-cols">Location</th>
             <th rowspan="3" data-col="TargetStart" class="mfg-hide-cols">Target Start</th>
             <th rowspan="3" data-col="TargetFinish">Target Finish</th>
-            <th rowspan="3" style="background: #1b5e20; color: white;">Road Catg.</th>
-            <th rowspan="3" style="background: #1b5e20; color: white;">Sign Material</th>
+            <th rowspan="3" style="background: #1b5e20; color: white;" data-col="RoadCatg">Road Catg.</th>
+            <th rowspan="3" style="background: #1b5e20; color: white;" data-col="SignMaterial">Sign Material</th>
             <th colspan="13" style="background: #4a148c; color: white; text-align: center;">Fabrication</th>
             <th rowspan="3">Photo</th>
           </tr>
@@ -1524,16 +1530,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <th rowspan="2" style="background: #9c27b0; color: white; text-align: center;">Details</th>
           </tr>
           <tr>
-            <th style="background: #ab47bc; color: white;">Sign Type</th>
-            <th style="background: #ab47bc; color: white;">Sign REF.</th>
-            <th style="background: #ab47bc; color: white;">Sign Shape</th>
-            <th style="background: #ab47bc; color: white;">SIZE (mm)</th>
-            <th style="background: #ab47bc; color: white;">QTY.</th>
-            <th style="background: #ba68c8; color: white;">TYPE</th>
-            <th style="background: #ba68c8; color: white;">HEIGHT (mm)</th>
-            <th style="background: #ba68c8; color: white;">QTY.</th>
-            <th style="background: #ce93d8; color: white;">Size L × W × H (mm)</th>
-            <th style="background: #ce93d8; color: white;">QTY.</th>
+            <th style="background: #ab47bc; color: white;" data-col="SignType">Sign Type</th>
+            <th style="background: #ab47bc; color: white;" data-col="SignRef">Sign REF.</th>
+            <th style="background: #ab47bc; color: white;" data-col="SignShape">Sign Shape</th>
+            <th style="background: #ab47bc; color: white;" data-col="SignSize">SIZE (mm)</th>
+            <th style="background: #ab47bc; color: white;" data-col="SignQty">QTY.</th>
+            <th style="background: #ba68c8; color: white;" data-col="PostType">TYPE</th>
+            <th style="background: #ba68c8; color: white;" data-col="PostHeight">HEIGHT (mm)</th>
+            <th style="background: #ba68c8; color: white;" data-col="PostQty">QTY.</th>
+            <th style="background: #ce93d8; color: white;" data-col="FoundSize">Size L × W × H (mm)</th>
+            <th style="background: #ce93d8; color: white;" data-col="FoundQty">QTY.</th>
           </tr>
         </thead>
         <tbody id="mfgBody">
@@ -1955,7 +1961,7 @@ let notifications = [];
 let notifTab = 'all';
 
 let dashMap = null;
-let columnFilters = {}; // Maps col to Set of selected values
+let columnFilters = {};
 let columnSearches = {};
 let mfgShowDetails = false;
 let currentMfgTab = 'active';
@@ -2214,8 +2220,11 @@ async function fetchAllWorkOrders() {
   }));
 }
 
-function initDashMap() {
-  if (dashMap) return;
+async function initDashMap() {
+  if (dashMap) {
+    dashMap.invalidateSize();
+    return;
+  }
   const mapCont = document.getElementById('dashMap');
   if (!mapCont) return;
 
@@ -2226,18 +2235,29 @@ function initDashMap() {
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dashMap);
 
-  const statusColors = {
-    'COMP': '#2ecc71',
-    'INPRG': '#3498db',
-    'DISPATCH': '#f1c40f',
-    'RTNENG': '#e67e22',
-    'WPERM': '#9b59b6',
-    'APPR': '#1abc9c'
+  // Load Boundary for Dash Map
+  if (supabaseClient) {
+    try {
+      const { data } = await supabaseClient.from('project_boundaries').select('*').limit(1).maybeSingle();
+      if (data && data.geojson) {
+        L.geoJSON(data.geojson, {
+          style: data.style_settings || { color: '#00c8ff', weight: 3, fillOpacity: 0.1 }
+        }).addTo(dashMap);
+      }
+    } catch(e) { console.error("Dash map boundary load failed", e); }
+  }
+
+  const catColors = {
+    'green': '#2ecc71', // On-Time
+    'amber': '#f1c40f', // Completed (Breached)
+    'red': '#e74c3c',   // Not Completed (Breached)
+    'blue': '#3498db'   // Pending
   };
 
   allData.forEach(r => {
     if (r.Lat && r.Lng) {
-      const color = statusColors[r.Status] || '#95a5a6';
+      const cat = getStatusCat(r);
+      const color = catColors[cat] || '#95a5a6';
       const marker = L.circleMarker([r.Lat, r.Lng], {
         radius: 6,
         fillColor: color,
@@ -2272,104 +2292,118 @@ function buildColumnFilters(tableId, data) {
   const table = document.getElementById(tableId);
   if (!table) return;
   const headers = table.querySelectorAll('thead th[data-col]');
-  
   headers.forEach(th => {
     const col = th.getAttribute('data-col');
     if (!col) return;
 
     let wrap = th.querySelector('.th-filter-wrap');
-    let search, btn, menu;
+    let searchInput;
+    let dropBtn;
 
     if (!wrap) {
       wrap = document.createElement('div');
       wrap.className = 'th-filter-wrap';
       wrap.onclick = (e) => e.stopPropagation();
 
-      search = document.createElement('input');
-      search.type = 'text';
-      search.className = 'th-search-input';
-      search.placeholder = 'Search...';
-      
-      const dropdown = document.createElement('div');
-      dropdown.className = 'th-filter-dropdown';
-      
-      btn = document.createElement('div');
-      btn.className = 'th-filter-btn';
-      btn.innerHTML = '<span>All</span> <i class="fas fa-chevron-down"></i>';
-      btn.onclick = () => {
-        const isOpen = menu.classList.contains('open');
-        document.querySelectorAll('.th-filter-menu').forEach(m => m.classList.remove('open'));
-        if (!isOpen) menu.classList.add('open');
+      searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.className = 'th-search-input';
+      searchInput.placeholder = 'Search...';
+      searchInput.oninput = (e) => {
+        columnSearches[col] = e.target.value;
+        if (tableId === 'mfgTable') applyManufacturingFilters(false);
+        else applyFilters(false);
       };
+      wrap.appendChild(searchInput);
 
-      menu = document.createElement('div');
-      menu.className = 'th-filter-menu';
+      dropBtn = document.createElement('div');
+      dropBtn.className = 'th-filter-dropdown-btn';
+      dropBtn.innerHTML = '<span>Filter...</span> <i class="fas fa-chevron-down"></i>';
+      dropBtn.onclick = (e) => {
+        const content = dropBtn.nextElementSibling;
+        const wasShown = content.classList.contains('show');
+        document.querySelectorAll('.th-filter-dropdown-content').forEach(c => c.classList.remove('show'));
+        if (!wasShown) content.classList.add('show');
+        e.stopPropagation();
+      };
+      wrap.appendChild(dropBtn);
 
-      dropdown.appendChild(btn);
-      dropdown.appendChild(menu);
-      wrap.appendChild(search);
-      wrap.appendChild(dropdown);
+      const dropContent = document.createElement('div');
+      dropContent.className = 'th-filter-dropdown-content';
+      wrap.appendChild(dropContent);
+
       th.appendChild(wrap);
     } else {
-      search = wrap.querySelector('.th-search-input');
-      btn = wrap.querySelector('.th-filter-btn');
-      menu = wrap.querySelector('.th-filter-menu');
+      searchInput = wrap.querySelector('.th-search-input');
+      dropBtn = wrap.querySelector('.th-filter-dropdown-btn');
     }
 
-    // Update handlers to avoid re-creation
-    search.oninput = (e) => {
-      columnSearches[col] = e.target.value;
-      if (tableId === 'mfgTable') applyManufacturingFilters(false);
-      else applyFilters(false);
-    };
+    // Always update search value
+    searchInput.value = columnSearches[col] || '';
 
-    // Populate Menu
-    const uniqueValues = [...new Set(data.map(r => r[col] || ''))].sort();
-    const selected = columnFilters[col] || new Set();
+    // Re-build dropdown items
+    const dropContent = wrap.querySelector('.th-filter-dropdown-content');
+    const values = [...new Set(data.map(r => r[col] || ''))].sort();
     
-    menu.innerHTML = '';
+    dropContent.innerHTML = '';
     
-    // Select All / Clear option
-    const allItem = document.createElement('div');
-    allItem.className = 'th-filter-item';
-    allItem.innerHTML = `<input type="checkbox" ${selected.size === 0 ? 'checked' : ''}> <i>(All)</i>`;
-    allItem.onclick = () => {
+    // Clear All option
+    const clearOpt = document.createElement('div');
+    clearOpt.className = 'th-filter-option';
+    clearOpt.style.fontWeight = 'bold';
+    clearOpt.style.borderBottom = '1px solid var(--border)';
+    clearOpt.innerHTML = `<span>Clear Filter</span>`;
+    clearOpt.onclick = () => {
       columnFilters[col] = new Set();
       if (tableId === 'mfgTable') applyManufacturingFilters();
       else applyFilters();
     };
-    menu.appendChild(allItem);
+    dropContent.appendChild(clearOpt);
 
-    uniqueValues.forEach(v => {
-      if (v === '' || v === null) return;
-      const item = document.createElement('div');
-      item.className = 'th-filter-item';
-      const isChecked = selected.has(String(v));
-      item.innerHTML = `<input type="checkbox" ${isChecked ? 'checked' : ''}> <span>${v}</span>`;
-      item.onclick = () => {
-        if (selected.has(String(v))) selected.delete(String(v));
-        else selected.add(String(v));
-        columnFilters[col] = selected;
+    values.forEach(v => {
+      const opt = document.createElement('div');
+      opt.className = 'th-filter-option';
+      
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      const currentSet = columnFilters[col] || new Set();
+      chk.checked = currentSet.has(String(v));
+      
+      chk.onchange = (e) => {
+        if (!columnFilters[col]) columnFilters[col] = new Set();
+        if (e.target.checked) columnFilters[col].add(String(v));
+        else columnFilters[col].delete(String(v));
+        
         if (tableId === 'mfgTable') applyManufacturingFilters();
         else applyFilters();
       };
-      menu.appendChild(item);
+      
+      opt.onclick = (e) => {
+        if (e.target !== chk) {
+          chk.checked = !chk.checked;
+          chk.dispatchEvent(new Event('change'));
+        }
+      };
+      
+      opt.appendChild(chk);
+      const label = document.createElement('span');
+      label.textContent = v === '' ? '(Empty)' : v;
+      opt.appendChild(label);
+      dropContent.appendChild(opt);
     });
 
-    // Update button label
-    const label = btn.querySelector('span');
-    if (selected.size === 0) label.textContent = 'All';
-    else if (selected.size === 1) label.textContent = Array.from(selected)[0];
-    else label.textContent = `${selected.size} selected`;
+    // Update button text
+    const activeSet = columnFilters[col];
+    const btnSpan = dropBtn.querySelector('span');
+    if (activeSet && activeSet.size > 0) {
+      btnSpan.textContent = activeSet.size === 1 ? [...activeSet][0] : `${activeSet.size} selected`;
+      dropBtn.style.borderColor = 'var(--accent)';
+    } else {
+      btnSpan.textContent = 'Filter...';
+      dropBtn.style.borderColor = 'var(--border)';
+    }
   });
 }
-
-// Global click to close filter menus
-window.addEventListener('click', (e) => {
-  if (!e.target.closest('.th-filter-dropdown')) {
-    document.querySelectorAll('.th-filter-menu').forEach(m => m.classList.remove('open'));
-  }
-});
 
 function showContextMenu(e, context, woId = null) {
   e.preventDefault();
@@ -2839,6 +2873,7 @@ function showPage(id) {
         document.querySelectorAll('.bar-seg').forEach(el => {
           el.style.width = el.getAttribute('data-w') + '%';
         });
+        initDashMap();
      }, 100);
   }
   if(id === 'manufacturing') {
@@ -3167,8 +3202,11 @@ function applyManufacturingFilters(rebuildFilters = true) {
     if (currentMfgTab === 'completed' && r.FabStatus !== 'Done') return false;
 
     for (let col in columnSearches) {
-      const val = columnSearches[col];
-      if (val && !String(r[col] || '').toLowerCase().includes(val.toLowerCase())) return false;
+      const val = columnSearches[col]?.toLowerCase();
+      if (val) {
+        const match = Object.values(r).some(v => String(v || '').toLowerCase().includes(val));
+        if (!match) return false;
+      }
     }
     for (let col in columnFilters) {
       const selectedSet = columnFilters[col];
@@ -3296,8 +3334,12 @@ function clearManufacturingFilters() {
 function applyFilters(rebuildFilters = true) {
   filteredData = allData.filter(r => {
     for (let col in columnSearches) {
-      const val = columnSearches[col];
-      if (val && !String(r[col] || '').toLowerCase().includes(val.toLowerCase())) return false;
+      const val = columnSearches[col]?.toLowerCase();
+      if (val) {
+        // Keyword search must scan all relevant fields as per requirement
+        const match = Object.values(r).some(v => String(v || '').toLowerCase().includes(val));
+        if (!match) return false;
+      }
     }
     for (let col in columnFilters) {
       const selectedSet = columnFilters[col];
