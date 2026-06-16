@@ -120,7 +120,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .kpi-card.failed::before { background: var(--red); }
 .kpi-card.pending::before { background: var(--blue); }
 .kpi-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-.kpi-value { font-family: 'Inter', 'Noto Sans Arabic', sans-serif; font-size: 42px; font-weight: 800; line-height: 1; color: #fff; }
+.kpi-value { font-family: 'Inter', 'Noto Sans Arabic', sans-serif; font-size: 28px; font-weight: 800; line-height: 1; color: #fff; }
 @media (max-width: 600px) { .kpi-value { font-size: 32px; } }
 [data-theme="light"] .kpi-value { color: var(--text); }
 .kpi-card.total .kpi-value { color: var(--accent); }
@@ -312,11 +312,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   width: 180px;
   max-height: 200px;
   overflow-y: auto;
-  background: var(--card-bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 2000;
   padding: 8px;
 }
 .th-filter-dropdown-content.show {
@@ -333,7 +333,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   color: var(--text);
 }
 .th-filter-option:hover {
-  background: var(--hover-bg);
+  background: var(--surface2);
 }
 .th-filter-option input {
   cursor: pointer;
@@ -951,48 +951,42 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
     </header>
 
-    <div class="kpi-grid">
-      <div class="kpi-card total cursor-pointer" onclick="drillDown('all')" style="background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 200, 255, 0.05) 100%); cursor:pointer;">
-        <div class="kpi-label">Total Work Orders</div>
-        <div class="kpi-value" id="kpiTotal">-</div>
-        <div class="kpi-pct" id="kpiTotalLabel">System Records</div>
-        <div class="kpi-icon">📋</div>
-      </div>
-      <div class="kpi-card on-time cursor-pointer" onclick="drillDown('on-time')" style="cursor:pointer;">
-        <div class="kpi-label">On-Time</div>
-        <div class="kpi-value" id="kpiGreen">-</div>
-        <div class="kpi-pct" id="kpiGreenPct">-%</div>
-        <div class="kpi-icon">✅</div>
-      </div>
-      <div class="kpi-card breached cursor-pointer" onclick="drillDown('breached-comp')" style="cursor:pointer;">
-        <div class="kpi-label">Completed (Breached)</div>
-        <div class="kpi-value" id="kpiAmber">-</div>
-        <div class="kpi-pct" id="kpiAmberPct">-%</div>
-        <div class="kpi-icon">⚠️</div>
-      </div>
-      <div class="kpi-card failed cursor-pointer" onclick="drillDown('breached-pending')" style="cursor:pointer;">
-        <div class="kpi-label">Not Completed (Breached)</div>
-        <div class="kpi-value" id="kpiRed">-</div>
-        <div class="kpi-pct" id="kpiRedPct">-%</div>
-        <div class="kpi-icon">❌</div>
-      </div>
-      <div class="kpi-card pending cursor-pointer" onclick="drillDown('pending')" style="cursor:pointer;">
-        <div class="kpi-label">Pending within Target Date</div>
-        <div class="kpi-value" id="kpiBlue">-</div>
-        <div class="kpi-pct" id="kpiBluePct">-%</div>
-        <div class="kpi-icon">⏳</div>
-      </div>
-    </div>
+    <div class="two-col" style="grid-template-columns: 1fr 380px; align-items: start;">
+      <!-- Left Column: KPIs and Analytics -->
+      <div style="display:flex; flex-direction:column; gap:24px;">
+        <!-- KPIs Row -->
+        <div class="kpi-grid" style="margin-bottom: 0;">
+          <div class="kpi-card total cursor-pointer" onclick="drillDown('all')" style="background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 200, 255, 0.05) 100%);">
+            <div class="kpi-label">Total</div>
+            <div class="kpi-value" id="kpiTotal">-</div>
+            <div class="kpi-icon">📋</div>
+          </div>
+          <div class="kpi-card on-time cursor-pointer" onclick="drillDown('on-time')">
+            <div class="kpi-label">On-Time</div>
+            <div class="kpi-value" id="kpiGreen">-</div>
+            <div class="kpi-pct" id="kpiGreenPct">-%</div>
+          </div>
+          <div class="kpi-card breached cursor-pointer" onclick="drillDown('breached-comp')">
+            <div class="kpi-label">Comp(B)</div>
+            <div class="kpi-value" id="kpiAmber">-</div>
+            <div class="kpi-pct" id="kpiAmberPct">-%</div>
+          </div>
+          <div class="kpi-card failed cursor-pointer" onclick="drillDown('breached-pending')">
+            <div class="kpi-label">NotComp(B)</div>
+            <div class="kpi-value" id="kpiRed">-</div>
+            <div class="kpi-pct" id="kpiRedPct">-%</div>
+          </div>
+          <div class="kpi-card pending cursor-pointer" onclick="drillDown('pending')">
+            <div class="kpi-label">Pending</div>
+            <div class="kpi-value" id="kpiBlue">-</div>
+            <div class="kpi-pct" id="kpiBluePct">-%</div>
+          </div>
+        </div>
 
-    <div class="section-title">GIS Overview Map</div>
-    <div class="card" style="padding:0; height:400px; overflow:hidden; margin-bottom:24px; border:1px solid var(--border);">
-      <div id="dashMap" style="width:100%; height:100%; z-index:1;"></div>
-    </div>
-
-    <div class="two-col" style="grid-template-columns: 2fr 1fr;">
-      <div style="display:flex; flex-direction:column; gap:20px;">
-        <div class="section-title">Performance Analytics</div>
-        <div class="two-col">
+        <!-- Performance Analytics -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          <div class="section-title">Performance Analytics</div>
+          <div class="two-col" style="margin-bottom: 0;">
           <div class="card">
             <div class="card-title">Monthly Volume — Stacked</div>
             <div class="bar-chart" id="barChart"></div>
@@ -1029,37 +1023,53 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <div id="dash-search-results"></div>
         </div>
         
+        <div class="two-col" style="margin-bottom: 0;">
+          <div style="display:flex; flex-direction:column; gap:20px;">
+             <div class="section-title">Top Pending</div>
+             <div class="card" id="dash-pending-items" style="display:flex; flex-direction:column; gap:8px; padding:16px;"></div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:20px;">
+             <div class="section-title">Due Soon</div>
+             <div class="card" id="dash-overdue-items" style="display:flex; flex-direction:column; gap:8px; padding:16px;"></div>
+          </div>
+        </div>
+
         <div id="dash-recent-activity-section">
           <div class="section-title">Recent Activity</div>
           <div class="card" style="padding:0;">
-            <div id="dash-recent-list" style="max-height:400px; overflow-y:auto;">
-              <div style="padding:40px; text-align:center; color:var(--muted);">No recent activity</div>
+            <div id="dash-recent-list" style="max-height:200px; overflow-y:auto;">
+              <div style="padding:20px; text-align:center; color:var(--muted); font-size:12px;">No recent activity</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:20px;">
-        <div class="section-title">Operational Health</div>
-        <div class="card">
-          <div class="card-title">Top Pending Items</div>
-          <div id="dash-pending-items" style="display:flex; flex-direction:column; gap:12px;"></div>
+      <!-- Right Column: GIS Map and Quick Info -->
+      <div style="display:flex; flex-direction:column; gap:24px;">
+        <div class="section-title">GIS Overview</div>
+        <div class="card" style="padding:0; height:650px; overflow:hidden; border:1px solid var(--border); position: relative;">
+          <div id="dashMap" style="width:100%; height:100%; z-index:1;"></div>
+          <!-- Quick Legend Overlay on Map -->
+          <div style="position: absolute; bottom: 10px; left: 10px; z-index: 1000; background: var(--surface); padding: 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 10px; display: flex; flex-direction: column; gap: 4px;">
+             <div style="display:flex; align-items:center; gap:6px;"><span class="dot green"></span> On-Time</div>
+             <div style="display:flex; align-items:center; gap:6px;"><span class="dot amber"></span> Comp(B)</div>
+             <div style="display:flex; align-items:center; gap:6px;"><span class="dot red"></span> NotComp(B)</div>
+             <div style="display:flex; align-items:center; gap:6px;"><span class="dot blue"></span> Pending</div>
+          </div>
         </div>
-        <div class="card">
-          <div class="card-title">Due Soon / Overdue</div>
-          <div id="dash-overdue-items" style="display:flex; flex-direction:column; gap:12px;"></div>
-        </div>
+
         <div class="card">
           <div class="card-title">Work Orders by Area</div>
-          <div id="dash-area-stats" style="display:flex; flex-direction:column; gap:10px;"></div>
+          <div id="dash-area-stats" style="display:flex; flex-direction:column; gap:8px; max-height: 200px; overflow-y: auto;"></div>
         </div>
+
         <div class="card">
           <div class="card-title">Quick Actions</div>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button class="btn btn-ghost btn-sm" onclick="showPage('manufacturing')"><i class="fas fa-industry"></i> Manufacturing</button>
-            <button class="btn btn-primary btn-sm" onclick="openAddModal()"><i class="fas fa-plus"></i> New WO</button>
-            <button class="btn btn-ghost btn-sm" onclick="exportTableCSV()"><i class="fas fa-download"></i> Export Data</button>
-            <button class="btn btn-ghost btn-sm" onclick="showPage('settings')"><i class="fas fa-cog"></i> Settings</button>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('manufacturing')" style="font-size:11px;"><i class="fas fa-industry"></i> Fab</button>
+            <button class="btn btn-primary btn-sm" onclick="openAddModal()" style="font-size:11px;"><i class="fas fa-plus"></i> New</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportTableCSV()" style="font-size:11px;"><i class="fas fa-download"></i> CSV</button>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('settings')" style="font-size:11px;"><i class="fas fa-cog"></i> Gear</button>
           </div>
         </div>
       </div>
