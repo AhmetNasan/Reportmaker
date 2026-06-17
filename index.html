@@ -2135,17 +2135,24 @@ async function onAuthenticated() {
   const userInit = document.getElementById('nav-user-initial');
   if (userInit) userInit.textContent = currentUser.email.charAt(0).toUpperCase();
   
+  const ap = document.getElementById('admin-panel');
+  const settingsTab = document.getElementById('nav-tab-settings');
+  const mobileSettingsTab = document.getElementById('mobile-nav-settings');
+  
   if (isAdmin) {
-    const ap = document.getElementById('admin-panel');
     if (ap) ap.style.display = 'block';
-    const settingsTab = document.getElementById('nav-tab-settings');
     if (settingsTab) settingsTab.style.display = 'flex';
-    const mobileSettingsTab = document.getElementById('mobile-nav-settings');
     if (mobileSettingsTab) mobileSettingsTab.style.display = 'flex';
     
     updateAdminUI();
     fetchPendingApprovalCount();
     loadPendingUsers();
+  } else {
+    // Ensure UI elements are hidden if not admin
+    if (ap) ap.style.display = 'none';
+    if (settingsTab) settingsTab.style.display = 'none';
+    if (mobileSettingsTab) mobileSettingsTab.style.display = 'none';
+    updateAdminUI(); 
   }
 
   await loadSystemSettings();
@@ -2193,6 +2200,7 @@ async function saveSystemSettings() {
     });
     
     contractStartDate = dateVal;
+    logAudit("Updated System Settings", `Contract Start Date: ${dateVal}`);
     showToast("System settings saved");
   } catch(e) { 
     console.error(e);
@@ -2807,6 +2815,7 @@ async function handleLogoUpload(event) {
       // For now, let's use localStorage as a cache and hope they refresh
       localStorage.setItem('qbc_logo', companyLogo);
       applyLogo();
+      logAudit("Updated Company Logo");
       showToast("Logo updated in cloud");
     } catch (e) {
       console.error(e);
@@ -2832,6 +2841,7 @@ async function removeLogo() {
      try { await supabaseClient.storage.from('qbc-storage').remove(['branding/logo.png']); } catch(e){}
   }
   applyLogo();
+  logAudit("Removed Company Logo");
   showToast("Logo removed");
 }
 
@@ -3392,6 +3402,7 @@ async function updateFabStatus(woId, status) {
   wo.FabStatus = status;
   try {
     await saveWorkOrderToSupabase(wo);
+    logAudit("Changed Manufacturing Status", `Status: ${status}, WO: ${woId}`, woId);
     addNotification(`Manufacturing status changed to ${status}`, woId, 'manufacturing');
     showToast(`Status updated to ${status}`);
     if (status === 'Done') {
@@ -3694,6 +3705,7 @@ async function saveDetailChanges() {
 
   try {
     await saveWorkOrderToSupabase(updatedData);
+    logAudit("Updated Work Order Details", `WO #${wo.WorkOrder}`, wo.WorkOrder);
     addNotification(`Updated Work Order ${wo.WorkOrder}`, wo.WorkOrder, 'workorders');
     showToast("Changes saved successfully");
     
@@ -4225,6 +4237,7 @@ async function saveProfile() {
     }
 
     showToast("Profile updated successfully");
+    logAudit("Updated Profile", `Updated user metadata/profile: ${currentUser.email}`);
     closeModal('profileModal');
     
     // Update UI dynamically
@@ -4360,25 +4373,17 @@ async function processExcelUpload() {
       const rawHeaders = rows[0];
       const headers = rawHeaders.map(h => String(h || '').toLowerCase().trim());
       const dataRows = rows.slice(1);
-      const woIdx = headers.findIndex(h => h === 'work order' || h === 'workorder' || h === 'wo');
-      
-      if (woIdx < 0) { 
-        console.error("CSV Headers found:", headers);
-        showToast('Column "Work Order" not found in CSV', 'error'); 
-        return; 
-      }
-
-      const upsertData = [];
       const MAP = { 
         'work order #': 'WorkOrder', 'work order': 'WorkOrder', 'workorder': 'WorkOrder', 'wo': 'WorkOrder', 'wo #': 'WorkOrder',
         'description': 'Description', 'status': 'Status', 'pwa engineer': 'PWA_ENG', 'engineer': 'PWA_ENG', 'pwa eng': 'PWA_ENG',
         'target start': 'TargetStart', 'target start date': 'TargetStart', 'target finish': 'TargetFinish', 'target finish date': 'TargetFinish', 'remaining': 'Remaining',
         'highway': 'Location', 'location': 'Location', 'latitude': 'Lat', 'longitude': 'Lng', 'lat': 'Lat', 'lng': 'Lng',
         'latitudey': 'Lat', 'longitudex': 'Lng', 'road category': 'RoadCatg', 'road catg': 'RoadCatg',
-        'sign type': 'SignType', 'sign ref': 'SignRef', 'sign shape': 'SignShape', 
+        'sign type': 'SignType', 'sign ref': 'SignRef', 'sign reference': 'SignRef', 'sign shape': 'SignShape', 
         'sign size': 'SignSize', 'sign material': 'SignMaterial',
-        'sign qty': 'SignQty', 'post type': 'PostType', 'post height': 'PostHeight', 
-        'post qty': 'PostQty', 'found size': 'FoundSize', 'found qty': 'FoundQty',
+        'sign qty': 'SignQty', 'sign quantity': 'SignQty', 'post type': 'PostType', 'post height': 'PostHeight', 
+        'post qty': 'PostQty', 'post quantity': 'PostQty', 'found size': 'FoundSize', 'foundation size': 'FoundSize', 
+        'found qty': 'FoundQty', 'foundation quantity': 'FoundQty',
         'scrap removal': 'ScrapRemoval', 'fab status': 'FabStatus', 
         'installation date': 'InstallationDate', 'install date': 'InstallationDate', 'installation': 'InstallationDate',
         'reported by': 'ReportedBy', 'reported': 'ReportedBy', 'reported date': 'ReportedDate', 'reported da': 'ReportedDate',
@@ -4390,6 +4395,16 @@ async function processExcelUpload() {
         'install date': 'InstallationDate', 'reported date': 'ReportedDate', 'status update date': 'StatusUpdateDate',
         'app date': 'ApplicationDate', 'application date': 'ApplicationDate', 'expiry date': 'ExpiryDate'
       };
+
+      const woIdx = headers.findIndex(h => MAP[h] === 'WorkOrder');
+      
+      if (woIdx < 0) { 
+        console.error("CSV Headers found:", headers);
+        showToast('Column "Work Order" not found in CSV', 'error'); 
+        return; 
+      }
+
+      const upsertData = [];
       const DATE_KEYS = ['TargetStart', 'TargetFinish', 'InstallationDate', 'ReportedDate', 'StatusUpdateDate', 'ApplicationDate', 'ExpiryDate'];
       const VALID_STATUSES = ['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR','APPROVED','COMPLETED','IN PROGRESS'];
       const STATUS_MAP = {
@@ -4556,6 +4571,7 @@ async function processExcelUpload() {
       }
       statusMsg.classList.add('success');
       showToast(`Finished processing ${uniqueData.length + uploadErrors.length} records`);
+      logAudit("Imported CSV Data", `Successfully imported ${uniqueData.length} records. skipped ${uploadErrors.length} rows.`);
       addNotification(`Imported ${uniqueData.length} records from CSV`, null, 'system');
       fetchData();
       
@@ -4645,6 +4661,9 @@ async function clearAllData() {
       
       if (error1 || error2 || error3) throw (error1 || error2 || error3);
       
+      logAudit("CRITICAL: Cleared All Table Data");
+      addNotification("CRITICAL: Administrator cleared all table data", null, 'system');
+
       showToast("All data cleared successfully");
       fetchData();
     } catch (e) {
@@ -4737,12 +4756,19 @@ async function loadPendingUsers() {
 async function approveUser(userId, status) {
   if (!supabaseClient) return;
   try {
+    const { data: userProfile } = await supabaseClient.from('profiles').select('email').eq('id', userId).single();
     const { error } = await supabaseClient
       .from('profiles')
       .update({ is_approved: status })
       .eq('id', userId);
     
     if (error) throw error;
+    
+    const action = status ? "Approved User" : "Revoked User Access";
+    const details = userProfile ? `User: ${userProfile.email}` : `User ID: ${userId}`;
+    logAudit(action, details);
+    addNotification(`${action}: ${details}`, null, 'system');
+
     showToast(status ? "User approved" : "Access revoked");
     loadPendingUsers();
     fetchPendingApprovalCount();
@@ -4967,6 +4993,7 @@ async function saveMapPresets() {
   };
   try {
     await supabaseClient.from('project_boundaries').upsert({ id: 0, name: 'MAP_PRESETS', style_settings: presets });
+    logAudit("Saved Map Presets", JSON.stringify(presets));
     showToast("Map presets saved as default");
   } catch(e) { showToast("Failed to save presets", "error"); }
 }
@@ -5361,7 +5388,10 @@ async function handleKMLUpload(event) {
               geojson: geojson
             });
             if (error) showToast("Error saving boundary to cloud", "error");
-            else showToast("Project boundary updated");
+            else {
+              showToast("Project boundary updated");
+              logAudit("Imported GIS Boundary", `File: ${file.name}`);
+            }
         } else {
             showToast("Boundary loaded locally");
         }
@@ -5958,6 +5988,7 @@ async function handlePhotoUpload(evt, wo) {
       }
 
       photos[wo] = publicUrl;
+      logAudit("Uploaded Photo", `Work Order: ${wo}`, wo);
       addNotification(`Uploaded new photo`, wo, 'photos');
       renderTable();
       updateFileManagerStats();
@@ -6003,6 +6034,7 @@ async function deletePhoto(wo) {
       delete photos[wo];
       renderTable();
       updateFileManagerStats();
+      logAudit("Deleted Photo", `Work Order: ${wo}`, wo);
       showToast("Photo deleted");
     } catch (e) {
       console.error(e);
@@ -6367,6 +6399,7 @@ async function updateFabDetails(woId, value) {
   wo.FabDetails = value;
   try {
     await saveWorkOrderToSupabase(wo);
+    logAudit("Updated Fabrication Details", `WO: ${woId}`, woId);
     addNotification(`Updated fabrication details`, woId, 'manufacturing');
     showToast('Fabrication details updated');
   } catch (err) {
@@ -6382,6 +6415,7 @@ async function updateQbcComments(woId, value) {
   wo.QBCComments = value;
   try {
     await saveWorkOrderToSupabase(wo);
+    logAudit("Updated QBC Comments", `WO: ${woId}`, woId);
     addNotification(`Updated comments`, woId, 'comments');
     showToast('QBC comments updated');
   } catch (err) {
@@ -6404,6 +6438,7 @@ async function sendToFabrication(woId) {
   
   try {
     await saveWorkOrderToSupabase(wo);
+    logAudit("Sent to Fabrication", `Submission #${wo.fab_history.length}, WO: ${woId}`, woId);
     showToast(`Sent to Fabrication (Total: ${wo.fab_history.length})`);
     applyFilters(); // Re-render
   } catch (err) {
@@ -6440,6 +6475,7 @@ async function saveEdit() {
 
   try {
     await saveWorkOrderToSupabase(r);
+    logAudit(editingWO ? "Edited Work Order" : "Created New Work Order", `WO: ${r.WorkOrder}`, r.WorkOrder);
     showToast('Saved successfully');
     closeModal('editModal');
     fetchData();
@@ -6572,6 +6608,23 @@ function toggleNotifPanel() {
   panel.classList.toggle('open');
   if (panel.classList.contains('open')) {
     renderNotifications();
+  }
+}
+
+async function logAudit(action, details = null, woId = null) {
+  if (!supabaseClient) return;
+  try {
+    await supabaseClient.from('audit_logs').insert({
+      user_id: currentUser ? currentUser.id : null,
+      user_email: currentUser ? currentUser.email : 'System',
+      user_name: currentUser ? (currentUser.user_metadata?.full_name || currentUser.email) : 'System',
+      action: action,
+      details: details,
+      work_order: woId,
+      created_at: new Date().toISOString()
+    });
+  } catch (e) {
+    console.warn("Audit log failed:", e);
   }
 }
 
