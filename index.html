@@ -330,7 +330,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   width: 180px;
   max-height: 200px;
   overflow-y: auto;
-  background: var(--card-bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -351,7 +351,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   color: var(--text);
 }
 .th-filter-option:hover {
-  background: var(--hover-bg);
+  background: var(--surface2);
 }
 .th-filter-option input {
   cursor: pointer;
@@ -1003,15 +1003,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
     </div>
 
-    <div class="section-title">GIS Overview Map</div>
-    <div class="card" style="padding:0; height:400px; overflow:hidden; margin-bottom:24px; border:1px solid var(--border);">
-      <div id="dashMap" style="width:100%; height:100%; z-index:1;"></div>
-    </div>
-
-    <div class="two-col" style="grid-template-columns: 2fr 1fr;">
-      <div style="display:flex; flex-direction:column; gap:20px;">
+    <div class="dash-main-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+      <div style="display:flex; flex-direction:column; gap:24px;">
         <div class="section-title">Performance Analytics</div>
-        <div class="two-col">
+        <div class="two-col" style="margin-bottom: 0;">
           <div class="card">
             <div class="card-title">Monthly Volume — Stacked</div>
             <div class="bar-chart" id="barChart"></div>
@@ -1058,7 +1053,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         </div>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:20px;">
+      <div style="display:flex; flex-direction:column; gap:24px;">
+        <div class="section-title">GIS Overview Map</div>
+        <div class="card" style="padding:0; height:480px; overflow:hidden; border:1px solid var(--border);">
+          <div id="dashMap" style="width:100%; height:100%; z-index:1;"></div>
+        </div>
+
         <div class="section-title">Operational Health</div>
         <div class="card">
           <div class="card-title">Top Pending Items</div>
@@ -1474,68 +1474,104 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="page" id="page-manufacturing">
   <div class="wrapper">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-      <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:18px;font-weight:700;">Manufacturing <span id="mfgCountLabel" style="font-size:13px;color:var(--muted)"></span></h2>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <button class="btn btn-ghost btn-sm" onclick="toggleMfgDetails()"><i class="fas fa-eye"></i> More Details</button>
-        <button class="btn btn-ghost btn-sm" id="mfg-more-actions" onclick="showContextMenu(event, 'page-manufacturing')"><i class="fas fa-ellipsis-v"></i> More Actions</button>
+    <header style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
+      <div>
+        <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;gap:12px;">
+          Manufacturing <span id="mfgCountBadge" style="background:var(--surface2); color:var(--accent); font-size:14px; padding:4px 12px; border-radius:100px; border:1px solid var(--border);">0</span>
+        </h2>
+        <p style="font-size:12px; color:var(--muted); margin-top:4px;">Manage fabrication and completed manufacturing works</p>
       </div>
-    </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="btn btn-ghost" onclick="toggleMfgDetails()"><i class="fas fa-eye"></i> More Details</button>
+        <button class="btn btn-ghost" id="mfg-more-actions-btn" onclick="showContextMenu(event, 'page-manufacturing')"><i class="fas fa-ellipsis-v"></i> More Actions</button>
+      </div>
+    </header>
 
     <style>
-      .mfg-tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); padding: 6px; border-radius: 12px; margin-bottom: 20px; width: fit-content; }
-      .mfg-tab { padding: 10px 20px; border-radius: 8px; border: none; background: none; color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; }
-      .mfg-tab:hover { background: var(--surface2); color: var(--text); }
-      .mfg-tab.active { background: var(--bg); color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+      .mfg-tabs-container { display: flex; align-items: center; border-bottom: 1px solid var(--border); margin-bottom: 24px; gap: 32px; }
+      .mfg-tab-btn { padding: 12px 4px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; position: relative; bottom: -1px; }
+      .mfg-tab-btn:hover { color: var(--text); }
+      .mfg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+      
+      .mfg-search-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 24px; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+      .mfg-search-bar:focus-within { border-color: var(--accent); box-shadow: 0 4px 20px rgba(0, 200, 255, 0.08); }
+      .mfg-search-input { flex: 1; background: none; border: none; color: var(--text); font-family: inherit; font-size: 14px; outline: none; }
+      
+      .mfg-table-actions { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 16px; }
+      
+      #mfgTable thead th { background: #0b0f1a; color: #fff; border: 1px solid #1f2d45; padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+      [data-theme="light"] #mfgTable thead th { background: #1e293b; }
+      #mfgTable thead tr:first-child th { border-bottom: none; }
+      
+      .empty-state-container { padding: 80px 20px; text-align: center; background: var(--surface); border: 1px dashed var(--border); border-radius: 16px; margin: 20px 0; }
+      .empty-state-icon { font-size: 48px; color: var(--muted); opacity: 0.3; margin-bottom: 16px; }
+      .empty-state-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+      .empty-state-desc { font-size: 14px; color: var(--muted); }
     </style>
 
-    <div class="mfg-tabs">
-      <button class="mfg-tab active" id="mfg-tab-active" onclick="switchMfgTab('active')">Active Fabrication</button>
-      <button class="mfg-tab" id="mfg-tab-completed" onclick="switchMfgTab('completed')">Completed Manufacturing</button>
+    <nav class="mfg-tabs-container">
+      <button class="mfg-tab-btn active" id="mfg-tab-active" onclick="switchMfgTab('active')">Active Fabrication</button>
+      <button class="mfg-tab-btn" id="mfg-tab-completed" onclick="switchMfgTab('completed')">Completed Manufacturing</button>
+    </nav>
+
+    <div class="mfg-search-bar">
+      <i class="fas fa-search" style="color:var(--muted); font-size:16px;"></i>
+      <input type="text" id="mfgGlobalSearch" class="mfg-search-input" placeholder="Search by Work Order, Road Category, Sign Material, Sign Type, Sign Ref., Shape, Size, Foundation Details, Status, etc." oninput="applyManufacturingFilters()">
     </div>
 
-    <div class="table-wrap">
+    <div class="mfg-table-actions">
+      <button class="btn btn-ghost btn-sm" onclick="clearManufacturingFilters()"><i class="fas fa-times"></i> Clear Search</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportTableCSV('manufacturing')"><i class="fas fa-download"></i> Export CSV</button>
+    </div>
+
+    <div class="table-wrap" style="background: var(--surface); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
       <table class="main-table" id="mfgTable">
         <thead id="mfgHead">
           <tr>
             <th rowspan="3">#</th>
-            <th rowspan="3" data-col="WorkOrder">Work Order</th>
-            <th rowspan="3" data-col="Description" class="mfg-hide-cols">Description</th>
-            <th rowspan="3" data-col="Status" class="mfg-hide-cols">Status</th>
-            <th rowspan="3" data-col="PWA_ENG" class="mfg-hide-cols">PWA Engineer</th>
-            <th rowspan="3" data-col="Location" class="mfg-hide-cols">Location</th>
-            <th rowspan="3" data-col="TargetStart" class="mfg-hide-cols">Target Start</th>
-            <th rowspan="3" data-col="TargetFinish">Target Finish</th>
-            <th rowspan="3" style="background: #1b5e20; color: white;" data-col="RoadCatg">Road Catg.</th>
-            <th rowspan="3" style="background: #1b5e20; color: white;" data-col="SignMaterial">Sign Material</th>
-            <th colspan="13" style="background: #4a148c; color: white; text-align: center;">Fabrication</th>
+            <th rowspan="3">Work Order</th>
+            <th rowspan="3" class="mfg-hide-cols">Description</th>
+            <th rowspan="3" class="mfg-hide-cols">Status</th>
+            <th rowspan="3" class="mfg-hide-cols">PWA Engineer</th>
+            <th rowspan="3" class="mfg-hide-cols">Location</th>
+            <th rowspan="3" class="mfg-hide-cols">Target Start</th>
+            <th rowspan="3">Target Finish</th>
+            <th rowspan="3">Road Catg.</th>
+            <th rowspan="3">Sign Material</th>
+            <th colspan="13" style="text-align: center;">Fabrication</th>
             <th rowspan="3">Photo</th>
           </tr>
           <tr>
-            <th colspan="5" style="background: #6a1b9a; color: white; text-align: center;">Sign Face Details</th>
-            <th colspan="3" style="background: #7b1fa2; color: white; text-align: center;">Post Details</th>
-            <th colspan="2" style="background: #8e24aa; color: white; text-align: center;">Foundation Details</th>
-            <th rowspan="2" style="background: #9c27b0; color: white; text-align: center;">Fab Status</th>
-            <th rowspan="2" style="background: #9c27b0; color: white; text-align: center;">Install Date</th>
-            <th rowspan="2" style="background: #9c27b0; color: white; text-align: center;">Details</th>
+            <th colspan="5" style="text-align: center;">Sign Face Details</th>
+            <th colspan="3" style="text-align: center;">Post Details</th>
+            <th colspan="2" style="text-align: center;">Foundation Details</th>
+            <th rowspan="2" style="text-align: center;">Fab Status</th>
+            <th rowspan="2" style="text-align: center;">Install Date</th>
+            <th rowspan="2" style="text-align: center;">Details</th>
           </tr>
           <tr>
-            <th style="background: #ab47bc; color: white;" data-col="SignType">Sign Type</th>
-            <th style="background: #ab47bc; color: white;" data-col="SignRef">Sign REF.</th>
-            <th style="background: #ab47bc; color: white;" data-col="SignShape">Sign Shape</th>
-            <th style="background: #ab47bc; color: white;" data-col="SignSize">SIZE (mm)</th>
-            <th style="background: #ab47bc; color: white;" data-col="SignQty">QTY.</th>
-            <th style="background: #ba68c8; color: white;" data-col="PostType">TYPE</th>
-            <th style="background: #ba68c8; color: white;" data-col="PostHeight">HEIGHT (mm)</th>
-            <th style="background: #ba68c8; color: white;" data-col="PostQty">QTY.</th>
-            <th style="background: #ce93d8; color: white;" data-col="FoundSize">Size L × W × H (mm)</th>
-            <th style="background: #ce93d8; color: white;" data-col="FoundQty">QTY.</th>
+            <th>Sign Type</th>
+            <th>Sign REF.</th>
+            <th>Sign Shape</th>
+            <th>SIZE (mm)</th>
+            <th>QTY.</th>
+            <th>TYPE</th>
+            <th>HEIGHT (mm)</th>
+            <th>QTY.</th>
+            <th>Size L × W × H (mm)</th>
+            <th>QTY.</th>
           </tr>
         </thead>
         <tbody id="mfgBody">
           <tr class="loading-row"><td colspan="25">Loading data...</td></tr>
         </tbody>
       </table>
+      
+      <div id="mfgEmptyState" class="empty-state-container" style="display: none;">
+        <div class="empty-state-icon"><i class="fas fa-industry"></i></div>
+        <div class="empty-state-title">No records found</div>
+        <div class="empty-state-desc">Try adjusting your search criteria or switching tabs.</div>
+      </div>
     </div>
     <div class="pagination" id="mfgPagination"></div>
   </div>
@@ -2226,7 +2262,7 @@ async function initDashMap() {
     boxZoom: false,
     touchZoom: false,
     attributionControl: false
-  }).setView([25.2854, 51.5310], 11);
+  }).setView([25.2854, 51.25], 9);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dashMap);
 
@@ -2277,14 +2313,16 @@ function toggleMfgDetails() {
 
 function switchMfgTab(tab) {
   currentMfgTab = tab;
-  document.getElementById('mfg-tab-active').classList.toggle('active', tab === 'active');
-  document.getElementById('mfg-tab-completed').classList.toggle('active', tab === 'completed');
+  const activeBtn = document.getElementById('mfg-tab-active');
+  const compBtn = document.getElementById('mfg-tab-completed');
+  if (activeBtn) activeBtn.classList.toggle('active', tab === 'active');
+  if (compBtn) compBtn.classList.toggle('active', tab === 'completed');
   applyManufacturingFilters();
 }
 
 function buildColumnFilters(tableId, data) {
   const table = document.getElementById(tableId);
-  if (!table) return;
+  if (!table || tableId === 'mfgTable') return;
   const headers = table.querySelectorAll('thead th[data-col]');
   headers.forEach(th => {
     const col = th.getAttribute('data-col');
@@ -2305,7 +2343,7 @@ function buildColumnFilters(tableId, data) {
       searchInput.placeholder = 'Search...';
       searchInput.oninput = (e) => {
         columnSearches[col] = e.target.value;
-        if (tableId === 'mfgTable') applyManufacturingFilters(false);
+        if (tableId === 'mfgTable') applyManufacturingFilters();
         else applyFilters(false);
       };
       wrap.appendChild(searchInput);
@@ -2922,20 +2960,29 @@ function getCompletionStatusLabel(r) {
 
 function getStatusCat(r) {
   const targetFinish = (r.TargetFinish && r.TargetFinish !== '0' && r.TargetFinish !== 0) ? new Date(r.TargetFinish) : null;
-  const installDate = (r.InstallationDate && r.InstallationDate !== '0' && r.InstallationDate !== 0) ? new Date(r.InstallationDate) : null;
+  let completionDate = (r.InstallationDate && r.InstallationDate !== '0' && r.InstallationDate !== 0) ? new Date(r.InstallationDate) : null;
+
+  // If status is COMP, ensure it is treated as completed
+  const isComp = (r.Status === 'COMP' || r.Status === 'Comp');
+
+  // Fallback for COMP status if InstallationDate is missing
+  if (isComp && (!completionDate || isNaN(completionDate.getTime()))) {
+    completionDate = (r.StatusUpdateDate && r.StatusUpdateDate !== '0' && r.StatusUpdateDate !== 0) ? new Date(r.StatusUpdateDate) : null;
+  }
+
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  // Rule: If installation date exists, compare with target finish
-  if (installDate && !isNaN(installDate.getTime())) {
-    if (targetFinish && !isNaN(targetFinish.getTime())) {
-      // On-Time (green) if Install <= Target Finish
-      // Completed (Breached) (amber) if Install > Target Finish
-      return installDate <= targetFinish ? 'green' : 'amber';
+  // Rule: If it's marked as COMP or has a valid installation date, classify as completed
+  if (isComp || (completionDate && !isNaN(completionDate.getTime()))) {
+    if (targetFinish && !isNaN(targetFinish.getTime()) && completionDate && !isNaN(completionDate.getTime())) {
+      // On-Time (green) if completion date <= Target Finish
+      // Completed (Breached) (amber) if completion date > Target Finish
+      return completionDate <= targetFinish ? 'green' : 'amber';
     }
-    return 'green'; // Default if target missing but installed
+    return 'green'; // Default to On-Time if target or completion date missing
   } else {
-    // Rule: If installation date is empty/0, compare Target Finish with Today
+    // Rule: Non-completed statuses follow existing pending/breached logic
     if (targetFinish && !isNaN(targetFinish.getTime())) {
       // Not Completed (Breached) (red) if Target Finish < Today
       // Pending Within Target Date (blue) if Target Finish >= Today
@@ -3202,13 +3249,24 @@ function buildEngineerFilter() {
   }
 }
 
-function applyManufacturingFilters(rebuildFilters = true) {
+function applyManufacturingFilters() {
+  const globalSearch = document.getElementById('mfgGlobalSearch').value.toLowerCase();
+  
   filteredFabData = allData.filter(r => {
     if (!r.isSentToFab) return false;
     
     if (currentMfgTab === 'active' && r.FabStatus === 'Done') return false;
     if (currentMfgTab === 'completed' && r.FabStatus !== 'Done') return false;
 
+    if (globalSearch) {
+      const searchableFields = [
+        'WorkOrder', 'Description', 'Status', 'PWA_ENG', 'Location', 'RoadCatg', 'SignType', 'SignRef', 'SignShape', 'SignSize', 'SignMaterial', 'FabStatus', 'FabDetails', 'FoundSize', 'PostType'
+      ];
+      const match = searchableFields.some(f => String(r[f] || '').toLowerCase().includes(globalSearch));
+      if (!match) return false;
+    }
+    
+    // Also respect individual column filters/searches if they still exist in code state
     for (let col in columnSearches) {
       const val = columnSearches[col]?.toLowerCase();
       if (val && !String(r[col] || '').toLowerCase().includes(val)) return false;
@@ -3217,24 +3275,31 @@ function applyManufacturingFilters(rebuildFilters = true) {
       const selectedSet = columnFilters[col];
       if (selectedSet && selectedSet.size > 0 && !selectedSet.has(String(r[col] || ''))) return false;
     }
+
     return true;
   });
   
   fabCurrentPage = 1;
   renderManufacturingTable();
-  if (rebuildFilters) buildColumnFilters('mfgTable', allData.filter(r => r.isSentToFab));
-  const label = document.getElementById('mfgCountLabel');
-  if (label) label.textContent = `(${filteredFabData.length})`;
+  
+  const label = document.getElementById('mfgCountBadge');
+  if (label) label.textContent = filteredFabData.length;
 }
 
 function renderManufacturingTable() {
   const tbody = document.getElementById('mfgBody');
+  const emptyState = document.getElementById('mfgEmptyState');
   const start = (fabCurrentPage - 1) * PAGE_SIZE;
   const slice = filteredFabData.slice(start, start + PAGE_SIZE);
+  
   if (slice.length === 0) {
-    tbody.innerHTML = '<tr class="loading-row"><td colspan="25">No records found</td></tr>';
-    renderManufacturingPagination(); return;
+    tbody.innerHTML = '';
+    if (emptyState) emptyState.style.display = 'block';
+    renderManufacturingPagination(); 
+    return;
   }
+  
+  if (emptyState) emptyState.style.display = 'none';
   tbody.innerHTML = slice.map((r, i) => {
     const stBadge = `<span class="status-badge badge-${r.Status||'COMP'}">${r.Status||'–'}</span>`;
     const photo = photos[r.WorkOrder];
@@ -3323,7 +3388,7 @@ async function updateFabStatus(woId, status) {
     addNotification(`Manufacturing status changed to ${status}`, woId, 'manufacturing');
     showToast(`Status updated to ${status}`);
     if (status === 'Done') {
-       applyManufacturingFilters(); // Remove from view
+       applyManufacturingFilters(); // Remove from view or move to completed
     }
   } catch (err) {
     showToast('Error updating status', 'error');
@@ -3331,8 +3396,8 @@ async function updateFabStatus(woId, status) {
 }
 
 function clearManufacturingFilters() {
-  columnFilters = {};
-  columnSearches = {};
+  const searchInput = document.getElementById('mfgGlobalSearch');
+  if (searchInput) searchInput.value = '';
   applyManufacturingFilters();
 }
 
@@ -3953,7 +4018,8 @@ function clearFilters() {
 
 function showManufacturingFor(woId) {
   showPage('manufacturing');
-  document.getElementById('mfgSearchInput').value = woId;
+  const searchInput = document.getElementById('mfgGlobalSearch');
+  if (searchInput) searchInput.value = woId;
   applyManufacturingFilters();
 }
 
