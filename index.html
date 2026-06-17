@@ -2635,9 +2635,7 @@ async function fetchData() {
       ExpiryDate: r.expiry_date || '',
       MediaAnnouncement: r.media_announcement,
       created_at: r.created_at,
-      created_by_name: r.created_by_name,
       last_modified_at: r.last_modified_at,
-      last_modified_by_name: r.last_modified_by_name,
       Priority: r.priority || 'Normal'
     }));
 
@@ -2723,9 +2721,7 @@ async function saveWorkOrderToSupabase(wo) {
     expiry_date: wo.ExpiryDate || null,
     media_announcement: wo.MediaAnnouncement,
     created_at: wo.created_at || new Date().toISOString(),
-    created_by_name: wo.created_by_name || (currentUser ? (currentUser.user_metadata?.full_name || currentUser.email) : 'System'),
     last_modified_at: new Date().toISOString(),
-    last_modified_by_name: currentUser ? (currentUser.user_metadata?.full_name || currentUser.email) : 'System',
     priority: wo.Priority || 'Normal'
   };
 
@@ -3566,9 +3562,9 @@ async function openDetail(woId) {
   }
 
   // Audit
-  document.getElementById('val-created-by').textContent = wo.created_by_name || 'System';
+  document.getElementById('val-created-by').textContent = 'System';
   document.getElementById('val-created-date').textContent = wo.created_at ? formatDateTime(wo.created_at) : '--';
-  document.getElementById('val-modified-by').textContent = wo.last_modified_by_name || '--';
+  document.getElementById('val-modified-by').textContent = '--';
   document.getElementById('val-modified-date').textContent = wo.last_modified_at ? formatDateTime(wo.last_modified_at) : '--';
 
   // Map
