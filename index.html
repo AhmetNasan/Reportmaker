@@ -1145,7 +1145,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('profileModal')">Cancel</button>
-      <button class="btn btn-primary btn-sm" id="save-profile-btn" onclick="saveProfile()">Save Changes</button>
+      <button class="btn btn-primary btn-sm" id="save-profile-btn" onclick="saveProfile()"><i class="fas fa-save"></i> Save Changes</button>
     </div>
   </div>
 </div>
@@ -1717,7 +1717,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('editModal')">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="saveEdit()">💾 Save Changes</button>
+      <button class="btn btn-primary btn-sm" id="save-edit-btn" onclick="saveEdit()"><i class="fas fa-save"></i> Save Changes</button>
     </div>
   </div>
 </div>
@@ -1742,6 +1742,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div id="detail-status-badge"></div>
     </div>
       <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="btn btn-ghost btn-sm" id="detail-edit-btn" onclick="toggleDetailEdit()" title="Edit Work Order"><i class="fas fa-edit"></i> Edit</button>
+      <button class="btn btn-green btn-sm" id="detail-save-btn" onclick="saveDetailChanges()" style="display:none;" title="Save Changes"><i class="fas fa-save"></i> Save</button>
+      <button class="btn btn-red btn-sm" id="detail-cancel-btn" onclick="cancelDetailEdit()" style="display:none;" title="Cancel Edit"><i class="fas fa-times"></i> Cancel</button>
       <button class="btn btn-ghost btn-sm" onclick="navigateDetail('prev')" title="Previous Work Order"><i class="fas fa-chevron-up"></i></button>
       <button class="btn btn-ghost btn-sm" onclick="navigateDetail('next')" title="Next Work Order"><i class="fas fa-chevron-down"></i></button>
         <button class="btn btn-ghost btn-sm" onclick="showContextMenu(event, 'detail-modal')" title="More Actions" aria-label="More Actions"><i class="fas fa-ellipsis-v"></i></button>
@@ -2753,7 +2756,8 @@ async function saveWorkOrderToSupabase(wo) {
 
   if (woError) {
     console.error("WO Save Error:", woError);
-    throw woError;
+    const msg = woError.message || "Unknown error saving Work Order";
+    throw new Error(`WO Save Error: ${msg}`);
   }
 
   // 2. Save Manufacturing Details
@@ -2763,7 +2767,8 @@ async function saveWorkOrderToSupabase(wo) {
 
   if (mfgError) {
     console.error("MFG Save Error:", mfgError);
-    throw mfgError;
+    const msg = mfgError.message || "Unknown error saving Manufacturing details";
+    throw new Error(`MFG Save Error: ${msg}`);
   }
 }
 
@@ -3397,7 +3402,8 @@ async function updateFabStatus(woId, status) {
        applyManufacturingFilters(); // Remove from view or move to completed
     }
   } catch (err) {
-    showToast('Error updating status', 'error');
+    console.error("Update Fab Status Error:", err);
+    showToast(err.message || 'Error updating status', 'error');
   }
 }
 
@@ -3703,7 +3709,8 @@ async function saveDetailChanges() {
     updateDashboard();
     openDetail(selectedWorkOrder); 
   } catch (error) {
-    showToast("Error saving changes", "error");
+    console.error("Manual Update Error:", error);
+    showToast(error.message || "Error saving changes", "error");
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalText;
@@ -4371,8 +4378,7 @@ async function processExcelUpload() {
         'description': 'Description', 'status': 'Status', 'pwa engineer': 'PWA_ENG', 'engineer': 'PWA_ENG', 'pwa eng': 'PWA_ENG',
         'target start': 'TargetStart', 'target start date': 'TargetStart', 'target finish': 'TargetFinish', 'target finish date': 'TargetFinish', 'remaining': 'Remaining',
         'highway': 'Location', 'location': 'Location', 'latitude': 'Lat', 'longitude': 'Lng', 'lat': 'Lat', 'lng': 'Lng',
-        'latitudey': 'Lat', 'longitudex': 'Lng',
-        'road category': 'RoadCatg', 'road catg': 'RoadCatg',
+        'latitudey': 'Lat', 'longitudex': 'Lng', 'road category': 'RoadCatg', 'road catg': 'RoadCatg',
         'sign type': 'SignType', 'sign ref': 'SignRef', 'sign shape': 'SignShape', 
         'sign size': 'SignSize', 'sign material': 'SignMaterial',
         'sign qty': 'SignQty', 'post type': 'PostType', 'post height': 'PostHeight', 
@@ -4384,7 +4390,9 @@ async function processExcelUpload() {
         'ro': 'RO', 'tdp': 'TDP', 'application date': 'ApplicationDate', 'application da': 'ApplicationDate', 'application': 'ApplicationDate',
         'tdp status': 'TDPStatus', 'expiry date': 'ExpiryDate', 'expiry da': 'ExpiryDate', 'expiry': 'ExpiryDate',
         'media announcement': 'MediaAnnouncement', 'media announceme': 'MediaAnnouncement',
-        'status update': 'StatusUpdateDate', 'completion': 'InstallationDate'
+        'status update': 'StatusUpdateDate', 'completion': 'InstallationDate', 'target start date': 'TargetStart', 'target finish date': 'TargetFinish',
+        'install date': 'InstallationDate', 'reported date': 'ReportedDate', 'status update date': 'StatusUpdateDate',
+        'app date': 'ApplicationDate', 'application date': 'ApplicationDate', 'expiry date': 'ExpiryDate'
       };
       const DATE_KEYS = ['TargetStart', 'TargetFinish', 'InstallationDate', 'ReportedDate', 'StatusUpdateDate', 'ApplicationDate', 'ExpiryDate'];
       const VALID_STATUSES = ['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR','APPROVED','COMPLETED','IN PROGRESS'];
@@ -4400,6 +4408,7 @@ async function processExcelUpload() {
         
         const r = { WorkOrder: wo };
         let rowHasError = false;
+        let errorReason = "";
         const rowNum = rowIndex + 2;
 
         headers.forEach((h, i) => {
@@ -4416,14 +4425,15 @@ async function processExcelUpload() {
               if (isNaN(num)) {
                  r[k] = null;
               } else {
-                 if (k === 'Lat' && (num < -90 || num > 90)) { rowHasError = true; }
-                 if (k === 'Lng' && (num < -180 || num > 180)) { rowHasError = true; }
+                 if (k === 'Lat' && (num < -90 || num > 90)) { rowHasError = true; errorReason = "Invalid Latitude"; }
+                 if (k === 'Lng' && (num < -180 || num > 180)) { rowHasError = true; errorReason = "Invalid Longitude"; }
                  r[k] = num;
               }
             } else if (DATE_KEYS.includes(k)) {
               const parsed = parseCSVDate(val);
               if (parsed === 'INVALID') {
                 rowHasError = true;
+                errorReason = `Invalid Date in ${h}`;
               } else {
                 r[k] = parsed;
               }
@@ -4432,6 +4442,7 @@ async function processExcelUpload() {
               if (STATUS_MAP[st]) st = STATUS_MAP[st];
               if (!VALID_STATUSES.includes(st)) {
                 rowHasError = true;
+                errorReason = `Invalid Status: ${val}`;
               } else {
                 r[k] = st;
               }
@@ -4442,7 +4453,7 @@ async function processExcelUpload() {
         });
 
         if (rowHasError) {
-          uploadErrors.push({ headers: rawHeaders, row: row });
+          uploadErrors.push({ headers: [...rawHeaders, "Error Reason"], row: [...row, errorReason] });
         } else {
           upsertData.push(r);
         }
@@ -4478,6 +4489,7 @@ async function processExcelUpload() {
           target_finish: wo.TargetFinish || null,
           remaining: wo.Remaining,
           location: wo.Location,
+          highway: wo.Location,
           lat: wo.Lat,
           lng: wo.Lng,
           reported_by: wo.ReportedBy,
@@ -6333,11 +6345,7 @@ function makeEditable(cell, woId, field, type = 'text') {
       } catch (err) {
         console.error("Save failed:", err);
         wo[field] = prevValue; // Rollback
-        if (err.message && err.message.includes('row-level security')) {
-           showToast("Access Denied: Check RLS Policies", "error");
-        } else {
-           showToast("Error saving changes", "error");
-        }
+        showToast(err.message || "Error saving changes", "error");
         renderTable();
       }
     } else {
@@ -6366,7 +6374,8 @@ async function updateFabDetails(woId, value) {
     addNotification(`Updated fabrication details`, woId, 'manufacturing');
     showToast('Fabrication details updated');
   } catch (err) {
-    showToast('Error updating details', 'error');
+    console.error("Update Fab Details Error:", err);
+    showToast(err.message || 'Error updating details', 'error');
   }
 }
 
@@ -6380,7 +6389,8 @@ async function updateQbcComments(woId, value) {
     addNotification(`Updated comments`, woId, 'comments');
     showToast('QBC comments updated');
   } catch (err) {
-    showToast('Error updating comments', 'error');
+    console.error("Update QBC Comments Error:", err);
+    showToast(err.message || 'Error updating comments', 'error');
   }
 }
 
@@ -6401,7 +6411,8 @@ async function sendToFabrication(woId) {
     showToast(`Sent to Fabrication (Total: ${wo.fab_history.length})`);
     applyFilters(); // Re-render
   } catch (err) {
-    showToast('Error sending request', 'error');
+    console.error("Send to Fabrication Error:", err);
+    showToast(err.message || 'Error sending request', 'error');
   }
 }
 
@@ -6424,13 +6435,26 @@ async function saveEdit() {
 
   if (!r.WorkOrder) { showToast('Work Order is required','error'); return; }
 
+  const btn = document.getElementById('save-edit-btn');
+  const originalText = btn ? btn.innerHTML : "Save Changes";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+  }
+
   try {
     await saveWorkOrderToSupabase(r);
     showToast('Saved successfully');
     closeModal('editModal');
     fetchData();
   } catch (error) {
-    showToast('Error saving changes', 'error');
+    console.error("Save Edit Error:", error);
+    showToast(error.message || 'Error saving changes', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
   }
 }
 
@@ -6711,6 +6735,100 @@ function setupNotifListener() {
       }
     })
     .subscribe();
+
+  // Listen for Work Order changes
+  supabaseClient
+    .channel('public:work_orders')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'work_orders' }, payload => {
+       console.log("Work Order change detected:", payload);
+       const d = payload.new;
+       const old = payload.old;
+       
+       if (payload.eventType === 'INSERT') {
+         const exists = allData.some(x => String(x.WorkOrder) === String(d.work_order));
+         if (!exists) {
+            // Need a full fetch or complex merge to get MFG data too
+            fetchData(); 
+         }
+       } else if (payload.eventType === 'UPDATE') {
+         const idx = allData.findIndex(x => String(x.WorkOrder) === String(d.work_order));
+         if (idx !== -1) {
+            // Update only fields present in work_orders table
+            allData[idx] = {
+               ...allData[idx],
+               Description: d.description,
+               Status: d.status,
+               PWA_ENG: d.pwa_eng,
+               TargetStart: d.target_start,
+               TargetFinish: d.target_finish,
+               Remaining: d.remaining,
+               Location: d.location,
+               Lat: d.lat,
+               Lng: d.lng,
+               isSentToFab: d.is_sent_to_fab,
+               fab_history: d.fab_history,
+               style_settings: d.style_settings,
+               ReportedBy: d.reported_by,
+               ReportedDate: d.reported_date,
+               StatusUpdateDate: d.status_update_date,
+               QBCComments: d.qbc_comments,
+               RO: d.ro,
+               TDP: d.tdp,
+               ApplicationDate: d.application_date,
+               TDPStatus: d.tdp_status,
+               ExpiryDate: d.expiry_date,
+               MediaAnnouncement: d.media_announcement,
+               Priority: d.priority
+            };
+            refreshUI();
+         }
+       } else if (payload.eventType === 'DELETE') {
+         allData = allData.filter(x => String(x.WorkOrder) !== String(old.work_order));
+         refreshUI();
+       }
+    })
+    .subscribe();
+
+  // Listen for Manufacturing changes
+  supabaseClient
+    .channel('public:manufacturing')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'manufacturing' }, payload => {
+       console.log("Manufacturing change detected:", payload);
+       const d = payload.new;
+       if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+          const idx = allData.findIndex(x => String(x.WorkOrder) === String(d.work_order_number));
+          if (idx !== -1) {
+             allData[idx] = {
+                ...allData[idx],
+                RoadCatg: d.road_catg,
+                SignType: d.sign_type,
+                SignRef: d.sign_ref,
+                SignShape: d.sign_shape,
+                SignSize: d.sign_size,
+                SignMaterial: d.sign_material,
+                SignQty: d.sign_qty,
+                PostType: d.post_type,
+                PostHeight: d.post_height,
+                PostQty: d.post_qty,
+                FoundSize: d.found_size,
+                FoundQty: d.found_qty,
+                FabStatus: d.fab_status,
+                InstallationDate: d.installation_date,
+                ScrapRemoval: d.scrap_removal,
+                FabDetails: d.fab_details
+             };
+             refreshUI();
+          }
+       }
+    })
+    .subscribe();
+}
+
+function refreshUI() {
+   applyFilters(false);
+   applyManufacturingFilters();
+   updateDashboard();
+   if (map) loadMarkers();
 }
 
 </script>
