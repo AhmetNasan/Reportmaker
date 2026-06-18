@@ -4708,7 +4708,7 @@ async function processExcelUpload() {
         
         const r = { WorkOrder: wo };
         let rowHasError = false;
-        let errorReason = "";
+        let errors = [];
         const rowNum = rowIndex + 2;
 
         headers.forEach((h, i) => {
@@ -4725,15 +4725,15 @@ async function processExcelUpload() {
               if (isNaN(num)) {
                  r[k] = null;
               } else {
-                 if (k === 'Lat' && (num < -90 || num > 90)) { rowHasError = true; errorReason = "Invalid Latitude"; }
-                 if (k === 'Lng' && (num < -180 || num > 180)) { rowHasError = true; errorReason = "Invalid Longitude"; }
+                 if (k === 'Lat' && (num < -90 || num > 90)) { rowHasError = true; errors.push("Invalid Latitude"); }
+                 if (k === 'Lng' && (num < -180 || num > 180)) { rowHasError = true; errors.push("Invalid Longitude"); }
                  r[k] = num;
               }
             } else if (DATE_KEYS.includes(k)) {
               const parsed = parseCSVDate(val);
               if (parsed === 'INVALID') {
                 rowHasError = true;
-                errorReason = `Invalid Date in ${h}`;
+                errors.push(`Invalid Date in ${h}`);
               } else {
                 r[k] = parsed;
               }
@@ -4742,7 +4742,7 @@ async function processExcelUpload() {
               if (STATUS_MAP[st]) st = STATUS_MAP[st];
               if (!VALID_STATUSES.includes(st)) {
                 rowHasError = true;
-                errorReason = `Invalid Status: ${val}`;
+                errors.push(`Invalid Status: ${val}`);
               } else {
                 r[k] = st;
               }
@@ -4753,7 +4753,7 @@ async function processExcelUpload() {
         });
 
         if (rowHasError) {
-          uploadErrors.push({ headers: [...rawHeaders, "Error Reason"], row: [...row, errorReason] });
+          uploadErrors.push({ headers: [...rawHeaders, "Error Reason"], row: [...row, errors.join('; ')] });
         } else {
           upsertData.push(r);
         }
@@ -6823,50 +6823,59 @@ function fieldHTML(f, val, extra='') {
 }
 function parseCSVDate(val) {
   if (val === undefined || val === null || String(val).trim() === '') return null;
-  
+
+  const format = (d) => {
+    if (isNaN(d.getTime())) return 'INVALID';
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${y}-${m}-${day} ${hh}:${mm}`;
+  };
+
   // If it's already a Date object
   if (val instanceof Date) {
-    if (isNaN(val.getTime())) return 'INVALID';
-    return val.toISOString().split('T')[0];
+    return format(val);
   }
 
   let s = String(val).trim();
   if (s === '0' || s.toLowerCase() === 'null' || s === '-' || s === '') return null;
 
-  // Excel serial number (typically 5 digits for current dates)
-  // We check if it's a pure number and within a reasonable range for Excel dates
-  if (/^\d{5,6}$/.test(s)) {
+  // Excel serial number (including decimals)
+  if (/^\d+(\.\d+)?$/.test(s)) {
     const serial = Number(s);
-    // Excel's 1900 leap year bug: Excel thinks 1900 was a leap year.
-    // 25569 is 1970-01-01 in Excel's system.
+    // 25569 is 1970-01-01.
     const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
-    if (!isNaN(date.getTime())) {
-      return date.toISOString().split('T')[0];
-    }
+    return format(date);
   }
 
-  // Handle DD/MM/YYYY or DD-MM-YYYY specifically (common in CSVs)
-  const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  // Handle DD/MM/YYYY or DD-MM-YYYY specifically
+  const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(\s+(\d{1,2}):(\d{1,2}))?$/);
   if (dmyMatch) {
     const day = dmyMatch[1].padStart(2, '0');
     const month = dmyMatch[2].padStart(2, '0');
     const year = dmyMatch[3];
-    return `${year}-${month}-${day}`;
+    const hh = (dmyMatch[5] || '00').padStart(2, '0');
+    const mm = (dmyMatch[6] || '00').padStart(2, '0');
+    return `${year}-${month}-${day} ${hh}:${mm}`;
   }
 
   // Handle YYYY-MM-DD specifically
-  const ymdMatch = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  const ymdMatch = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})(\s+(\d{1,2}):(\d{1,2}))?$/);
   if (ymdMatch) {
     const year = ymdMatch[1];
     const month = ymdMatch[2].padStart(2, '0');
     const day = ymdMatch[3].padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const hh = (ymdMatch[5] || '00').padStart(2, '0');
+    const mm = (ymdMatch[6] || '00').padStart(2, '0');
+    return `${year}-${month}-${day} ${hh}:${mm}`;
   }
 
   // Fallback to JS Date parsing
   const d = new Date(s);
   if (!isNaN(d.getTime())) {
-    return d.toISOString().split('T')[0];
+    return format(d);
   }
 
   return 'INVALID';
