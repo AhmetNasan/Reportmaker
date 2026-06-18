@@ -1104,13 +1104,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Roads, Assets & GIS Management System</p>
     
     <div id="signup-fields" style="display: none;">
-      <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name">
-      <input type="text" id="auth-mobile" class="auth-input" placeholder="Mobile Number">
-      <input type="text" id="auth-position" class="auth-input" placeholder="Position / Job Title">
+      <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name" onkeydown="if(event.key==='Enter')handleAuth()">
+      <input type="text" id="auth-mobile" class="auth-input" placeholder="Mobile Number" onkeydown="if(event.key==='Enter')handleAuth()">
+      <input type="text" id="auth-position" class="auth-input" placeholder="Position / Job Title" onkeydown="if(event.key==='Enter')handleAuth()">
     </div>
 
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address">
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password">
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" onkeydown="if(event.key==='Enter')handleAuth()">
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password" onkeydown="if(event.key==='Enter')handleAuth()">
     
     <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
     <div style="margin-top: 16px; font-size: 11px; color: var(--accent); cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
@@ -1409,7 +1409,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Please enter your email address. We will send you a link to reset your password.</p>
     <div class="form-group">
       <label>Email Address</label>
-      <input type="email" id="recovery-email" class="auth-input" placeholder="Enter your email">
+      <input type="email" id="recovery-email" class="auth-input" placeholder="Enter your email" onkeydown="if(event.key==='Enter')submitRecovery()">
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('recoveryModal')">Cancel</button>
