@@ -4702,14 +4702,15 @@ async function processExcelUpload() {
         'APPROVED': 'APPR'
       };
 
-      dataRows.forEach((row, rowIndex) => {
+      const totalRows = dataRows.length;
+      for (let rowIndex = 0; rowIndex < totalRows; rowIndex++) {
+        const row = dataRows[rowIndex];
         const wo = String(row[woIdx] || '').trim(); 
-        if (!wo) return;
+        if (!wo) continue;
         
         const r = { WorkOrder: wo };
         let rowHasError = false;
         let errors = [];
-        const rowNum = rowIndex + 2;
 
         headers.forEach((h, i) => {
           const k = MAP[h];
@@ -4757,7 +4758,15 @@ async function processExcelUpload() {
         } else {
           upsertData.push(r);
         }
-      });
+
+        if (rowIndex % 500 === 0 || rowIndex === totalRows - 1) {
+          const pct = Math.round(((rowIndex + 1) / totalRows) * 5); // Use first 5% for validation
+          statusLabel.textContent = `Validating data (${rowIndex + 1}/${totalRows})...`;
+          progressFill.style.width = `${pct}%`;
+          progressPct.textContent = `${pct}%`;
+          await new Promise(res => setTimeout(res, 0));
+        }
+      }
 
       if (upsertData.length === 0 && uploadErrors.length > 0) {
         statusLabel.textContent = 'Validation Failed';
@@ -4833,7 +4842,7 @@ async function processExcelUpload() {
 
         const updateProgress = () => {
           processedChunks++;
-          const pct = Math.round((processedChunks / totalChunks) * 100);
+          const pct = 5 + Math.round((processedChunks / totalChunks) * 95);
           progressFill.style.width = `${pct}%`;
           progressPct.textContent = `${pct}%`;
         };
@@ -6821,22 +6830,22 @@ function fieldHTML(f, val, extra='') {
   if (f.k === 'FabDetails' || f.k === 'QBCComments') return `<div class="form-group" style="${extra}; grid-column: 1/-1;"><label>${f.l}</label><textarea id="${id}" style="height:60px;" ${readonlyAttr}>${val||''}</textarea></div>`;
   return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="text" id="${id}" value="${val||''}" ${readonlyAttr}></div>`;
 }
+function formatCSVDate(d) {
+  if (isNaN(d.getTime())) return 'INVALID';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${day} ${hh}:${mm}`;
+}
+
 function parseCSVDate(val) {
   if (val === undefined || val === null || String(val).trim() === '') return null;
 
-  const format = (d) => {
-    if (isNaN(d.getTime())) return 'INVALID';
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    return `${y}-${m}-${day} ${hh}:${mm}`;
-  };
-
   // If it's already a Date object
   if (val instanceof Date) {
-    return format(val);
+    return formatCSVDate(val);
   }
 
   let s = String(val).trim();
@@ -6847,7 +6856,7 @@ function parseCSVDate(val) {
     const serial = Number(s);
     // 25569 is 1970-01-01.
     const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
-    return format(date);
+    return formatCSVDate(date);
   }
 
   // Handle DD/MM/YYYY or DD-MM-YYYY specifically
@@ -6875,7 +6884,7 @@ function parseCSVDate(val) {
   // Fallback to JS Date parsing
   const d = new Date(s);
   if (!isNaN(d.getTime())) {
-    return format(d);
+    return formatCSVDate(d);
   }
 
   return 'INVALID';
