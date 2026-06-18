@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Qatar Building Company – Engineering Platform</title>
+<title>QBC Operations Center – Roads, Assets & GIS Management System</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -172,8 +172,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .dash-layout { display: flex; flex-direction: column; gap: 24px; }
 .dash-row { display: grid; gap: 24px; }
 .dash-row-2 { grid-template-columns: 25% 45% 30%; height: 450px; }
-.dash-row-3 { grid-template-columns: 55% 15% 30%; height: 400px; }
-.dash-row-4 { grid-template-columns: 100%; }
+.dash-row-3 { grid-template-columns: 65% 35%; height: 500px; }
+.dash-row-4 { grid-template-columns: 1fr 1fr; }
 
 @media (max-width: 1200px) {
   .dash-row-2, .dash-row-3 { grid-template-columns: 1fr; height: auto; }
@@ -529,17 +529,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   flex-direction: column;
   overflow: hidden;
   background: var(--bg);
+  position: relative;
 }
 
 .gis-top-bar {
-  height: 48px;
+  height: 52px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  gap: 16px;
-  z-index: 30;
+  padding: 0 20px;
+  gap: 20px;
+  z-index: 100;
 }
 
 .gis-main-content {
@@ -732,6 +733,189 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.gis-theme-dark .glass-panel {
+  background: rgba(11, 15, 26, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+.gis-theme-dark {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --border: #1f2d45;
+  --text: #ffffff;
+  --muted: #94a3b8;
+  --accent: #00c8ff;
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+.gis-theme-dark .gis-top-bar,
+.gis-theme-dark .gis-sidebar,
+.gis-theme-dark .gis-status-bar,
+.gis-theme-dark .gis-tabs,
+.gis-theme-dark .gis-sidebar-header,
+.gis-theme-dark .gis-sidebar-footer {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+.gis-theme-dark .gis-tab.active {
+  background: rgba(0, 200, 255, 0.1) !important;
+  color: var(--accent) !important;
+}
+
+.gis-theme-dark .gis-tool-btn {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.gis-theme-dark .gis-tool-btn:hover {
+  background: var(--accent) !important;
+  color: #000 !important;
+}
+
+.gis-theme-dark .status-badge {
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.gis-floating-kpis {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.gis-kpi-card {
+  pointer-events: auto;
+  padding: 10px 16px;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gis-kpi-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.gis-kpi-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.gis-kpi-indicator {
+  height: 3px;
+  width: 20px;
+  border-radius: 10px;
+  margin-top: 4px;
+}
+
+.gis-details-panel {
+  position: absolute;
+  top: 70px;
+  right: -400px;
+  width: 380px;
+  bottom: 50px;
+  z-index: 60;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+}
+
+.gis-details-panel.open {
+  right: 20px;
+}
+
+.gis-details-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gis-details-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.gis-legend {
+  position: absolute;
+  bottom: 50px;
+  left: 20px;
+  z-index: 50;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.gis-view-toggle {
+  display: flex;
+  background: var(--surface2);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.gis-toggle-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.gis-toggle-btn.active {
+  background: var(--accent);
+  color: #000;
+}
+
+.gis-dashboard-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  z-index: 150;
+  display: none;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.gis-dashboard-overlay.open {
+  display: block;
+}
+
 .gis-search-input-wrap {
   display: flex;
   align-items: center;
@@ -916,9 +1100,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div id="auth-container" class="auth-container">
   <div class="auth-card">
-    <div class="auth-logo"> QATAR BUILDING COMPANY</div>
+    <div class="auth-logo">QBC Operations Center</div>
     <h2 id="auth-title">Welcome Back</h2>
-    <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Sign in to Qatar Building Company platform</p>
+    <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Roads, Assets & GIS Management System</p>
     
     <div id="signup-fields" style="display: none;">
       <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name">
@@ -938,7 +1122,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <nav id="main-nav" style="display: none;">
   <button class="hamburger" id="gis-sidebar-toggle" style="display:none" onclick="toggleGisSidebar()" aria-label="Toggle GIS Sidebar"><i class="fas fa-layer-group"></i></button>
   <button class="hamburger" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Toggle Navigation Menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
-  <div class="nav-brand" id="nav-brand-container"> QBC <span>Platform</span></div>
+  <div class="nav-brand" id="nav-brand-container"> QBC <span>Operations Center</span></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="nav-tab" id="nav-workorders-btn" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
@@ -1013,8 +1197,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="wrapper">
     <header class="dash-header">
       <div class="header-left">
-        <div class="tag">▸ Qatar Building Company</div>
-        <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Control <span style="color:var(--accent)">Center</span></h1>
+        <div class="tag">▸ QBC Operations Center</div>
+        <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Operations <span style="color:var(--accent)">Center</span></h1>
+        <p style="font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500; letter-spacing: 0.02em;">Roads, Assets & GIS Management System</p>
       </div>
       <div class="header-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
         <div style="font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px;">
@@ -1086,7 +1271,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         </div>
       </div>
 
-      <!-- ROW 3: Summary, Due Soon, Locations & Trends -->
+      <!-- ROW 3: Summary & Trends -->
       <div class="dash-row dash-row-3">
         <div class="dash-card" id="monthlySummaryCard">
           <div class="dash-card-header">
@@ -1099,16 +1284,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             </table>
           </div>
         </div>
-        <div class="dash-card" id="dueSoonCard">
-          <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-bell"></i> Due / Overdue</div>
-          </div>
-          <div class="dash-card-body" id="dueOverdueContainer" style="overflow-y: auto;">
-            <div class="empty-state">No pending items</div>
-          </div>
-        </div>
         <div class="dash-col-stack">
-          <div class="dash-card">
+          <div class="dash-card" style="flex: 1;">
             <div class="dash-card-header">
               <div class="dash-card-title"><i class="fa-solid fa-chart-line"></i> Monthly Trend</div>
             </div>
@@ -1116,37 +1293,29 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
               <canvas id="monthlyTrendCanvas"></canvas>
             </div>
           </div>
-          <div class="dash-card">
+          <div class="dash-card" id="dueSoonCard" style="flex: 1;">
             <div class="dash-card-header">
-              <div class="dash-card-title"><i class="fa-solid fa-location-dot"></i> Top Locations</div>
+              <div class="dash-card-title"><i class="fa-solid fa-bell"></i> Due / Overdue</div>
             </div>
-            <div class="dash-card-body" id="topLocContainer">
-              <div class="empty-state">No data available</div>
+            <div class="dash-card-body" id="dueOverdueContainer" style="overflow-y: auto;">
+              <div class="empty-state">No pending items</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ROW 4: Recent Activity -->
+      <!-- ROW 4: Locations -->
       <div class="dash-row dash-row-4">
         <div class="dash-card">
           <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</div>
+            <div class="dash-card-title"><i class="fa-solid fa-location-dot"></i> Top Locations</div>
           </div>
-          <div class="dash-card-body" style="padding:0; overflow:auto;">
-            <table class="dash-table">
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  <th>User</th>
-                  <th>Action</th>
-                  <th>Work Order</th>
-                </tr>
-              </thead>
-              <tbody id="dashRecentBody"></tbody>
-            </table>
+          <div class="dash-card-body" id="topLocContainer">
+            <div class="empty-state">No data available</div>
           </div>
         </div>
+        <!-- Space for additional future widget -->
+        <div class="dash-card" style="background: transparent; border: none; box-shadow: none;"></div>
       </div>
 
       <!-- Quick Actions (Optional, moving to bottom or context menu as per requirement?) -->
@@ -1297,28 +1466,106 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 </div>
 
 <div class="page" id="page-map">
-  <div class="gis-container">
+  <div class="gis-container gis-theme-dark" id="gis-main-container">
     <header class="gis-top-bar">
       <button class="btn btn-ghost btn-sm" onclick="toggleGisSidebar()" title="Toggle Sidebar"><i class="fas fa-bars"></i></button>
-      <div class="gis-search-wrap" style="flex: 1; max-width: 600px; display: flex; align-items: center; background: var(--surface2); border-radius: 8px; padding: 0 12px; border: 1px solid var(--border);">
+      <div class="gis-search-wrap" style="flex: 1; max-width: 500px; display: flex; align-items: center; background: var(--surface2); border-radius: 20px; padding: 0 16px; border: 1px solid var(--border);">
         <i class="fas fa-search" style="color:var(--muted)"></i>
-        <input type="text" id="map-search-input" class="gis-search-input" placeholder="Search Asset ID, coordinates, or locations..." onkeydown="if(event.key==='Enter')searchCoordinates()" style="background: transparent; border: none; color: var(--text); flex: 1; padding: 8px; outline: none; font-size: 13px;">
-        <button class="btn-reset" onclick="searchCoordinates()"><i class="fas fa-arrow-right" style="color:var(--accent)"></i></button>
+        <input type="text" id="map-search-input" class="gis-search-input" placeholder="Search Asset ID, Work Order, Coordinates, or Location" onkeydown="if(event.key==='Enter')searchCoordinates()" style="background: transparent; border: none; color: var(--text); flex: 1; padding: 10px; outline: none; font-size: 13px;">
+        <span style="font-size: 10px; color: var(--muted); background: var(--border); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">ENTER</span>
       </div>
-      <div style="flex: 1;"></div>
-      <div class="gis-top-actions">
-        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('kml-upload').click()"><i class="fas fa-upload"></i> Import</button>
-        <button class="btn btn-ghost btn-sm" onclick="exportMapKML()"><i class="fas fa-download"></i> Export</button>
+      
+      <div style="flex: 1; display: flex; justify-content: center;">
+        <div class="gis-view-toggle">
+          <button class="gis-toggle-btn active" id="gis-view-map-btn" onclick="switchGisView('map')">Map View</button>
+          <button class="gis-toggle-btn" id="gis-view-dash-btn" onclick="switchGisView('dash')">Dashboard View</button>
+        </div>
+      </div>
+
+      <div class="gis-top-actions" style="display: flex; gap: 8px;">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('kml-upload').click()"><i class="fas fa-upload"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="exportMapKML()"><i class="fas fa-download"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleGisTheme()" title="Toggle GIS Theme"><i class="fas fa-circle-half-stroke"></i></button>
       </div>
     </header>
+
+    <div class="gis-floating-kpis">
+      <div class="gis-kpi-card glass-panel">
+        <div class="gis-kpi-label">Total Work Orders</div>
+        <div class="gis-kpi-value" id="gis-kpi-total">0</div>
+        <div class="gis-kpi-indicator" style="background: var(--blue);"></div>
+      </div>
+      <div class="gis-kpi-card glass-panel">
+        <div class="gis-kpi-label">Completed</div>
+        <div class="gis-kpi-value" id="gis-kpi-completed">0</div>
+        <div class="gis-kpi-indicator" style="background: var(--green);"></div>
+      </div>
+      <div class="gis-kpi-card glass-panel">
+        <div class="gis-kpi-label">In Progress</div>
+        <div class="gis-kpi-value" id="gis-kpi-progress">0</div>
+        <div class="gis-kpi-indicator" style="background: var(--amber);"></div>
+      </div>
+      <div class="gis-kpi-card glass-panel">
+        <div class="gis-kpi-label">Overdue</div>
+        <div class="gis-kpi-value" id="gis-kpi-overdue">0</div>
+        <div class="gis-kpi-indicator" style="background: var(--red);"></div>
+      </div>
+    </div>
+
+    <div class="gis-legend glass-panel">
+      <div class="legend-row"><span class="legend-dot" style="background: var(--green);"></span> <span>Completed</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background: var(--amber);"></span> <span>In Progress</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background: var(--red);"></span> <span>Overdue</span></div>
+      <div class="legend-row"><i class="fas fa-users-viewfinder" style="color: var(--accent); font-size: 12px;"></i> <span>Cluster</span></div>
+    </div>
+
+    <div class="gis-details-panel glass-panel" id="gis-details-panel">
+      <div class="gis-details-header">
+        <h3 id="gis-det-title" style="font-size: 14px; color: var(--accent);">Work Order Details</h3>
+        <button class="btn-reset" onclick="closeGisDetails()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="gis-details-content" id="gis-details-content">
+        <!-- Content will be injected here -->
+      </div>
+    </div>
+
+    <div class="gis-dashboard-overlay" id="gis-dash-overlay">
+       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+          <h2 style="font-size: 24px; font-weight: 800;">GIS <span style="color: var(--accent);">Operational Insights</span></h2>
+          <button class="btn btn-ghost" onclick="switchGisView('map')"><i class="fas fa-map"></i> Back to Map</button>
+       </div>
+       <div class="kpi-grid" id="gis-dash-kpis">
+          <!-- KPIs will be mirrored here -->
+       </div>
+       <div class="dash-row" style="grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 24px;">
+          <div class="dash-card">
+             <div class="dash-card-header"><div class="dash-card-title">Completion Status</div></div>
+             <div class="dash-card-body" style="height: 250px;"><canvas id="gisDashCompCanvas"></canvas></div>
+          </div>
+          <div class="dash-card">
+             <div class="dash-card-header"><div class="dash-card-title">Status Breakdown</div></div>
+             <div class="dash-card-body" style="height: 250px;"><canvas id="gisDashStatusCanvas"></canvas></div>
+          </div>
+          <div class="dash-card">
+             <div class="dash-card-header"><div class="dash-card-title">Top 10 Locations</div></div>
+             <div class="dash-card-body" style="height: 250px;"><canvas id="gisDashLocCanvas"></canvas></div>
+          </div>
+       </div>
+       <div class="dash-row" style="margin-top: 24px;">
+          <div class="dash-card">
+             <div class="dash-card-header"><div class="dash-card-title">Performance Metrics</div></div>
+             <div class="dash-card-body" style="height: 300px;"><canvas id="gisDashPerfCanvas"></canvas></div>
+          </div>
+       </div>
+    </div>
 
     <div class="gis-main-content">
       <aside class="gis-sidebar" id="gis-sidebar">
         <div class="gis-sidebar-header">
-          <div class="gis-sidebar-title">QBC GIS Platform</div>
-          <div class="gis-sidebar-stats">
-            <span><i class="far fa-eye"></i> 1.2k views</span>
-            <span><i class="far fa-calendar-alt"></i> May 2025</span>
+          <div class="gis-sidebar-title">Layers Panel</div>
+          <div class="gis-search-input-wrap glass-panel" style="margin-top: 12px; padding: 4px 12px; border-radius: 8px;">
+            <i class="fas fa-search" style="font-size: 12px; color: var(--muted);"></i>
+            <input type="text" id="layer-search" class="gis-search-input" style="font-size: 12px;" placeholder="Search layers..." oninput="filterGisLayers()">
           </div>
         </div>
 
@@ -1467,30 +1714,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <div class="gis-toolbar glass-panel">
       <button class="gis-tool-btn" onclick="map.zoomIn()" title="Zoom In" aria-label="Zoom In"><i class="fas fa-plus"></i></button>
       <button class="gis-tool-btn" onclick="map.zoomOut()" title="Zoom Out" aria-label="Zoom Out"><i class="fas fa-minus"></i></button>
+      <button class="gis-tool-btn" onclick="map.locate({setView: true, maxZoom: 16})" title="Locate Me" aria-label="Locate Me"><i class="fas fa-location-crosshairs"></i></button>
       
       <div style="height:1px; background:var(--border); margin:4px 0;"></div>
       
-      <button class="gis-tool-btn" id="tool-marker" onclick="toggleDrawMode('Marker')" title="Add Pin" aria-label="Add Pin"><i class="fas fa-map-marker-alt"></i></button>
-      <button class="gis-tool-btn" id="tool-line" onclick="toggleDrawMode('Line')" title="Draw Polyline" aria-label="Draw Polyline"><i class="fas fa-project-diagram"></i></button>
-      <button class="gis-tool-btn" id="tool-rect" onclick="toggleDrawMode('Rectangle')" title="Draw Rectangle" aria-label="Draw Rectangle"><i class="far fa-square"></i></button>
-      <button class="gis-tool-btn" id="tool-poly" onclick="toggleDrawMode('Polygon')" title="Draw Polygon" aria-label="Draw Polygon"><i class="fas fa-draw-polygon"></i></button>
-      <button class="gis-tool-btn" id="tool-circle" onclick="toggleDrawMode('Circle')" title="Draw Circle" aria-label="Draw Circle"><i class="far fa-circle"></i></button>
-      <button class="gis-tool-btn" id="tool-text" onclick="showToast('Text Tool Coming Soon')" title="Text Tool" aria-label="Text Tool"><i class="fas fa-font"></i></button>
-      
-      <div style="height:1px; background:var(--border); margin:4px 0;"></div>
-      
-      <button class="gis-tool-btn" id="tool-edit" onclick="toggleGlobalEdit()" title="Edit Geometry" aria-label="Edit Geometry"><i class="fas fa-mouse-pointer"></i></button>
-      <button class="gis-tool-btn" id="tool-drag" onclick="map.pm.disableDraw(); map.pm.disableGlobalEditMode();" title="Drag Map" aria-label="Drag Map"><i class="fas fa-arrows-alt"></i></button>
-      <button class="gis-tool-btn" id="tool-cut" onclick="toggleDrawMode('Cut')" title="Cut Polygon" aria-label="Cut Polygon"><i class="fas fa-scissors"></i></button>
-      <button class="gis-tool-btn" id="tool-delete" onclick="map.pm.toggleGlobalRemovalMode()" title="Delete Layer" aria-label="Delete Layer"><i class="fas fa-eraser"></i></button>
-      <button class="gis-tool-btn" onclick="resetMapView()" title="Reset View" aria-label="Reset View"><i class="fas fa-sync-alt"></i></button>
-      
-      <div style="height:1px; background:var(--border); margin:4px 0;"></div>
-      
-      <button class="gis-tool-btn" onclick="map.pm.Draw.undo()" title="Undo" aria-label="Undo"><i class="fas fa-undo"></i></button>
-      <button class="gis-tool-btn" onclick="exitGisModes()" title="Exit / Reset Tools" aria-label="Exit / Reset Tools"><i class="fas fa-times-circle"></i></button>
+      <button class="gis-tool-btn" onclick="toggleGisSidebar()" title="Layers" aria-label="Layers"><i class="fas fa-layer-group"></i></button>
       <button class="gis-tool-btn" id="tool-measure" onclick="toggleMeasure()" title="Measure" aria-label="Measure"><i class="fas fa-ruler-combined"></i></button>
-      <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Fullscreen" aria-label="Fullscreen"><i class="fas fa-expand"></i></button>
+      <button class="gis-tool-btn" id="tool-poly" onclick="toggleDrawMode('Polygon')" title="Draw" aria-label="Draw"><i class="fas fa-pencil-alt"></i></button>
+      <button class="gis-tool-btn" onclick="switchGisTab('assets')" title="Filter" aria-label="Filter"><i class="fas fa-filter"></i></button>
+      <button class="gis-tool-btn" onclick="window.print()" title="Print" aria-label="Print"><i class="fas fa-print"></i></button>
+      <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Full Screen" aria-label="Full Screen"><i class="fas fa-expand"></i></button>
     </div>
 
       </div>
@@ -2958,12 +3191,12 @@ function applyLogo() {
   const removeBtn = document.getElementById('btn-remove-logo');
 
   if (companyLogo) {
-    if (brandContainer) brandContainer.innerHTML = `<img src="${companyLogo}" class="nav-logo" alt="Logo">`;
+    if (brandContainer) brandContainer.innerHTML = `<img src="${companyLogo}" class="nav-logo" alt="Logo" style="margin-right: 8px;"> <span>Operations Center</span>`;
     if (previewImg) { previewImg.src = companyLogo; previewImg.style.display = 'block'; }
     if (previewPlaceholder) previewPlaceholder.style.display = 'none';
     if (removeBtn) removeBtn.style.display = 'block';
   } else {
-    if (brandContainer) brandContainer.innerHTML = `QBC <span>Platform</span>`;
+    if (brandContainer) brandContainer.innerHTML = `QBC <span>Operations Center</span>`;
     if (previewImg) { previewImg.src = ''; previewImg.style.display = 'none'; }
     if (previewPlaceholder) previewPlaceholder.style.display = 'block';
     if (removeBtn) removeBtn.style.display = 'none';
@@ -3014,7 +3247,10 @@ function showPage(id) {
     if (gisToggle) gisToggle.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
     setTimeout(() => {
        initMap();
-       if(map) map.invalidateSize();
+       if(map) {
+         map.invalidateSize();
+         updateDashboard(); // Ensure GIS KPIs and charts are ready
+       }
     }, 100);
   } else {
     if (gisToggle) gisToggle.style.display = 'none';
@@ -3156,14 +3392,15 @@ function updateDashboard() {
   renderVolumeChart(mArr);
   renderAreaStats(areaStats);
   renderOperationalItems();
-  updateRecentActivity();
   
   if (dashMap) {
     dashMap.invalidateSize();
   } else {
     initDashMap();
   }
-  
+
+  updateGisKpis(stats);
+
   // Sync Row 3 heights
   setTimeout(() => {
     const summaryCard = document.getElementById('monthlySummaryCard');
@@ -3174,6 +3411,18 @@ function updateDashboard() {
   }, 500);
 
   document.getElementById('dash-last-refresh').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function updateGisKpis(stats) {
+  const total = document.getElementById('gis-kpi-total');
+  const comp = document.getElementById('gis-kpi-completed');
+  const prog = document.getElementById('gis-kpi-progress');
+  const over = document.getElementById('gis-kpi-overdue');
+  
+  if (total) total.textContent = stats.total.toLocaleString();
+  if (comp) comp.textContent = (stats.green + stats.amber).toLocaleString();
+  if (prog) prog.textContent = stats.blue.toLocaleString();
+  if (over) over.textContent = stats.red.toLocaleString();
 }
 
 function renderMonthly(mArr) {
@@ -3408,36 +3657,6 @@ function renderOperationalItems() {
   `).join('') + `</div>`;
 }
 
-function updateRecentActivity() {
-  const tbody = document.getElementById('dashRecentBody');
-  if (!tbody) return;
-  
-  if (notifications.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:var(--muted);">No recent activity</td></tr>';
-    return;
-  }
-  
-  tbody.innerHTML = notifications.slice(0, 15).map(n => {
-    let badgeColor = 'var(--muted)';
-    const act = (n.action || '').toLowerCase();
-    if (act.includes('add') || act.includes('create')) badgeColor = 'var(--green)';
-    else if (act.includes('update') || act.includes('edit') || act.includes('save')) badgeColor = 'var(--blue)';
-    else if (act.includes('delete') || act.includes('remove')) badgeColor = 'var(--red)';
-
-    return `
-      <tr class="cursor-pointer" onclick="handleNotifClick(${n.id})">
-        <td style="white-space:nowrap; color:var(--muted); font-size:11px;">${formatNotifTime(n.time)}</td>
-        <td style="font-weight:600;">${n.user}</td>
-        <td>
-          <span class="status-badge" style="background:${badgeColor}20; color:${badgeColor}; font-size:10px; padding:2px 8px; border-radius:100px; font-weight:700;">
-            ${n.action}
-          </span>
-        </td>
-        <td style="font-weight:700; color:var(--text); font-size:12px;">${n.woId ? '#' + n.woId : '—'}</td>
-      </tr>
-    `;
-  }).join('');
-}
 
 // Global search handling
 if (document.getElementById('dash-global-search')) {
@@ -4588,14 +4807,14 @@ function toggleAuthMode() {
   
   if (btn.textContent === 'Sign In') {
     title.textContent = 'Create Account';
-    if (subtitle) subtitle.textContent = 'Register for the QBC Platform';
+    if (subtitle) subtitle.textContent = 'Roads, Assets & GIS Management System';
     btn.textContent = 'Sign Up';
     toggleText.textContent = 'Sign In';
     if (helperText) helperText.textContent = 'Already have an account? ';
     if (signupFields) signupFields.style.display = 'block';
   } else {
     title.textContent = 'Welcome Back';
-    if (subtitle) subtitle.textContent = 'Sign in to Qatar Building Company platform';
+    if (subtitle) subtitle.textContent = 'Roads, Assets & GIS Management System';
     btn.textContent = 'Sign In';
     toggleText.textContent = 'Sign Up';
     if (helperText) helperText.textContent = "Don't have an account? ";
@@ -5494,6 +5713,9 @@ function onMapClick(e) {
 }
 
 function showPointInfo(lat, lng, woData = null, isBoundary = false) {
+  if (woData) {
+    openGisDetails(woData.WorkOrder);
+  }
   switchGisTab('assets');
   const details = document.getElementById('point-details');
   
@@ -5990,6 +6212,208 @@ function filterMapByStatus(status, visible) {
   loadMarkers(status, visible);
 }
 
+function switchGisView(view) {
+  const mapBtn = document.getElementById('gis-view-map-btn');
+  const dashBtn = document.getElementById('gis-view-dash-btn');
+  const overlay = document.getElementById('gis-dash-overlay');
+  
+  if (view === 'dash') {
+    overlay.classList.add('open');
+    mapBtn.classList.remove('active');
+    dashBtn.classList.add('active');
+    renderGisDashboard();
+  } else {
+    overlay.classList.remove('open');
+    mapBtn.classList.add('active');
+    dashBtn.classList.remove('active');
+  }
+}
+
+function renderGisDashboard() {
+  const stats = { total: allData.length, green: 0, amber: 0, red: 0, blue: 0 };
+  allData.forEach(r => stats[getStatusCat(r)]++);
+  
+  const container = document.getElementById('gis-dash-kpis');
+  container.innerHTML = `
+    <div class="kpi-card total"><div class="kpi-label">Total</div><div class="kpi-value">${stats.total}</div></div>
+    <div class="kpi-card on-time"><div class="kpi-label">Completed</div><div class="kpi-value">${stats.green + stats.amber}</div></div>
+    <div class="kpi-card breached"><div class="kpi-label">In Progress</div><div class="kpi-value">${stats.blue}</div></div>
+    <div class="kpi-card failed"><div class="kpi-label">Overdue</div><div class="kpi-value">${stats.red}</div></div>
+  `;
+
+  // Mini charts for GIS dashboard
+  if (charts.gisComp) charts.gisComp.destroy();
+  charts.gisComp = new Chart(document.getElementById('gisDashCompCanvas'), {
+    type: 'bar',
+    data: {
+      labels: ['Completed', 'Pending'],
+      datasets: [{
+        data: [stats.green + stats.amber, stats.blue + stats.red],
+        backgroundColor: ['#22c55e', '#3b82f6']
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+
+  if (charts.gisStatus) charts.gisStatus.destroy();
+  charts.gisStatus = new Chart(document.getElementById('gisDashStatusCanvas'), {
+    type: 'doughnut',
+    data: {
+      labels: ['On-Time', 'Breached', 'Pending', 'Overdue'],
+      datasets: [{
+        data: [stats.green, stats.amber, stats.blue, stats.red],
+        backgroundColor: ['#22c55e', '#f59e0b', '#6366f1', '#ef4444']
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  // Top Locations Chart
+  const locCounts = {};
+  allData.forEach(r => { const loc = r.Location || 'Unknown'; locCounts[loc] = (locCounts[loc] || 0) + 1; });
+  const sortedLocs = Object.entries(locCounts).sort((a,b) => b[1] - a[1]).slice(0, 10);
+  
+  if (charts.gisLoc) charts.gisLoc.destroy();
+  charts.gisLoc = new Chart(document.getElementById('gisDashLocCanvas'), {
+    type: 'pie',
+    data: {
+      labels: sortedLocs.map(x => x[0]),
+      datasets: [{
+        data: sortedLocs.map(x => x[1]),
+        backgroundColor: ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#a855f7', '#6366f1', '#14b8a6', '#f43f5e', '#8b5cf6', '#06b6d4']
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 9 } } } } }
+  });
+
+  // Performance Trend (Monthly)
+  const monthData = {};
+  allData.forEach(r => {
+    if (r.TargetStart) {
+      const d = new Date(r.TargetStart);
+      const m = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0');
+      if (!monthData[m]) monthData[m] = 0;
+      monthData[m]++;
+    }
+  });
+  const sortedMonths = Object.keys(monthData).sort();
+
+  if (charts.gisPerf) charts.gisPerf.destroy();
+  charts.gisPerf = new Chart(document.getElementById('gisDashPerfCanvas'), {
+    type: 'line',
+    data: {
+      labels: sortedMonths,
+      datasets: [{
+        label: 'Work Order Volume',
+        data: sortedMonths.map(m => monthData[m]),
+        borderColor: '#00c8ff',
+        tension: 0.4,
+        fill: true,
+        backgroundColor: 'rgba(0, 200, 255, 0.1)'
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+  });
+}
+
+function toggleGisTheme() {
+  const container = document.getElementById('gis-main-container');
+  container.classList.toggle('gis-theme-dark');
+}
+
+function filterGisLayers() {
+  const q = document.getElementById('layer-search').value.toLowerCase();
+  document.querySelectorAll('.gis-layer-item').forEach(item => {
+    const name = item.querySelector('.gis-layer-name').textContent.toLowerCase();
+    item.style.display = name.includes(q) ? 'flex' : 'none';
+  });
+  
+  document.querySelectorAll('.gis-panel-section').forEach(section => {
+    const visibleItems = Array.from(section.querySelectorAll('.gis-layer-item')).filter(i => i.style.display !== 'none');
+    section.style.display = visibleItems.length > 0 || section.querySelector('.basemap-grid') ? 'block' : 'none';
+  });
+}
+
+function openGisDetails(woId) {
+  const wo = allData.find(r => String(r.WorkOrder) === String(woId));
+  if (!wo) return;
+
+  const panel = document.getElementById('gis-details-panel');
+  const content = document.getElementById('gis-details-content');
+  
+  document.getElementById('gis-det-title').textContent = `WO #${wo.WorkOrder}`;
+  
+  const photo = photos[wo.WorkOrder];
+  
+  const cat = getStatusCat(wo);
+  const progress = cat === 'green' || cat === 'amber' ? 100 : (cat === 'blue' ? 50 : 20);
+
+  content.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="status-badge badge-${wo.Status}" style="font-size: 12px; padding: 4px 12px;">${wo.Status}</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--accent);">${progress}% Progress</div>
+      </div>
+      
+      <div class="progress-wrap" style="height: 4px; margin-top: -10px;">
+        <div class="progress-fill" style="width: ${progress}%; background: var(--accent);"></div>
+      </div>
+      
+      ${photo ? `<img src="${photo}" style="width: 100%; border-radius: 12px; border: 1px solid var(--border);">` : ''}
+      
+      <div class="info-group">
+        <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Description</label>
+        <div style="font-size: 14px; font-weight: 600; margin-top: 4px;">${wo.Description || '—'}</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="info-group">
+          <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Priority</label>
+          <div style="font-size: 13px; font-weight: 600;">${wo.Priority || 'Normal'}</div>
+        </div>
+        <div class="info-group">
+          <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Asset Type</label>
+          <div style="font-size: 13px; font-weight: 600;">${wo.SignType || '—'}</div>
+        </div>
+      </div>
+
+      <div class="info-group">
+        <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Location</label>
+        <div style="font-size: 13px; font-weight: 600;">${wo.Location || '—'}</div>
+      </div>
+
+      <div class="info-group">
+        <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Assigned Engineer</label>
+        <div style="font-size: 13px; font-weight: 600;">${wo.PWA_ENG || '—'}</div>
+      </div>
+
+      <div class="info-group">
+        <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Target Finish</label>
+        <div style="font-size: 13px; font-weight: 600; color: var(--red);">${formatDate(wo.TargetFinish)}</div>
+      </div>
+
+      <div class="info-group">
+        <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Documents & History</label>
+        <div style="display: flex; gap: 8px; margin-top: 6px;">
+          <button class="btn btn-ghost btn-sm" onclick="openFabModal('${wo.WorkOrder}')"><i class="fas fa-file-pdf"></i> PDF</button>
+          <button class="btn btn-ghost btn-sm" onclick="showFabHistory('${wo.WorkOrder}')"><i class="fas fa-history"></i> History</button>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 10px; padding-top: 20px; border-top: 1px solid var(--border);">
+        <button class="btn btn-primary flex-1" onclick="openDetail('${wo.WorkOrder}')"><i class="fas fa-external-link-alt"></i> Full View</button>
+        <button class="btn btn-ghost" onclick="copyCoords(${wo.Lat}, ${wo.Lng})"><i class="fas fa-copy"></i></button>
+      </div>
+    </div>
+  `;
+  
+  panel.classList.add('open');
+}
+
+function closeGisDetails() {
+  document.getElementById('gis-details-panel').classList.remove('open');
+}
+
 function exportGisResults(format) {
   const q = document.getElementById('gis-wo-search').value.toLowerCase();
   const list = allData.filter(r => r.WorkOrder.includes(q) || (r.Description||'').toLowerCase().includes(q));
@@ -6392,9 +6816,12 @@ function openFabModal(wo) {
   <div id="fabDoc" style="background:#fff;color:#000;width:794px;height:1123px;padding:40px;font-family:'Inter', 'Noto Sans Arabic', sans-serif;box-sizing:border-box;display:flex;flex-direction:column;margin:0 auto;position:relative;">
     
     <div style="flex-shrink:0; border-bottom:3px solid var(--accent);padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;">
-      <div>
-        <div style="font-size:24px;font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:1px;">Fabrication</div>
-        <div style="font-size:12px;color:#64748b;margin-top:4px;">Qatar Building Company – PWA Signage Works</div>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        ${companyLogo ? `<img src="${companyLogo}" style="max-height: 50px; width: auto;">` : ''}
+        <div>
+          <div style="font-size:24px;font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:1px;">Fabrication</div>
+          <div style="font-size:12px;color:#64748b;margin-top:4px;">QBC Operations Center – Roads, Assets & GIS Management System</div>
+        </div>
       </div>
       <div style="text-align:right;">
         <div style="font-size:22px;font-weight:800;color:#000;">WO: ${r.WorkOrder}</div>
