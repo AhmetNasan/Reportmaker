@@ -1,0 +1,3 @@
+## 2025-05-22 - [Standardizing .btn-reset and Focus States]
+**Learning:** The application used a `.btn-reset` utility class across multiple icon-only buttons (Notifications, GIS Search), but the class was not defined in CSS, resulting in missing focus indicators and inconsistent appearance. Adding semantic `aria-label` attributes and a clear `:focus-visible` ring significantly improves keyboard navigability and screen reader support without affecting the visual design for mouse users.
+**Action:** Always verify that utility classes for "reset" buttons include `:focus-visible` styles and that icon-only buttons have explicit `aria-label` attributes that match their `title` or purpose.
