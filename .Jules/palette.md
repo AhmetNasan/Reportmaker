@@ -1,0 +1,3 @@
+## 2025-05-15 - Utility Class Accessibility Omission
+**Learning:** The application utilized a `.btn-reset` utility class in several places for icon-only buttons (close buttons, "Forgot?" link), but the class was never defined in the CSS. This led to default browser button styling (or lack thereof) and missing critical accessibility features like `:focus-visible` outlines and hover feedback.
+**Action:** Always verify that utility classes used in the HTML are actually defined in the design system. For "reset" or "ghost" buttons, explicitly define `:focus-visible` with a high-contrast outline (e.g., `2px solid var(--accent)`) and pair with `aria-label` for icon-only implementations.
