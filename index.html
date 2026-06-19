@@ -265,6 +265,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .btn-sm{padding:5px 12px;font-size:11px;}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-reset { background: none; border: none; padding: 0; cursor: pointer; color: inherit; font: inherit; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
+.btn-reset:hover { opacity: 0.8; }
+.btn-reset:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .btn-green{background:var(--green);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
 
@@ -1159,7 +1162,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div id="notif-panel" class="notif-panel">
   <div class="notif-header">
     <div class="notif-title">Notifications</div>
-    <button class="btn-reset" onclick="toggleNotifPanel()"><i class="fas fa-times"></i></button>
+    <button class="btn-reset" onclick="toggleNotifPanel()" aria-label="Close notifications" title="Close notifications"><i class="fas fa-times"></i></button>
   </div>
   <div class="notif-tabs">
     <button class="notif-tab active" onclick="switchNotifTab('all')">All</button>
@@ -1337,7 +1340,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <!-- Drill-Down Modal -->
 <div class="modal-overlay" id="drillDownModal">
   <div class="modal" style="max-width:1200px; width:95%;">
-    <button class="modal-close" onclick="closeModal('drillDownModal')">×</button>
+    <button class="modal-close" onclick="closeModal('drillDownModal')" aria-label="Close modal" title="Close modal">×</button>
     <div class="modal-title" id="drill-modal-title">Filtered Work Orders</div>
     <div class="filters" style="margin-bottom:16px;">
       <input type="text" class="filter-input" id="drill-search" placeholder="Search in results..." style="flex:1;">
@@ -1364,7 +1367,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="profileModal">
   <div class="modal" style="max-width:400px;">
-    <button class="modal-close" onclick="closeModal('profileModal')">×</button>
+    <button class="modal-close" onclick="closeModal('profileModal')" aria-label="Close modal" title="Close modal">×</button>
     <div class="modal-title">Edit Profile</div>
     <div class="form-group mb-3">
       <label>Full Name</label>
@@ -1404,7 +1407,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="recoveryModal">
   <div class="modal" style="max-width:360px;">
-    <button class="modal-close" onclick="closeModal('recoveryModal')">×</button>
+    <button class="modal-close" onclick="closeModal('recoveryModal')" aria-label="Close modal" title="Close modal">×</button>
     <div class="modal-title">Password Recovery</div>
     <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Please enter your email address. We will send you a link to reset your password.</p>
     <div class="form-group">
@@ -1467,7 +1470,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div class="page" id="page-map">
   <div class="gis-container gis-theme-dark" id="gis-main-container">
     <header class="gis-top-bar">
-      <button class="btn btn-ghost btn-sm" onclick="toggleGisSidebar()" title="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleGisSidebar()" title="Toggle Sidebar" aria-label="Toggle Sidebar"><i class="fas fa-bars"></i></button>
       <div class="gis-search-wrap" style="flex: 1; max-width: 500px; display: flex; align-items: center; background: var(--surface2); border-radius: 20px; padding: 0 16px; border: 1px solid var(--border);">
         <i class="fas fa-search" style="color:var(--muted)"></i>
         <input type="text" id="map-search-input" class="gis-search-input" placeholder="Search Asset ID, Work Order, Coordinates, or Location" onkeydown="if(event.key==='Enter')searchCoordinates()" style="background: transparent; border: none; color: var(--text); flex: 1; padding: 10px; outline: none; font-size: 13px;">
@@ -1482,9 +1485,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
 
       <div class="gis-top-actions" style="display: flex; gap: 8px;">
-        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('kml-upload').click()"><i class="fas fa-upload"></i></button>
-        <button class="btn btn-ghost btn-sm" onclick="exportMapKML()"><i class="fas fa-download"></i></button>
-        <button class="btn btn-ghost btn-sm" onclick="toggleGisTheme()" title="Toggle GIS Theme"><i class="fas fa-circle-half-stroke"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('kml-upload').click()" title="Upload KML" aria-label="Upload KML"><i class="fas fa-upload"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="exportMapKML()" title="Export KML" aria-label="Export KML"><i class="fas fa-download"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleGisTheme()" title="Toggle GIS Theme" aria-label="Toggle GIS Theme"><i class="fas fa-circle-half-stroke"></i></button>
       </div>
     </header>
 
@@ -1521,7 +1524,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="gis-details-panel glass-panel" id="gis-details-panel">
       <div class="gis-details-header">
         <h3 id="gis-det-title" style="font-size: 14px; color: var(--accent);">Work Order Details</h3>
-        <button class="btn-reset" onclick="closeGisDetails()"><i class="fas fa-times"></i></button>
+        <button class="btn-reset" onclick="closeGisDetails()" aria-label="Close details" title="Close details"><i class="fas fa-times"></i></button>
       </div>
       <div class="gis-details-content" id="gis-details-content">
         <!-- Content will be injected here -->
@@ -2008,7 +2011,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="adminModal">
   <div class="modal" style="max-width:360px;">
-    <button class="modal-close" onclick="closeModal('adminModal')">×</button>
+    <button class="modal-close" onclick="closeModal('adminModal')" aria-label="Close modal" title="Close modal">×</button>
     <div class="modal-title">Admin Login</div>
     <div class="form-group">
       <label>Password</label>
@@ -2024,7 +2027,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="editModal">
   <div class="modal" style="max-width:850px;">
-    <button class="modal-close" onclick="closeModal('editModal')">×</button>
+    <button class="modal-close" onclick="closeModal('editModal')" aria-label="Close modal" title="Close modal">×</button>
     <div class="modal-title" id="editModalTitle">Edit Work Order</div>
     <div class="form-grid" id="editFormGrid"></div>
     <div class="fab-section">
@@ -2040,7 +2043,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="fabModal">
   <div class="modal pdf-modal">
-    <button class="modal-close" onclick="closeModal('fabModal')">×</button>
+    <button class="modal-close" onclick="closeModal('fabModal')" aria-label="Close modal" title="Close modal">×</button>
     <div class="modal-title">Fabrication – <span id="fabModalWO"></span></div>
     <div id="pdfPreview"></div>
     <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;">
@@ -2061,8 +2064,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <button class="btn btn-ghost btn-sm" id="detail-edit-btn" onclick="toggleDetailEdit()" title="Edit Work Order"><i class="fas fa-edit"></i> Edit</button>
       <button class="btn btn-green btn-sm" id="detail-save-btn" onclick="saveDetailChanges()" style="display:none;" title="Save Changes"><i class="fas fa-save"></i> Save</button>
       <button class="btn btn-red btn-sm" id="detail-cancel-btn" onclick="cancelDetailEdit()" style="display:none;" title="Cancel Edit"><i class="fas fa-times"></i> Cancel</button>
-      <button class="btn btn-ghost btn-sm" onclick="navigateDetail('prev')" title="Previous Work Order"><i class="fas fa-chevron-up"></i></button>
-      <button class="btn btn-ghost btn-sm" onclick="navigateDetail('next')" title="Next Work Order"><i class="fas fa-chevron-down"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="navigateDetail('prev')" title="Previous Work Order" aria-label="Previous Work Order"><i class="fas fa-chevron-up"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="navigateDetail('next')" title="Next Work Order" aria-label="Next Work Order"><i class="fas fa-chevron-down"></i></button>
         <button class="btn btn-ghost btn-sm" onclick="showContextMenu(event, 'detail-modal')" title="More Actions" aria-label="More Actions"><i class="fas fa-ellipsis-v"></i></button>
       <button class="btn btn-primary btn-sm" onclick="closeDetail()"><i class="fas fa-times"></i> Close</button>
     </div>
