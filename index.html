@@ -13,7 +13,6 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.css" />
 <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
@@ -24,10 +23,10 @@
 <script src="https://unpkg.com/leaflet-minimap@3.6.1/dist/Control.MiniMap.min.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet-geometryutil@0.9.3/src/leaflet.geometryutil.min.js"></script>
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://unpkg.com/@mapbox/togeojson@0.16.0/togeojson.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.min.js"></script>
 <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
@@ -852,29 +851,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   padding: 16px;
 }
 
-.gis-legend {
-  position: absolute;
-  bottom: 50px;
-  left: 20px;
-  z-index: 50;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 11px;
-}
-
-.legend-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
 
 .gis-view-toggle {
   display: flex;
@@ -1488,12 +1464,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
     </div>
 
-    <div class="gis-legend glass-panel">
-      <div class="legend-row"><span class="legend-dot" style="background: var(--green);"></span> <span>Completed</span></div>
-      <div class="legend-row"><span class="legend-dot" style="background: var(--amber);"></span> <span>In Progress</span></div>
-      <div class="legend-row"><span class="legend-dot" style="background: var(--red);"></span> <span>Overdue</span></div>
-      <div class="legend-row"><i class="fas fa-users-viewfinder" style="color: var(--accent); font-size: 12px;"></i> <span>Cluster</span></div>
-    </div>
 
     <div class="gis-details-panel glass-panel" id="gis-details-panel">
       <div class="gis-details-header">
@@ -1711,7 +1681,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div id="map-scale-display">Scale: --</div>
       <div style="flex: 1;"></div>
       <div id="active-layer-display">Layer: Work Orders</div>
-      <div id="live-measure-summary" style="color: var(--accent); font-weight: 600;"></div>
     </footer>
 
     <input type="file" id="kml-upload" style="display:none" accept=".kml,.kmz,.gpx,.csv" onchange="handleKMLUpload(event)">
@@ -2274,6 +2243,7 @@ let fmSelected = new Set();
 let fmFiles = [];
 let selectedWorkOrder = null;
 let isAuthenticating = false;
+let isMeasuringMode = false;
 let contractStartDate = '2026-01-01';
 let uploadErrors = [];
 let notifications = [];
@@ -5281,29 +5251,6 @@ async function initMap() {
     .addTo(map);
   }
 
-  if (typeof L.Control.Measure !== 'undefined') {
-    measureControl = new L.Control.Measure({
-      position: 'bottomright',
-      primaryLengthUnit: 'meters',
-      secondaryLengthUnit: 'kilometers',
-      primaryAreaUnit: 'sqmeters',
-      secondaryAreaUnit: 'hectares',
-      activeColor: '#00c8ff',
-      completedColor: '#7c3aed',
-      captureZIndex: 10000
-    });
-    
-    map.on('measurefinish', function(e) {
-      updateMeasureUI(e);
-    });
-    
-    map.on('measurestart', function() {
-       switchGisTab('measure');
-       document.getElementById('measure-results').innerHTML = '<div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-spinner fa-spin"></i> <span>Measuring active...</span></div>';
-       document.getElementById('measure-btn-main').innerHTML = '<i class="fas fa-stop"></i> Stop';
-       document.getElementById('measure-btn-main').classList.add('btn-red');
-    });
-  }
 
   // Locate Me
   const LocateControl = L.Control.extend({
@@ -5336,48 +5283,21 @@ async function initMap() {
         const layer = e.layer;
         const type = e.shape;
         
+        // Only trigger measurement if coming from measurement tools
+        if (isMeasuringMode) {
+            processMeasurement(layer, type);
+        }
+
         if (type === 'Marker') {
             const latlng = layer.getLatLng();
-            showToast(`New marker created at ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`);
-            // In a real app, this would trigger an "Add Work Order" flow
-        }
-
-        if (type === 'Polygon' || type === 'Rectangle') {
-            updatePolygonArea(layer);
-            layer.on('pm:edit', () => updatePolygonArea(layer));
+            showToast(`Marker created at ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`);
         }
         
-        // Save history
-        saveMapHistory('create', { shape: type, latlngs: layer.getLatLngs ? layer.getLatLngs() : layer.getLatLng() });
+        // Internal history tracking (local session)
+        if (typeof saveMapHistory === 'function') {
+           saveMapHistory('create', { shape: type, latlngs: layer.getLatLngs ? layer.getLatLngs() : layer.getLatLng() });
+        }
     });
-
-    function updatePolygonArea(layer) {
-        const latlngs = layer.getLatLngs()[0];
-        const area = L.GeometryUtil.geodesicArea(latlngs);
-        const areaStr = area > 10000 
-            ? (area / 10000).toFixed(2) + ' ha' 
-            : area.toFixed(2) + ' m²';
-        
-        if (layer._areaLabel) {
-            layer._areaLabel.setLatLng(layer.getBounds().getCenter());
-            layer._areaLabel.setIcon(L.divIcon({
-                className: 'area-label',
-                html: `<div style="background:rgba(0,0,0,0.6); color:#fff; padding:2px 6px; border-radius:4px; font-size:11px; white-space:nowrap; border:1px solid var(--accent);">${areaStr}</div>`,
-                iconSize: [60, 20],
-                iconAnchor: [30, 10]
-            }));
-        } else {
-            layer._areaLabel = L.marker(layer.getBounds().getCenter(), {
-                icon: L.divIcon({
-                    className: 'area-label',
-                    html: `<div style="background:rgba(0,0,0,0.6); color:#fff; padding:2px 6px; border-radius:4px; font-size:11px; white-space:nowrap; border:1px solid var(--accent);">${areaStr}</div>`,
-                    iconSize: [60, 20],
-                    iconAnchor: [30, 10]
-                }),
-                interactive: false
-            }).addTo(map);
-        }
-    }
 
     map.on('pm:remove', (e) => {
         saveMapHistory('delete', { shape: e.shape });
@@ -5640,7 +5560,7 @@ function showPointInfo(lat, lng, woData = null, isBoundary = false) {
   if (woData) {
     openGisDetails(woData.WorkOrder);
   }
-  switchGisTab('assets');
+  // Removed automatic sidebar tab switching to keep user on their current tab
   const details = document.getElementById('point-details');
   
   let content = `
@@ -5741,7 +5661,15 @@ function showPointInfo(lat, lng, woData = null, isBoundary = false) {
       <em style="color:var(--muted);">No editable object found at this location.</em>
     `;
   }
-  details.innerHTML = content;
+  if (details) details.innerHTML = content;
+
+  // Show map popup for map clicks or boundaries (markers already have their own bindPopup)
+  if (!woData || isBoundary) {
+    L.popup({ maxWidth: 350 })
+      .setLatLng([lat, lng])
+      .setContent(`<div class="gis-popup-content" style="color:var(--text); font-family:var(--font);">${content}</div>`)
+      .openOn(map);
+  }
 }
 
 function hidePointInfo() {
@@ -5872,6 +5800,7 @@ function toggleBoundaryVisibility() {
 
 function toggleDrawMode(mode) {
   document.querySelectorAll('.gis-tool-btn').forEach(b => b.classList.remove('active'));
+  isMeasuringMode = false;
   if (!mode) {
     map.pm.disableDraw();
     return;
@@ -5931,7 +5860,6 @@ function exitGisModes() {
 
 function toggleMeasure() {
   const btn = document.getElementById('tool-measure');
-  const mainBtn = document.getElementById('measure-btn-main');
   if (btn.classList.contains('active')) {
     stopMeasurement();
   } else {
@@ -5943,9 +5871,12 @@ function startMeasurement() {
   const btn = document.getElementById('tool-measure');
   const mainBtn = document.getElementById('measure-btn-main');
   btn.classList.add('active');
+  if(mainBtn) {
+    mainBtn.innerHTML = '<i class="fas fa-stop"></i> Stop';
+    mainBtn.classList.add('btn-red');
+  }
+  isMeasuringMode = true;
   switchGisTab('measure');
-  measureControl.addTo(map);
-  // Leaflet-measure plugin auto-triggers measurestart
   showToast("Measurement mode active");
 }
 
@@ -5957,41 +5888,11 @@ function stopMeasurement() {
     mainBtn.innerHTML = '<i class="fas fa-play"></i> Start';
     mainBtn.classList.remove('btn-red');
   }
-  try { map.removeControl(measureControl); } catch(e){}
-  document.getElementById('measure-results').innerHTML = '<p style="color: var(--muted); font-size: 12px; text-align: center;">Measurement mode inactive</p>';
-  document.getElementById('live-measure-summary').textContent = '';
-  showToast("Measurement mode exited");
+  isMeasuringMode = false;
+  if (map && map.pm) map.pm.disableDraw();
+  showToast("Measurement mode disabled");
 }
 
-function clearMeasurements() {
-  // The leaflet-measure plugin doesn't have a simple "clear" method exposed easily while active
-  // So we stop and restart to reset the state
-  stopMeasurement();
-  startMeasurement();
-}
-
-function updateMeasureUI(e) {
-  const results = document.getElementById('measure-results');
-  const summary = document.getElementById('live-measure-summary');
-  if (results) {
-    let html = `
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:11px; color:var(--muted);">Area:</span>
-          <span style="color:var(--accent); font-weight:700;">${e.areaDisplay}</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:11px; color:var(--muted);">Length:</span>
-          <span style="color:var(--accent); font-weight:700;">${e.lengthDisplay}</span>
-        </div>
-      </div>
-    `;
-    results.innerHTML = html;
-  }
-  if (summary) {
-    summary.textContent = `| Length: ${e.lengthDisplay} | Area: ${e.areaDisplay}`;
-  }
-}
 
 function toggleGisSidebar() {
   const sb = document.getElementById('gis-sidebar');
@@ -6035,64 +5936,124 @@ function switchGisTab(tabId) {
   }
 }
 
-let gisMeasureLayer = null;
+let measurementHistory = [];
+let measurementLayers = [];
 
 function startGisMeasure(type) {
   if (!map) return;
-  if (gisMeasureLayer) map.removeLayer(gisMeasureLayer);
-  
-  showToast(`Measurement started: ${type}`);
+  isMeasuringMode = true;
   if (type === 'polyline') map.pm.enableDraw('Line');
   else if (type === 'polygon') map.pm.enableDraw('Polygon');
   else if (type === 'marker') map.pm.enableDraw('Marker');
-  
-  map.once('pm:create', e => {
-    const layer = e.layer;
-    gisMeasureLayer = layer;
-    let output = '';
+  showToast(`Draw on map to measure ${type}`);
+}
+
+function processMeasurement(layer, shapeType) {
+    if (!layer._mId) layer._mId = 'm-' + Date.now();
     
-    if (type === 'polyline') {
-      const distance = L.GeometryUtil.accumulatedLengths(layer.getLatLngs());
-      const total = distance[distance.length - 1];
-      output = `
-        <div style="font-size:12px;">
-          <div style="margin-bottom:8px; color:var(--accent); font-weight:700;">Distance Results</div>
-          <div>Meters: <b>${total.toFixed(2)} m</b></div>
-          <div>Kilometers: <b>${(total/1000).toFixed(3)} km</b></div>
-          <div>Feet: <b>${(total*3.28084).toFixed(1)} ft</b></div>
-        </div>
-      `;
-    } else if (type === 'polygon') {
-      const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
-      output = `
-        <div style="font-size:12px;">
-          <div style="margin-bottom:8px; color:var(--accent); font-weight:700;">Area Results</div>
-          <div>Sq Meters: <b>${area.toFixed(2)} m²</b></div>
-          <div>Hectares: <b>${(area/10000).toFixed(3)} ha</b></div>
-          <div>Perimeter: <b>${L.GeometryUtil.accumulatedLengths(layer.getLatLngs()[0]).slice(-1)[0].toFixed(1)} m</b></div>
-        </div>
-      `;
-    } else if (type === 'marker') {
-      const ll = layer.getLatLng();
-      output = `
-        <div style="font-size:12px;">
-          <div style="margin-bottom:8px; color:var(--accent); font-weight:700;">Coordinates</div>
-          <div>Lat: <b>${ll.lat.toFixed(6)}</b></div>
-          <div>Lng: <b>${ll.lng.toFixed(6)}</b></div>
-        </div>
-      `;
+    if (!measurementLayers.includes(layer)) {
+        measurementLayers.push(layer);
+        layer.isMeasurement = true;
     }
+
+    let result = {
+        id: layer._mId,
+        type: shapeType,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        title: '', mainValue: '', details: ''
+    };
+
+    try {
+        if (shapeType === 'Line' || shapeType === 'Polyline') {
+            const latlngs = layer.getLatLngs();
+            const dists = L.GeometryUtil.accumulatedLengths(latlngs);
+            const total = dists[dists.length - 1];
+            result.title = 'Distance';
+            result.mainValue = total > 1000 ? (total/1000).toFixed(3) + ' km' : total.toFixed(2) + ' m';
+            result.details = `Meters: ${total.toFixed(1)} m<br>Feet: ${(total*3.28084).toFixed(1)} ft`;
+        } else if (shapeType === 'Polygon' || shapeType === 'Rectangle') {
+            const latlngs = layer.getLatLngs()[0];
+            const area = L.GeometryUtil.geodesicArea(latlngs);
+            const perim = L.GeometryUtil.accumulatedLengths(latlngs).slice(-1)[0];
+            result.title = 'Area & Perimeter';
+            result.mainValue = area > 10000 ? (area/10000).toFixed(3) + ' ha' : area.toFixed(2) + ' m²';
+            result.details = `Perimeter: ${perim.toFixed(1)} m<br>Sq Feet: ${(area * 10.7639).toFixed(1)} ft²`;
+        } else if (shapeType === 'Marker' || shapeType === 'CircleMarker') {
+            const ll = layer.getLatLng();
+            result.title = 'Coordinates';
+            result.mainValue = `${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)}`;
+            result.details = `Lat: ${ll.lat.toFixed(8)}<br>Lng: ${ll.lng.toFixed(8)}`;
+        }
+    } catch (err) {
+        result.mainValue = "Error";
+        result.details = "Calculation failed";
+    }
+
+    updateMeasurementUI(result);
+    layer.on('pm:edit', () => processMeasurement(layer, shapeType));
+}
+
+function updateMeasurementUI(result) {
+    const output = document.getElementById('gis-measure-output');
+    if (!output) return;
+
+    output.innerHTML = `
+        <div style="font-size:12px;">
+          <div style="margin-bottom:4px; color:var(--accent); font-weight:700;">${result.title}</div>
+          <div style="font-size:18px; font-weight:800; margin-bottom:8px; color:var(--text);">${result.mainValue}</div>
+          <div style="font-size:10px; color:var(--muted); line-height:1.4;">${result.details}</div>
+        </div>
+    `;
+
+    const existingIdx = measurementHistory.findIndex(h => h.id === result.id);
+    if (existingIdx !== -1) {
+        measurementHistory[existingIdx] = result;
+    } else {
+        measurementHistory.unshift(result);
+    }
+    renderMeasurementHistory();
+}
+
+function renderMeasurementHistory() {
+    const container = document.getElementById('gis-saved-measures');
+    if (!container) return;
     
-    document.getElementById('gis-measure-output').innerHTML = output;
-  });
+    if (measurementHistory.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = '<div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:700; margin:15px 0 8px 0; border-top:1px solid var(--border); padding-top:10px;">History</div>';
+
+    measurementHistory.forEach(h => {
+        const item = document.createElement('div');
+        item.style.background = 'var(--surface2)';
+        item.style.borderRadius = '8px';
+        item.style.padding = '8px';
+        item.style.marginBottom = '6px';
+        item.style.border = '1px solid var(--border)';
+        item.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                <span style="color:var(--accent); font-weight:700; font-size:12px;">${h.mainValue}</span>
+                <span style="font-size:9px; color:var(--muted);">${h.timestamp}</span>
+            </div>
+            <div style="font-size:9px; color:var(--muted);">${h.title}</div>
+        `;
+        container.appendChild(item);
+    });
 }
 
 function clearMapMeasurements() {
-  if (gisMeasureLayer) {
-    map.removeLayer(gisMeasureLayer);
-    gisMeasureLayer = null;
-  }
-  document.getElementById('gis-measure-output').innerHTML = '<p style="color:var(--muted); font-size:12px; text-align:center;">No active measurements</p>';
+  measurementLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+  measurementLayers = [];
+  measurementHistory = [];
+
+  const output = document.getElementById('gis-measure-output');
+  if(output) output.innerHTML = '<p style="color:var(--muted); font-size:12px; text-align:center;">No active measurements</p>';
+  renderMeasurementHistory();
+
+  if (map && map.pm) map.pm.disableDraw();
+  showToast("Measurements cleared");
 }
 
 function updateAssetList() {
