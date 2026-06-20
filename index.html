@@ -267,6 +267,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
 .btn-green{background:var(--green);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
+.btn-reset{background:none;border:none;padding:0;cursor:pointer;font-family:inherit;color:inherit;display:inline-flex;align-items:center;justify-content:center;}
+.btn-reset:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 
 /* ─── UPLOAD PROGRESS ─── */
 .upload-progress-container { margin-top: 16px; display: none; flex-direction: column; gap: 8px; }
@@ -1159,7 +1161,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div id="notif-panel" class="notif-panel">
   <div class="notif-header">
     <div class="notif-title">Notifications</div>
-    <button class="btn-reset" onclick="toggleNotifPanel()"><i class="fas fa-times"></i></button>
+    <button class="btn-reset" onclick="toggleNotifPanel()" aria-label="Close notifications"><i class="fas fa-times"></i></button>
   </div>
   <div class="notif-tabs">
     <button class="notif-tab active" onclick="switchNotifTab('all')">All</button>
@@ -1387,7 +1389,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="form-group mb-3">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <label>Current Password <span style="color:var(--red); font-size:10px;">(Required)</span></label>
-        <button class="btn-reset" style="font-size:10px; color:var(--accent);" onclick="handleProfileForgotPwd()">Forgot?</button>
+        <button class="btn-reset" style="font-size:10px; color:var(--accent);" onclick="handleProfileForgotPwd()" aria-label="Forgot password?">Forgot?</button>
       </div>
       <input type="password" id="prof-pwd-current" class="filter-input w-100" placeholder="Enter current password">
     </div>
@@ -1521,7 +1523,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="gis-details-panel glass-panel" id="gis-details-panel">
       <div class="gis-details-header">
         <h3 id="gis-det-title" style="font-size: 14px; color: var(--accent);">Work Order Details</h3>
-        <button class="btn-reset" onclick="closeGisDetails()"><i class="fas fa-times"></i></button>
+        <button class="btn-reset" onclick="closeGisDetails()" aria-label="Close details"><i class="fas fa-times"></i></button>
       </div>
       <div class="gis-details-content" id="gis-details-content">
         <!-- Content will be injected here -->
