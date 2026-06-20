@@ -177,17 +177,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   #dashMap { height: 450px !important; }
 }
 
-@media (max-width: 600px) {
-  #topLocContainer { 
-    position: static !important; 
-    width: 100% !important; 
-    max-height: none !important; 
-    border-radius: 0 !important; 
-    border-top: 1px solid var(--border); 
-    box-shadow: none !important; 
-    background: transparent !important;
-  }
-}
 
 .overdue-item { 
   background: rgba(220, 38, 38, 0.05); 
@@ -1265,14 +1254,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         </div>
         <div class="dash-card">
           <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-map-location-dot"></i> Project Boundary and Top Locations</div>
+            <div class="dash-card-title"><i class="fa-solid fa-map-location-dot"></i> Project Boundary</div>
           </div>
           <div class="dash-card-body" style="padding:0; position:relative;">
             <div id="dashMap" style="width:100%; height:100%;"></div>
-            <div id="topLocContainer" class="glass-panel" style="position:absolute; top:20px; right:20px; width:220px; max-height:calc(100% - 40px); z-index:10; padding:15px; overflow-y:auto; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
-              <div style="font-size:11px; font-weight:800; color:var(--accent); text-transform:uppercase; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">Top Locations</div>
-              <div id="topLocContent"><div class="empty-state">No data available</div></div>
-            </div>
           </div>
         </div>
         <div class="dash-card">
@@ -3342,7 +3327,6 @@ function updateDashboard() {
 
   let stats = { total: dashFilteredRecords.length, green: 0, amber: 0, red: 0, blue: 0 };
   let monthsObj = {};
-  let areaStats = {};
   
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -3369,9 +3353,6 @@ function updateDashboard() {
       monthsObj[mKey][cat]++;
     }
 
-    // Area stats
-    const area = r.Location || 'Unknown';
-    areaStats[area] = (areaStats[area] || 0) + 1;
   });
 
   // KPI UI
@@ -3391,7 +3372,6 @@ function updateDashboard() {
   renderMonthly(mArr);
   renderStatusDistributionChart(stats);
   renderVolumeChart(mArr);
-  renderAreaStats(areaStats);
   renderOperationalItems();
   
   if (dashMap) {
@@ -3561,30 +3541,6 @@ function renderVolumeChart(mArr) {
 }
 
 
-function renderAreaStats(areaStats) {
-  const container = document.getElementById('topLocContent');
-  if (!container) return;
-  
-  const sorted = Object.entries(areaStats).sort((a,b) => b[1] - a[1]).slice(0, 10);
-  const maxVal = sorted.length > 0 ? sorted[0][1] : 1;
-  
-  if (sorted.length === 0) {
-    container.innerHTML = '<div class="empty-state">No data available</div>';
-    return;
-  }
-
-  container.innerHTML = `
-    <div class="bar-chart">
-      ${sorted.map(([name, count]) => `
-        <div class="bar-row">
-          <div class="bar-label" title="${name}" style="font-size:9px; width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</div>
-          <div class="bar-track" style="height:8px; border-radius:4px;"><div class="bar-seg blue" style="width:${(count/maxVal)*100}%; border-radius:4px;"></div></div>
-          <div class="bar-total" style="font-size:9px; width:25px;">${count}</div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
 
 function renderOperationalItems() {
   const container = document.getElementById('dueOverdueContainer');
