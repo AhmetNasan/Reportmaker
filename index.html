@@ -172,10 +172,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .dash-row { display: grid; gap: 24px; }
 .dash-row-2 { grid-template-columns: 25% 45% 30%; height: 450px; }
 .dash-row-3 { grid-template-columns: 70% 30%; height: 500px; }
-.dash-row-4 { grid-template-columns: 70% 30%; height: 350px; }
-
 @media (max-width: 1200px) {
-  .dash-row-2, .dash-row-3, .dash-row-4 { grid-template-columns: 1fr; height: auto; }
+  .dash-row-2, .dash-row-3 { grid-template-columns: 1fr; height: auto; }
+  .dash-row-2 .dash-card-body { flex-direction: column !important; }
+  #dashMap { height: 300px !important; }
+  #topLocContainer { border-left: none !important; border-top: 1px solid var(--border); }
 }
 
 .overdue-item { 
@@ -1242,7 +1243,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         </div>
       </div>
 
-      <!-- ROW 2: Volume, Map, Status Dist -->
+      <!-- ROW 2: Volume, Map + Locations, Status Dist -->
       <div class="dash-row dash-row-2">
         <div class="dash-card">
           <div class="dash-card-header">
@@ -1254,10 +1255,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         </div>
         <div class="dash-card">
           <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-map-location-dot"></i> GIS Overview</div>
+            <div class="dash-card-title"><i class="fa-solid fa-map-location-dot"></i> Project Boundary and Top Locations</div>
           </div>
-          <div class="dash-card-body" style="padding:0;">
-            <div id="dashMap" style="width:100%; height:100%;"></div>
+          <div class="dash-card-body" style="padding:0; display:flex; flex-direction:row;">
+            <div id="dashMap" style="flex: 7; height:100%;"></div>
+            <div id="topLocContainer" style="flex: 3; height:100%; border-left:1px solid var(--border); padding:15px; overflow-y:auto;">
+              <div class="empty-state">No data available</div>
+            </div>
           </div>
         </div>
         <div class="dash-card">
@@ -1270,7 +1274,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         </div>
       </div>
 
-      <!-- ROW 3: Summary & Trends -->
+      <!-- ROW 3: Summary & Due/Overdue -->
       <div class="dash-row dash-row-3">
         <div class="dash-card" id="monthlySummaryCard">
           <div class="dash-card-header">
@@ -1283,38 +1287,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             </table>
           </div>
         </div>
-        <div class="dash-col-stack">
-          <div class="dash-card" style="flex: 1;">
-            <div class="dash-card-header">
-              <div class="dash-card-title"><i class="fa-solid fa-chart-line"></i> Monthly Trend</div>
-            </div>
-            <div class="dash-card-body" id="monthlyTrendChartContainer">
-              <canvas id="monthlyTrendCanvas"></canvas>
-            </div>
-          </div>
-          <div class="dash-card" id="dueSoonCard" style="flex: 1;">
-            <div class="dash-card-header">
-              <div class="dash-card-title"><i class="fa-solid fa-bell"></i> Due / Overdue</div>
-            </div>
-            <div class="dash-card-body" id="dueOverdueContainer" style="overflow-y: auto;">
-              <div class="empty-state">No pending items</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ROW 4: Locations -->
-      <div class="dash-row dash-row-4">
-        <div class="dash-card">
+        <div class="dash-card" id="dueSoonCard">
           <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-location-dot"></i> Top Locations</div>
+            <div class="dash-card-title"><i class="fa-solid fa-bell"></i> Due / Overdue</div>
+            <button class="btn btn-sm btn-ghost" onclick="exportDueSoonCSV()" title="Export Due/Overdue"><i class="fas fa-file-csv"></i></button>
           </div>
-          <div class="dash-card-body" id="topLocContainer" style="overflow-y: auto;">
-            <div class="empty-state">No data available</div>
+          <div class="dash-card-body" id="dueOverdueContainer" style="overflow-y: auto;">
+            <div class="empty-state">No pending items</div>
           </div>
         </div>
-        <!-- Right side empty for now or future widget -->
-        <div class="dash-card" style="background: transparent; border: none; box-shadow: none;"></div>
       </div>
 
       <!-- Quick Actions (Optional, moving to bottom or context menu as per requirement?) -->
@@ -3398,7 +3379,6 @@ function updateDashboard() {
   let mArr = Object.values(monthsObj).sort((a, b) => a.sortKey - b.sortKey);
   renderMonthly(mArr);
   renderStatusDistributionChart(stats);
-  renderMonthlyTrendChart(mArr);
   renderVolumeChart(mArr);
   renderAreaStats(areaStats);
   renderOperationalItems();
@@ -3569,42 +3549,6 @@ function renderVolumeChart(mArr) {
   });
 }
 
-function renderMonthlyTrendChart(mArr) {
-  const container = document.getElementById('monthlyTrendChartContainer');
-  if (!container) return;
-  
-  container.innerHTML = '<canvas id="monthlyTrendCanvas"></canvas>';
-  const canvas = document.getElementById('monthlyTrendCanvas');
-  
-  if (charts.trend) charts.trend.destroy();
-  
-  charts.trend = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels: mArr.map(d => d.month),
-      datasets: [{
-        label: 'Work Orders',
-        data: mArr.map(d => d.total),
-        borderColor: '#007fff',
-        backgroundColor: 'rgba(0, 127, 255, 0.1)',
-        fill: true,
-        tension: 0.4,
-        pointRadius: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        x: { display: false },
-        y: { display: false }
-      }
-    }
-  });
-}
 
 function renderAreaStats(areaStats) {
   const container = document.getElementById('topLocContainer');
@@ -6958,6 +6902,35 @@ function downloadCSVTemplate() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+function exportDueSoonCSV() {
+    const today = new Date();
+    const weekFromNow = new Date();
+    weekFromNow.setDate(today.getDate() + 7);
+
+    const items = dashFilteredRecords.filter(r => r.Status !== 'COMP' && r.TargetFinish).map(r => {
+        const target = new Date(r.TargetFinish);
+        let type = null;
+        if (target < today) type = 'Overdue';
+        else if (target < weekFromNow) type = 'Due Soon';
+        return { ...r, type, target };
+    }).filter(r => r.type).sort((a, b) => a.target - b.target);
+
+    if (items.length === 0) return showToast('No pending items to export', 'info');
+
+    const headers = ["Type", "Work Order", "Description", "Location", "Target Finish", "Status"];
+    let csv = headers.join(",") + "\n";
+    csv += items.map(r => [
+        r.type, r.WorkOrder, r.Description, r.Location, formatDate(r.TargetFinish), r.Status
+    ].map(v => `"${(v || '').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `due_overdue_export_${new Date().getTime()}.csv`);
+    link.click();
 }
 
 function exportTableCSV(mode = 'all') {
