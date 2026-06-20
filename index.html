@@ -1289,6 +1289,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <button class="btn btn-ghost" onclick="exportTableCSV()">
           <i class="fa-solid fa-download"></i> Export Data
         </button>
+        <button class="btn btn-ghost" onclick="exportDashboardPDF()">
+          <i class="fa-solid fa-file-pdf"></i> Export Dashboard (A4)
+        </button>
       </div>
     </div>
   </div>
@@ -2476,6 +2479,8 @@ async function loadSystemSettings() {
       }
       if (data.style_settings.last_csv_upload) {
         lastCsvUpload = data.style_settings.last_csv_upload;
+        const dashRefreshEl = document.getElementById('dash-last-refresh');
+        if (dashRefreshEl) dashRefreshEl.textContent = formatLastUpdated(lastCsvUpload);
       }
     }
   } catch(e) { console.error("Load system settings failed:", e); }
@@ -4996,6 +5001,8 @@ async function processExcelUpload() {
           const currentSettings = (settingsData && settingsData.style_settings) ? settingsData.style_settings : {};
           currentSettings.last_csv_upload = lastCsvUpload;
           await supabaseClient.from('project_boundaries').upsert({ id: 0, name: 'MAP_PRESETS', style_settings: currentSettings });
+          const dashRefreshEl = document.getElementById('dash-last-refresh');
+          if (dashRefreshEl) dashRefreshEl.textContent = formatLastUpdated(lastCsvUpload);
         } catch (e) { console.error("Failed to save last upload timestamp:", e); }
       }
 
@@ -5986,19 +5993,42 @@ function processMeasurement(layer, shapeType) {
 
     try {
         if (shapeType === 'Line' || shapeType === 'Polyline') {
-            const latlngs = layer.getLatLngs();
+            let latlngs = layer.getLatLngs();
+            if (Array.isArray(latlngs) && Array.isArray(latlngs[0])) latlngs = latlngs.flat(Infinity);
             const dists = L.GeometryUtil.accumulatedLengths(latlngs);
             const total = dists[dists.length - 1];
             result.title = 'Distance';
             result.mainValue = total > 1000 ? (total/1000).toFixed(3) + ' km' : total.toFixed(2) + ' m';
             result.details = `Meters: ${total.toFixed(1)} m<br>Feet: ${(total*3.28084).toFixed(1)} ft`;
         } else if (shapeType === 'Polygon' || shapeType === 'Rectangle') {
-            const latlngs = layer.getLatLngs()[0];
-            const area = L.GeometryUtil.geodesicArea(latlngs);
+            let coords = layer.getLatLngs();
+            while (Array.isArray(coords) && Array.isArray(coords[0]) && coords[0].length > 0) {
+                coords = coords[0];
+            }
+            const latlngs = coords;
+            
+            const calcArea = (nodes) => {
+                if (L.GeometryUtil && typeof L.GeometryUtil.geodesicArea === 'function') {
+                    return L.GeometryUtil.geodesicArea(nodes);
+                }
+                // Manual geodesic area calculation fallback
+                var area = 0.0, d2r = Math.PI / 180, p1, p2;
+                if (nodes.length > 2) {
+                    for (var i = 0; i < nodes.length; i++) {
+                        p1 = nodes[i];
+                        p2 = nodes[(i + 1) % nodes.length];
+                        area += ((p2.lng - p1.lng) * d2r) * (2 + Math.sin(p1.lat * d2r) + Math.sin(p2.lat * d2r));
+                    }
+                    area = area * 6378137.0 * 6378137.0 / 2.0;
+                }
+                return Math.abs(area);
+            };
+
+            const area = calcArea(latlngs);
             const perim = L.GeometryUtil.accumulatedLengths(latlngs).slice(-1)[0];
             result.title = 'Area & Perimeter';
-            result.mainValue = area > 10000 ? (area/10000).toFixed(3) + ' ha' : area.toFixed(2) + ' m²';
-            result.details = `Perimeter: ${perim.toFixed(1)} m<br>Sq Feet: ${(area * 10.7639).toFixed(1)} ft²`;
+            result.mainValue = area.toLocaleString(undefined, {maximumFractionDigits: 2}) + ' m²';
+            result.details = `Hectares: ${(area/10000).toFixed(4)} ha<br>Perimeter: ${perim.toFixed(1)} m<br>Sq Feet: ${(area * 10.7639).toFixed(1)} ft²`;
         } else if (shapeType === 'Marker' || shapeType === 'CircleMarker') {
             const ll = layer.getLatLng();
             result.title = 'Coordinates';
@@ -6814,6 +6844,153 @@ function exportPDF() {
   });
 }
 
+async function exportDashboardPDF() {
+  const { jsPDF } = window.jspdf;
+  showToast("Generating Dashboard PDF Report...");
+
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pdfWidth = 210;
+  const pdfHeight = 297;
+  const margin = 15;
+  const contentWidth = pdfWidth - (2 * margin);
+  let currentY = margin;
+
+  // 1. Header with Logo
+  pdf.setFillColor(11, 15, 26); // Dark Navy
+  pdf.rect(0, 0, pdfWidth, 35, 'F');
+  
+  if (companyLogo) {
+    try { pdf.addImage(companyLogo, 'PNG', margin, 7, 20, 20); } catch(e) {}
+  }
+  
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(22);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text("QBC Operations Center", margin + (companyLogo ? 25 : 0), 18);
+  
+  pdf.setFontSize(11);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(148, 163, 184);
+  pdf.text("Roads, Assets & GIS Management System Dashboard", margin + (companyLogo ? 25 : 0), 25);
+  
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  pdf.setFontSize(9);
+  pdf.text(`Report Generated: ${today}`, pdfWidth - margin, 18, { align: 'right' });
+  
+  currentY = 45;
+
+  // 2. KPI Grid Redesign
+  pdf.setTextColor(30, 41, 59);
+  pdf.setFontSize(13);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text("Executive Summary (KPIs)", margin, currentY);
+  currentY += 8;
+
+  const stats = {
+    total: document.getElementById('kpiTotal').textContent,
+    green: document.getElementById('kpiGreen').textContent,
+    amber: document.getElementById('kpiAmber').textContent,
+    red: document.getElementById('kpiRed').textContent,
+    blue: document.getElementById('kpiBlue').textContent
+  };
+
+  const kpis = [
+    { label: "Total WO", val: stats.total, color: [59, 130, 246], icon: 'clipboard-list' },
+    { label: "On-Time", val: stats.green, color: [34, 197, 94], icon: 'check-circle' },
+    { label: "Comp (B)", val: stats.amber, color: [245, 158, 11], icon: 'exclamation-triangle' },
+    { label: "Overdue", val: stats.red, color: [239, 68, 68], icon: 'times-circle' },
+    { label: "Pending", val: stats.blue, color: [99, 102, 241], icon: 'clock' }
+  ];
+
+  const boxWidth = contentWidth / 5;
+  kpis.forEach((k, i) => {
+    const x = margin + (i * boxWidth);
+    pdf.setDrawColor(226, 232, 240);
+    pdf.setFillColor(248, 250, 252);
+    pdf.roundedRect(x, currentY, boxWidth - 3, 25, 2, 2, 'FD');
+    
+    pdf.setFillColor(k.color[0], k.color[1], k.color[2]);
+    pdf.rect(x, currentY, boxWidth - 3, 1.5, 'F');
+
+    pdf.setFontSize(7);
+    pdf.setTextColor(100, 116, 139);
+    pdf.text(k.label.toUpperCase(), x + (boxWidth-3)/2, currentY + 10, { align: 'center' });
+    
+    pdf.setFontSize(14);
+    pdf.setTextColor(15, 23, 42);
+    pdf.text(k.val, x + (boxWidth-3)/2, currentY + 20, { align: 'center' });
+  });
+
+  currentY += 35;
+
+  // 3. Visualizations Row
+  const volumeCanvas = document.getElementById('monthlyVolumeCanvas');
+  if (volumeCanvas) {
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(30, 41, 59);
+    pdf.text("Monthly Performance Trends", margin, currentY);
+    
+    const xRight = margin + contentWidth / 2 + 5;
+    pdf.text("Permit Approvals Status", xRight, currentY);
+    currentY += 5;
+
+    // Volume Chart
+    const volImg = volumeCanvas.toDataURL('image/png');
+    pdf.setDrawColor(226, 232, 240);
+    pdf.roundedRect(margin, currentY, contentWidth / 2 - 5, 55, 2, 2, 'D');
+    pdf.addImage(volImg, 'PNG', margin + 2, currentY + 5, contentWidth / 2 - 9, 45);
+
+    // Permit Card
+    const waitingCount = document.getElementById('waitingPermitsCount').textContent;
+    pdf.roundedRect(xRight, currentY, contentWidth / 2 - 5, 55, 2, 2, 'D');
+    pdf.setFontSize(28);
+    pdf.setTextColor(0, 127, 255);
+    pdf.text(waitingCount, xRight + (contentWidth/2 - 5)/2, currentY + 25, { align: 'center' });
+    pdf.setFontSize(9);
+    pdf.setTextColor(100, 116, 139);
+    pdf.text("Work Orders Waiting Permits", xRight + (contentWidth/2 - 5)/2, currentY + 35, { align: 'center' });
+    pdf.setFontSize(7);
+    pdf.text("(WPERM Status Records)", xRight + (contentWidth/2 - 5)/2, currentY + 40, { align: 'center' });
+  }
+
+  currentY += 65;
+
+  // 4. Monthly Data Table
+  pdf.setFontSize(11);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(30, 41, 59);
+  pdf.text("Detailed Monthly Summary", margin, currentY);
+  currentY += 5;
+
+  const tableEl = document.querySelector('#monthlySummaryCard table');
+  if (tableEl) {
+    const tableCanvas = await html2canvas(tableEl, { scale: 2, backgroundColor: '#ffffff' });
+    const tableImg = tableCanvas.toDataURL('image/png');
+    
+    let displayWidth = contentWidth;
+    let displayHeight = (tableCanvas.height * displayWidth) / tableCanvas.width;
+    
+    const availableHeight = pdfHeight - currentY - margin;
+    if (displayHeight > availableHeight) {
+      displayHeight = availableHeight;
+      displayWidth = (tableCanvas.width * displayHeight) / tableCanvas.height;
+    }
+    
+    const xPos = margin + (contentWidth - displayWidth) / 2;
+    pdf.addImage(tableImg, 'PNG', xPos, currentY, displayWidth, displayHeight);
+  }
+
+  // Footer
+  pdf.setFontSize(8);
+  pdf.setTextColor(148, 163, 184);
+  pdf.text("Confidential Operations Report - QBC Operations Center", pdfWidth / 2, pdfHeight - 10, { align: 'center' });
+  pdf.text("Page 1 of 1", pdfWidth - margin, pdfHeight - 10, { align: 'right' });
+
+  pdf.save(`QBC_Dashboard_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+  showToast("Dashboard Report exported as A4 PDF");
+}
+
 function exportUploadErrors() {
   if (uploadErrors.length === 0) return;
   
@@ -7091,7 +7268,7 @@ async function sendToFabrication(woId) {
   try {
     await saveWorkOrderToSupabase(wo);
     logAudit("Sent to Fabrication", `Submission #${wo.fab_history.length}, WO: ${woId}`, woId);
-    showToast(`Sent to Fabrication (Total: ${wo.fab_history.length})`);
+    showToast(`Success: Work Order #${woId} has been sent to Fabrication.`);
     applyFilters(); // Re-render
   } catch (err) {
     console.error("Send to Fabrication Error:", err);
