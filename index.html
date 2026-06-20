@@ -171,11 +171,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .dash-layout { display: flex; flex-direction: column; gap: 24px; }
 .dash-row { display: grid; gap: 24px; }
 .dash-row-2 { grid-template-columns: 25% 45% 30%; height: 450px; }
-.dash-row-3 { grid-template-columns: 65% 35%; height: 500px; }
-.dash-row-4 { grid-template-columns: 1fr 1fr; }
+.dash-row-3 { grid-template-columns: 70% 30%; height: 500px; }
+.dash-row-4 { grid-template-columns: 70% 30%; height: 350px; }
 
 @media (max-width: 1200px) {
-  .dash-row-2, .dash-row-3 { grid-template-columns: 1fr; height: auto; }
+  .dash-row-2, .dash-row-3, .dash-row-4 { grid-template-columns: 1fr; height: auto; }
 }
 
 .overdue-item { 
@@ -1309,11 +1309,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <div class="dash-card-header">
             <div class="dash-card-title"><i class="fa-solid fa-location-dot"></i> Top Locations</div>
           </div>
-          <div class="dash-card-body" id="topLocContainer">
+          <div class="dash-card-body" id="topLocContainer" style="overflow-y: auto;">
             <div class="empty-state">No data available</div>
           </div>
         </div>
-        <!-- Space for additional future widget -->
+        <!-- Right side empty for now or future widget -->
         <div class="dash-card" style="background: transparent; border: none; box-shadow: none;"></div>
       </div>
 
@@ -2301,6 +2301,7 @@ let contractStartDate = '2026-01-01';
 let uploadErrors = [];
 let notifications = [];
 let notifTab = 'all';
+let lastCsvUpload = null;
 
 let dashMap = null;
 let columnFilters = {};
@@ -2488,6 +2489,9 @@ async function loadSystemSettings() {
         contractStartDate = data.style_settings.contract_start_date;
         const el = document.getElementById('contract-start-setting');
         if (el) el.value = contractStartDate;
+      }
+      if (data.style_settings.last_csv_upload) {
+        lastCsvUpload = data.style_settings.last_csv_upload;
       }
     }
   } catch(e) { console.error("Load system settings failed:", e); }
@@ -3407,16 +3411,7 @@ function updateDashboard() {
 
   updateGisKpis(stats);
 
-  // Sync Row 3 heights
-  setTimeout(() => {
-    const summaryCard = document.getElementById('monthlySummaryCard');
-    const dueCard = document.getElementById('dueSoonCard');
-    if (summaryCard && dueCard) {
-      dueCard.style.height = summaryCard.offsetHeight + 'px';
-    }
-  }, 500);
-
-  document.getElementById('dash-last-refresh').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('dash-last-refresh').textContent = formatLastUpdated(lastCsvUpload);
 }
 
 function updateGisKpis(stats) {
@@ -5085,6 +5080,18 @@ async function processExcelUpload() {
       
       statusLabel.textContent = 'Complete';
       statusMsg.textContent = `Upload finished. ${uniqueData.length} rows imported successfully.`;
+
+      // Update last upload timestamp
+      lastCsvUpload = new Date().toISOString();
+      if (supabaseClient) {
+        try {
+          const { data: settingsData } = await supabaseClient.from('project_boundaries').select('style_settings').eq('id', 0).maybeSingle();
+          const currentSettings = (settingsData && settingsData.style_settings) ? settingsData.style_settings : {};
+          currentSettings.last_csv_upload = lastCsvUpload;
+          await supabaseClient.from('project_boundaries').upsert({ id: 0, name: 'MAP_PRESETS', style_settings: currentSettings });
+        } catch (e) { console.error("Failed to save last upload timestamp:", e); }
+      }
+
       if (uploadErrors.length > 0) {
         statusMsg.textContent += ` ${uploadErrors.length} rows skipped due to validation errors.`;
         document.getElementById('upload-error-actions').style.display = 'block';
@@ -7327,6 +7334,25 @@ function formatDateTime(val) {
   const d = new Date(val);
   if (isNaN(d.getTime())) return val;
   return d.toISOString().split('T')[0] + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function formatLastUpdated(val) {
+  if (!val) return 'No data uploaded';
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return 'No data uploaded';
+  
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const day = d.getDate();
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
+  
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  
+  return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
 }
 
 // NOTIFICATIONS
