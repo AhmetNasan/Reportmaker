@@ -1238,10 +1238,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         </div>
         <div class="dash-card">
           <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-chart-pie"></i> Status Distribution</div>
+            <div class="dash-card-title"><i class="fa-solid fa-file-invoice"></i> Work Orders Waiting Permits</div>
           </div>
-          <div class="dash-card-body" id="statusDistChartContainer">
-            <canvas id="statusDistCanvas"></canvas>
+          <div class="dash-card-body" id="waitingPermitsCardBody">
+            <div style="text-align: center; padding: 10px 0;">
+              <div id="waitingPermitsCount" style="font-size: 32px; font-weight: 800; color: var(--accent);">0</div>
+              <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">Total Waiting</div>
+            </div>
+            <div id="waitingPermitsList" style="flex: 1; overflow-y: auto; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+              <div class="empty-state">No work orders waiting for permits</div>
+            </div>
+            <button class="btn btn-ghost btn-sm w-100 mt-3" onclick="openWaitingPermitsModal()"><i class="fas fa-list-ul"></i> View All Details</button>
           </div>
         </div>
       </div>
@@ -1283,6 +1290,32 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <i class="fa-solid fa-download"></i> Export Data
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="waitingPermitsModal">
+  <div class="modal" style="max-width:1200px; width:95%;">
+    <button class="modal-close" onclick="closeModal('waitingPermitsModal')">×</button>
+    <div class="modal-title">Work Orders Waiting Permits (WPERM)</div>
+    <div class="table-wrap" style="max-height: 70vh; overflow-y: auto;">
+      <table class="main-table" style="table-layout: fixed; width: 100%;">
+        <thead style="position: sticky; top: 0; z-index: 10;">
+          <tr>
+            <th style="width: 100px;">Work Order</th>
+            <th style="width: 100px;">RO</th>
+            <th style="width: 100px;">TDP</th>
+            <th style="width: 120px;">App. Date</th>
+            <th style="width: 120px;">TDP Status</th>
+            <th style="width: 120px;">Expiry Date</th>
+            <th>Media Announcement</th>
+          </tr>
+        </thead>
+        <tbody id="waitingPermitsTableBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-sm" onclick="closeModal('waitingPermitsModal')">Close</button>
     </div>
   </div>
 </div>
@@ -2045,6 +2078,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <button class="detail-tab" onclick="switchDetailTab('location')"><i class="fas fa-map-marker-alt"></i> Location</button>
       <button class="detail-tab" onclick="switchDetailTab('sign')"><i class="fas fa-traffic-light"></i> Sign Details</button>
       <button class="detail-tab" onclick="switchDetailTab('installation')"><i class="fas fa-tools"></i> Installation</button>
+      <button class="detail-tab" onclick="switchDetailTab('permits')"><i class="fas fa-file-contract"></i> Permits</button>
       <button class="detail-tab" onclick="switchDetailTab('photos')"><i class="fas fa-images"></i> Photos</button>
       <button class="detail-tab" onclick="switchDetailTab('manufacturing')"><i class="fas fa-industry"></i> Manufacturing</button>
       <button class="detail-tab" onclick="switchDetailTab('history')"><i class="fas fa-history"></i> History</button>
@@ -2127,6 +2161,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <div class="info-item" style="grid-column: span 2;"><label>QBC Comments</label><span id="val-qbc-comments">--</span><textarea id="det-qbc-comments" rows="3"></textarea></div>
         </div>
       </div>
+    </div>
+
+    <div class="detail-pane" id="pane-permits">
       <div class="detail-section">
         <div class="detail-section-title">Permits & Approvals</div>
         <div class="detail-info-grid">
@@ -3340,7 +3377,7 @@ function updateDashboard() {
 
   let mArr = Object.values(monthsObj).sort((a, b) => a.sortKey - b.sortKey);
   renderMonthly(mArr);
-  renderStatusDistributionChart(stats);
+  renderWaitingPermitsCard();
   renderVolumeChart(mArr);
   renderOperationalItems();
   
@@ -3414,69 +3451,53 @@ function renderMonthly(mArr) {
   }
 }
 
-function renderStatusDistributionChart(stats) {
-  const container = document.getElementById('statusDistChartContainer');
-  if (!container) return;
+function renderWaitingPermitsCard() {
+  const waitingList = allData.filter(r => r.Status === 'WPERM');
+  const countEl = document.getElementById('waitingPermitsCount');
+  const listEl = document.getElementById('waitingPermitsList');
   
-  container.innerHTML = '<canvas id="statusDistCanvas"></canvas>';
-  const canvas = document.getElementById('statusDistCanvas');
+  if (countEl) countEl.textContent = waitingList.length;
   
-  if (charts.pie) charts.pie.destroy();
-  
-  charts.pie = new Chart(canvas, {
-    type: 'doughnut',
-    data: {
-      labels: ['On-Time', 'Comp(B)', 'NotComp(B)', 'Pending'],
-      datasets: [{
-        data: [stats.green, stats.amber, stats.red, stats.blue],
-        backgroundColor: ['#16a34a', '#d97706', '#dc2626', '#4f46e5'],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { 
-          position: 'right', 
-          labels: { 
-            boxWidth: 12, 
-            font: { size: 10, family: 'Inter' },
-            color: '#64748b',
-            generateLabels: (chart) => {
-              const data = chart.data;
-              if (data.labels.length && data.datasets.length) {
-                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                return data.labels.map((label, i) => {
-                  const val = data.datasets[0].data[i];
-                  const pct = total ? ((val / total) * 100).toFixed(1) : 0;
-                  return {
-                    text: `${label}: ${pct}%`,
-                    fillStyle: data.datasets[0].backgroundColor[i],
-                    strokeStyle: '#fff',
-                    lineWidth: 0,
-                    hidden: isNaN(data.datasets[0].data[i]),
-                    index: i
-                  };
-                });
-              }
-              return [];
-            }
-          } 
-        },
-        tooltip: {
-          callbacks: {
-            label: (item) => {
-              const val = item.raw;
-              const pct = stats.total ? ((val / stats.total) * 100).toFixed(1) + '%' : '0%';
-              return ` ${item.label}: ${val} (${pct})`;
-            }
-          }
-        }
-      },
-      cutout: '70%'
+  if (listEl) {
+    if (waitingList.length === 0) {
+      listEl.innerHTML = '<div class="empty-state">No work orders waiting for permits</div>';
+    } else {
+      listEl.innerHTML = waitingList.slice(0, 10).map(r => `
+        <div class="overdue-item soon" onclick="openDetail('${r.WorkOrder}')" style="cursor:pointer; margin-bottom: 8px;">
+          <div class="overdue-head">
+            <span>#${r.WorkOrder}</span>
+            <span style="color:var(--accent); font-weight:700;">${r.TDPStatus || 'WPERM'}</span>
+          </div>
+          <div class="overdue-loc">${r.Location || 'No location'}</div>
+        </div>
+      `).join('') + (waitingList.length > 10 ? `<div style="font-size:10px; color:var(--muted); text-align:center; padding-top:5px;">+ ${waitingList.length - 10} more...</div>` : '');
     }
-  });
+  }
+}
+
+function openWaitingPermitsModal() {
+  const waitingList = allData.filter(r => r.Status === 'WPERM');
+  const tbody = document.getElementById('waitingPermitsTableBody');
+  
+  if (tbody) {
+    if (waitingList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--muted);">No work orders waiting for permits</td></tr>';
+    } else {
+      tbody.innerHTML = waitingList.map(r => `
+        <tr onclick="openDetail('${r.WorkOrder}')" style="cursor:pointer;">
+          <td><span class="wo-num">${r.WorkOrder}</span></td>
+          <td>${r.RO || '—'}</td>
+          <td>${r.TDP || '—'}</td>
+          <td>${formatDate(r.ApplicationDate)}</td>
+          <td>${r.TDPStatus || '—'}</td>
+          <td>${formatDate(r.ExpiryDate)}</td>
+          <td style="white-space: normal; word-break: break-word;">${r.MediaAnnouncement || '—'}</td>
+        </tr>
+      `).join('');
+    }
+  }
+  
+  openModal('waitingPermitsModal');
 }
 
 function renderVolumeChart(mArr) {
