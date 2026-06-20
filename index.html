@@ -1432,7 +1432,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <table class="main-table" id="woTable">
         <thead>
           <tr>
-            <th data-col="WorkOrder">Work Order #</th>
+            <th data-col="WorkOrder">Work Order</th>
             <th data-col="Description">Description</th>
             <th data-col="Status">Status</th>
             <th data-col="Lat">Latitude</th>
@@ -1441,18 +1441,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
             <th data-col="ReportedDate">Reported Date</th>
             <th data-col="PWA_ENG">PWA Engineer</th>
             <th data-col="Location">Location</th>
-            <th data-col="TargetStart">Target Start</th>
+            <th data-col="TargetStart">Target Start Date</th>
             <th data-col="Month">Month</th>
-            <th data-col="TargetFinish">Target Finish</th>
-            <th data-col="StatusUpdateDate">Status Update</th>
-            <th data-col="CompletionStatus">Completion</th>
-            <th data-col="QBC_Comments">Comments</th>
+            <th data-col="TargetFinish">Target Finish Date</th>
+            <th data-col="StatusUpdateDate">Status Update Date</th>
+            <th data-col="CompletionStatus">Completion Status</th>
+            <th data-col="QBCComments">QBC Comments</th>
             <th data-col="RO">RO</th>
             <th data-col="TDP">TDP</th>
-            <th data-col="ApplicationDate">App Date</th>
+            <th data-col="ApplicationDate">Application Date</th>
             <th data-col="TDP_Status">TDP Status</th>
-            <th data-col="ExpiryDate">Expiry</th>
-            <th data-col="MediaAnnouncement">Media</th>
+            <th data-col="ExpiryDate">TDP Expiry Date</th>
+            <th data-col="MediaAnnouncement">Media Announcement</th>
           </tr>
         </thead>
         <tbody id="woBody">
@@ -2072,7 +2072,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <!-- Top Stats Row -->
     <div class="detail-top-info">
       <div class="detail-top-stat">
-        <label>Work Order #</label>
+        <label>Work Order</label>
         <span id="top-wo-num">--</span>
       </div>
       <div class="detail-top-stat">
@@ -2188,7 +2188,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <div class="info-item"><label>TDP</label><span id="val-tdp">--</span><input type="text" id="det-tdp"></div>
           <div class="info-item"><label>Application Date</label><span id="val-app-date">--</span><input type="date" id="det-app-date"></div>
           <div class="info-item"><label>TDP Status</label><span id="val-tdp-status">--</span><input type="text" id="det-tdp-status"></div>
-          <div class="info-item"><label>Expiry Date</label><span id="val-expiry">--</span><input type="date" id="det-expiry"></div>
+          <div class="info-item"><label>TDP Expiry Date</label><span id="val-expiry">--</span><input type="date" id="det-expiry"></div>
           <div class="info-item"><label>Media Announcement</label><span id="val-media">--</span><input type="text" id="det-media"></div>
         </div>
       </div>
@@ -3021,18 +3021,23 @@ async function saveWorkOrderToSupabase(wo) {
     return;
   }
 
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  let monthVal = null;
+  if (wo.TargetStart) {
+    const d = new Date(wo.TargetStart);
+    if (!isNaN(d.getTime())) monthVal = monthNames[d.getMonth()];
+  }
+
   const woPayload = {
     work_order: wo.WorkOrder,
     description: wo.Description,
     status: wo.Status,
-    pwa_eng: wo.PWA_ENG,
-    target_start: wo.TargetStart || null,
-    target_finish: wo.TargetFinish || null,
-    remaining: wo.Remaining,
+    pwa_engineer: wo.PWA_ENG,
+    target_start_date: wo.TargetStart || null,
+    target_finish_date: wo.TargetFinish || null,
     location: wo.Location,
-    highway: wo.Location,
-    lat: parseFloat(wo.Lat) || null,
-    lng: parseFloat(wo.Lng) || null,
+    latitude: parseFloat(wo.Lat) || null,
+    longitude: parseFloat(wo.Lng) || null,
     is_sent_to_fab: wo.isSentToFab || false,
     fab_history: wo.fab_history || [],
     style_settings: wo.style_settings || {},
@@ -3044,11 +3049,13 @@ async function saveWorkOrderToSupabase(wo) {
     tdp: wo.TDP,
     application_date: wo.ApplicationDate || null,
     tdp_status: wo.TDPStatus,
-    expiry_date: wo.ExpiryDate || null,
+    tdp_expiry_date: wo.ExpiryDate || null,
     media_announcement: wo.MediaAnnouncement,
     created_at: wo.created_at || new Date().toISOString(),
     last_modified_at: new Date().toISOString(),
-    priority: wo.Priority || 'Normal'
+    priority: wo.Priority || 'Normal',
+    month: monthVal,
+    completion_status: getCompletionStatusLabel(wo)
   };
 
   const mfgPayload = {
@@ -4883,26 +4890,13 @@ async function processExcelUpload() {
       const headers = rawHeaders.map(h => String(h || '').toLowerCase().trim());
       const dataRows = rows.slice(1);
       const MAP = { 
-        'work order #': 'WorkOrder', 'work order': 'WorkOrder', 'workorder': 'WorkOrder', 'wo': 'WorkOrder', 'wo #': 'WorkOrder',
-        'description': 'Description', 'status': 'Status', 'pwa engineer': 'PWA_ENG', 'engineer': 'PWA_ENG', 'pwa eng': 'PWA_ENG',
-        'target start': 'TargetStart', 'target start date': 'TargetStart', 'target finish': 'TargetFinish', 'target finish date': 'TargetFinish', 'remaining': 'Remaining',
-        'highway': 'Location', 'location': 'Location', 'latitude': 'Lat', 'longitude': 'Lng', 'lat': 'Lat', 'lng': 'Lng',
-        'latitudey': 'Lat', 'longitudex': 'Lng', 'road category': 'RoadCatg', 'road catg': 'RoadCatg',
-        'sign type': 'SignType', 'sign ref': 'SignRef', 'sign reference': 'SignRef', 'sign shape': 'SignShape', 
-        'sign size': 'SignSize', 'sign material': 'SignMaterial',
-        'sign qty': 'SignQty', 'sign quantity': 'SignQty', 'post type': 'PostType', 'post height': 'PostHeight', 
-        'post qty': 'PostQty', 'post quantity': 'PostQty', 'found size': 'FoundSize', 'foundation size': 'FoundSize', 
-        'found qty': 'FoundQty', 'foundation quantity': 'FoundQty',
-        'scrap removal': 'ScrapRemoval', 'fab status': 'FabStatus', 
-        'installation date': 'InstallationDate', 'install date': 'InstallationDate', 'installation': 'InstallationDate',
-        'reported by': 'ReportedBy', 'reported': 'ReportedBy', 'reported date': 'ReportedDate', 'reported da': 'ReportedDate',
-        'status update date': 'StatusUpdateDate', 'status upda': 'StatusUpdateDate', 'qbc comments': 'QBCComments',
-        'ro': 'RO', 'tdp': 'TDP', 'application date': 'ApplicationDate', 'application da': 'ApplicationDate', 'application': 'ApplicationDate',
-        'tdp status': 'TDPStatus', 'expiry date': 'ExpiryDate', 'expiry da': 'ExpiryDate', 'expiry': 'ExpiryDate',
-        'media announcement': 'MediaAnnouncement', 'media announceme': 'MediaAnnouncement',
-        'status update': 'StatusUpdateDate', 'completion': 'InstallationDate', 'target start date': 'TargetStart', 'target finish date': 'TargetFinish',
-        'install date': 'InstallationDate', 'reported date': 'ReportedDate', 'status update date': 'StatusUpdateDate',
-        'app date': 'ApplicationDate', 'application date': 'ApplicationDate', 'expiry date': 'ExpiryDate'
+        'work order': 'WorkOrder', 'description': 'Description', 'status': 'Status', 'latitude': 'Lat', 'longitude': 'Lng',
+        'reported by': 'ReportedBy', 'reported date': 'ReportedDate', 'pwa engineer': 'PWA_ENG', 'location': 'Location',
+        'target start date': 'TargetStart', 'target finish date': 'TargetFinish', 'status update date': 'StatusUpdateDate',
+        'qbc comments': 'QBCComments', 'ro': 'RO', 'tdp': 'TDP', 'application date': 'ApplicationDate',
+        'tdp status': 'TDPStatus', 'tdp expiry date': 'ExpiryDate', 'media announcement': 'MediaAnnouncement',
+        // Backward compatibility
+        'work order #': 'WorkOrder', 'pwa eng': 'PWA_ENG', 'expiry date': 'ExpiryDate'
       };
 
       const woIdx = headers.findIndex(h => MAP[h] === 'WorkOrder');
@@ -5009,29 +5003,37 @@ async function processExcelUpload() {
       const uniqueData = Array.from(new Map(upsertData.map(item => [item.WorkOrder, item])).values());
 
       if (supabaseClient) {
-        const woData = uniqueData.map(wo => ({
-          work_order: wo.WorkOrder,
-          description: wo.Description,
-          status: wo.Status,
-          pwa_eng: wo.PWA_ENG,
-          target_start: wo.TargetStart || null,
-          target_finish: wo.TargetFinish || null,
-          remaining: wo.Remaining,
-          location: wo.Location,
-          highway: wo.Location,
-          lat: wo.Lat,
-          lng: wo.Lng,
-          reported_by: wo.ReportedBy,
-          reported_date: wo.ReportedDate || null,
-          status_update_date: wo.StatusUpdateDate || null,
-          qbc_comments: wo.QBCComments,
-          ro: wo.RO,
-          tdp: wo.TDP,
-          application_date: wo.ApplicationDate || null,
-          tdp_status: wo.TDPStatus,
-          expiry_date: wo.ExpiryDate || null,
-          media_announcement: wo.MediaAnnouncement
-        }));
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const woData = uniqueData.map(wo => {
+          let monthVal = null;
+          if (wo.TargetStart) {
+            const d = new Date(wo.TargetStart);
+            if (!isNaN(d.getTime())) monthVal = monthNames[d.getMonth()];
+          }
+          return {
+            work_order: wo.WorkOrder,
+            description: wo.Description,
+            status: wo.Status,
+            pwa_engineer: wo.PWA_ENG,
+            target_start_date: wo.TargetStart || null,
+            target_finish_date: wo.TargetFinish || null,
+            location: wo.Location,
+            latitude: wo.Lat,
+            longitude: wo.Lng,
+            reported_by: wo.ReportedBy,
+            reported_date: wo.ReportedDate || null,
+            status_update_date: wo.StatusUpdateDate || null,
+            qbc_comments: wo.QBCComments,
+            ro: wo.RO,
+            tdp: wo.TDP,
+            application_date: wo.ApplicationDate || null,
+            tdp_status: wo.TDPStatus,
+            tdp_expiry_date: wo.ExpiryDate || null,
+            media_announcement: wo.MediaAnnouncement,
+            month: monthVal,
+            completion_status: getCompletionStatusLabel(wo)
+          };
+        });
 
         const mfgData = uniqueData.map(wo => ({
           work_order_number: wo.WorkOrder,
@@ -5659,7 +5661,7 @@ function loadMarkers(statusFilter = null, isVisible = true) {
         r.Lat = newPos.lat;
         r.Lng = newPos.lng;
         if (supabaseClient) {
-          await supabaseClient.from('work_orders').update({ lat: newPos.lat, lng: newPos.lng }).eq('work_order', r.WorkOrder);
+          await supabaseClient.from('work_orders').update({ latitude: newPos.lat, longitude: newPos.lng }).eq('work_order', r.WorkOrder);
         }
         showToast(`Marker moved to ${newPos.lat.toFixed(4)}, ${newPos.lng.toFixed(4)}`);
         saveMapHistory('move', { type: 'wo', id: r.WorkOrder, latlng: newPos });
@@ -6932,16 +6934,15 @@ function exportUploadErrors() {
 
 function downloadCSVTemplate() {
   const headers = [
-    "Work Order #", "Description", "Status", "Latitude", "Longitude", "Reported By", "Reported Date",
-    "PWA Engineer", "Location", "Target Start Date", "Month", "Target Finish Date", "Status Update Date",
-    "Completion Status", "QBC Comments", "RO", "TDP", "Application Date", "TDP Status", "Expiry Date", "Media Announcement"
+    "Work Order", "Description", "Status", "Latitude", "Longitude", "Reported By", "Reported Date",
+    "PWA Engineer", "Location", "Target Start Date", "Target Finish Date", "Status Update Date",
+    "QBC Comments", "RO", "TDP", "Application Date", "TDP Status", "TDP Expiry Date", "Media Announcement"
   ];
   const sample = [
-    "25003146", "Road Safety,Warning Sign,Signface,loss of reflectivity, 0.0", "COMP", "21.73040931", "49.2829842", "DHANJITL", "13/01/2026",
-    "Adnan Khdair", "Dukhan Road", "13/01/2026", "January", "17/01/2026", "14/01/2026",
-    "Completed Within Target", "Sample Comment", "RO-VAL", "TDP-VAL", "13/01/2026", "Approved", "13/01/2027", "Yes"
+    "26800018", "Road Safety,Warning Sign,Signface,loss of reflectivity", "INPRG", "26.07897", "51.29768", "HPRASADB", "46189.61362",
+    "Adnan Khdair", "Al Shamal Road", "46189.61319", "46193.61319", "46191.32933", "-", "56656", "6564564", "46191.32933", "Approved", "46189.61319", "Not Required"
   ];
-  const csvContent = headers.join(",") + "\n" + sample.join(",");
+  const csvContent = headers.map(h => `"${h}"`).join(",") + "\n" + sample.map(v => `"${v}"`).join(",");
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -6967,22 +6968,16 @@ function exportTableCSV(mode = 'all') {
       ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
     } else {
       const headers = [
-        "Work Order #", "Description", "Status", "Latitude", "Longitude", "Reported By", "Reported Date",
-        "PWA Engineer", "Location", "Target Start Date", "Month", "Target Finish Date", "Status Update Date",
-        "Completion Status", "QBC Comments", "RO", "TDP", "Application Date", "TDP Status", "Expiry Date", "Media Announcement"
+        "Work Order", "Description", "Status", "Latitude", "Longitude", "Reported By", "Reported Date",
+        "PWA Engineer", "Location", "Target Start Date", "Target Finish Date", "Status Update Date",
+        "QBC Comments", "RO", "TDP", "Application Date", "TDP Status", "TDP Expiry Date", "Media Announcement"
       ];
       csvContent = headers.join(",") + "\n";
       csvContent += data.map(r => {
-        let monthLabel = "—";
-        if (r.TargetStart) {
-          const d = new Date(r.TargetStart);
-          if (!isNaN(d.getTime())) monthLabel = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-        }
-        const completionStatus = getCompletionStatusLabel(r);
         return [
           r.WorkOrder, r.Description, r.Status, r.Lat, r.Lng, r.ReportedBy, formatDate(r.ReportedDate),
-          r.PWA_ENG, r.Location, formatDate(r.TargetStart), monthLabel, formatDate(r.TargetFinish), formatDate(r.StatusUpdateDate),
-          completionStatus, r.QBCComments, r.RO, r.TDP, formatDate(r.ApplicationDate), r.TDPStatus, formatDate(r.ExpiryDate), r.MediaAnnouncement
+          r.PWA_ENG, r.Location, formatDate(r.TargetStart), formatDate(r.TargetFinish), formatDate(r.StatusUpdateDate),
+          r.QBCComments, r.RO, r.TDP, formatDate(r.ApplicationDate), r.TDPStatus, formatDate(r.ExpiryDate), r.MediaAnnouncement
         ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',');
       }).join('\n');
     }
@@ -7539,13 +7534,14 @@ function setupNotifListener() {
                ...allData[idx],
                Description: d.description,
                Status: d.status,
-               PWA_ENG: d.pwa_eng,
-               TargetStart: d.target_start,
-               TargetFinish: d.target_finish,
-               Remaining: d.remaining,
+               PWA_ENG: d.pwa_engineer,
+               TargetStart: d.target_start_date,
+               TargetFinish: d.target_finish_date,
+               Month: d.month,
+               CompletionStatus: d.completion_status,
                Location: d.location,
-               Lat: d.lat,
-               Lng: d.lng,
+               Lat: d.latitude,
+               Lng: d.longitude,
                isSentToFab: d.is_sent_to_fab,
                fab_history: d.fab_history,
                style_settings: d.style_settings,
@@ -7557,7 +7553,7 @@ function setupNotifListener() {
                TDP: d.tdp,
                ApplicationDate: d.application_date,
                TDPStatus: d.tdp_status,
-               ExpiryDate: d.expiry_date,
+               ExpiryDate: d.tdp_expiry_date,
                MediaAnnouncement: d.media_announcement,
                Priority: d.priority
             };
