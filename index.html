@@ -502,6 +502,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .attachment-item:hover .attachment-overlay { opacity: 1; }
 .attachment-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.2s; gap: 10px; }
 .attachment-overlay i { color: #fff; font-size: 18px; }
+.attachment-badge { position: absolute; top: 8px; left: 8px; background: var(--accent); color: #000; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; z-index: 5; text-transform: uppercase; }
+.attachment-actions { position: absolute; bottom: 8px; left: 0; right: 0; display: flex; justify-content: center; gap: 4px; z-index: 6; opacity: 0; transition: 0.2s; }
+.attachment-item:hover .attachment-actions { opacity: 1; }
+.btn-attachment { width: 24px; height: 24px; border-radius: 4px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; transition: 0.2s; }
+.btn-attachment:hover { background: var(--accent); color: #000; }
+.btn-attachment.danger:hover { background: var(--red); color: #fff; }
 .attachment-item img { width: 100%; height: 100%; object-fit: cover; }
 .attachment-item.file { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface2); }
 .attachment-item.file i { font-size: 24px; color: var(--muted); margin-bottom: 8px; }
@@ -1101,7 +1107,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="nav-tab" id="nav-workorders-btn" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
-      <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing</button>
+      <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn" style="position: relative;">
+        <i class="fas fa-industry"></i> Manufacturing
+        <span id="mfg-nav-badge" class="notif-badge" style="display: none; top: 12px; right: 0;">0</span>
+      </button>
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="nav-tab" id="nav-tab-settings" onclick="showPage('settings')" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
@@ -1159,7 +1168,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div id="mobile-menu" class="mobile-menu">
     <button class="mobile-nav-item active" onclick="showPage('dashboard'); toggleMobileMenu();"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="mobile-nav-item" onclick="showPage('workorders'); toggleMobileMenu();"><i class="fas fa-clipboard-list"></i> Work Orders</button>
-    <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing</button>
+    <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();" style="position: relative;">
+      <i class="fas fa-industry"></i> Manufacturing
+      <span id="mfg-mobile-badge" class="notif-badge" style="display: none; top: 15px; left: 130px;">0</span>
+    </button>
     <button class="mobile-nav-item" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="mobile-nav-item" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
@@ -1421,6 +1433,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <table class="main-table" id="woTable">
         <thead>
           <tr>
+            <th>Photo</th>
             <th data-col="WorkOrder">Work Order</th>
             <th data-col="Description">Description</th>
             <th data-col="Status">Status</th>
@@ -2912,6 +2925,7 @@ async function fetchData() {
     
     // Map Supabase fields to app fields
     allData = combinedData.map(r => ({
+      id: r.id,
       WorkOrder: r.work_order,
       Description: r.description,
       Status: r.status,
@@ -3336,6 +3350,7 @@ let charts = {};
 
 function updateDashboard() {
   dashFilteredRecords = allData;
+  updateManufacturingBadge();
 
   let stats = { total: dashFilteredRecords.length, green: 0, amber: 0, red: 0, blue: 0 };
   let monthsObj = {};
@@ -3747,7 +3762,7 @@ function renderManufacturingTable() {
     if (photo) {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
+          <img src="${photo}" style="width:60px; height:40px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
         </div>
       `;
     } else {
@@ -4191,63 +4206,203 @@ async function renderDetailAttachments(woId) {
   const container = document.getElementById('detail-attachments');
   container.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
   
-  const photo = photos[woId];
   let html = '';
-
-  if (photo) {
-    html += `
-      <div class="attachment-item" title="Main Photo">
-        <img src="${photo}" alt="Work Order Photo">
-        <div class="attachment-overlay">
-          <i class="fas fa-search-plus" onclick="viewPhoto('${woId}')"></i>
-          <a href="${photo}" download target="_blank" style="color:white;"><i class="fas fa-download"></i></a>
-        </div>
-      </div>
-    `;
-  }
+  let attachments = [];
 
   if (supabaseClient) {
     try {
       const { data, error } = await supabaseClient
         .from('work_order_attachments')
         .select('*')
-        .eq('work_order', woId);
+        .eq('work_order', woId)
+        .order('created_at', { ascending: true });
       
       if (!error && data) {
-        data.forEach(file => {
+        attachments = data;
+        
+        // Migration check: if legacy photo exists but not in attachments
+        const legacyPhotoUrl = photos[woId];
+        if (legacyPhotoUrl && !attachments.some(a => a.url === legacyPhotoUrl)) {
+           try {
+             const { data: newAttr } = await supabaseClient.from('work_order_attachments').insert({
+                work_order: woId,
+                url: legacyPhotoUrl,
+                filename: 'Legacy Photo',
+                file_type: 'image/jpeg',
+                is_primary: true
+             }).select().single();
+             if (newAttr) attachments.push(newAttr);
+           } catch(e) { console.error("Migration failed:", e); }
+        }
+
+        // Auto-assign primary if none exist and we have images
+        const images = attachments.filter(a => /\.(jpg|jpeg|png|webp|gif)$/i.test(a.url));
+        if (images.length > 0 && !images.some(img => img.is_primary)) {
+           await setPrimaryPhoto(images[0].id, woId, true);
+           // Re-fetch to get updated state
+           return renderDetailAttachments(woId);
+        }
+
+        attachments.forEach(file => {
           const isImg = /\.(jpg|jpeg|png|webp|gif)$/i.test(file.url);
           if (isImg) {
             html += `
               <div class="attachment-item" title="${file.filename}">
+                ${file.is_primary ? '<div class="attachment-badge">Primary Photo</div>' : ''}
                 <img src="${file.url}">
                 <div class="attachment-overlay">
                   <i class="fas fa-search-plus" onclick="window.open('${file.url}', '_blank')"></i>
                   <a href="${file.url}" download target="_blank" style="color:white;"><i class="fas fa-download"></i></a>
+                </div>
+                <div class="attachment-actions">
+                  ${!file.is_primary ? `<button class="btn-attachment" onclick="setPrimaryPhoto('${file.id}', '${woId}')" title="Set as Primary"><i class="fas fa-star"></i></button>` : ''}
+                  <button class="btn-attachment" onclick="replacePhotoFromDetail('${file.id}', '${woId}')" title="Replace Photo"><i class="fas fa-sync-alt"></i></button>
+                  <button class="btn-attachment danger" onclick="deletePhotoFromDetail('${file.id}', '${woId}', ${file.is_primary})" title="Delete Photo"><i class="fas fa-trash-alt"></i></button>
                 </div>
               </div>`;
           } else {
             html += `
               <div class="attachment-item file" title="${file.filename}">
                 <i class="fas fa-file-alt"></i>
-                <span>${file.filename || 'Document'}</span>
+                <span style="font-size: 9px; padding: 0 4px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">${file.filename || 'Document'}</span>
                 <div class="attachment-overlay">
                   <a href="${file.url}" download target="_blank" style="color:white;"><i class="fas fa-download"></i></a>
+                  <i class="fas fa-trash-alt" style="cursor:pointer;" onclick="deletePhotoFromDetail('${file.id}', '${woId}', false)"></i>
                 </div>
               </div>
             `;
           }
         });
       }
-    } catch(e) {}
+    } catch(e) { console.error("Error loading attachments:", e); }
   }
 
   container.innerHTML = html + `
     <div class="attachment-item file" onclick="attachFileFromDetail()" style="border: 2px dashed var(--border); background: transparent;">
       <i class="fas fa-plus"></i>
-      <span>Add File</span>
+      <span>Add Photo/File</span>
     </div>
     <input type="file" id="detail-file-upload" style="display:none" multiple onchange="handleDetailFileUpload(event, '${woId}')">
+    <input type="file" id="detail-replace-upload" style="display:none" onchange="handleReplacePhoto(event)">
   `;
+}
+
+let replacingAttachmentId = null;
+let replacingWoId = null;
+
+function replacePhotoFromDetail(attachmentId, woId) {
+  replacingAttachmentId = attachmentId;
+  replacingWoId = woId;
+  document.getElementById('detail-replace-upload').click();
+}
+
+async function handleReplacePhoto(evt) {
+  const file = evt.target.files[0];
+  if (!file || !replacingAttachmentId || !replacingWoId) return;
+
+  showToast("Replacing photo...");
+  try {
+    const { data: oldAttr } = await supabaseClient.from('work_order_attachments').select('url').eq('id', replacingAttachmentId).single();
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${replacingWoId}_${Date.now()}.${fileExt}`;
+    const filePath = `attachments/${fileName}`;
+
+    const { error: uploadError } = await supabaseClient.storage.from('qbc-storage').upload(filePath, file);
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabaseClient.storage.from('qbc-storage').getPublicUrl(filePath);
+
+    await supabaseClient.from('work_order_attachments').update({
+      url: publicUrl,
+      filename: file.name,
+      file_type: file.type
+    }).eq('id', replacingAttachmentId);
+
+    // If it was primary, sync to photos table
+    const { data: checkPrimary } = await supabaseClient.from('work_order_attachments').select('is_primary').eq('id', replacingAttachmentId).single();
+    if (checkPrimary && checkPrimary.is_primary) {
+      await supabaseClient.from('photos').upsert({ work_order: replacingWoId, url: publicUrl }, { onConflict: 'work_order' });
+      photos[replacingWoId] = publicUrl;
+      renderTable();
+    }
+
+    // Try deleting old file from storage if it was from our bucket
+    if (oldAttr && oldAttr.url && oldAttr.url.includes('qbc-storage')) {
+      const oldPath = oldAttr.url.split('qbc-storage/')[1];
+      if (oldPath) await supabaseClient.storage.from('qbc-storage').remove([oldPath]);
+    }
+
+    showToast("Photo replaced successfully");
+    renderDetailAttachments(replacingWoId);
+  } catch (e) {
+    console.error(e);
+    showToast("Replace failed", "error");
+  } finally {
+    replacingAttachmentId = null;
+    replacingWoId = null;
+    evt.target.value = '';
+  }
+}
+
+async function deletePhotoFromDetail(id, woId, wasPrimary) {
+  if (!confirm("Are you sure you want to delete this attachment?")) return;
+  
+  try {
+    const { data: attr } = await supabaseClient.from('work_order_attachments').select('url').eq('id', id).single();
+    
+    await supabaseClient.from('work_order_attachments').delete().eq('id', id);
+
+    if (attr && attr.url && attr.url.includes('qbc-storage')) {
+      const path = attr.url.split('qbc-storage/')[1];
+      if (path) await supabaseClient.storage.from('qbc-storage').remove([path]);
+    }
+
+    if (wasPrimary) {
+      // Find another photo to make primary
+      const { data: remaining } = await supabaseClient.from('work_order_attachments').select('*').eq('work_order', woId).order('created_at', { ascending: true });
+      const nextImg = (remaining || []).find(a => /\.(jpg|jpeg|png|webp|gif)$/i.test(a.url));
+      if (nextImg) {
+        await setPrimaryPhoto(nextImg.id, woId, true);
+      } else {
+        // No photos left
+        await supabaseClient.from('photos').delete().eq('work_order', woId);
+        delete photos[woId];
+        renderTable();
+      }
+    }
+
+    showToast("Attachment deleted");
+    renderDetailAttachments(woId);
+  } catch (e) {
+    console.error(e);
+    showToast("Delete failed", "error");
+  }
+}
+
+async function setPrimaryPhoto(id, woId, silent = false) {
+  try {
+    // 1. Unset existing primary for this WO
+    await supabaseClient.from('work_order_attachments').update({ is_primary: false }).eq('work_order', woId);
+    
+    // 2. Set new primary
+    const { data: updated } = await supabaseClient.from('work_order_attachments').update({ is_primary: true }).eq('id', id).select().single();
+    
+    // 3. Sync to legacy photos table
+    if (updated) {
+      await supabaseClient.from('photos').upsert({ work_order: woId, url: updated.url }, { onConflict: 'work_order' });
+      photos[woId] = updated.url;
+      renderTable();
+    }
+    
+    if (!silent) {
+      showToast("Primary photo updated");
+      renderDetailAttachments(woId);
+    }
+  } catch (e) {
+    console.error(e);
+    if (!silent) showToast("Failed to set primary", "error");
+  }
 }
 
 async function handleDetailFileUpload(evt, wo) {
@@ -4277,13 +4432,21 @@ async function handleDetailFileUpload(evt, wo) {
         .getPublicUrl(filePath);
 
       // Save to attachments table
-      await supabaseClient.from('work_order_attachments').insert({
+      const { data: newAttr } = await supabaseClient.from('work_order_attachments').insert({
         work_order: wo,
         url: publicUrl,
         filename: file.name,
         file_type: file.type,
         uploader_id: currentUser.id
-      });
+      }).select().single();
+
+      // If it's an image and there are no other photos, it will be made primary by renderDetailAttachments re-fetching
+      // But we can also check here to sync to legacy photos table immediately if it's the first image
+      if (isImg && !photos[wo]) {
+         await supabaseClient.from('photos').upsert({ work_order: wo, url: publicUrl }, { onConflict: 'work_order' });
+         photos[wo] = publicUrl;
+         renderTable();
+      }
 
       showToast(`Uploaded ${file.name}`);
     } catch (error) {
@@ -4396,7 +4559,7 @@ function renderTable() {
     if (photo) {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
+          <img src="${photo}" style="width:60px; height:40px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
         </div>
       `;
     } else {
@@ -4412,6 +4575,7 @@ function renderTable() {
       onclick="selectWorkOrderRow('${r.WorkOrder}')" 
       ondblclick="openDetail('${r.WorkOrder}')"
       oncontextmenu="showContextMenu(event, 'row-wo', '${r.WorkOrder}')">
+      <td>${photoCell}</td>
       <td><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td>${stBadge}</td>
@@ -7265,6 +7429,9 @@ async function sendToFabrication(woId) {
   wo.fab_history.push(submission);
   wo.isSentToFab = true;
   
+  // Create a notification for the fabrication request
+  await addNotification(`New Work Order Added for Fabrication: #${woId}`, woId, 'manufacturing');
+
   try {
     await saveWorkOrderToSupabase(wo);
     logAudit("Sent to Fabrication", `Submission #${wo.fab_history.length}, WO: ${woId}`, woId);
@@ -7735,7 +7902,23 @@ function refreshUI() {
    applyFilters(false);
    applyManufacturingFilters();
    updateDashboard();
+   updateManufacturingBadge();
    if (map) loadMarkers();
+}
+
+function updateManufacturingBadge() {
+  const pendingFabCount = allData.filter(r => r.isSentToFab && r.FabStatus !== 'Done' && r.Status !== 'COMP').length;
+  const badge = document.getElementById('mfg-nav-badge');
+  const mobileBadge = document.getElementById('mfg-mobile-badge');
+  
+  if (badge) {
+    badge.textContent = pendingFabCount;
+    badge.style.display = pendingFabCount > 0 ? 'flex' : 'none';
+  }
+  if (mobileBadge) {
+    mobileBadge.textContent = pendingFabCount;
+    mobileBadge.style.display = pendingFabCount > 0 ? 'flex' : 'none';
+  }
 }
 
 </script>
