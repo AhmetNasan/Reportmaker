@@ -1038,6 +1038,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .notif-badge { position: absolute; top: 0; right: 0; background: var(--red); color: #fff; font-size: 9px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--surface); transform: translate(25%, -25%); }
 .notif-badge.show { display: flex; }
 
+#mfg-mobile-badge { display: none; }
+@media (max-width: 900px) {
+  #mfg-mobile-badge.show-badge { display: flex !important; }
+  #mfg-nav-badge { display: none !important; }
+}
+
 .notif-panel { position: fixed; top: var(--header-h); right: -360px; width: 360px; height: calc(100vh - var(--header-h)); background: var(--surface); border-left: 1px solid var(--border); z-index: 1500; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.3); }
 .notif-panel.open { right: 0; }
 .notif-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
@@ -2950,11 +2956,11 @@ async function fetchData() {
       PostQty: r.post_qty,
       FoundSize: r.found_size,
       FoundQty: r.found_qty,
-      FabStatus: r.fab_status,
+      FabStatus: r.fab_status || 'Pending',
       InstallationDate: r.installation_date,
       ScrapRemoval: r.scrap_removal,
       FabDetails: r.fab_details || '',
-      isSentToFab: r.is_sent_to_fab || false,
+      isSentToFab: !!r.is_sent_to_fab,
       fab_history: r.fab_history || [],
       style_settings: r.style_settings || {},
       ReportedBy: r.reported_by || '',
@@ -2973,15 +2979,16 @@ async function fetchData() {
     }));
 
     const { data: photoData, error: photoError } = await supabaseClient
-      .from('photos')
-      .select('work_order, url');
+      .from('work_order_attachments')
+      .select('work_order, url')
+      .eq('is_primary', true);
 
-    if (photoError) throw photoError;
-    
     photos = {};
-    photoData.forEach(p => {
-      photos[p.work_order] = p.url;
-    });
+    if (!photoError && photoData) {
+      photoData.forEach(p => {
+        photos[p.work_order] = p.url;
+      });
+    }
 
   } catch (error) {
     console.error("Supabase fetch error, falling back to local storage:", error);
@@ -3708,10 +3715,11 @@ function applyManufacturingFilters() {
   const globalSearch = document.getElementById('mfgGlobalSearch').value.toLowerCase();
   
   filteredFabData = allData.filter(r => {
+    // Critical: Ensure item is sent to fab
     if (!r.isSentToFab) return false;
     
-    if (currentMfgTab === 'active' && r.FabStatus === 'Done') return false;
-    if (currentMfgTab === 'completed' && r.FabStatus !== 'Done') return false;
+    if (currentMfgTab === 'active' && (r.FabStatus === 'Done' || r.Status === 'COMP')) return false;
+    if (currentMfgTab === 'completed' && r.FabStatus !== 'Done' && r.Status !== 'COMP') return false;
 
     if (globalSearch) {
       const searchableFields = [
@@ -3721,16 +3729,6 @@ function applyManufacturingFilters() {
       if (!match) return false;
     }
     
-    // Also respect individual column filters/searches if they still exist in code state
-    for (let col in columnSearches) {
-      const val = columnSearches[col]?.toLowerCase();
-      if (val && !String(r[col] || '').toLowerCase().includes(val)) return false;
-    }
-    for (let col in columnFilters) {
-      const selectedSet = columnFilters[col];
-      if (selectedSet && selectedSet.size > 0 && !selectedSet.has(String(r[col] || ''))) return false;
-    }
-
     return true;
   });
   
@@ -4193,6 +4191,55 @@ function closeWO() {
   }
 }
 
+async function deleteWO(woId) {
+  if (!isAdmin) return showToast("Admin access required", "error");
+  const wo = allData.find(d => String(d.WorkOrder) === String(woId));
+  if (!wo) return showToast("Work Order not found", "error");
+
+  if (!confirm(`CRITICAL ACTION: Are you sure you want to PERMANENTLY delete Work Order #${woId} and all its associated photos, comments, and manufacturing data? This cannot be undone.`)) return;
+
+  try {
+    showToast(`Deleting WO #${woId}...`);
+
+    // 1. Get attachment URLs for storage cleanup
+    const { data: attachments } = await supabaseClient.from('work_order_attachments').select('url').eq('work_order', woId);
+
+    // 2. Delete from all related tables
+    // Foreign key constraints should ideally handle this if set to CASCADE, but we'll be explicit for safety.
+    await supabaseClient.from('work_order_attachments').delete().eq('work_order', woId);
+    await supabaseClient.from('work_order_comments').delete().eq('work_order', woId);
+    await supabaseClient.from('manufacturing').delete().eq('work_order_number', woId);
+    await supabaseClient.from('work_orders').delete().eq('work_order', woId);
+
+    // 3. Clean up storage files
+    if (attachments && attachments.length > 0) {
+      const paths = attachments.map(a => a.url.split('qbc-storage/')[1]).filter(p => !!p);
+      if (paths.length > 0) {
+        await supabaseClient.storage.from('qbc-storage').remove(paths);
+      }
+    }
+
+    // 4. Update local state and UI
+    allData = allData.filter(d => String(d.WorkOrder) !== String(woId));
+    delete photos[woId];
+
+    logAudit("Deleted Work Order", `WO #${woId}`, woId);
+    addNotification(`Work Order #${woId} has been deleted by Administrator`, null, 'system');
+
+    showToast(`Work Order #${woId} deleted successfully`);
+
+    if (selectedWorkOrder === woId) {
+      selectedWorkOrder = null;
+      closeDetail();
+    }
+
+    refreshUI();
+  } catch (e) {
+    console.error("Delete WO error:", e);
+    showToast("Failed to delete Work Order", "error");
+  }
+}
+
 function openInGoogleMaps() {
   const wo = allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder));
   if (wo && wo.Lat && wo.Lng) {
@@ -4220,27 +4267,14 @@ async function renderDetailAttachments(woId) {
       if (!error && data) {
         attachments = data;
 
-        // Migration check: if legacy photo exists but not in attachments
-        const legacyPhotoUrl = photos[woId];
-        if (legacyPhotoUrl && !attachments.some(a => a.url === legacyPhotoUrl)) {
-           try {
-             const { data: newAttr } = await supabaseClient.from('work_order_attachments').insert({
-                work_order: woId,
-                url: legacyPhotoUrl,
-                filename: 'Legacy Photo',
-                file_type: 'image/jpeg',
-                is_primary: true
-             }).select().single();
-             if (newAttr) attachments.push(newAttr);
-           } catch(e) { console.error("Migration failed:", e); }
-        }
-
         // Auto-assign primary if none exist and we have images
         const images = attachments.filter(a => /\.(jpg|jpeg|png|webp|gif)$/i.test(a.url));
         if (images.length > 0 && !images.some(img => img.is_primary)) {
-           await setPrimaryPhoto(images[0].id, woId, true);
-           // Re-fetch to get updated state
-           return renderDetailAttachments(woId);
+           // Synchronously update in-memory state first to prevent recursion
+           images[0].is_primary = true;
+           photos[woId] = images[0].url;
+           // Then asynchronously update DB
+           setPrimaryPhoto(images[0].id, woId, true);
         }
 
         attachments.forEach(file => {
@@ -4319,10 +4353,9 @@ async function handleReplacePhoto(evt) {
       file_type: file.type
     }).eq('id', replacingAttachmentId);
 
-    // If it was primary, sync to photos table
+    // If it was primary, update local cache
     const { data: checkPrimary } = await supabaseClient.from('work_order_attachments').select('is_primary').eq('id', replacingAttachmentId).single();
     if (checkPrimary && checkPrimary.is_primary) {
-      await supabaseClient.from('photos').upsert({ work_order: replacingWoId, url: publicUrl }, { onConflict: 'work_order' });
       photos[replacingWoId] = publicUrl;
       renderTable();
     }
@@ -4366,7 +4399,6 @@ async function deletePhotoFromDetail(id, woId, wasPrimary) {
         await setPrimaryPhoto(nextImg.id, woId, true);
       } else {
         // No photos left
-        await supabaseClient.from('photos').delete().eq('work_order', woId);
         delete photos[woId];
         renderTable();
       }
@@ -4388,9 +4420,8 @@ async function setPrimaryPhoto(id, woId, silent = false) {
     // 2. Set new primary
     const { data: updated } = await supabaseClient.from('work_order_attachments').update({ is_primary: true }).eq('id', id).select().single();
 
-    // 3. Sync to legacy photos table
+    // 3. Update local cache
     if (updated) {
-      await supabaseClient.from('photos').upsert({ work_order: woId, url: updated.url }, { onConflict: 'work_order' });
       photos[woId] = updated.url;
       renderTable();
     }
@@ -4441,9 +4472,8 @@ async function handleDetailFileUpload(evt, wo) {
       }).select().single();
 
       // If it's an image and there are no other photos, it will be made primary by renderDetailAttachments re-fetching
-      // But we can also check here to sync to legacy photos table immediately if it's the first image
+      // But we can also check here to update local cache immediately if it's the first image
       if (isImg && !photos[wo]) {
-         await supabaseClient.from('photos').upsert({ work_order: wo, url: publicUrl }, { onConflict: 'work_order' });
          photos[wo] = publicUrl;
          renderTable();
       }
@@ -5261,7 +5291,7 @@ async function clearAllData() {
     try {
       // In Supabase, standard delete needs a filter. We use a filter that matches everything.
       const { error: error1 } = await supabaseClient.from('work_orders').delete().neq('work_order', '___NONE___');
-      const { error: error2 } = await supabaseClient.from('photos').delete().neq('work_order', '___NONE___');
+      const { error: error2 } = await supabaseClient.from('work_order_attachments').delete().neq('work_order', '___NONE___');
       const { error: error3 } = await supabaseClient.from('exported_pdfs').delete().neq('id', 0);
       
       if (error1 || error2 || error3) throw (error1 || error2 || error3);
@@ -6769,7 +6799,7 @@ async function handlePhotoUpload(evt, wo) {
 
       const fileExt = file.name.split('.').pop();
       const fileName = `${wo}_${Date.now()}.${fileExt}`;
-      const filePath = `photos/${fileName}`;
+      const filePath = `attachments/${fileName}`;
 
       const { error: uploadError } = await supabaseClient.storage
         .from('qbc-storage')
@@ -6780,13 +6810,7 @@ async function handlePhotoUpload(evt, wo) {
 
       if (uploadError) {
         console.error("Storage Error:", uploadError);
-        if (uploadError.message.includes('bucket not found')) {
-           showToast("Error: Storage bucket 'qbc-storage' not found", "error");
-        } else if (uploadError.message.includes('row-level security')) {
-           showToast("Storage Access Denied: Check Bucket Policies", "error");
-        } else {
-           showToast(`Upload failed: ${uploadError.message}`, "error");
-        }
+        showToast(`Upload failed: ${uploadError.message}`, "error");
         return;
       }
 
@@ -6794,21 +6818,25 @@ async function handlePhotoUpload(evt, wo) {
         .from('qbc-storage')
         .getPublicUrl(filePath);
 
-      const { error: dbError } = await supabaseClient
-        .from('photos')
-        .upsert({ work_order: wo, url: publicUrl }, { onConflict: 'work_order' });
+      const { data: newAttr, error: dbError } = await supabaseClient
+        .from('work_order_attachments')
+        .insert({
+           work_order: wo,
+           url: publicUrl,
+           filename: file.name,
+           file_type: file.type,
+           is_primary: !photos[wo] // Primary if no photos exist yet
+        }).select().single();
 
       if (dbError) {
         console.error("DB Error:", dbError);
-        if (dbError.message.includes('row-level security')) {
-           showToast("Table Access Denied: Check Photos Table Policies", "error");
-        } else {
-           showToast(`DB Error: ${dbError.message}`, "error");
-        }
+        showToast(`DB Error: ${dbError.message}`, "error");
         return;
       }
 
-      photos[wo] = publicUrl;
+      if (newAttr && newAttr.is_primary) {
+        photos[wo] = publicUrl;
+      }
       logAudit("Uploaded Photo", `Work Order: ${wo}`, wo);
       addNotification(`Uploaded new photo`, wo, 'photos');
       renderTable();
@@ -6838,28 +6866,27 @@ function viewPhoto(wo) {
 
 async function deletePhoto(wo) {
   if (!hasPermission('edit')) { showToast("Permission denied", "error"); return; }
-  if (!confirm(`Are you sure you want to delete the photo for WO: ${wo}?`)) return;
+  if (!confirm(`Are you sure you want to delete all photos for WO: ${wo}?`)) return;
   
   if (supabaseClient) {
     try {
-      const { error } = await supabaseClient
-        .from('photos')
-        .delete()
-        .eq('work_order', wo);
+      const { data: attrs } = await supabaseClient.from('work_order_attachments').select('url').eq('work_order', wo);
       
-      if (error) throw error;
+      await supabaseClient.from('work_order_attachments').delete().eq('work_order', wo);
       
-      // Note: In a real scenario, you'd also delete from Storage bucket.
-      // But for now, we'll just remove the DB reference to "unlink" it.
+      if (attrs) {
+        const paths = attrs.map(a => a.url.split('qbc-storage/')[1]).filter(p => !!p);
+        if (paths.length > 0) await supabaseClient.storage.from('qbc-storage').remove(paths);
+      }
       
       delete photos[wo];
       renderTable();
       updateFileManagerStats();
-      logAudit("Deleted Photo", `Work Order: ${wo}`, wo);
-      showToast("Photo deleted");
+      logAudit("Deleted All Photos", `Work Order: ${wo}`, wo);
+      showToast("Photos deleted");
     } catch (e) {
       console.error(e);
-      showToast("Error deleting photo", "error");
+      showToast("Error deleting photos", "error");
     }
   } else {
     delete photos[wo];
@@ -7917,7 +7944,7 @@ function updateManufacturingBadge() {
   }
   if (mobileBadge) {
     mobileBadge.textContent = pendingFabCount;
-    mobileBadge.style.display = pendingFabCount > 0 ? 'flex' : 'none';
+    mobileBadge.classList.toggle('show-badge', pendingFabCount > 0);
   }
 }
 
