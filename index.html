@@ -502,6 +502,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .attachment-item:hover .attachment-overlay { opacity: 1; }
 .attachment-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.2s; gap: 10px; }
 .attachment-overlay i { color: #fff; font-size: 18px; }
+.attachment-badge { position: absolute; top: 8px; left: 8px; background: var(--accent); color: #000; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; z-index: 5; text-transform: uppercase; }
+.attachment-actions { position: absolute; bottom: 8px; left: 0; right: 0; display: flex; justify-content: center; gap: 4px; z-index: 6; opacity: 0; transition: 0.2s; }
+.attachment-item:hover .attachment-actions { opacity: 1; }
+.btn-attachment { width: 24px; height: 24px; border-radius: 4px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; transition: 0.2s; }
+.btn-attachment:hover { background: var(--accent); color: #000; }
+.btn-attachment.danger:hover { background: var(--red); color: #fff; }
 .attachment-item img { width: 100%; height: 100%; object-fit: cover; }
 .attachment-item.file { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface2); }
 .attachment-item.file i { font-size: 24px; color: var(--muted); margin-bottom: 8px; }
@@ -1032,6 +1038,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .notif-badge { position: absolute; top: 0; right: 0; background: var(--red); color: #fff; font-size: 9px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--surface); transform: translate(25%, -25%); }
 .notif-badge.show { display: flex; }
 
+#mfg-mobile-badge { display: none; }
+@media (max-width: 900px) {
+  #mfg-mobile-badge.show-badge { display: flex !important; }
+  #mfg-nav-badge { display: none !important; }
+}
+
 .notif-panel { position: fixed; top: var(--header-h); right: -360px; width: 360px; height: calc(100vh - var(--header-h)); background: var(--surface); border-left: 1px solid var(--border); z-index: 1500; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.3); }
 .notif-panel.open { right: 0; }
 .notif-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
@@ -1101,8 +1113,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="nav-tab" id="nav-workorders-btn" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
-      <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing</button>
-    <button class="nav-tab" id="nav-installation-btn" onclick="showPage('installation')"><i class="fas fa-tools"></i> Installation</button>
+      <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn" style="position: relative;">
+        <i class="fas fa-industry"></i> Manufacturing
+        <span id="mfg-nav-badge" class="notif-badge" style="display: none; top: 12px; right: 0;">0</span>
+      </button>
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="nav-tab" id="nav-tab-settings" onclick="showPage('settings')" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
@@ -1160,8 +1174,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div id="mobile-menu" class="mobile-menu">
     <button class="mobile-nav-item active" onclick="showPage('dashboard'); toggleMobileMenu();"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="mobile-nav-item" onclick="showPage('workorders'); toggleMobileMenu();"><i class="fas fa-clipboard-list"></i> Work Orders</button>
-    <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing</button>
-    <button class="mobile-nav-item" onclick="showPage('installation'); toggleMobileMenu();"><i class="fas fa-tools"></i> Installation</button>
+    <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();" style="position: relative;">
+      <i class="fas fa-industry"></i> Manufacturing
+      <span id="mfg-mobile-badge" class="notif-badge" style="display: none; top: 15px; left: 130px;">0</span>
+    </button>
     <button class="mobile-nav-item" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="mobile-nav-item" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
@@ -1423,6 +1439,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <table class="main-table" id="woTable">
         <thead>
           <tr>
+            <th>Photo</th>
             <th data-col="WorkOrder">Work Order</th>
             <th data-col="Description">Description</th>
             <th data-col="Status">Status</th>
@@ -1874,31 +1891,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<div class="page" id="page-installation">
-  <div class="wrapper">
-    <header style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
-      <div>
-        <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;gap:12px;">
-          Installation Planning & Dispatch
-        </h2>
-        <p style="font-size:12px; color:var(--muted); margin-top:4px;">Manage site execution, team scheduling, and progress tracking</p>
-      </div>
-    </header>
-
-    <nav class="mfg-tabs-container" id="inst-tabs">
-      <button class="mfg-tab-btn active" onclick="switchInstTab('dashboard')">Dashboard</button>
-      <button class="mfg-tab-btn" onclick="switchInstTab('map')">Planning Map</button>
-      <button class="mfg-tab-btn" onclick="switchInstTab('teams')">Teams Module</button>
-      <button class="mfg-tab-btn" onclick="switchInstTab('programs')">Programs</button>
-      <button class="mfg-tab-btn" onclick="switchInstTab('calendar')">Calendar</button>
-    </nav>
-
-    <div id="inst-content">
-      <!-- Content loaded dynamically via switchInstTab -->
-    </div>
-  </div>
-</div>
-
 <div class="page" id="page-settings">
   <div class="wrapper">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
@@ -2323,13 +2315,6 @@ let columnSearches = {};
 let mfgShowDetails = false;
 let currentMfgTab = 'active';
 
-// Installation State
-let installationRecords = [];
-let installationTeams = [];
-let installationPhotos = [];
-let instMap = null;
-let currentInstTab = 'dashboard';
-
 // INITIALIZATION
 window.addEventListener('paste', async (e) => {
   if (!selectedWorkOrder) return;
@@ -2589,29 +2574,8 @@ async function fetchAllWorkOrders() {
     page++;
   }
 
-  // Fetch Installation Records
-  installationRecords = [];
-  page = 0; moreRows = true;
-  while (moreRows) {
-    const { data, error } = await supabaseClient.from('installation_records').select('*').range(page * pageSize, (page + 1) * pageSize - 1);
-    if (error) { console.warn("Installation records fetch failed:", error); break; }
-    installationRecords = installationRecords.concat(data);
-    if (data.length < pageSize) moreRows = false;
-    page++;
-  }
-
-  // Fetch Installation Teams
-  const { data: teamData, error: teamError } = await supabaseClient.from('installation_teams').select('*');
-  if (!teamError && teamData) installationTeams = teamData;
-
-  // Fetch Installation Photos
-  const { data: instPhotos, error: instPhotoError } = await supabaseClient.from('installation_photos').select('*');
-  if (!instPhotoError && instPhotos) installationPhotos = instPhotos;
-
   // Merge
   const mfgMap = new Map(allMFG.map(m => [m.work_order_number, m]));
-  const instRecMap = new Map(installationRecords.map(r => [r.work_order, r]));
-
   return allWO.map(wo => ({
     ...wo,
     ...(mfgMap.get(wo.work_order) || {})
@@ -2690,14 +2654,6 @@ function switchMfgTab(tab) {
   if (activeBtn) activeBtn.classList.toggle('active', tab === 'active');
   if (compBtn) compBtn.classList.toggle('active', tab === 'completed');
   applyManufacturingFilters();
-}
-
-function switchInstTab(tab) {
-  currentInstTab = tab;
-  document.querySelectorAll('#inst-tabs .mfg-tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${tab}'`));
-  });
-  updateInstallationUI();
 }
 
 function buildColumnFilters(tableId, data) {
@@ -2975,6 +2931,7 @@ async function fetchData() {
     
     // Map Supabase fields to app fields
     allData = combinedData.map(r => ({
+      id: r.id,
       WorkOrder: r.work_order,
       Description: r.description,
       Status: r.status,
@@ -2984,12 +2941,6 @@ async function fetchData() {
       Month: r.month,
       CompletionStatus: r.completion_status,
       Remaining: r.remaining,
-      ReadyForInstallation: r.ready_for_installation || false,
-      InstallationStatus: r.installation_status || 'Pending',
-      AssignedTeam: r.assigned_team || '',
-      AssignedDate: r.assigned_date || '',
-      PlannedInstallationDate: r.planned_installation_date || '',
-      ActualInstallationDate: r.actual_installation_date || '',
       Location: r.location,
       Lat: r.latitude,
       Lng: r.longitude,
@@ -3005,11 +2956,11 @@ async function fetchData() {
       PostQty: r.post_qty,
       FoundSize: r.found_size,
       FoundQty: r.found_qty,
-      FabStatus: r.fab_status,
+      FabStatus: r.fab_status || 'Pending',
       InstallationDate: r.installation_date,
       ScrapRemoval: r.scrap_removal,
       FabDetails: r.fab_details || '',
-      isSentToFab: r.is_sent_to_fab || false,
+      isSentToFab: !!r.is_sent_to_fab,
       fab_history: r.fab_history || [],
       style_settings: r.style_settings || {},
       ReportedBy: r.reported_by || '',
@@ -3028,15 +2979,16 @@ async function fetchData() {
     }));
 
     const { data: photoData, error: photoError } = await supabaseClient
-      .from('photos')
-      .select('work_order, url');
+      .from('work_order_attachments')
+      .select('work_order, url')
+      .eq('is_primary', true);
 
-    if (photoError) throw photoError;
-    
     photos = {};
-    photoData.forEach(p => {
-      photos[p.work_order] = p.url;
-    });
+    if (!photoError && photoData) {
+      photoData.forEach(p => {
+        photos[p.work_order] = p.url;
+      });
+    }
 
   } catch (error) {
     console.error("Supabase fetch error, falling back to local storage:", error);
@@ -3117,13 +3069,7 @@ async function saveWorkOrderToSupabase(wo) {
     last_modified_at: new Date().toISOString(),
     priority: wo.Priority || 'Normal',
     month: monthVal,
-    completion_status: getCompletionStatusLabel(wo),
-    ready_for_installation: wo.ReadyForInstallation || false,
-    installation_status: wo.InstallationStatus || 'Pending',
-    assigned_team: wo.AssignedTeam || null,
-    assigned_date: wo.AssignedDate || null,
-    planned_installation_date: wo.PlannedInstallationDate || null,
-    actual_installation_date: wo.ActualInstallationDate || null
+    completion_status: getCompletionStatusLabel(wo)
   };
 
   const mfgPayload = {
@@ -3341,9 +3287,6 @@ function showPage(id) {
   if(id === 'manufacturing') {
     applyManufacturingFilters();
   }
-  if(id === 'installation') {
-    updateInstallationUI();
-  }
 }
 
 // DASHBOARD LOGIC
@@ -3414,6 +3357,7 @@ let charts = {};
 
 function updateDashboard() {
   dashFilteredRecords = allData;
+  updateManufacturingBadge();
 
   let stats = { total: dashFilteredRecords.length, green: 0, amber: 0, red: 0, blue: 0 };
   let monthsObj = {};
@@ -3771,10 +3715,11 @@ function applyManufacturingFilters() {
   const globalSearch = document.getElementById('mfgGlobalSearch').value.toLowerCase();
   
   filteredFabData = allData.filter(r => {
+    // Critical: Ensure item is sent to fab
     if (!r.isSentToFab) return false;
     
-    if (currentMfgTab === 'active' && r.FabStatus === 'Done') return false;
-    if (currentMfgTab === 'completed' && r.FabStatus !== 'Done') return false;
+    if (currentMfgTab === 'active' && (r.FabStatus === 'Done' || r.Status === 'COMP')) return false;
+    if (currentMfgTab === 'completed' && r.FabStatus !== 'Done' && r.Status !== 'COMP') return false;
 
     if (globalSearch) {
       const searchableFields = [
@@ -3784,16 +3729,6 @@ function applyManufacturingFilters() {
       if (!match) return false;
     }
     
-    // Also respect individual column filters/searches if they still exist in code state
-    for (let col in columnSearches) {
-      const val = columnSearches[col]?.toLowerCase();
-      if (val && !String(r[col] || '').toLowerCase().includes(val)) return false;
-    }
-    for (let col in columnFilters) {
-      const selectedSet = columnFilters[col];
-      if (selectedSet && selectedSet.size > 0 && !selectedSet.has(String(r[col] || ''))) return false;
-    }
-
     return true;
   });
   
@@ -3825,7 +3760,7 @@ function renderManufacturingTable() {
     if (photo) {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
+          <img src="${photo}" style="width:60px; height:40px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
         </div>
       `;
     } else {
@@ -4256,6 +4191,55 @@ function closeWO() {
   }
 }
 
+async function deleteWO(woId) {
+  if (!isAdmin) return showToast("Admin access required", "error");
+  const wo = allData.find(d => String(d.WorkOrder) === String(woId));
+  if (!wo) return showToast("Work Order not found", "error");
+
+  if (!confirm(`CRITICAL ACTION: Are you sure you want to PERMANENTLY delete Work Order #${woId} and all its associated photos, comments, and manufacturing data? This cannot be undone.`)) return;
+
+  try {
+    showToast(`Deleting WO #${woId}...`);
+    
+    // 1. Get attachment URLs for storage cleanup
+    const { data: attachments } = await supabaseClient.from('work_order_attachments').select('url').eq('work_order', woId);
+    
+    // 2. Delete from all related tables
+    // Foreign key constraints should ideally handle this if set to CASCADE, but we'll be explicit for safety.
+    await supabaseClient.from('work_order_attachments').delete().eq('work_order', woId);
+    await supabaseClient.from('work_order_comments').delete().eq('work_order', woId);
+    await supabaseClient.from('manufacturing').delete().eq('work_order_number', woId);
+    await supabaseClient.from('work_orders').delete().eq('work_order', woId);
+    
+    // 3. Clean up storage files
+    if (attachments && attachments.length > 0) {
+      const paths = attachments.map(a => a.url.split('qbc-storage/')[1]).filter(p => !!p);
+      if (paths.length > 0) {
+        await supabaseClient.storage.from('qbc-storage').remove(paths);
+      }
+    }
+
+    // 4. Update local state and UI
+    allData = allData.filter(d => String(d.WorkOrder) !== String(woId));
+    delete photos[woId];
+    
+    logAudit("Deleted Work Order", `WO #${woId}`, woId);
+    addNotification(`Work Order #${woId} has been deleted by Administrator`, null, 'system');
+    
+    showToast(`Work Order #${woId} deleted successfully`);
+    
+    if (selectedWorkOrder === woId) {
+      selectedWorkOrder = null;
+      closeDetail();
+    }
+    
+    refreshUI();
+  } catch (e) {
+    console.error("Delete WO error:", e);
+    showToast("Failed to delete Work Order", "error");
+  }
+}
+
 function openInGoogleMaps() {
   const wo = allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder));
   if (wo && wo.Lat && wo.Lng) {
@@ -4269,63 +4253,187 @@ async function renderDetailAttachments(woId) {
   const container = document.getElementById('detail-attachments');
   container.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
   
-  const photo = photos[woId];
   let html = '';
-
-  if (photo) {
-    html += `
-      <div class="attachment-item" title="Main Photo">
-        <img src="${photo}" alt="Work Order Photo">
-        <div class="attachment-overlay">
-          <i class="fas fa-search-plus" onclick="viewPhoto('${woId}')"></i>
-          <a href="${photo}" download target="_blank" style="color:white;"><i class="fas fa-download"></i></a>
-        </div>
-      </div>
-    `;
-  }
+  let attachments = [];
 
   if (supabaseClient) {
     try {
       const { data, error } = await supabaseClient
         .from('work_order_attachments')
         .select('*')
-        .eq('work_order', woId);
+        .eq('work_order', woId)
+        .order('created_at', { ascending: true });
       
       if (!error && data) {
-        data.forEach(file => {
+        attachments = data;
+        
+        // Auto-assign primary if none exist and we have images
+        const images = attachments.filter(a => /\.(jpg|jpeg|png|webp|gif)$/i.test(a.url));
+        if (images.length > 0 && !images.some(img => img.is_primary)) {
+           // Synchronously update in-memory state first to prevent recursion
+           images[0].is_primary = true;
+           photos[woId] = images[0].url;
+           // Then asynchronously update DB
+           setPrimaryPhoto(images[0].id, woId, true);
+        }
+
+        attachments.forEach(file => {
           const isImg = /\.(jpg|jpeg|png|webp|gif)$/i.test(file.url);
           if (isImg) {
             html += `
               <div class="attachment-item" title="${file.filename}">
+                ${file.is_primary ? '<div class="attachment-badge">Primary Photo</div>' : ''}
                 <img src="${file.url}">
                 <div class="attachment-overlay">
                   <i class="fas fa-search-plus" onclick="window.open('${file.url}', '_blank')"></i>
                   <a href="${file.url}" download target="_blank" style="color:white;"><i class="fas fa-download"></i></a>
+                </div>
+                <div class="attachment-actions">
+                  ${!file.is_primary ? `<button class="btn-attachment" onclick="setPrimaryPhoto('${file.id}', '${woId}')" title="Set as Primary"><i class="fas fa-star"></i></button>` : ''}
+                  <button class="btn-attachment" onclick="replacePhotoFromDetail('${file.id}', '${woId}')" title="Replace Photo"><i class="fas fa-sync-alt"></i></button>
+                  <button class="btn-attachment danger" onclick="deletePhotoFromDetail('${file.id}', '${woId}', ${file.is_primary})" title="Delete Photo"><i class="fas fa-trash-alt"></i></button>
                 </div>
               </div>`;
           } else {
             html += `
               <div class="attachment-item file" title="${file.filename}">
                 <i class="fas fa-file-alt"></i>
-                <span>${file.filename || 'Document'}</span>
+                <span style="font-size: 9px; padding: 0 4px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">${file.filename || 'Document'}</span>
                 <div class="attachment-overlay">
                   <a href="${file.url}" download target="_blank" style="color:white;"><i class="fas fa-download"></i></a>
+                  <i class="fas fa-trash-alt" style="cursor:pointer;" onclick="deletePhotoFromDetail('${file.id}', '${woId}', false)"></i>
                 </div>
               </div>
             `;
           }
         });
       }
-    } catch(e) {}
+    } catch(e) { console.error("Error loading attachments:", e); }
   }
 
   container.innerHTML = html + `
     <div class="attachment-item file" onclick="attachFileFromDetail()" style="border: 2px dashed var(--border); background: transparent;">
       <i class="fas fa-plus"></i>
-      <span>Add File</span>
+      <span>Add Photo/File</span>
     </div>
     <input type="file" id="detail-file-upload" style="display:none" multiple onchange="handleDetailFileUpload(event, '${woId}')">
+    <input type="file" id="detail-replace-upload" style="display:none" onchange="handleReplacePhoto(event)">
   `;
+}
+
+let replacingAttachmentId = null;
+let replacingWoId = null;
+
+function replacePhotoFromDetail(attachmentId, woId) {
+  replacingAttachmentId = attachmentId;
+  replacingWoId = woId;
+  document.getElementById('detail-replace-upload').click();
+}
+
+async function handleReplacePhoto(evt) {
+  const file = evt.target.files[0];
+  if (!file || !replacingAttachmentId || !replacingWoId) return;
+
+  showToast("Replacing photo...");
+  try {
+    const { data: oldAttr } = await supabaseClient.from('work_order_attachments').select('url').eq('id', replacingAttachmentId).single();
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${replacingWoId}_${Date.now()}.${fileExt}`;
+    const filePath = `attachments/${fileName}`;
+
+    const { error: uploadError } = await supabaseClient.storage.from('qbc-storage').upload(filePath, file);
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabaseClient.storage.from('qbc-storage').getPublicUrl(filePath);
+
+    await supabaseClient.from('work_order_attachments').update({
+      url: publicUrl,
+      filename: file.name,
+      file_type: file.type
+    }).eq('id', replacingAttachmentId);
+
+    // If it was primary, update local cache
+    const { data: checkPrimary } = await supabaseClient.from('work_order_attachments').select('is_primary').eq('id', replacingAttachmentId).single();
+    if (checkPrimary && checkPrimary.is_primary) {
+      photos[replacingWoId] = publicUrl;
+      renderTable();
+    }
+
+    // Try deleting old file from storage if it was from our bucket
+    if (oldAttr && oldAttr.url && oldAttr.url.includes('qbc-storage')) {
+      const oldPath = oldAttr.url.split('qbc-storage/')[1];
+      if (oldPath) await supabaseClient.storage.from('qbc-storage').remove([oldPath]);
+    }
+
+    showToast("Photo replaced successfully");
+    renderDetailAttachments(replacingWoId);
+  } catch (e) {
+    console.error(e);
+    showToast("Replace failed", "error");
+  } finally {
+    replacingAttachmentId = null;
+    replacingWoId = null;
+    evt.target.value = '';
+  }
+}
+
+async function deletePhotoFromDetail(id, woId, wasPrimary) {
+  if (!confirm("Are you sure you want to delete this attachment?")) return;
+  
+  try {
+    const { data: attr } = await supabaseClient.from('work_order_attachments').select('url').eq('id', id).single();
+    
+    await supabaseClient.from('work_order_attachments').delete().eq('id', id);
+
+    if (attr && attr.url && attr.url.includes('qbc-storage')) {
+      const path = attr.url.split('qbc-storage/')[1];
+      if (path) await supabaseClient.storage.from('qbc-storage').remove([path]);
+    }
+
+    if (wasPrimary) {
+      // Find another photo to make primary
+      const { data: remaining } = await supabaseClient.from('work_order_attachments').select('*').eq('work_order', woId).order('created_at', { ascending: true });
+      const nextImg = (remaining || []).find(a => /\.(jpg|jpeg|png|webp|gif)$/i.test(a.url));
+      if (nextImg) {
+        await setPrimaryPhoto(nextImg.id, woId, true);
+      } else {
+        // No photos left
+        delete photos[woId];
+        renderTable();
+      }
+    }
+
+    showToast("Attachment deleted");
+    renderDetailAttachments(woId);
+  } catch (e) {
+    console.error(e);
+    showToast("Delete failed", "error");
+  }
+}
+
+async function setPrimaryPhoto(id, woId, silent = false) {
+  try {
+    // 1. Unset existing primary for this WO
+    await supabaseClient.from('work_order_attachments').update({ is_primary: false }).eq('work_order', woId);
+    
+    // 2. Set new primary
+    const { data: updated } = await supabaseClient.from('work_order_attachments').update({ is_primary: true }).eq('id', id).select().single();
+    
+    // 3. Update local cache
+    if (updated) {
+      photos[woId] = updated.url;
+      renderTable();
+    }
+    
+    if (!silent) {
+      showToast("Primary photo updated");
+      renderDetailAttachments(woId);
+    }
+  } catch (e) {
+    console.error(e);
+    if (!silent) showToast("Failed to set primary", "error");
+  }
 }
 
 async function handleDetailFileUpload(evt, wo) {
@@ -4355,13 +4463,20 @@ async function handleDetailFileUpload(evt, wo) {
         .getPublicUrl(filePath);
 
       // Save to attachments table
-      await supabaseClient.from('work_order_attachments').insert({
+      const { data: newAttr } = await supabaseClient.from('work_order_attachments').insert({
         work_order: wo,
         url: publicUrl,
         filename: file.name,
         file_type: file.type,
         uploader_id: currentUser.id
-      });
+      }).select().single();
+
+      // If it's an image and there are no other photos, it will be made primary by renderDetailAttachments re-fetching
+      // But we can also check here to update local cache immediately if it's the first image
+      if (isImg && !photos[wo]) {
+         photos[wo] = publicUrl;
+         renderTable();
+      }
 
       showToast(`Uploaded ${file.name}`);
     } catch (error) {
@@ -4474,7 +4589,7 @@ function renderTable() {
     if (photo) {
       photoCell = `
         <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
+          <img src="${photo}" style="width:60px; height:40px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
         </div>
       `;
     } else {
@@ -4490,6 +4605,7 @@ function renderTable() {
       onclick="selectWorkOrderRow('${r.WorkOrder}')" 
       ondblclick="openDetail('${r.WorkOrder}')"
       oncontextmenu="showContextMenu(event, 'row-wo', '${r.WorkOrder}')">
+      <td>${photoCell}</td>
       <td><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td>${stBadge}</td>
@@ -5175,7 +5291,7 @@ async function clearAllData() {
     try {
       // In Supabase, standard delete needs a filter. We use a filter that matches everything.
       const { error: error1 } = await supabaseClient.from('work_orders').delete().neq('work_order', '___NONE___');
-      const { error: error2 } = await supabaseClient.from('photos').delete().neq('work_order', '___NONE___');
+      const { error: error2 } = await supabaseClient.from('work_order_attachments').delete().neq('work_order', '___NONE___');
       const { error: error3 } = await supabaseClient.from('exported_pdfs').delete().neq('id', 0);
       
       if (error1 || error2 || error3) throw (error1 || error2 || error3);
@@ -5623,239 +5739,6 @@ function loadMarkers(statusFilter = null, isVisible = true) {
   map.addLayer(window.markerClusterGroup);
   const countEl = document.getElementById('gis-count-wo');
   if (countEl) countEl.textContent = `${allData.length} items`;
-}
-
-function initInstMap() {
-  if (instMap) return;
-  instMap = L.map('instMap', { zoomControl: true, maxZoom: 22 }).setView([25.3548, 51.1839], 10);
-  L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 22, attribution: 'Google' }).addTo(instMap);
-  
-  if (supabaseClient) {
-    supabaseClient.from('project_boundaries').select('*').limit(1).maybeSingle().then(({data}) => {
-      if (data && data.geojson) {
-        L.geoJSON(data.geojson, { style: { color: '#00c8ff', weight: 2, fillOpacity: 0.05 } }).addTo(instMap);
-      }
-    });
-  }
-  
-  loadInstMarkers();
-}
-
-function loadInstMarkers() {
-  if (!instMap) return;
-  
-  // Clear existing markers
-  instMap.eachLayer(l => {
-    if (l instanceof L.Marker) instMap.removeLayer(l);
-  });
-
-  const today = new Date();
-  const ready = allData.filter(r => r.ReadyForInstallation && r.Lat && r.Lng);
-
-  ready.forEach(r => {
-    let color = '#64748b'; // Unassigned
-    if (r.AssignedTeam && r.AssignedTeam !== '') color = '#22c55e'; // Assigned
-    if (r.InstallationStatus === 'Planned') color = '#f59e0b'; // Planned
-    if (r.TargetFinish && new Date(r.TargetFinish) < today && r.InstallationStatus !== 'Completed') color = '#ef4444'; // Overdue
-
-    const marker = L.marker([r.Lat, r.Lng], {
-      icon: L.divIcon({
-        className: 'inst-marker',
-        html: `<div style="background:${color}; width:16px; height:16px; border:2px solid white; border-radius:50%; box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
-        iconSize: [16, 16],
-        iconAnchor: [8, 8]
-      })
-    }).addTo(instMap);
-
-    marker.bindPopup(`
-      <div style="font-family:'Inter',sans-serif; min-width:200px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <strong style="color:var(--accent);">#${r.WorkOrder}</strong>
-          <span class="status-badge badge-${r.InstallationStatus}" style="font-size:10px;">${r.InstallationStatus}</span>
-        </div>
-        <div style="font-size:11px; font-weight:600; margin-bottom:4px;">${r.Description || 'No description'}</div>
-        <div style="font-size:11px; color:var(--muted); margin-bottom:8px;"><i class="fas fa-map-marker-alt"></i> ${r.Location}</div>
-        
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:10px; margin-bottom:12px; padding:8px; background:var(--surface2); border-radius:6px;">
-          <div><label style="color:var(--muted); display:block;">Finish Date</label>${formatDate(r.TargetFinish)}</div>
-          <div><label style="color:var(--muted); display:block;">Priority</label>${r.Priority || 'Normal'}</div>
-          <div style="grid-column: span 2;"><label style="color:var(--muted); display:block;">Team</label>${r.AssignedTeam || 'Unassigned'}</div>
-        </div>
-        
-        <div style="display:flex; gap:6px;">
-          <button class="btn btn-primary btn-xs flex-1" onclick="openDetail('${r.WorkOrder}')">View Details</button>
-          <button class="btn btn-ghost btn-xs" onclick="quickAssign('${r.WorkOrder}')"><i class="fas fa-user-plus"></i></button>
-        </div>
-      </div>
-    `);
-  });
-}
-
-function quickAssign(woId) {
-  const teams = installationTeams.map(t => `<option value="${t.team_name}">${t.team_name}</option>`).join('');
-  const content = `
-    <div class="form-group">
-      <label>Select Team</label>
-      <select id="quick-team-sel" class="filter-input">${teams}</select>
-    </div>
-    <div style="margin-top:12px; display:flex; gap:8px;">
-      <button class="btn btn-primary btn-sm flex-1" onclick="processQuickAssign('${woId}')">Assign</button>
-      <button class="btn btn-ghost btn-sm" onclick="Swal.close()">Cancel</button>
-    </div>
-  `;
-  
-  // Using Swal if available, otherwise fallback
-  if (window.Swal) {
-    Swal.fire({
-      title: 'Assign Team',
-      html: content,
-      showConfirmButton: false
-    });
-  } else {
-    const team = prompt("Enter Team Name:", installationTeams[0]?.team_name || "");
-    if (team) processQuickAssign(woId, team);
-  }
-}
-
-async function autoGroupNearby() {
-  const ready = allData.filter(r => r.ReadyForInstallation && !r.AssignedTeam && r.Lat && r.Lng);
-  if (ready.length === 0) {
-    showToast("No unassigned work orders ready for installation", "amber");
-    return;
-  }
-  
-  const availableTeams = installationTeams.filter(t => t.status === 'Available');
-  if (availableTeams.length === 0) {
-    showToast("No available teams for assignment", "error");
-    return;
-  }
-
-  showToast(`Grouping ${ready.length} locations for ${availableTeams.length} teams...`);
-
-  // Basic K-Means implementation
-  let centroids = availableTeams.slice(0, ready.length).map((t, i) => ({
-    lat: ready[i].Lat,
-    lng: ready[i].Lng,
-    team: t.team_name
-  }));
-
-  const iterations = 5;
-  let assignments = new Map();
-
-  for (let iter = 0; iter < iterations; iter++) {
-    assignments.clear();
-    ready.forEach(r => {
-      let minDist = Infinity;
-      let closest = null;
-      centroids.forEach(c => {
-        const d = Math.sqrt(Math.pow(r.Lat - c.lat, 2) + Math.pow(r.Lng - c.lng, 2));
-        if (d < minDist) {
-          minDist = d;
-          closest = c.team;
-        }
-      });
-      if (!assignments.has(closest)) assignments.set(closest, []);
-      assignments.get(closest).push(r);
-    });
-
-    // Update centroids
-    centroids.forEach(c => {
-      const assigned = assignments.get(c.team);
-      if (assigned && assigned.length > 0) {
-        c.lat = assigned.reduce((sum, r) => sum + r.Lat, 0) / assigned.length;
-        c.lng = assigned.reduce((sum, r) => sum + r.Lng, 0) / assigned.length;
-      }
-    });
-  }
-
-  // Bulk Save
-  try {
-    for (const [team, orders] of assignments.entries()) {
-      for (const wo of orders) {
-        wo.AssignedTeam = team;
-        wo.AssignedDate = new Date().toISOString().split('T')[0];
-        wo.InstallationStatus = 'Assigned';
-        await saveWorkOrderToSupabase(wo);
-      }
-    }
-    showToast("Auto-grouping complete");
-    loadInstMarkers();
-    updateInstKPIs();
-  } catch (e) {
-    showToast("Bulk assignment failed", "error");
-  }
-}
-
-function optimizeAllRoutes() {
-  const ready = allData.filter(r => r.ReadyForInstallation && r.AssignedTeam && r.Lat && r.Lng);
-  const teams = [...new Set(ready.map(r => r.AssignedTeam))];
-  
-  if (teams.length === 0) {
-    showToast("No assigned work orders to optimize", "amber");
-    return;
-  }
-
-  teams.forEach(team => {
-    const teamOrders = ready.filter(r => r.AssignedTeam === team);
-    if (teamOrders.length < 2) return;
-
-    // Simple nearest neighbor starting from first point
-    let unvisited = [...teamOrders];
-    let route = [unvisited.shift()];
-
-    while (unvisited.length > 0) {
-      let current = route[route.length - 1];
-      let closestIdx = 0;
-      let minDist = Infinity;
-
-      unvisited.forEach((r, idx) => {
-        const d = getHaversineDist(current.Lat, current.Lng, r.Lat, r.Lng);
-        if (d < minDist) {
-          minDist = d;
-          closestIdx = idx;
-        }
-      });
-
-      route.push(unvisited.splice(closestIdx, 1)[0]);
-    }
-    
-    // In a real app, we'd store the sequence. 
-    // For now, we'll just log it or show a toast.
-    console.log(`Optimized route for ${team}:`, route.map(r => r.WorkOrder));
-  });
-
-  showToast("Routes optimized (Sequence updated)");
-}
-
-function getHaversineDist(lat1, lon1, lat2, lon2) {
-  const R = 6371; // km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-async function processQuickAssign(woId, manualTeam = null) {
-  const team = manualTeam || document.getElementById('quick-team-sel').value;
-  const wo = allData.find(r => r.WorkOrder === woId);
-  if (!wo) return;
-  
-  wo.AssignedTeam = team;
-  wo.AssignedDate = new Date().toISOString().split('T')[0];
-  wo.InstallationStatus = 'Assigned';
-  
-  try {
-    await saveWorkOrderToSupabase(wo);
-    showToast(`Assigned ${woId} to ${team}`);
-    if (window.Swal) Swal.close();
-    loadInstMarkers();
-    updateInstKPIs();
-  } catch(e) {
-    showToast("Assignment failed", "error");
-  }
 }
 
 async function loadProjectBoundary() {
@@ -6916,7 +6799,7 @@ async function handlePhotoUpload(evt, wo) {
 
       const fileExt = file.name.split('.').pop();
       const fileName = `${wo}_${Date.now()}.${fileExt}`;
-      const filePath = `photos/${fileName}`;
+      const filePath = `attachments/${fileName}`;
 
       const { error: uploadError } = await supabaseClient.storage
         .from('qbc-storage')
@@ -6927,13 +6810,7 @@ async function handlePhotoUpload(evt, wo) {
 
       if (uploadError) {
         console.error("Storage Error:", uploadError);
-        if (uploadError.message.includes('bucket not found')) {
-           showToast("Error: Storage bucket 'qbc-storage' not found", "error");
-        } else if (uploadError.message.includes('row-level security')) {
-           showToast("Storage Access Denied: Check Bucket Policies", "error");
-        } else {
-           showToast(`Upload failed: ${uploadError.message}`, "error");
-        }
+        showToast(`Upload failed: ${uploadError.message}`, "error");
         return;
       }
 
@@ -6941,21 +6818,25 @@ async function handlePhotoUpload(evt, wo) {
         .from('qbc-storage')
         .getPublicUrl(filePath);
 
-      const { error: dbError } = await supabaseClient
-        .from('photos')
-        .upsert({ work_order: wo, url: publicUrl }, { onConflict: 'work_order' });
+      const { data: newAttr, error: dbError } = await supabaseClient
+        .from('work_order_attachments')
+        .insert({
+           work_order: wo,
+           url: publicUrl,
+           filename: file.name,
+           file_type: file.type,
+           is_primary: !photos[wo] // Primary if no photos exist yet
+        }).select().single();
 
       if (dbError) {
         console.error("DB Error:", dbError);
-        if (dbError.message.includes('row-level security')) {
-           showToast("Table Access Denied: Check Photos Table Policies", "error");
-        } else {
-           showToast(`DB Error: ${dbError.message}`, "error");
-        }
+        showToast(`DB Error: ${dbError.message}`, "error");
         return;
       }
 
-      photos[wo] = publicUrl;
+      if (newAttr && newAttr.is_primary) {
+        photos[wo] = publicUrl;
+      }
       logAudit("Uploaded Photo", `Work Order: ${wo}`, wo);
       addNotification(`Uploaded new photo`, wo, 'photos');
       renderTable();
@@ -6985,28 +6866,27 @@ function viewPhoto(wo) {
 
 async function deletePhoto(wo) {
   if (!hasPermission('edit')) { showToast("Permission denied", "error"); return; }
-  if (!confirm(`Are you sure you want to delete the photo for WO: ${wo}?`)) return;
+  if (!confirm(`Are you sure you want to delete all photos for WO: ${wo}?`)) return;
   
   if (supabaseClient) {
     try {
-      const { error } = await supabaseClient
-        .from('photos')
-        .delete()
-        .eq('work_order', wo);
+      const { data: attrs } = await supabaseClient.from('work_order_attachments').select('url').eq('work_order', wo);
       
-      if (error) throw error;
+      await supabaseClient.from('work_order_attachments').delete().eq('work_order', wo);
       
-      // Note: In a real scenario, you'd also delete from Storage bucket.
-      // But for now, we'll just remove the DB reference to "unlink" it.
+      if (attrs) {
+        const paths = attrs.map(a => a.url.split('qbc-storage/')[1]).filter(p => !!p);
+        if (paths.length > 0) await supabaseClient.storage.from('qbc-storage').remove(paths);
+      }
       
       delete photos[wo];
       renderTable();
       updateFileManagerStats();
-      logAudit("Deleted Photo", `Work Order: ${wo}`, wo);
-      showToast("Photo deleted");
+      logAudit("Deleted All Photos", `Work Order: ${wo}`, wo);
+      showToast("Photos deleted");
     } catch (e) {
       console.error(e);
-      showToast("Error deleting photo", "error");
+      showToast("Error deleting photos", "error");
     }
   } else {
     delete photos[wo];
@@ -7576,6 +7456,9 @@ async function sendToFabrication(woId) {
   wo.fab_history.push(submission);
   wo.isSentToFab = true;
   
+  // Create a notification for the fabrication request
+  await addNotification(`New Work Order Added for Fabrication: #${woId}`, woId, 'manufacturing');
+
   try {
     await saveWorkOrderToSupabase(wo);
     logAudit("Sent to Fabrication", `Submission #${wo.fab_history.length}, WO: ${woId}`, woId);
@@ -8040,248 +7923,29 @@ function setupNotifListener() {
        }
     })
     .subscribe();
-
-  // Listen for Installation Records changes
-  supabaseClient
-    .channel('public:installation_records')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_records' }, payload => {
-       console.log("Installation Record change detected:", payload);
-       const d = payload.new;
-       if (payload.eventType === 'INSERT') {
-         installationRecords.push(d);
-       } else if (payload.eventType === 'UPDATE') {
-         const idx = installationRecords.findIndex(r => r.id === d.id);
-         if (idx !== -1) installationRecords[idx] = d;
-       } else if (payload.eventType === 'DELETE') {
-         installationRecords = installationRecords.filter(r => r.id !== payload.old.id);
-       }
-       updateInstallationUI();
-    })
-    .subscribe();
-
-  // Listen for Installation Teams changes
-  supabaseClient
-    .channel('public:installation_teams')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_teams' }, payload => {
-       console.log("Installation Team change detected:", payload);
-       const d = payload.new;
-       if (payload.eventType === 'INSERT') {
-         installationTeams.push(d);
-       } else if (payload.eventType === 'UPDATE') {
-         const idx = installationTeams.findIndex(t => t.id === d.id);
-         if (idx !== -1) installationTeams[idx] = d;
-       } else if (payload.eventType === 'DELETE') {
-         installationTeams = installationTeams.filter(t => t.id !== payload.old.id);
-       }
-       updateInstallationUI();
-    })
-    .subscribe();
-
-  // Listen for Installation Photos changes
-  supabaseClient
-    .channel('public:installation_photos')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_photos' }, payload => {
-       console.log("Installation Photo change detected:", payload);
-       const d = payload.new;
-       if (payload.eventType === 'INSERT') {
-         installationPhotos.push(d);
-       } else if (payload.eventType === 'DELETE') {
-         installationPhotos = installationPhotos.filter(p => p.id !== payload.old.id);
-       }
-       updateInstallationUI();
-    })
-    .subscribe();
-}
-
-function updateInstallationUI() {
-  const content = document.getElementById('inst-content');
-  if (!content) return;
-  
-  if (currentInstTab === 'dashboard') {
-    renderInstDashboard(content);
-  } else if (currentInstTab === 'map') {
-    renderInstMap(content);
-  } else if (currentInstTab === 'teams') {
-    renderInstTeams(content);
-  } else if (currentInstTab === 'programs') {
-    renderInstPrograms(content);
-  } else if (currentInstTab === 'calendar') {
-    renderInstCalendar(content);
-  }
-}
-
-function renderInstDashboard(container) {
-  container.innerHTML = `
-    <div class="dash-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-       <div class="kpi-card total"><div class="kpi-label">Ready for Installation</div><div class="kpi-value" id="kpi-ready">0</div></div>
-       <div class="kpi-card on-time"><div class="kpi-label">Assigned to Team</div><div class="kpi-value" id="kpi-assigned">0</div></div>
-       <div class="kpi-card pending"><div class="kpi-label">Pending Assignment</div><div class="kpi-value" id="kpi-pending">0</div></div>
-       <div class="kpi-card breached"><div class="kpi-label">Completed Today</div><div class="kpi-value" id="kpi-comp-today">0</div></div>
-       <div class="kpi-card failed"><div class="kpi-label">Overdue Installations</div><div class="kpi-value" id="kpi-overdue">0</div></div>
-    </div>
-    <div class="dash-row" style="margin-top:24px; display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
-       <div class="dash-card">
-          <div class="dash-card-title">Upcoming Target Finish Dates</div>
-          <div class="table-wrap" style="max-height:400px; overflow-y:auto;">
-             <table class="main-table">
-                <thead><tr><th>WO</th><th>Location</th><th>Finish Date</th><th>Team</th><th>Status</th></tr></thead>
-                <tbody id="upcoming-inst-list"></tbody>
-             </table>
-          </div>
-       </div>
-       <div class="dash-card">
-          <div class="dash-card-title">Team Capacity Monitoring</div>
-          <div id="team-capacity-list"></div>
-       </div>
-    </div>
-  `;
-  updateInstKPIs();
-}
-
-function updateInstKPIs() {
-  const ready = allData.filter(r => r.ReadyForInstallation);
-  const assigned = ready.filter(r => r.AssignedTeam && r.AssignedTeam !== '');
-  const pending = ready.filter(r => !r.AssignedTeam || r.AssignedTeam === '');
-  
-  const todayStr = new Date().toISOString().split('T')[0];
-  const compToday = allData.filter(r => r.ActualInstallationDate === todayStr);
-  
-  const today = new Date();
-  const overdue = ready.filter(r => r.TargetFinish && new Date(r.TargetFinish) < today && r.InstallationStatus !== 'Completed');
-
-  if(document.getElementById('kpi-ready')) document.getElementById('kpi-ready').textContent = ready.length;
-  if(document.getElementById('kpi-assigned')) document.getElementById('kpi-assigned').textContent = assigned.length;
-  if(document.getElementById('kpi-pending')) document.getElementById('kpi-pending').textContent = pending.length;
-  if(document.getElementById('kpi-comp-today')) document.getElementById('kpi-comp-today').textContent = compToday.length;
-  if(document.getElementById('kpi-overdue')) document.getElementById('kpi-overdue').textContent = overdue.length;
-
-  const upcomingTbody = document.getElementById('upcoming-inst-list');
-  if(upcomingTbody) {
-    const upcoming = ready.filter(r => r.InstallationStatus !== 'Completed').sort((a,b) => new Date(a.TargetFinish) - new Date(b.TargetFinish)).slice(0, 10);
-    upcomingTbody.innerHTML = upcoming.map(r => `
-       <tr onclick="openDetail('${r.WorkOrder}')" style="cursor:pointer;">
-          <td><span class="wo-num">${r.WorkOrder}</span></td>
-          <td>${r.Location}</td>
-          <td>${formatDate(r.TargetFinish)}</td>
-          <td>${r.AssignedTeam || '—'}</td>
-          <td><span class="status-badge badge-${r.InstallationStatus}">${r.InstallationStatus}</span></td>
-       </tr>
-    `).join('');
-  }
-
-  const capacityCont = document.getElementById('team-capacity-list');
-  if(capacityCont) {
-    if(installationTeams.length === 0) {
-      capacityCont.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted); font-size:12px;">No teams configured</div>';
-    } else {
-      capacityCont.innerHTML = installationTeams.map(t => {
-        const assignedCount = ready.filter(r => r.AssignedTeam === t.team_name && r.InstallationStatus !== 'Completed').length;
-        const pct = Math.min(100, Math.round((assignedCount / t.capacity_per_day) * 100));
-        const color = pct > 100 ? 'var(--red)' : (pct > 80 ? 'var(--amber)' : 'var(--green)');
-        return `
-          <div style="margin-bottom:16px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;">
-              <span style="font-weight:600;">${t.team_name}</span>
-              <span style="color:var(--muted);">${assignedCount} / ${t.capacity_per_day} Signs</span>
-            </div>
-            <div style="height:6px; background:var(--surface2); border-radius:100px; overflow:hidden;">
-              <div style="height:100%; width:${pct}%; background:${color};"></div>
-            </div>
-            ${pct >= 100 ? '<div style="font-size:10px; color:var(--red); margin-top:4px;"><i class="fas fa-exclamation-triangle"></i> Team overloaded</div>' : ''}
-          </div>
-        `;
-      }).join('');
-    }
-  }
-}
-
-function renderInstMap(container) {
-  container.innerHTML = `
-    <div style="height: calc(100vh - 250px); position: relative; border-radius:16px; overflow:hidden; border:1px solid var(--border);">
-       <div id="instMap" style="height: 100%; width: 100%;"></div>
-       <div style="position:absolute; top:20px; right:20px; z-index:1000; display:flex; flex-direction:column; gap:10px;">
-          <button class="btn btn-primary" onclick="autoGroupNearby()"><i class="fas fa-object-group"></i> Auto Group Nearby</button>
-          <button class="btn btn-ghost" style="background:var(--surface); border:1px solid var(--border);" onclick="optimizeAllRoutes()"><i class="fas fa-route"></i> Optimize All Routes</button>
-       </div>
-       <div id="inst-map-legend" style="position:absolute; bottom:20px; left:20px; z-index:1000; background:var(--surface); padding:12px; border-radius:8px; border:1px solid var(--border); font-size:11px;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="width:12px; height:12px; border-radius:50%; background:#22c55e;"></span> Assigned</div>
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></span> Planned</div>
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></span> Overdue</div>
-          <div style="display:flex; align-items:center; gap:8px;"><span style="width:12px; height:12px; border-radius:50%; background:#64748b;"></span> Unassigned</div>
-       </div>
-    </div>
-  `;
-  setTimeout(initInstMap, 100);
-}
-
-function renderInstTeams(container) {
-  container.innerHTML = `
-    <div class="dash-card">
-       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <div class="dash-card-title">Installation Teams Management</div>
-          <button class="btn btn-primary btn-sm" onclick="openAddTeamModal()"><i class="fas fa-plus"></i> Add Team</button>
-       </div>
-       <div class="table-wrap">
-          <table class="main-table">
-             <thead><tr><th>Team</th><th>Supervisor</th><th>Crew Size</th><th>Vehicle</th><th>Capacity/Day</th><th>Status</th><th>Actions</th></tr></thead>
-             <tbody id="inst-teams-list"></tbody>
-          </table>
-       </div>
-    </div>
-  `;
-  updateTeamsList();
-}
-
-function updateTeamsList() {
-  const tbody = document.getElementById('inst-teams-list');
-  if(!tbody) return;
-  tbody.innerHTML = installationTeams.map(t => `
-     <tr>
-        <td style="font-weight:700; color:var(--accent);">${t.team_name}</td>
-        <td>${t.supervisor}</td>
-        <td>${t.crew_size}</td>
-        <td>${t.vehicle}</td>
-        <td>${t.capacity_per_day} Signs</td>
-        <td><span class="status-badge" style="background:var(--surface2); color:var(--text);">${t.status}</span></td>
-        <td>
-           <button class="btn btn-ghost btn-xs" onclick="editTeam('${t.id}')"><i class="fas fa-edit"></i></button>
-           <button class="btn btn-ghost btn-xs" style="color:var(--red);" onclick="deleteTeam('${t.id}')"><i class="fas fa-trash"></i></button>
-        </td>
-     </tr>
-  `).join('');
-}
-
-function renderInstPrograms(container) {
-  container.innerHTML = `
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
-       <div class="dash-card">
-          <div class="dash-card-title">Daily Installation Program</div>
-          <div id="daily-program-content"></div>
-       </div>
-       <div class="dash-card">
-          <div class="dash-card-title">Weekly Overview</div>
-          <div id="weekly-program-content"></div>
-       </div>
-    </div>
-  `;
-  updateProgramContent();
-}
-
-function renderInstCalendar(container) {
-  container.innerHTML = `
-    <div class="dash-card" style="min-height:600px;">
-       <div class="dash-card-title">Installation Schedule Calendar</div>
-       <div id="inst-calendar-grid" style="margin-top:16px;"></div>
-    </div>
-  `;
-  // Calendar logic would go here
 }
 
 function refreshUI() {
    applyFilters(false);
    applyManufacturingFilters();
    updateDashboard();
+   updateManufacturingBadge();
    if (map) loadMarkers();
+}
+
+function updateManufacturingBadge() {
+  const pendingFabCount = allData.filter(r => r.isSentToFab && r.FabStatus !== 'Done' && r.Status !== 'COMP').length;
+  const badge = document.getElementById('mfg-nav-badge');
+  const mobileBadge = document.getElementById('mfg-mobile-badge');
+  
+  if (badge) {
+    badge.textContent = pendingFabCount;
+    badge.style.display = pendingFabCount > 0 ? 'flex' : 'none';
+  }
+  if (mobileBadge) {
+    mobileBadge.textContent = pendingFabCount;
+    mobileBadge.classList.toggle('show-badge', pendingFabCount > 0);
+  }
 }
 
 </script>
