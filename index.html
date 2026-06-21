@@ -32,6 +32,8 @@
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 :root{
@@ -490,6 +492,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .detail-modal.editing .info-item span { display: none; }
 .detail-modal.editing .info-item input, .detail-modal.editing .info-item select, .detail-modal.editing .info-item textarea { display: block; background: var(--surface2); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .detail-modal.editing .info-item.modified input, .detail-modal.editing .info-item.modified select, .detail-modal.editing .info-item.modified textarea { background: rgba(0, 200, 255, 0.05); }
+
+.upload-box { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface2); }
+.upload-box:hover { border-color: var(--accent); background: rgba(0, 200, 255, 0.05); }
+.upload-box i { font-size: 24px; color: var(--muted); margin-bottom: 8px; }
+.upload-box span { font-size: 11px; font-weight: 600; color: var(--muted); }
+.prev-img { position: absolute; inset: 4px; z-index: 1; pointer-events: none; border-radius: 8px; overflow: hidden; }
 
 .detail-toolbar { display: flex; gap: 10px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; align-items: center; }
 .comment-item { padding: 16px; background: var(--surface2); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
@@ -1102,6 +1110,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="nav-tab active" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="nav-tab" id="nav-workorders-btn" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
       <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing</button>
+    <button class="nav-tab" id="nav-installation-btn" onclick="showPage('installation')"><i class="fas fa-tools"></i> Installation</button>
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="nav-tab" id="nav-tab-settings" onclick="showPage('settings')" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
@@ -1160,6 +1169,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="mobile-nav-item active" onclick="showPage('dashboard'); toggleMobileMenu();"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="mobile-nav-item" onclick="showPage('workorders'); toggleMobileMenu();"><i class="fas fa-clipboard-list"></i> Work Orders</button>
     <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing</button>
+    <button class="mobile-nav-item" onclick="showPage('installation'); toggleMobileMenu();"><i class="fas fa-tools"></i> Installation</button>
     <button class="mobile-nav-item" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="mobile-nav-item" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
@@ -1293,6 +1303,29 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <i class="fa-solid fa-file-pdf"></i> Export Dashboard (A4)
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="teamModal">
+  <div class="modal" style="max-width:400px;">
+    <button class="modal-close" onclick="closeModal('teamModal')">×</button>
+    <div class="modal-title" id="teamModalTitle">Add Installation Team</div>
+    <div class="form-grid" style="grid-template-columns:1fr;">
+       <div class="form-group"><label>Team Name</label><input type="text" id="tm-name" class="filter-input"></div>
+       <div class="form-group"><label>Supervisor</label><input type="text" id="tm-supervisor" class="filter-input"></div>
+       <div class="form-group"><label>Crew Size</label><input type="number" id="tm-size" class="filter-input"></div>
+       <div class="form-group"><label>Vehicle</label><input type="text" id="tm-vehicle" class="filter-input"></div>
+       <div class="form-group"><label>Capacity (Signs/Day)</label><input type="number" id="tm-capacity" class="filter-input"></div>
+       <div class="form-group"><label>Status</label>
+          <select id="tm-status" class="filter-input">
+             <option>Available</option><option>Working</option><option>Maintenance</option><option>Off Duty</option>
+          </select>
+       </div>
+    </div>
+    <div class="modal-footer">
+       <button class="btn btn-ghost btn-sm" onclick="closeModal('teamModal')">Cancel</button>
+       <button class="btn btn-primary btn-sm" id="save-team-btn" onclick="saveTeam()">Save Team</button>
     </div>
   </div>
 </div>
@@ -1872,6 +1905,31 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
+<div class="page" id="page-installation">
+  <div class="wrapper">
+    <header style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
+      <div>
+        <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;gap:12px;">
+          Installation Planning & Dispatch
+        </h2>
+        <p style="font-size:12px; color:var(--muted); margin-top:4px;">Manage site execution, team scheduling, and progress tracking</p>
+      </div>
+    </header>
+
+    <nav class="mfg-tabs-container" id="inst-tabs">
+      <button class="mfg-tab-btn active" onclick="switchInstTab('dashboard')">Dashboard</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('map')">Planning Map</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('teams')">Teams Module</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('programs')">Programs</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('calendar')">Calendar</button>
+    </nav>
+
+    <div id="inst-content">
+      <!-- Content loaded dynamically via switchInstTab -->
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-settings">
   <div class="wrapper">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
@@ -2155,11 +2213,51 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
     <div class="detail-pane" id="pane-installation">
       <div class="detail-section">
-        <div class="detail-section-title">Project Scheduling & Installation</div>
+        <div class="detail-section-title">Installation Planning & Progress</div>
+        <div class="detail-info-grid">
+          <div class="info-item"><label>Ready for Installation</label><span id="val-inst-ready">--</span><select id="det-inst-ready" class="filter-input"><option>No</option><option>Yes</option></select></div>
+          <div class="info-item"><label>Installation Status</label><span id="val-inst-status">--</span>
+            <select id="det-inst-status" class="filter-input">
+              <option>Pending</option><option>Planned</option><option>Assigned</option><option>On Site</option><option>Installed</option><option>QA Inspection</option><option>Completed</option><option>Returned</option>
+            </select>
+          </div>
+          <div class="info-item"><label>Assigned Team</label><span id="val-inst-team">--</span><input type="text" id="det-inst-team"></div>
+          <div class="info-item"><label>Planned Date</label><span id="val-inst-planned">--</span><input type="date" id="det-inst-planned"></div>
+          <div class="info-item"><label>Actual Date</label><span id="val-inst-actual">--</span><input type="date" id="det-inst-actual"></div>
+          <div class="info-item"><label>Target Finish</label><span id="val-target">--</span><input type="date" id="det-target" disabled></div>
+        </div>
+      </div>
+
+      <div class="detail-section" style="margin-top:24px;">
+        <div class="detail-section-title">Installation Photos</div>
+        <div id="inst-photo-gallery" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:12px;">
+           <div class="upload-box" onclick="triggerInstUpload('Before')">
+              <i class="fas fa-camera"></i>
+              <span>Before Installation</span>
+              <div id="img-prev-before" class="prev-img"></div>
+           </div>
+           <div class="upload-box" onclick="triggerInstUpload('During')">
+              <i class="fas fa-camera"></i>
+              <span>During Installation</span>
+              <div id="img-prev-during" class="prev-img"></div>
+           </div>
+           <div class="upload-box" onclick="triggerInstUpload('After')">
+              <i class="fas fa-camera"></i>
+              <span>After Installation</span>
+              <div id="img-prev-after" class="prev-img"></div>
+           </div>
+        </div>
+        <input type="file" id="inst-file-input" style="display:none" accept="image/*" onchange="handleInstPhotoUpload(event)">
+        <div style="margin-top:16px; display:flex; gap:10px;">
+           <button class="btn btn-primary btn-sm" onclick="generateCompletionCertificate(selectedWorkOrder)"><i class="fas fa-certificate"></i> Completion Certificate</button>
+        </div>
+      </div>
+
+      <div class="detail-section" style="margin-top:24px;">
+        <div class="detail-section-title">Project Scheduling</div>
         <div class="detail-info-grid">
           <div class="info-item"><label>Target Start Date</label><span id="val-start">--</span><input type="date" id="det-start"></div>
-          <div class="info-item"><label>Target Finish Date</label><span id="val-target">--</span><input type="date" id="det-target"></div>
-          <div class="info-item"><label>Installation Date</label><span id="val-install">--</span><input type="date" id="det-install"></div>
+          <div class="info-item"><label>Installation Date (Legacy)</label><span id="val-install">--</span><input type="date" id="det-install"></div>
           <div class="info-item"><label>Status Update Date</label><span id="val-update-date">--</span><input type="date" id="det-update-date" readonly></div>
           <div class="info-item" style="grid-column: span 2;"><label>QBC Comments</label><span id="val-qbc-comments">--</span><textarea id="det-qbc-comments" rows="3"></textarea></div>
         </div>
@@ -2295,6 +2393,14 @@ let columnFilters = {};
 let columnSearches = {};
 let mfgShowDetails = false;
 let currentMfgTab = 'active';
+
+// Installation State
+let installationRecords = [];
+let installationTeams = [];
+let installationPhotos = [];
+let instMap = null;
+let currentInstTab = 'dashboard';
+let optimizedRoutes = {};
 
 // INITIALIZATION
 window.addEventListener('paste', async (e) => {
@@ -2555,11 +2661,33 @@ async function fetchAllWorkOrders() {
     page++;
   }
 
+  // Fetch Installation Records
+  installationRecords = [];
+  page = 0; moreRows = true;
+  while (moreRows) {
+    const { data, error } = await supabaseClient.from('installation_records').select('*').range(page * pageSize, (page + 1) * pageSize - 1);
+    if (error) { console.warn("Installation records fetch failed:", error); break; }
+    installationRecords = installationRecords.concat(data);
+    if (data.length < pageSize) moreRows = false;
+    page++;
+  }
+
+  // Fetch Installation Teams
+  const { data: teamData, error: teamError } = await supabaseClient.from('installation_teams').select('*');
+  if (!teamError && teamData) installationTeams = teamData;
+
+  // Fetch Installation Photos
+  const { data: instPhotos, error: instPhotoError } = await supabaseClient.from('installation_photos').select('*');
+  if (!instPhotoError && instPhotos) installationPhotos = instPhotos;
+
   // Merge
   const mfgMap = new Map(allMFG.map(m => [m.work_order_number, m]));
+  const instRecMap = new Map(installationRecords.map(r => [r.work_order, r]));
+
   return allWO.map(wo => ({
     ...wo,
-    ...(mfgMap.get(wo.work_order) || {})
+    ...(mfgMap.get(wo.work_order) || {}),
+    ...(instRecMap.get(wo.work_order) || {})
   }));
 }
 
@@ -2635,6 +2763,14 @@ function switchMfgTab(tab) {
   if (activeBtn) activeBtn.classList.toggle('active', tab === 'active');
   if (compBtn) compBtn.classList.toggle('active', tab === 'completed');
   applyManufacturingFilters();
+}
+
+function switchInstTab(tab) {
+  currentInstTab = tab;
+  document.querySelectorAll('#inst-tabs .mfg-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${tab}'`));
+  });
+  updateInstallationUI();
 }
 
 function buildColumnFilters(tableId, data) {
@@ -2921,6 +3057,12 @@ async function fetchData() {
       Month: r.month,
       CompletionStatus: r.completion_status,
       Remaining: r.remaining,
+      ReadyForInstallation: r.ready_for_installation || false,
+      InstallationStatus: r.installation_status || 'Pending',
+      AssignedTeam: r.assigned_team || '',
+      AssignedDate: r.assigned_date || '',
+      PlannedInstallationDate: r.planned_installation_date || '',
+      ActualInstallationDate: r.actual_installation_date || '',
       Location: r.location,
       Lat: r.latitude,
       Lng: r.longitude,
@@ -3048,7 +3190,13 @@ async function saveWorkOrderToSupabase(wo) {
     last_modified_at: new Date().toISOString(),
     priority: wo.Priority || 'Normal',
     month: monthVal,
-    completion_status: getCompletionStatusLabel(wo)
+    completion_status: getCompletionStatusLabel(wo),
+    ready_for_installation: wo.ReadyForInstallation || false,
+    installation_status: wo.InstallationStatus || 'Pending',
+    assigned_team: wo.AssignedTeam || null,
+    assigned_date: wo.AssignedDate || null,
+    planned_installation_date: wo.PlannedInstallationDate || null,
+    actual_installation_date: wo.ActualInstallationDate || null
   };
 
   const mfgPayload = {
@@ -3265,6 +3413,9 @@ function showPage(id) {
   }
   if(id === 'manufacturing') {
     applyManufacturingFilters();
+  }
+  if(id === 'installation') {
+    updateInstallationUI();
   }
 }
 
@@ -3797,6 +3948,7 @@ function renderManufacturingTable() {
           <textarea class="filter-input" style="min-width:120px; height:32px; font-size:11px; padding:4px;" 
             onblur="updateFabDetails('${r.WorkOrder}', this.value)"
             onkeydown="if(event.ctrlKey && event.key==='Enter') { this.blur(); }">${r.FabDetails||''}</textarea>
+          <button class="btn btn-primary btn-xs" onclick="dispatchToInstallation('${r.WorkOrder}')" title="Dispatch to Installation"><i class="fas fa-paper-plane"></i></button>
         </div>
       </td>
       <td>${photoCell}</td>
@@ -3819,6 +3971,22 @@ function renderManufacturingPagination() {
 }
 function gotoManufacturingPage(p) { fabCurrentPage = p; renderManufacturingTable(); }
 
+async function dispatchToInstallation(woId) {
+  const wo = allData.find(d => d.WorkOrder === woId);
+  if (!wo) return;
+
+  wo.ReadyForInstallation = true;
+  wo.InstallationStatus = 'Planned';
+
+  try {
+    await saveWorkOrderToSupabase(wo);
+    showToast(`Work Order #${woId} dispatched to Installation Planning`);
+    applyManufacturingFilters();
+  } catch(e) {
+    showToast("Dispatch failed", "error");
+  }
+}
+
 async function updateFabStatus(woId, status) {
   const wo = allData.find(d => d.WorkOrder === woId);
   if (!wo) return;
@@ -3829,6 +3997,9 @@ async function updateFabStatus(woId, status) {
     addNotification(`Manufacturing status changed to ${status}`, woId, 'manufacturing');
     showToast(`Status updated to ${status}`);
     if (status === 'Done') {
+       wo.ReadyForInstallation = true;
+       wo.InstallationStatus = 'Planned';
+       await saveWorkOrderToSupabase(wo);
        applyManufacturingFilters(); // Remove from view or move to completed
     }
   } catch (err) {
@@ -3976,6 +4147,11 @@ async function openDetail(woId) {
     'media': wo.MediaAnnouncement || '',
     'roadcat': wo.RoadCatg || '',
     'fab': wo.FabStatus || 'Pending',
+    'inst-ready': wo.ReadyForInstallation ? 'Yes' : 'No',
+    'inst-status': wo.InstallationStatus || 'Pending',
+    'inst-team': wo.AssignedTeam || '',
+    'inst-planned': wo.PlannedInstallationDate || '',
+    'inst-actual': wo.ActualInstallationDate || '',
     'posttype': wo.PostType || '',
     'postheight': wo.PostHeight || '',
     'foundsize': wo.FoundSize || '',
@@ -4023,11 +4199,66 @@ async function openDetail(woId) {
 
   renderDetailAttachments(woId);
   loadComments(woId);
+  renderInstPhotos(woId);
   
   // Update UI mode
   document.getElementById('detail-edit-btn').style.display = 'block';
   document.getElementById('detail-save-btn').style.display = 'none';
   document.getElementById('detail-cancel-btn').style.display = 'none';
+}
+
+let currentUploadCategory = '';
+
+function triggerInstUpload(category) {
+  currentUploadCategory = category;
+  document.getElementById('inst-file-input').click();
+}
+
+async function handleInstPhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file || !selectedWorkOrder) return;
+
+  showToast(`Uploading ${currentUploadCategory} photo...`);
+
+  try {
+    const fileName = `inst_${selectedWorkOrder}_${currentUploadCategory}_${Date.now()}.png`;
+    const { data, error } = await supabaseClient.storage
+      .from('installation-photos')
+      .upload(fileName, file);
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabaseClient.storage
+      .from('installation-photos')
+      .getPublicUrl(fileName);
+
+    await supabaseClient.from('installation_photos').insert({
+      work_order: selectedWorkOrder,
+      category: currentUploadCategory,
+      url: publicUrl
+    });
+
+    showToast("Photo uploaded successfully");
+    renderInstPhotos(selectedWorkOrder);
+  } catch(err) {
+    console.error("Inst photo upload failed:", err);
+    showToast("Upload failed", "error");
+  }
+}
+
+function renderInstPhotos(woId) {
+  const photos = installationPhotos.filter(p => String(p.work_order) === String(woId));
+  ['Before', 'During', 'After'].forEach(cat => {
+    const p = photos.find(x => x.category === cat);
+    const prev = document.getElementById(`img-prev-${cat.toLowerCase()}`);
+    if (prev) {
+      if (p) {
+        prev.innerHTML = `<img src="${p.url}" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">`;
+      } else {
+        prev.innerHTML = '';
+      }
+    }
+  });
 }
 
 function switchDetailTab(tabId) {
@@ -4119,6 +4350,11 @@ async function saveDetailChanges() {
     MediaAnnouncement: document.getElementById('det-media').value,
     RoadCatg: document.getElementById('det-roadcat').value,
     FabStatus: document.getElementById('det-fab').value,
+    ReadyForInstallation: document.getElementById('det-inst-ready').value === 'Yes',
+    InstallationStatus: document.getElementById('det-inst-status').value,
+    AssignedTeam: document.getElementById('det-inst-team').value,
+    PlannedInstallationDate: document.getElementById('det-inst-planned').value,
+    ActualInstallationDate: document.getElementById('det-inst-actual').value,
     PostType: document.getElementById('det-posttype').value,
     PostHeight: document.getElementById('det-postheight').value,
     FoundSize: document.getElementById('det-foundsize').value,
@@ -5547,6 +5783,265 @@ function loadMarkers(statusFilter = null, isVisible = true) {
   if (countEl) countEl.textContent = `${allData.length} items`;
 }
 
+function initInstMap() {
+  if (instMap) return;
+  instMap = L.map('instMap', { zoomControl: true, maxZoom: 22 }).setView([25.3548, 51.1839], 10);
+  L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 22, attribution: 'Google' }).addTo(instMap);
+
+  if (supabaseClient) {
+    supabaseClient.from('project_boundaries').select('*').limit(1).maybeSingle().then(({data}) => {
+      if (data && data.geojson) {
+        L.geoJSON(data.geojson, { style: { color: '#00c8ff', weight: 2, fillOpacity: 0.05 } }).addTo(instMap);
+      }
+    });
+  }
+
+  loadInstMarkers();
+}
+
+function loadInstMarkers() {
+  if (!instMap) return;
+
+  // Clear existing markers
+  instMap.eachLayer(l => {
+    if (l instanceof L.Marker) instMap.removeLayer(l);
+  });
+
+  const today = new Date();
+  const ready = allData.filter(r => r.ReadyForInstallation && r.Lat && r.Lng);
+
+  ready.forEach(r => {
+    let color = '#64748b'; // Unassigned
+    if (r.AssignedTeam && r.AssignedTeam !== '') color = '#22c55e'; // Assigned
+    if (r.InstallationStatus === 'Planned') color = '#f59e0b'; // Planned
+    if (r.TargetFinish && new Date(r.TargetFinish) < today && r.InstallationStatus !== 'Completed') color = '#ef4444'; // Overdue
+
+    const marker = L.marker([r.Lat, r.Lng], {
+      icon: L.divIcon({
+        className: 'inst-marker',
+        html: `<div style="background:${color}; width:16px; height:16px; border:2px solid white; border-radius:50%; box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      })
+    }).addTo(instMap);
+
+    marker.bindPopup(`
+      <div style="font-family:'Inter',sans-serif; min-width:200px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="color:var(--accent);">#${r.WorkOrder}</strong>
+          <span class="status-badge badge-${r.InstallationStatus}" style="font-size:10px;">${r.InstallationStatus}</span>
+        </div>
+        <div style="font-size:11px; font-weight:600; margin-bottom:4px;">${r.Description || 'No description'}</div>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:8px;"><i class="fas fa-map-marker-alt"></i> ${r.Location}</div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:10px; margin-bottom:12px; padding:8px; background:var(--surface2); border-radius:6px;">
+          <div><label style="color:var(--muted); display:block;">Finish Date</label>${formatDate(r.TargetFinish)}</div>
+          <div><label style="color:var(--muted); display:block;">Priority</label>${r.Priority || 'Normal'}</div>
+          <div style="grid-column: span 2;"><label style="color:var(--muted); display:block;">Team</label>${r.AssignedTeam || 'Unassigned'}</div>
+        </div>
+
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-primary btn-xs flex-1" onclick="openDetail('${r.WorkOrder}')">View Details</button>
+          <button class="btn btn-ghost btn-xs" onclick="quickAssign('${r.WorkOrder}')"><i class="fas fa-user-plus"></i></button>
+        </div>
+      </div>
+    `);
+  });
+}
+
+function quickAssign(woId) {
+  const teams = installationTeams.map(t => `<option value="${t.team_name}">${t.team_name}</option>`).join('');
+  const content = `
+    <div class="form-group">
+      <label>Select Team</label>
+      <select id="quick-team-sel" class="filter-input">${teams}</select>
+    </div>
+    <div style="margin-top:12px; display:flex; gap:8px;">
+      <button class="btn btn-primary btn-sm flex-1" onclick="processQuickAssign('${woId}')">Assign</button>
+      <button class="btn btn-ghost btn-sm" onclick="Swal.close()">Cancel</button>
+    </div>
+  `;
+
+  // Using Swal if available, otherwise fallback
+  if (window.Swal) {
+    Swal.fire({
+      title: 'Assign Team',
+      html: content,
+      showConfirmButton: false
+    });
+  } else {
+    const team = prompt("Enter Team Name:", installationTeams[0]?.team_name || "");
+    if (team) processQuickAssign(woId, team);
+  }
+}
+
+async function autoGroupNearby() {
+  const ready = allData.filter(r => r.ReadyForInstallation && !r.AssignedTeam && r.Lat && r.Lng);
+  if (ready.length === 0) {
+    showToast("No unassigned work orders ready for installation", "amber");
+    return;
+  }
+
+  const availableTeams = installationTeams.filter(t => t.status === 'Available');
+  if (availableTeams.length === 0) {
+    showToast("No available teams for assignment", "error");
+    return;
+  }
+
+  showToast(`Grouping ${ready.length} locations for ${availableTeams.length} teams...`);
+
+  // Basic K-Means implementation
+  let centroids = availableTeams.slice(0, ready.length).map((t, i) => ({
+    lat: ready[i].Lat,
+    lng: ready[i].Lng,
+    team: t.team_name
+  }));
+
+  const iterations = 5;
+  let assignments = new Map();
+
+  for (let iter = 0; iter < iterations; iter++) {
+    assignments.clear();
+    ready.forEach(r => {
+      let minDist = Infinity;
+      let closest = null;
+      centroids.forEach(c => {
+        const d = Math.sqrt(Math.pow(r.Lat - c.lat, 2) + Math.pow(r.Lng - c.lng, 2));
+        if (d < minDist) {
+          minDist = d;
+          closest = c.team;
+        }
+      });
+      if (!assignments.has(closest)) assignments.set(closest, []);
+      assignments.get(closest).push(r);
+    });
+
+    // Update centroids
+    centroids.forEach(c => {
+      const assigned = assignments.get(c.team);
+      if (assigned && assigned.length > 0) {
+        c.lat = assigned.reduce((sum, r) => sum + r.Lat, 0) / assigned.length;
+        c.lng = assigned.reduce((sum, r) => sum + r.Lng, 0) / assigned.length;
+      }
+    });
+  }
+
+  // Bulk Save
+  try {
+    let updates = [];
+    for (const [team, orders] of assignments.entries()) {
+      for (const wo of orders) {
+        wo.AssignedTeam = team;
+        wo.AssignedDate = new Date().toISOString().split('T')[0];
+        wo.InstallationStatus = 'Assigned';
+
+        updates.push({
+           work_order: wo.WorkOrder,
+           assigned_team: team,
+           assigned_date: wo.AssignedDate,
+           installation_status: 'Assigned'
+        });
+      }
+    }
+
+    if (updates.length > 0) {
+      const { error } = await supabaseClient
+        .from('work_orders')
+        .upsert(updates, { onConflict: 'work_order' });
+      if (error) throw error;
+    }
+
+    showToast("Auto-grouping complete");
+    loadInstMarkers();
+    updateInstKPIs();
+  } catch (e) {
+    showToast("Bulk assignment failed", "error");
+  }
+}
+
+function optimizeAllRoutes() {
+  const ready = allData.filter(r => r.ReadyForInstallation && r.AssignedTeam && r.Lat && r.Lng && r.InstallationStatus !== 'Completed');
+  const teams = [...new Set(ready.map(r => r.AssignedTeam))];
+
+  if (teams.length === 0) {
+    showToast("No assigned work orders to optimize", "amber");
+    return;
+  }
+
+  optimizedRoutes = {};
+
+  // Clear previous route lines from map
+  if (instMap) {
+    instMap.eachLayer(l => { if (l instanceof L.Polyline && !l.isBoundary) instMap.removeLayer(l); });
+  }
+
+  teams.forEach(team => {
+    const teamOrders = ready.filter(r => r.AssignedTeam === team);
+    if (teamOrders.length < 1) return;
+
+    let unvisited = [...teamOrders];
+    let route = [unvisited.shift()];
+
+    while (unvisited.length > 0) {
+      let current = route[route.length - 1];
+      let closestIdx = 0;
+      let minDist = Infinity;
+
+      unvisited.forEach((r, idx) => {
+        const d = getHaversineDist(current.Lat, current.Lng, r.Lat, r.Lng);
+        if (d < minDist) {
+          minDist = d;
+          closestIdx = idx;
+        }
+      });
+      route.push(unvisited.splice(closestIdx, 1)[0]);
+    }
+
+    optimizedRoutes[team] = route;
+
+    // Visualize on map
+    if (instMap && route.length > 1) {
+       const latlngs = route.map(r => [r.Lat, r.Lng]);
+       const color = '#' + Math.floor(Math.random()*16777215).toString(16);
+       L.polyline(latlngs, { color: color, weight: 3, opacity: 0.6, dashArray: '10, 10' }).addTo(instMap);
+    }
+  });
+
+  showToast("Routes optimized and visualized");
+  updateProgramContent();
+}
+
+function getHaversineDist(lat1, lon1, lat2, lon2) {
+  const R = 6371; // km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+async function processQuickAssign(woId, manualTeam = null) {
+  const team = manualTeam || document.getElementById('quick-team-sel').value;
+  const wo = allData.find(r => r.WorkOrder === woId);
+  if (!wo) return;
+
+  wo.AssignedTeam = team;
+  wo.AssignedDate = new Date().toISOString().split('T')[0];
+  wo.InstallationStatus = 'Assigned';
+
+  try {
+    await saveWorkOrderToSupabase(wo);
+    showToast(`Assigned ${woId} to ${team}`);
+    if (window.Swal) Swal.close();
+    loadInstMarkers();
+    updateInstKPIs();
+  } catch(e) {
+    showToast("Assignment failed", "error");
+  }
+}
+
 async function loadProjectBoundary() {
   if (!supabaseClient) return;
   try {
@@ -6822,8 +7317,28 @@ function openFabModal(wo) {
       </table>
     </div>
 
+    <div id="fab-qr" style="position:absolute; bottom:40px; right:40px;"></div>
+
   </div>`;
+
+  setTimeout(() => {
+    new QRCode(document.getElementById("fab-qr"), {
+      text: window.location.href + "?wo=" + r.WorkOrder,
+      width: 80,
+      height: 80
+    });
+  }, 100);
+
   openModal('fabModal');
+}
+
+async function getFabPDFData(wo) {
+   openFabModal(wo);
+   await new Promise(r => setTimeout(r, 500)); // Wait for QR and layout
+   const el = document.getElementById('fabDoc');
+   const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+   closeModal('fabModal');
+   return canvas.toDataURL('image/jpeg', 0.95);
 }
 
 function exportPDF() {
@@ -7101,6 +7616,161 @@ function exportTableCSV(mode = 'all') {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+async function generateTeamPackage(teamName) {
+  const ready = allData.filter(r => r.AssignedTeam === teamName && r.InstallationStatus !== 'Completed');
+  if (ready.length === 0) { showToast("No work orders assigned to this team", "amber"); return; }
+
+  showToast(`Generating Installation Package for ${teamName}...`);
+
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+  const mainPdf = await PDFDocument.create();
+  const font = await mainPdf.embedFont(StandardFonts.HelveticaBold);
+
+  // 1. Cover Page
+  const cover = mainPdf.addPage([595.28, 841.89]); // A4
+  cover.drawText('TEAM INSTALLATION PACKAGE', { x: 50, y: 750, size: 24, font, color: rgb(0, 0.49, 1) });
+  cover.drawText(`Team: ${teamName}`, { x: 50, y: 700, size: 16 });
+  cover.drawText(`Date: ${formatDate(new Date())}`, { x: 50, y: 670, size: 14 });
+  cover.drawText(`Total Work Orders: ${ready.length}`, { x: 50, y: 640, size: 14 });
+
+  cover.drawText('DAILY PROGRAM:', { x: 50, y: 580, size: 14, font });
+  let y = 550;
+  ready.forEach((r, i) => {
+    cover.drawText(`${i+1}. WO #${r.WorkOrder} - ${r.Location}`, { x: 60, y, size: 11 });
+    y -= 20;
+  });
+
+  // 2. Individual WO Pages
+  for (const r of ready) {
+     try {
+       const imgData = await getFabPDFData(r.WorkOrder);
+       // Strip data:image/jpeg;base64, prefix
+       const base64Data = imgData.split(',')[1];
+       const img = await mainPdf.embedJpg(base64Data);
+       const page = mainPdf.addPage([595.28, 841.89]);
+       page.drawImage(img, { x: 0, y: 0, width: 595.28, height: 841.89 });
+     } catch (e) {
+       console.error(`Failed to embed WO ${r.WorkOrder}`, e);
+     }
+  }
+
+  const pdfBytes = await mainPdf.save();
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${teamName.replace(/\s+/g, '_')}_Package.pdf`;
+  a.click();
+  showToast("Package generated successfully");
+}
+
+async function exportTeamKMZ(teamName) {
+  const ready = allData.filter(r => r.AssignedTeam === teamName && r.Lat && r.Lng);
+  if (ready.length === 0) { showToast("No locations for this team", "amber"); return; }
+
+  let kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>${teamName} Installation Map</name>`;
+
+  ready.forEach(r => {
+    kml += `
+    <Placemark>
+      <name>WO: ${r.WorkOrder}</name>
+      <description>
+        <![CDATA[
+          <div style="font-family:Sans-serif; padding:10px;">
+            <h3>#${r.WorkOrder}</h3>
+            <p><b>Description:</b> ${r.Description || '—'}</p>
+            <p><b>Target Date:</b> ${formatDate(r.TargetFinish)}</p>
+            <p><b>Location:</b> ${r.Location || '—'}</p>
+            <p><b>Status:</b> ${r.InstallationStatus}</p>
+          </div>
+        ]]>
+      </description>
+      <Point><coordinates>${r.Lng},${r.Lat},0</coordinates></Point>
+    </Placemark>`;
+  });
+
+  kml += `</Document></kml>`;
+
+  const zip = new JSZip();
+  zip.file("doc.kml", kml);
+  const content = await zip.generateAsync({type:"blob"});
+
+  const url = URL.createObjectURL(content);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${teamName.replace(/\s+/g, '_')}.kmz`;
+  a.click();
+  showToast(`${teamName} KMZ Exported`);
+}
+
+async function generateCompletionCertificate(woId) {
+  const wo = allData.find(r => String(r.WorkOrder) === String(woId));
+  if (!wo) return;
+
+  const photos = installationPhotos.filter(p => String(p.work_order) === String(woId));
+  const before = photos.find(p => p.category === 'Before');
+  const after = photos.find(p => p.category === 'After');
+
+  if (!after) { showToast("After installation photo is required for certificate", "amber"); return; }
+
+  showToast("Generating Completion Certificate...");
+
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+  const pdf = await PDFDocument.create();
+  const font = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const page = pdf.addPage([595.28, 841.89]);
+
+  page.drawText('INSTALLATION COMPLETION CERTIFICATE', { x: 50, y: 780, size: 20, font, color: rgb(0, 0.49, 1) });
+
+  let y = 730;
+  const details = [
+    ['Work Order', wo.WorkOrder],
+    ['Location', wo.Location || '—'],
+    ['Team', wo.AssignedTeam || '—'],
+    ['Actual Install Date', wo.ActualInstallationDate || formatDate(new Date())],
+    ['GPS Coordinates', `${wo.Lat}, ${wo.Lng}`]
+  ];
+
+  details.forEach(([label, val]) => {
+    page.drawText(`${label}:`, { x: 50, y, size: 12, font });
+    page.drawText(String(val), { x: 180, y, size: 12 });
+    y -= 25;
+  });
+
+  // Images
+  page.drawText('Before Installation:', { x: 50, y: 550, size: 14, font });
+  if (before) {
+    try {
+      const resp = await fetch(before.url);
+      const bytes = await resp.arrayBuffer();
+      // Detect if PNG or JPG
+      const img = before.url.toLowerCase().endsWith('.png') ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
+      page.drawImage(img, { x: 50, y: 340, width: 220, height: 200 });
+    } catch(e) { console.warn("Could not embed before photo", e); }
+  }
+
+  page.drawText('After Installation:', { x: 300, y: 550, size: 14, font });
+  if (after) {
+    try {
+      const resp = await fetch(after.url);
+      const bytes = await resp.arrayBuffer();
+      const img = after.url.toLowerCase().endsWith('.png') ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
+      page.drawImage(img, { x: 300, y: 340, width: 220, height: 200 });
+    } catch(e) { console.warn("Could not embed after photo", e); }
+  }
+
+  const pdfBytes = await pdf.save();
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Certificate_WO${wo.WorkOrder}.pdf`;
+  a.click();
 }
 
 // PERMISSIONS & ROLES
@@ -7729,6 +8399,404 @@ function setupNotifListener() {
        }
     })
     .subscribe();
+
+  // Listen for Installation Records changes
+  supabaseClient
+    .channel('public:installation_records')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_records' }, payload => {
+       console.log("Installation Record change detected:", payload);
+       const d = payload.new;
+       if (payload.eventType === 'INSERT') {
+         installationRecords.push(d);
+       } else if (payload.eventType === 'UPDATE') {
+         const idx = installationRecords.findIndex(r => r.id === d.id);
+         if (idx !== -1) installationRecords[idx] = d;
+       } else if (payload.eventType === 'DELETE') {
+         installationRecords = installationRecords.filter(r => r.id !== payload.old.id);
+       }
+       updateInstallationUI();
+    })
+    .subscribe();
+
+  // Listen for Installation Teams changes
+  supabaseClient
+    .channel('public:installation_teams')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_teams' }, payload => {
+       console.log("Installation Team change detected:", payload);
+       const d = payload.new;
+       if (payload.eventType === 'INSERT') {
+         installationTeams.push(d);
+       } else if (payload.eventType === 'UPDATE') {
+         const idx = installationTeams.findIndex(t => t.id === d.id);
+         if (idx !== -1) installationTeams[idx] = d;
+       } else if (payload.eventType === 'DELETE') {
+         installationTeams = installationTeams.filter(t => t.id !== payload.old.id);
+       }
+       updateInstallationUI();
+    })
+    .subscribe();
+
+  // Listen for Installation Photos changes
+  supabaseClient
+    .channel('public:installation_photos')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_photos' }, payload => {
+       console.log("Installation Photo change detected:", payload);
+       const d = payload.new;
+       if (payload.eventType === 'INSERT') {
+         installationPhotos.push(d);
+       } else if (payload.eventType === 'DELETE') {
+         installationPhotos = installationPhotos.filter(p => p.id !== payload.old.id);
+       }
+       updateInstallationUI();
+    })
+    .subscribe();
+}
+
+function updateInstallationUI() {
+  const content = document.getElementById('inst-content');
+  if (!content) return;
+
+  if (currentInstTab === 'dashboard') {
+    renderInstDashboard(content);
+  } else if (currentInstTab === 'map') {
+    renderInstMap(content);
+  } else if (currentInstTab === 'teams') {
+    renderInstTeams(content);
+  } else if (currentInstTab === 'programs') {
+    renderInstPrograms(content);
+  } else if (currentInstTab === 'calendar') {
+    renderInstCalendar(content);
+  }
+}
+
+function renderInstDashboard(container) {
+  container.innerHTML = `
+    <div class="dash-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+       <div class="kpi-card total"><div class="kpi-label">Ready for Installation</div><div class="kpi-value" id="kpi-ready">0</div></div>
+       <div class="kpi-card on-time"><div class="kpi-label">Assigned to Team</div><div class="kpi-value" id="kpi-assigned">0</div></div>
+       <div class="kpi-card pending"><div class="kpi-label">Pending Assignment</div><div class="kpi-value" id="kpi-pending">0</div></div>
+       <div class="kpi-card breached"><div class="kpi-label">Completed Today</div><div class="kpi-value" id="kpi-comp-today">0</div></div>
+       <div class="kpi-card failed"><div class="kpi-label">Overdue Installations</div><div class="kpi-value" id="kpi-overdue">0</div></div>
+    </div>
+    <div class="dash-row" style="margin-top:24px; display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+       <div class="dash-card">
+          <div class="dash-card-title">Upcoming Target Finish Dates</div>
+          <div class="table-wrap" style="max-height:400px; overflow-y:auto;">
+             <table class="main-table">
+                <thead><tr><th>WO</th><th>Location</th><th>Finish Date</th><th>Team</th><th>Status</th></tr></thead>
+                <tbody id="upcoming-inst-list"></tbody>
+             </table>
+          </div>
+       </div>
+       <div class="dash-card">
+          <div class="dash-card-title">Team Capacity Monitoring</div>
+          <div id="team-capacity-list"></div>
+       </div>
+    </div>
+  `;
+  updateInstKPIs();
+}
+
+function updateInstKPIs() {
+  const ready = allData.filter(r => r.ReadyForInstallation);
+  const assigned = ready.filter(r => r.AssignedTeam && r.AssignedTeam !== '');
+  const pending = ready.filter(r => !r.AssignedTeam || r.AssignedTeam === '');
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const compToday = allData.filter(r => r.ActualInstallationDate === todayStr);
+
+  const today = new Date();
+  const overdue = ready.filter(r => r.TargetFinish && new Date(r.TargetFinish) < today && r.InstallationStatus !== 'Completed');
+
+  if(document.getElementById('kpi-ready')) document.getElementById('kpi-ready').textContent = ready.length;
+  if(document.getElementById('kpi-assigned')) document.getElementById('kpi-assigned').textContent = assigned.length;
+  if(document.getElementById('kpi-pending')) document.getElementById('kpi-pending').textContent = pending.length;
+  if(document.getElementById('kpi-comp-today')) document.getElementById('kpi-comp-today').textContent = compToday.length;
+  if(document.getElementById('kpi-overdue')) document.getElementById('kpi-overdue').textContent = overdue.length;
+
+  const upcomingTbody = document.getElementById('upcoming-inst-list');
+  if(upcomingTbody) {
+    const upcoming = ready.filter(r => r.InstallationStatus !== 'Completed').sort((a,b) => new Date(a.TargetFinish) - new Date(b.TargetFinish)).slice(0, 10);
+    upcomingTbody.innerHTML = upcoming.map(r => `
+       <tr onclick="openDetail('${r.WorkOrder}')" style="cursor:pointer;">
+          <td><span class="wo-num">${r.WorkOrder}</span></td>
+          <td>${r.Location}</td>
+          <td>${formatDate(r.TargetFinish)}</td>
+          <td>${r.AssignedTeam || '—'}</td>
+          <td><span class="status-badge badge-${r.InstallationStatus}">${r.InstallationStatus}</span></td>
+       </tr>
+    `).join('');
+  }
+
+  const capacityCont = document.getElementById('team-capacity-list');
+  if(capacityCont) {
+    if(installationTeams.length === 0) {
+      capacityCont.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted); font-size:12px;">No teams configured</div>';
+    } else {
+      capacityCont.innerHTML = installationTeams.map(t => {
+        const assignedCount = ready.filter(r => r.AssignedTeam === t.team_name && r.InstallationStatus !== 'Completed').length;
+        const pct = Math.min(100, Math.round((assignedCount / t.capacity_per_day) * 100));
+        const color = pct > 100 ? 'var(--red)' : (pct > 80 ? 'var(--amber)' : 'var(--green)');
+        return `
+          <div style="margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;">
+              <span style="font-weight:600;">${t.team_name}</span>
+              <span style="color:var(--muted);">${assignedCount} / ${t.capacity_per_day} Signs</span>
+            </div>
+            <div style="height:6px; background:var(--surface2); border-radius:100px; overflow:hidden;">
+              <div style="height:100%; width:${pct}%; background:${color};"></div>
+            </div>
+            ${pct >= 100 ? '<div style="font-size:10px; color:var(--red); margin-top:4px;"><i class="fas fa-exclamation-triangle"></i> Team overloaded</div>' : ''}
+          </div>
+        `;
+      }).join('');
+    }
+  }
+}
+
+function renderInstMap(container) {
+  container.innerHTML = `
+    <div style="height: calc(100vh - 250px); position: relative; border-radius:16px; overflow:hidden; border:1px solid var(--border);">
+       <div id="instMap" style="height: 100%; width: 100%;"></div>
+       <div style="position:absolute; top:20px; right:20px; z-index:1000; display:flex; flex-direction:column; gap:10px;">
+          <button class="btn btn-primary" onclick="autoGroupNearby()"><i class="fas fa-object-group"></i> Auto Group Nearby</button>
+          <button class="btn btn-ghost" style="background:var(--surface); border:1px solid var(--border);" onclick="optimizeAllRoutes()"><i class="fas fa-route"></i> Optimize All Routes</button>
+       </div>
+       <div id="inst-map-legend" style="position:absolute; bottom:20px; left:20px; z-index:1000; background:var(--surface); padding:12px; border-radius:8px; border:1px solid var(--border); font-size:11px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="width:12px; height:12px; border-radius:50%; background:#22c55e;"></span> Assigned</div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></span> Planned</div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></span> Overdue</div>
+          <div style="display:flex; align-items:center; gap:8px;"><span style="width:12px; height:12px; border-radius:50%; background:#64748b;"></span> Unassigned</div>
+       </div>
+    </div>
+  `;
+  setTimeout(initInstMap, 100);
+}
+
+function renderInstTeams(container) {
+  container.innerHTML = `
+    <div class="dash-card">
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div class="dash-card-title">Installation Teams Management</div>
+          <button class="btn btn-primary btn-sm" onclick="openAddTeamModal()"><i class="fas fa-plus"></i> Add Team</button>
+       </div>
+       <div class="table-wrap">
+          <table class="main-table">
+             <thead><tr><th>Team</th><th>Supervisor</th><th>Crew Size</th><th>Vehicle</th><th>Capacity/Day</th><th>Status</th><th>Actions</th></tr></thead>
+             <tbody id="inst-teams-list"></tbody>
+          </table>
+       </div>
+    </div>
+  `;
+  updateTeamsList();
+}
+
+function updateTeamsList() {
+  const tbody = document.getElementById('inst-teams-list');
+  if(!tbody) return;
+  tbody.innerHTML = installationTeams.map(t => `
+     <tr>
+        <td style="font-weight:700; color:var(--accent);">${t.team_name}</td>
+        <td>${t.supervisor}</td>
+        <td>${t.crew_size}</td>
+        <td>${t.vehicle}</td>
+        <td>${t.capacity_per_day} Signs</td>
+        <td><span class="status-badge" style="background:var(--surface2); color:var(--text);">${t.status}</span></td>
+        <td>
+           <div style="display:flex; gap:4px;">
+              <button class="btn btn-ghost btn-xs" onclick="editTeam('${t.id}')" title="Edit Team"><i class="fas fa-edit"></i></button>
+              <button class="btn btn-ghost btn-xs" onclick="generateTeamPackage('${t.team_name}')" title="PDF Package"><i class="fas fa-file-pdf"></i></button>
+              <button class="btn btn-ghost btn-xs" onclick="exportTeamKMZ('${t.team_name}')" title="Export KMZ"><i class="fas fa-map-marked-alt"></i></button>
+              <button class="btn btn-ghost btn-xs" style="color:var(--red);" onclick="deleteTeam('${t.id}')" title="Delete Team"><i class="fas fa-trash"></i></button>
+           </div>
+        </td>
+     </tr>
+  `).join('');
+}
+
+function renderInstPrograms(container) {
+  container.innerHTML = `
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+       <div class="dash-card">
+          <div class="dash-card-title">Daily Installation Program</div>
+          <div id="daily-program-content"></div>
+       </div>
+       <div class="dash-card">
+          <div class="dash-card-title">Weekly Overview</div>
+          <div id="weekly-program-content"></div>
+       </div>
+    </div>
+  `;
+  updateProgramContent();
+}
+
+let editingTeamId = null;
+
+function openAddTeamModal() {
+  editingTeamId = null;
+  document.getElementById('teamModalTitle').textContent = 'Add Installation Team';
+  document.getElementById('tm-name').value = '';
+  document.getElementById('tm-supervisor').value = '';
+  document.getElementById('tm-size').value = '5';
+  document.getElementById('tm-vehicle').value = '';
+  document.getElementById('tm-capacity').value = '10';
+  document.getElementById('tm-status').value = 'Available';
+  openModal('teamModal');
+}
+
+function editTeam(id) {
+  const team = installationTeams.find(t => String(t.id) === String(id));
+  if(!team) return;
+  editingTeamId = id;
+  document.getElementById('teamModalTitle').textContent = 'Edit Installation Team';
+  document.getElementById('tm-name').value = team.team_name;
+  document.getElementById('tm-supervisor').value = team.supervisor;
+  document.getElementById('tm-size').value = team.crew_size;
+  document.getElementById('tm-vehicle').value = team.vehicle;
+  document.getElementById('tm-capacity').value = team.capacity_per_day;
+  document.getElementById('tm-status').value = team.status;
+  openModal('teamModal');
+}
+
+async function saveTeam() {
+  const payload = {
+    team_name: document.getElementById('tm-name').value,
+    supervisor: document.getElementById('tm-supervisor').value,
+    crew_size: parseInt(document.getElementById('tm-size').value),
+    vehicle: document.getElementById('tm-vehicle').value,
+    capacity_per_day: parseInt(document.getElementById('tm-capacity').value),
+    status: document.getElementById('tm-status').value
+  };
+
+  if(!payload.team_name) { showToast("Team name required", "error"); return; }
+
+  const btn = document.getElementById('save-team-btn');
+  btn.disabled = true;
+
+  try {
+    if(editingTeamId) {
+      await supabaseClient.from('installation_teams').update(payload).eq('id', editingTeamId);
+    } else {
+      await supabaseClient.from('installation_teams').insert(payload);
+    }
+    showToast("Team saved successfully");
+    closeModal('teamModal');
+    // Real-time listener will update local state and UI
+  } catch(e) {
+    showToast("Error saving team", "error");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deleteTeam(id) {
+  if(!confirm("Are you sure you want to delete this team?")) return;
+  try {
+    await supabaseClient.from('installation_teams').delete().eq('id', id);
+    showToast("Team deleted");
+  } catch(e) {
+    showToast("Delete failed", "error");
+  }
+}
+
+function updateProgramContent() {
+  const ready = allData.filter(r => r.ReadyForInstallation && r.AssignedTeam && r.InstallationStatus !== 'Completed');
+  const dailyCont = document.getElementById('daily-program-content');
+  const weeklyCont = document.getElementById('weekly-program-content');
+
+  if(dailyCont) {
+    if(ready.length === 0) {
+      dailyCont.innerHTML = '<div class="empty-state">No active installations programmed</div>';
+    } else {
+      const teams = [...new Set(ready.map(r => r.AssignedTeam))];
+      dailyCont.innerHTML = teams.map(t => {
+         const items = optimizedRoutes[t] || ready.filter(r => r.AssignedTeam === t);
+         return `
+         <div style="margin-bottom:20px; padding:12px; background:var(--surface2); border-radius:12px; border:1px solid var(--border);">
+            <div style="font-weight:700; color:var(--accent); margin-bottom:8px; display:flex; justify-content:space-between;">
+               <span>${t}</span>
+               <div style="display:flex; gap:6px;">
+                  <button class="btn btn-ghost btn-xs" onclick="generateTeamPackage('${t}')"><i class="fas fa-file-pdf"></i> PDF Package</button>
+               </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+               ${items.map((r, idx) => `
+                  <div style="font-size:11px; padding:6px; background:var(--surface); border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                     <span><b>${idx+1}.</b> #${r.WorkOrder} - ${r.Location}</span>
+                     <span style="font-weight:600; color:var(--muted);">${formatDate(r.TargetFinish)}</span>
+                  </div>
+               `).join('')}
+            </div>
+         </div>
+         `;
+      }).join('');
+    }
+  }
+
+  if(weeklyCont) {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const today = new Date();
+    weeklyCont.innerHTML = days.map((day, idx) => {
+       const d = new Date(today);
+       d.setDate(today.getDate() + (idx - today.getDay() + 1));
+       const dStr = d.toISOString().split('T')[0];
+       const count = allData.filter(r => r.PlannedInstallationDate === dStr).length;
+       return `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--border);">
+             <span style="font-weight:600; font-size:13px;">${day}</span>
+             <span class="status-badge" style="background:var(--accent); color:#000;">${count} locations</span>
+          </div>
+       `;
+    }).join('');
+  }
+}
+
+function renderInstCalendar(container) {
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  container.innerHTML = `
+    <div class="dash-card" style="min-height:600px;">
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <div class="dash-card-title">Installation Schedule - ${monthNames[currentMonth]} ${currentYear}</div>
+          <div style="display:flex; gap:8px;">
+             <button class="btn btn-ghost btn-sm"><i class="fas fa-chevron-left"></i></button>
+             <button class="btn btn-ghost btn-sm"><i class="fas fa-chevron-right"></i></button>
+          </div>
+       </div>
+       <div style="display:grid; grid-template-columns: repeat(7, 1fr); border-top:1px solid var(--border); border-left:1px solid var(--border);">
+          ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div style="padding:10px; text-align:center; background:var(--surface2); font-weight:700; font-size:12px; border-right:1px solid var(--border); border-bottom:1px solid var(--border);">${d}</div>`).join('')}
+          <div id="calendar-days-grid" style="display:contents;"></div>
+       </div>
+    </div>
+  `;
+
+  const daysGrid = document.getElementById('calendar-days-grid');
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  let html = '';
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div style="height:100px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); background:var(--bg); opacity:0.3;"></div>`;
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dayWos = allData.filter(r => r.PlannedInstallationDate === dStr);
+    const isToday = day === today.getDate() && currentMonth === today.getMonth();
+
+    html += `
+       <div style="height:120px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:8px; position:relative; ${isToday ? 'background:rgba(0, 200, 255, 0.05);' : ''}">
+          <div style="font-size:12px; font-weight:700; margin-bottom:6px; ${isToday ? 'color:var(--accent);' : ''}">${day}</div>
+          <div style="display:flex; flex-direction:column; gap:4px; max-height:80px; overflow-y:auto;">
+             ${dayWos.map(r => `<div onclick="openDetail('${r.WorkOrder}')" title="${r.Location}" style="font-size:9px; padding:2px 4px; background:var(--surface2); border-left:2px solid var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;">#${r.WorkOrder}</div>`).join('')}
+          </div>
+       </div>
+    `;
+  }
+  daysGrid.innerHTML = html;
 }
 
 function refreshUI() {
