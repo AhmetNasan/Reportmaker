@@ -5788,7 +5788,7 @@ function clearSignature() {
 function fetchCurrentGPS() {
   if ("geolocation" in navigator) {
     navigator.geolocation.getCurrentPosition(pos => {
-       document.getElementById('comp-gps').value = \`\${pos.coords.latitude.toFixed(6)}, \${pos.coords.longitude.toFixed(6)}\`;
+       document.getElementById('comp-gps').value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
     }, err => {
        showToast("GPS Access Denied", "amber");
     });
@@ -5844,8 +5844,8 @@ async function saveCompletion() {
        await supabaseClient.from('installation_records').insert(record);
     }
 
-    logAudit("Completed Installation", \`WO: \${woId}, Team: \${wo.AssignedTeam}\`, woId);
-    showToast(\`Work Order #\${woId} marked as Completed\`);
+    logAudit("Completed Installation", `WO: ${woId}, Team: ${wo.AssignedTeam}`, woId);
+    showToast(`Work Order #${woId} marked as Completed`);
     closeModal('completionModal');
     currentCompletionWO = null;
     
