@@ -1926,6 +1926,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <button class="mfg-tab-btn" onclick="switchInstTab('teams')">Teams Module</button>
       <button class="mfg-tab-btn" onclick="switchInstTab('programs')">Programs</button>
       <button class="mfg-tab-btn" onclick="switchInstTab('calendar')">Calendar</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('records')">Records</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('photos')">Photos</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('logistics')">Logistics</button>
     </nav>
 
     <div id="inst-content">
@@ -2833,7 +2836,14 @@ function switchInstTab(tab) {
     btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${tab}'`));
   });
   if (tab === 'calendar') resetCalMonth();
-  else updateInstallationUI();
+  if (tab === 'dashboard') {
+    // Clear charts to force re-render with new data/dimensions
+    if (charts.instStatus) charts.instStatus.destroy();
+    if (charts.instTeam) charts.instTeam.destroy();
+    delete charts.instStatus;
+    delete charts.instTeam;
+  }
+  updateInstallationUI();
 }
 
 function buildColumnFilters(tableId, data) {
@@ -7895,12 +7905,30 @@ function exportDueSoonCSV() {
 }
 
 function exportTableCSV(mode = 'all') {
-    const data = mode === 'manufacturing' ? filteredFabData : filteredData;
-    const filename = mode === 'manufacturing' ? 'manufacturing_export.csv' : 'work_orders_export.csv';
+    let data;
+    let filename;
+
+    if (mode === 'manufacturing') {
+      data = filteredFabData;
+      filename = 'manufacturing_export.csv';
+    } else if (mode === 'inst-records') {
+      data = installationRecords;
+      filename = 'installation_records_export.csv';
+    } else {
+      data = filteredData;
+      filename = 'work_orders_export.csv';
+    }
+
     if (data.length === 0) return showToast('No data to export', 'error');
     
     let csvContent = "";
-    if (mode === 'manufacturing') {
+    if (mode === 'inst-records') {
+      const headers = ["Date", "Work Order", "Team", "Status", "Recorded By", "Notes"];
+      csvContent = headers.join(",") + "\n";
+      csvContent += data.map(r => [
+        formatDateTime(r.created_at), r.work_order, r.team_name, r.status, r.recorded_by, r.notes
+      ].map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
+    } else if (mode === 'manufacturing') {
       const headers = ["Work Order", "Description", "Status", "PWA Engineer", "Location", "Target Start", "Target Finish", "Sign Type", "Sign Ref", "Qty", "Fabrication Status", "Install Date", "Fabrication Details"];
       csvContent = headers.join(",") + "\n";
       csvContent += data.map(r => [
@@ -8897,21 +8925,42 @@ function updateInstallationUI() {
     renderInstPrograms(content);
   } else if (currentInstTab === 'calendar') {
     renderInstCalendar(content);
+  } else if (currentInstTab === 'records') {
+    renderInstRecords(content);
+  } else if (currentInstTab === 'photos') {
+    renderInstPhotosTab(content);
+  } else if (currentInstTab === 'logistics') {
+    renderInstLogistics(content);
   }
 }
 
 function renderInstDashboard(container) {
   container.innerHTML = `
-    <div class="dash-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-       <div class="kpi-card total"><div class="kpi-label">Ready for Installation</div><div class="kpi-value" id="kpi-ready">0</div></div>
-       <div class="kpi-card on-time"><div class="kpi-label">Assigned to Team</div><div class="kpi-value" id="kpi-assigned">0</div></div>
-       <div class="kpi-card pending"><div class="kpi-label">Pending Assignment</div><div class="kpi-value" id="kpi-pending">0</div></div>
+    <div class="dash-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:15px; margin-bottom:24px;">
+       <div class="kpi-card total"><div class="kpi-label">Ready for Install</div><div class="kpi-value" id="kpi-ready">0</div></div>
+       <div class="kpi-card pending"><div class="kpi-label">Planned</div><div class="kpi-value" id="kpi-planned">0</div></div>
+       <div class="kpi-card on-time"><div class="kpi-label">Assigned</div><div class="kpi-value" id="kpi-assigned">0</div></div>
+       <div class="kpi-card total" style="border-left: 3px solid var(--purple);"><div class="kpi-label">Dispatched</div><div class="kpi-value" id="kpi-dispatched">0</div></div>
        <div class="kpi-card breached"><div class="kpi-label">Completed Today</div><div class="kpi-value" id="kpi-comp-today">0</div></div>
-       <div class="kpi-card failed"><div class="kpi-label">Overdue Installations</div><div class="kpi-value" id="kpi-overdue">0</div></div>
+       <div class="kpi-card failed"><div class="kpi-label">Overdue</div><div class="kpi-value" id="kpi-overdue">0</div></div>
     </div>
-    <div class="dash-row" style="margin-top:24px; display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+
+    <div class="dash-row" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap:24px; margin-bottom: 24px;">
        <div class="dash-card">
-          <div class="dash-card-title">Upcoming Target Finish Dates</div>
+          <div class="dash-card-header"><div class="dash-card-title"><i class="fas fa-chart-pie"></i> Status Breakdown</div></div>
+          <div class="dash-card-body" style="height:250px;"><canvas id="instStatusChart"></canvas></div>
+       </div>
+       <div class="dash-card">
+          <div class="dash-card-header"><div class="dash-card-title"><i class="fas fa-users"></i> Team Workload Balance</div></div>
+          <div class="dash-card-body" style="height:250px;"><canvas id="instTeamChart"></canvas></div>
+       </div>
+    </div>
+
+    <div class="dash-row" style="display:grid; grid-template-columns: 2fr 1fr; gap:24px; margin-bottom: 24px;">
+       <div class="dash-card">
+          <div class="dash-card-header">
+             <div class="dash-card-title"><i class="fas fa-clock"></i> Recent Activity & Critical Deadlines</div>
+          </div>
           <div class="table-wrap" style="max-height:400px; overflow-y:auto;">
              <table class="main-table">
                 <thead><tr><th>WO</th><th>Location</th><th>Finish Date</th><th>Team</th><th>Status</th></tr></thead>
@@ -8920,8 +8969,37 @@ function renderInstDashboard(container) {
           </div>
        </div>
        <div class="dash-card">
-          <div class="dash-card-title">Team Capacity Monitoring</div>
-          <div id="team-capacity-list"></div>
+          <div class="dash-card-header">
+             <div class="dash-card-title"><i class="fas fa-tachometer-alt"></i> Performance Metrics</div>
+          </div>
+          <div class="dash-card-body">
+             <div id="inst-metrics-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                <div class="dash-card-title" style="font-size: 11px; margin-bottom: 15px;">Team Capacity</div>
+                <div id="team-capacity-list"></div>
+             </div>
+          </div>
+       </div>
+    </div>
+
+    <div class="dash-card" style="margin-bottom: 24px;">
+       <div class="dash-card-header">
+          <div class="dash-card-title"><i class="fas fa-history"></i> Recent Installation Logs</div>
+          <button class="btn btn-ghost btn-sm" onclick="switchInstTab('records')">View All</button>
+       </div>
+       <div class="table-wrap">
+          <table class="main-table">
+             <thead>
+                <tr>
+                   <th>Time</th>
+                   <th>WO</th>
+                   <th>Team</th>
+                   <th>Action</th>
+                   <th>Recorded By</th>
+                </tr>
+             </thead>
+             <tbody id="recent-inst-logs-tbody"></tbody>
+          </table>
        </div>
     </div>
   `;
@@ -8930,18 +9008,20 @@ function renderInstDashboard(container) {
 
 function updateInstKPIs() {
   const ready = allData.filter(r => r.ReadyForInstallation);
-  const assigned = ready.filter(r => r.AssignedTeam && r.AssignedTeam !== '');
-  const pending = ready.filter(r => !r.AssignedTeam || r.AssignedTeam === '');
+  const planned = ready.filter(r => r.InstallationStatus === 'Planned');
+  const assigned = ready.filter(r => r.InstallationStatus === 'Assigned');
+  const dispatched = ready.filter(r => r.InstallationStatus === 'Dispatched');
   
   const todayStr = new Date().toISOString().split('T')[0];
-  const compToday = allData.filter(r => r.ActualInstallationDate === todayStr);
+  const compToday = allData.filter(r => r.ActualInstallationDate === todayStr || (r.InstallationStatus === 'Completed' && formatDate(r.last_modified_at) === todayStr));
   
   const today = new Date();
   const overdue = ready.filter(r => r.TargetFinish && new Date(r.TargetFinish) < today && r.InstallationStatus !== 'Completed');
 
   if(document.getElementById('kpi-ready')) document.getElementById('kpi-ready').textContent = ready.length;
+  if(document.getElementById('kpi-planned')) document.getElementById('kpi-planned').textContent = planned.length;
   if(document.getElementById('kpi-assigned')) document.getElementById('kpi-assigned').textContent = assigned.length;
-  if(document.getElementById('kpi-pending')) document.getElementById('kpi-pending').textContent = pending.length;
+  if(document.getElementById('kpi-dispatched')) document.getElementById('kpi-dispatched').textContent = dispatched.length;
   if(document.getElementById('kpi-comp-today')) document.getElementById('kpi-comp-today').textContent = compToday.length;
   if(document.getElementById('kpi-overdue')) document.getElementById('kpi-overdue').textContent = overdue.length;
 
@@ -8951,12 +9031,51 @@ function updateInstKPIs() {
     upcomingTbody.innerHTML = upcoming.map(r => `
        <tr onclick="openDetail('${r.WorkOrder}')" style="cursor:pointer;">
           <td><span class="wo-num">${r.WorkOrder}</span></td>
-          <td>${r.Location}</td>
+          <td>${r.Location || '—'}</td>
           <td>${formatDate(r.TargetFinish)}</td>
           <td>${r.AssignedTeam || '—'}</td>
           <td><span class="status-badge badge-${r.InstallationStatus}">${r.InstallationStatus}</span></td>
        </tr>
     `).join('');
+  }
+
+  const logsTbody = document.getElementById('recent-inst-logs-tbody');
+  if(logsTbody) {
+    const recentLogs = (installationRecords || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
+    logsTbody.innerHTML = recentLogs.map(l => `
+       <tr>
+          <td style="font-size:10px; color:var(--muted);">${formatDateTime(l.created_at)}</td>
+          <td><span class="wo-num" onclick="openDetail('${l.work_order}')" style="cursor:pointer;">#${l.work_order}</span></td>
+          <td>${l.team_name || '—'}</td>
+          <td><span class="status-badge badge-${l.status}">${l.status}</span></td>
+          <td>${l.recorded_by || 'System'}</td>
+       </tr>
+    `).join('');
+  }
+
+  const metricsCont = document.getElementById('inst-metrics-list');
+  if(metricsCont) {
+     const totalComp = allData.filter(r => r.InstallationStatus === 'Completed').length;
+     const totalReady = ready.length;
+     const efficiency = totalReady > 0 ? Math.round((totalComp / (totalComp + totalReady)) * 100) : 100;
+
+     metricsCont.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+           <span style="font-size:12px; color:var(--muted);">Overall Efficiency</span>
+           <span style="font-weight:700; color:var(--green);">${efficiency}%</span>
+        </div>
+        <div class="progress-wrap" style="height:6px; background:var(--surface2);">
+           <div class="progress-fill" style="width:${efficiency}%; background:var(--green);"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+           <span style="font-size:12px; color:var(--muted);">Photo Submissions</span>
+           <span style="font-weight:700; color:var(--accent);">${installationPhotos.length} files</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+           <span style="font-size:12px; color:var(--muted);">Active Teams</span>
+           <span style="font-weight:700; color:var(--text);">${installationTeams.filter(t=>t.status==='Available' || t.status==='Working').length} / ${installationTeams.length}</span>
+        </div>
+     `;
   }
 
   const capacityCont = document.getElementById('team-capacity-list');
@@ -8966,22 +9085,82 @@ function updateInstKPIs() {
     } else {
       capacityCont.innerHTML = installationTeams.map(t => {
         const assignedCount = ready.filter(r => r.AssignedTeam === t.team_name && r.InstallationStatus !== 'Completed').length;
-        const pct = Math.min(100, Math.round((assignedCount / t.capacity_per_day) * 100));
+        const pct = Math.min(100, Math.round((assignedCount / (t.capacity_per_day || 1)) * 100));
         const color = pct > 100 ? 'var(--red)' : (pct > 80 ? 'var(--amber)' : 'var(--green)');
         return `
-          <div style="margin-bottom:16px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;">
+          <div style="margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
               <span style="font-weight:600;">${t.team_name}</span>
-              <span style="color:var(--muted);">${assignedCount} / ${t.capacity_per_day} Signs</span>
+              <span style="color:var(--muted);">${assignedCount} / ${t.capacity_per_day}</span>
             </div>
-            <div style="height:6px; background:var(--surface2); border-radius:100px; overflow:hidden;">
+            <div style="height:4px; background:var(--surface2); border-radius:100px; overflow:hidden;">
               <div style="height:100%; width:${pct}%; background:${color};"></div>
             </div>
-            ${pct >= 100 ? '<div style="font-size:10px; color:var(--red); margin-top:4px;"><i class="fas fa-exclamation-triangle"></i> Team overloaded</div>' : ''}
           </div>
         `;
       }).join('');
     }
+  }
+
+  // Render Charts
+  renderInstCharts();
+}
+
+function renderInstCharts() {
+  const ready = allData.filter(r => r.ReadyForInstallation);
+
+  const statusCounts = {
+     'Planned': ready.filter(r => r.InstallationStatus === 'Planned').length,
+     'Assigned': ready.filter(r => r.InstallationStatus === 'Assigned').length,
+     'Dispatched': ready.filter(r => r.InstallationStatus === 'Dispatched').length,
+     'Completed': allData.filter(r => r.InstallationStatus === 'Completed').length,
+     'On Site': ready.filter(r => r.InstallationStatus === 'On Site').length
+  };
+
+  const statusCtx = document.getElementById('instStatusChart');
+  if (statusCtx) {
+     if (charts.instStatus) charts.instStatus.destroy();
+     charts.instStatus = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+           labels: Object.keys(statusCounts),
+           datasets: [{
+              data: Object.values(statusCounts),
+              backgroundColor: ['#6366f1', '#22c55e', '#a855f7', '#00c8ff', '#f59e0b']
+           }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } }
+     });
+  }
+
+  const teamCtx = document.getElementById('instTeamChart');
+  if (teamCtx && installationTeams.length > 0) {
+     const teamLabels = installationTeams.map(t => t.team_name);
+     const teamData = teamLabels.map(name => ready.filter(r => r.AssignedTeam === name && r.InstallationStatus !== 'Completed').length);
+
+     if (charts.instTeam) charts.instTeam.destroy();
+     charts.instTeam = new Chart(teamCtx, {
+        type: 'bar',
+        data: {
+           labels: teamLabels,
+           datasets: [{
+              label: 'Assigned Work Orders',
+              data: teamData,
+              backgroundColor: 'rgba(0, 200, 255, 0.6)',
+              borderColor: 'var(--accent)',
+              borderWidth: 1
+           }]
+        },
+        options: {
+           responsive: true,
+           maintainAspectRatio: false,
+           scales: {
+              y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } },
+              x: { ticks: { font: { size: 10 } } }
+           },
+           plugins: { legend: { display: false } }
+        }
+     });
   }
 }
 
@@ -9066,16 +9245,259 @@ function renderInstPrograms(container) {
   container.innerHTML = `
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
        <div class="dash-card">
-          <div class="dash-card-title">Daily Installation Program</div>
-          <div id="daily-program-content"></div>
+          <div class="dash-card-header">
+             <div class="dash-card-title"><i class="fas fa-tasks"></i> Daily Installation Program</div>
+             <div style="display:flex; gap:8px;">
+                <button class="btn btn-ghost btn-sm" onclick="optimizeAllRoutes()"><i class="fas fa-magic"></i> Auto-Optimize Routes</button>
+             </div>
+          </div>
+          <div class="dash-card-body" id="daily-program-content"></div>
        </div>
        <div class="dash-card">
-          <div class="dash-card-title">Weekly Overview</div>
-          <div id="weekly-program-content"></div>
+          <div class="dash-card-header">
+             <div class="dash-card-title"><i class="fas fa-calendar-alt"></i> Weekly Overview</div>
+          </div>
+          <div class="dash-card-body" id="weekly-program-content"></div>
        </div>
     </div>
   `;
   updateProgramContent();
+}
+
+function renderInstRecords(container) {
+  container.innerHTML = `
+    <div class="dash-card">
+       <div class="dash-card-header">
+          <div class="dash-card-title"><i class="fas fa-history"></i> Installation Records & History</div>
+          <div style="display:flex; gap:10px; align-items:center;">
+             <input type="text" id="rec-search" class="filter-input" placeholder="Search WO or Team..." oninput="filterInstRecords()" style="width:200px;">
+             <button class="btn btn-ghost btn-sm" onclick="exportTableCSV('inst-records')"><i class="fas fa-download"></i> Export</button>
+          </div>
+       </div>
+       <div class="table-wrap">
+          <table class="main-table">
+             <thead>
+                <tr>
+                   <th>Date</th>
+                   <th>Work Order</th>
+                   <th>Team</th>
+                   <th>Status Change</th>
+                   <th>Recorded By</th>
+                   <th>Notes / Snapshots</th>
+                </tr>
+             </thead>
+             <tbody id="inst-records-tbody"></tbody>
+          </table>
+       </div>
+    </div>
+  `;
+  filterInstRecords();
+}
+
+function filterInstRecords() {
+  const q = document.getElementById('rec-search')?.value.toLowerCase() || '';
+  const tbody = document.getElementById('inst-records-tbody');
+  if (!tbody) return;
+
+  const filtered = (installationRecords || []).filter(r =>
+    String(r.work_order).includes(q) ||
+    String(r.team_name || '').toLowerCase().includes(q) ||
+    String(r.status || '').toLowerCase().includes(q)
+  ).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--muted);">No records found matching criteria</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(r => `
+    <tr>
+       <td style="white-space:nowrap;">${formatDateTime(r.created_at)}</td>
+       <td><span class="wo-num" onclick="openDetail('${r.work_order}')" style="cursor:pointer;">#${r.work_order}</span></td>
+       <td>${r.team_name || '—'}</td>
+       <td><span class="status-badge badge-${r.status}">${r.status}</span></td>
+       <td>${r.recorded_by || 'System'}</td>
+       <td style="max-width:300px; font-size:10px; color:var(--muted);">${r.notes || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderInstPhotosTab(container) {
+  container.innerHTML = `
+    <div class="dash-card">
+       <div class="dash-card-header">
+          <div class="dash-card-title"><i class="fas fa-camera-retro"></i> Installation Photo Gallery</div>
+          <div style="display:flex; gap:10px; align-items:center;">
+             <select id="photo-cat-filter" class="filter-input" onchange="filterInstPhotos()">
+                <option value="all">All Categories</option>
+                <option value="Before">Before</option>
+                <option value="During">During</option>
+                <option value="After">After</option>
+             </select>
+             <input type="text" id="photo-search" class="filter-input" placeholder="Search WO..." oninput="filterInstPhotos()" style="width:150px;">
+          </div>
+       </div>
+       <div class="dash-card-body">
+          <div class="attachment-gallery" id="inst-gallery-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));"></div>
+       </div>
+    </div>
+  `;
+  filterInstPhotos();
+}
+
+function filterInstPhotos() {
+  const cat = document.getElementById('photo-cat-filter')?.value || 'all';
+  const q = document.getElementById('photo-search')?.value || '';
+  const grid = document.getElementById('inst-gallery-grid');
+  if (!grid) return;
+
+  const filtered = (installationPhotos || []).filter(p =>
+    (cat === 'all' || p.category === cat) &&
+    String(p.work_order).includes(q)
+  );
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1; padding:60px; text-align:center; color:var(--muted);">No photos found</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => `
+    <div class="attachment-item" onclick="viewPhotoUrl('${p.url}')">
+       <img src="${p.url}" loading="lazy">
+       <div class="attachment-overlay">
+          <div style="text-align:center;">
+             <div style="font-size:10px; font-weight:800; color:#fff;">WO #${p.work_order}</div>
+             <div style="font-size:9px; color:var(--accent);">${p.category}</div>
+          </div>
+       </div>
+    </div>
+  `).join('');
+}
+
+function viewPhotoUrl(url) {
+  window.open(url, '_blank');
+}
+
+function renderInstLogistics(container) {
+  const unassigned = allData.filter(r => r.ReadyForInstallation && !r.AssignedTeam).length;
+  const assigned = allData.filter(r => r.ReadyForInstallation && r.AssignedTeam).length;
+
+  container.innerHTML = `
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+       <div class="dash-card">
+          <div class="dash-card-header">
+             <div class="dash-card-title"><i class="fas fa-project-diagram"></i> Smart Planning & Clustering</div>
+          </div>
+          <div class="dash-card-body">
+             <div style="background:var(--surface2); padding:20px; border-radius:12px; margin-bottom:20px;">
+                <h4 style="font-size:13px; margin-bottom:12px; color:var(--accent);">K-Means Workload Distribution</h4>
+                <p style="font-size:11px; color:var(--muted); margin-bottom:16px;">
+                   Automatically group ${unassigned} unassigned work orders based on geographic proximity to available teams.
+                </p>
+                <button class="btn btn-primary w-100" onclick="autoGroupNearby()">
+                   <i class="fas fa-magic"></i> Run Auto-Grouping Algorithm
+                </button>
+             </div>
+
+             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <div style="background:var(--bg); padding:12px; border-radius:8px; text-align:center; border:1px solid var(--border);">
+                   <div style="font-size:24px; font-weight:800;">${unassigned}</div>
+                   <div style="font-size:10px; color:var(--muted); text-transform:uppercase;">Unassigned</div>
+                </div>
+                <div style="background:var(--bg); padding:12px; border-radius:8px; text-align:center; border:1px solid var(--border);">
+                   <div style="font-size:24px; font-weight:800;">${assigned}</div>
+                   <div style="font-size:10px; color:var(--muted); text-transform:uppercase;">Assigned</div>
+                </div>
+             </div>
+          </div>
+       </div>
+
+       <div class="dash-card">
+          <div class="dash-card-header">
+             <div class="dash-card-title"><i class="fas fa-route"></i> Route Optimization Metrics</div>
+          </div>
+          <div class="dash-card-body">
+             <div style="background:var(--surface2); padding:20px; border-radius:12px; margin-bottom:20px;">
+                <h4 style="font-size:13px; margin-bottom:12px; color:var(--accent);">Nearest Neighbor Heuristics</h4>
+                <p style="font-size:11px; color:var(--muted); margin-bottom:16px;">
+                   Calculate the most efficient sequence for ${assigned} assigned locations to minimize travel time and fuel consumption.
+                </p>
+                <button class="btn btn-ghost w-100" onclick="optimizeAllRoutes()">
+                   <i class="fas fa-route"></i> Calculate Optimized Paths
+                </button>
+             </div>
+
+             <div id="logistics-stats" style="font-size:12px;">
+                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border);">
+                   <span style="color:var(--muted);">Total Estimated Distance</span>
+                   <span id="log-total-dist" style="font-weight:700;">-- km</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border);">
+                   <span style="color:var(--muted);">Avg. Stops per Team</span>
+                   <span id="log-avg-stops" style="font-weight:700;">--</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:8px 0;">
+                   <span style="color:var(--muted);">Routing Algorithm</span>
+                   <span style="font-weight:700; color:var(--green);">Active</span>
+                </div>
+             </div>
+          </div>
+       </div>
+
+       <div class="dash-card" style="grid-column: 1/-1;">
+          <div class="dash-card-header">
+             <div class="dash-card-title"><i class="fas fa-balance-scale"></i> Team Workload Balancing</div>
+          </div>
+          <div class="dash-card-body">
+             <div id="logistics-workload-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:20px;">
+                <!-- Dynamically populated -->
+             </div>
+          </div>
+       </div>
+    </div>
+  `;
+  updateLogisticsUI();
+}
+
+function updateLogisticsUI() {
+  const ready = allData.filter(r => r.ReadyForInstallation && r.AssignedTeam && r.Lat && r.Lng);
+  const teams = installationTeams;
+
+  let totalDist = 0;
+  teams.forEach(t => {
+     const route = (optimizedRoutes || {})[t.team_name];
+     if (route && route.length > 1) {
+        for (let i=0; i < route.length-1; i++) {
+           totalDist += getHaversineDist(route[i].Lat, route[i].Lng, route[i+1].Lat, route[i+1].Lng);
+        }
+     }
+  });
+
+  if (document.getElementById('log-total-dist')) document.getElementById('log-total-dist').textContent = totalDist.toFixed(1) + ' km';
+  if (document.getElementById('log-avg-stops')) document.getElementById('log-avg-stops').textContent = (ready.length / (teams.filter(t => t.status === 'Available').length || 1)).toFixed(1);
+
+  const workloadGrid = document.getElementById('logistics-workload-grid');
+  if (workloadGrid) {
+    workloadGrid.innerHTML = teams.map(t => {
+      const assignedCount = ready.filter(r => r.AssignedTeam === t.team_name && r.InstallationStatus !== 'Completed').length;
+      const pct = Math.min(100, (assignedCount / (t.capacity_per_day || 1)) * 100);
+      return `
+        <div style="padding:15px; background:var(--bg); border-radius:12px; border:1px solid var(--border);">
+           <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <span style="font-weight:700;">${t.team_name}</span>
+              <span style="font-size:11px; color:var(--muted);">${assignedCount} / ${t.capacity_per_day} cap</span>
+           </div>
+           <div class="progress-wrap" style="height:6px; background:var(--surface2);">
+              <div class="progress-fill" style="width:${pct}%; background:${pct > 90 ? 'var(--red)' : 'var(--accent)'};"></div>
+           </div>
+           <div style="margin-top:8px; font-size:10px; color:var(--muted); display:flex; justify-content:space-between;">
+              <span>Efficiency: ${pct > 0 ? 'Optimal' : 'Idle'}</span>
+              <span>${t.status}</span>
+           </div>
+        </div>
+      `;
+    }).join('');
+  }
 }
 
 let editingTeamId = null;
