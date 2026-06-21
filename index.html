@@ -1109,7 +1109,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="nav-tab" id="nav-workorders-btn" onclick="showPage('workorders')"><i class="fas fa-clipboard-list"></i> Work Orders</button>
-      <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing</button>
+    <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing <span id="mfg-nav-badge" class="status-badge badge-WPERM" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <button class="nav-tab" id="nav-installation-btn" onclick="showPage('installation')"><i class="fas fa-tools"></i> Installation</button>
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
@@ -1168,7 +1168,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div id="mobile-menu" class="mobile-menu">
     <button class="mobile-nav-item active" onclick="showPage('dashboard'); toggleMobileMenu();"><i class="fas fa-chart-bar"></i> Dashboard</button>
     <button class="mobile-nav-item" onclick="showPage('workorders'); toggleMobileMenu();"><i class="fas fa-clipboard-list"></i> Work Orders</button>
-    <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing</button>
+    <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing <span id="mfg-mobile-badge" class="status-badge badge-WPERM" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <button class="mobile-nav-item" onclick="showPage('installation'); toggleMobileMenu();"><i class="fas fa-tools"></i> Installation</button>
     <button class="mobile-nav-item" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
     <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
@@ -1322,6 +1322,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
              <option>Available</option><option>Working</option><option>Maintenance</option><option>Off Duty</option>
           </select>
        </div>
+       <div class="form-group"><label>Specialization</label><input type="text" id="tm-specialization" class="filter-input" placeholder="e.g. Ground Signs, Gantries"></div>
+       <div class="form-group"><label>Equipment</label><input type="text" id="tm-equipment" class="filter-input" placeholder="e.g. Crane, Drill Rig"></div>
+       <div class="form-group"><label>Remarks</label><textarea id="tm-remarks" class="filter-input" style="height:60px;"></textarea></div>
     </div>
     <div class="modal-footer">
        <button class="btn btn-ghost btn-sm" onclick="closeModal('teamModal')">Cancel</button>
@@ -2078,6 +2081,58 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
+<div class="modal-overlay" id="completionModal">
+  <div class="modal" style="max-width: 800px; width: 95%;">
+    <button class="modal-close" onclick="closeModal('completionModal')">×</button>
+    <div class="modal-title">Work Order Completion – <span id="comp-wo-num"></span></div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 20px;">
+      <!-- Photos Section -->
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="form-group">
+          <label style="font-weight:700;">Before Installation Photo</label>
+          <div id="comp-prev-before" style="width:100%; height:180px; background:var(--surface2); border:2px dashed var(--border); border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="triggerInstUpload('Before')">
+            <span style="color:var(--muted); font-size:12px;">Click to upload "Before" photo</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="font-weight:700;">After Installation Photo</label>
+          <div id="comp-prev-after" style="width:100%; height:180px; background:var(--surface2); border:2px dashed var(--border); border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="triggerInstUpload('After')">
+            <span style="color:var(--muted); font-size:12px;">Click to upload "After" photo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Details & Signature Section -->
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="form-group">
+          <label style="font-weight:700;">GPS Verification</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="comp-gps" class="filter-input" placeholder="0.000, 0.000" readonly style="flex:1;">
+            <button class="btn btn-ghost btn-sm" onclick="fetchCurrentGPS()" title="Fetch Current GPS"><i class="fas fa-location-arrow"></i></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="font-weight:700;">Installer Signature</label>
+          <div style="border:1px solid var(--border); border-radius:8px; background:white; position:relative;">
+            <canvas id="signature-pad" width="350" height="150" style="width:100%; height:150px;"></canvas>
+            <button class="btn btn-reset" style="position:absolute; top:5px; right:5px; padding:4px; font-size:10px; color:var(--red);" onclick="clearSignature()" aria-label="Clear Signature"><i class="fas fa-eraser"></i> Clear</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="font-weight:700;">Completion Notes</label>
+          <textarea id="comp-notes" class="filter-input" style="width:100%; height:80px; resize:none;" placeholder="Enter any site observations..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:12px; margin-top:24px; justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeModal('completionModal')">Cancel</button>
+      <button class="btn btn-primary" id="comp-save-btn" onclick="saveCompletion()">Confirm Completion</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="fabModal">
   <div class="modal pdf-modal">
     <button class="modal-close" onclick="closeModal('fabModal')">×</button>
@@ -2312,6 +2367,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
           <div class="info-item"><label>Created Date</label><span id="val-created-date">--</span></div>
           <div class="info-item"><label>Last Modified By</label><span id="val-modified-by">--</span></div>
           <div class="info-item"><label>Last Modified Date</label><span id="val-modified-date">--</span></div>
+          <div class="info-item"><label>Dispatch User</label><span id="val-dispatch-user">--</span></div>
+          <div class="info-item"><label>Dispatch Time</label><span id="val-dispatch-time">--</span></div>
         </div>
       </div>
       <div class="detail-section">
@@ -2401,6 +2458,10 @@ let installationPhotos = [];
 let instMap = null;
 let currentInstTab = 'dashboard';
 let optimizedRoutes = {};
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+let signaturePad = null;
+let currentCompletionWO = null;
 
 // INITIALIZATION
 window.addEventListener('paste', async (e) => {
@@ -2770,7 +2831,8 @@ function switchInstTab(tab) {
   document.querySelectorAll('#inst-tabs .mfg-tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${tab}'`));
   });
-  updateInstallationUI();
+  if (tab === 'calendar') resetCalMonth();
+  else updateInstallationUI();
 }
 
 function buildColumnFilters(tableId, data) {
@@ -3061,6 +3123,7 @@ async function fetchData() {
       InstallationStatus: r.installation_status || 'Pending',
       AssignedTeam: r.assigned_team || '',
       AssignedDate: r.assigned_date || '',
+      SequenceOrder: r.sequence_order || null,
       PlannedInstallationDate: r.planned_installation_date || '',
       ActualInstallationDate: r.actual_installation_date || '',
       Location: r.location,
@@ -3097,7 +3160,9 @@ async function fetchData() {
       MediaAnnouncement: r.media_announcement,
       created_at: r.created_at,
       last_modified_at: r.last_modified_at,
-      Priority: r.priority || 'Normal'
+      Priority: r.priority || 'Normal',
+      DispatchTime: r.dispatch_time,
+      DispatchUser: r.dispatch_user
     }));
 
     const { data: photoData, error: photoError } = await supabaseClient
@@ -3196,7 +3261,10 @@ async function saveWorkOrderToSupabase(wo) {
     assigned_team: wo.AssignedTeam || null,
     assigned_date: wo.AssignedDate || null,
     planned_installation_date: wo.PlannedInstallationDate || null,
-    actual_installation_date: wo.ActualInstallationDate || null
+    actual_installation_date: wo.ActualInstallationDate || null,
+    dispatch_time: wo.DispatchTime || null,
+    dispatch_user: wo.DispatchUser || null,
+    sequence_order: wo.SequenceOrder || null
   };
 
   const mfgPayload = {
@@ -4176,6 +4244,8 @@ async function openDetail(woId) {
   document.getElementById('val-created-date').textContent = wo.created_at ? formatDateTime(wo.created_at) : '--';
   document.getElementById('val-modified-by').textContent = '--';
   document.getElementById('val-modified-date').textContent = wo.last_modified_at ? formatDateTime(wo.last_modified_at) : '--';
+  document.getElementById('val-dispatch-user').textContent = wo.DispatchUser || '--';
+  document.getElementById('val-dispatch-time').textContent = wo.DispatchTime ? formatDateTime(wo.DispatchTime) : '--';
 
   // Map
   const mapContainer = document.getElementById('detail-map');
@@ -4361,6 +4431,14 @@ async function saveDetailChanges() {
     ScrapRemoval: document.getElementById('det-scrap').value,
     FabDetails: document.getElementById('det-fabdetails').value
   };
+
+  // --- AUTOMATION HOOKS ---
+  if (updatedData.FabStatus === 'Done') updatedData.ReadyForInstallation = true;
+  if (updatedData.InstallationStatus === 'Completed') {
+     updatedData.Status = 'COMP';
+     if (!updatedData.ActualInstallationDate) updatedData.ActualInstallationDate = new Date().toISOString().split('T')[0];
+  }
+  // ------------------------
 
   try {
     await saveWorkOrderToSupabase(updatedData);
@@ -5591,6 +5669,231 @@ async function initMap() {
   loadMapPresets();
 }
 
+function openInstSidePanel(woId) {
+  const wo = allData.find(r => String(r.WorkOrder) === String(woId));
+  if (!wo) return;
+
+  const panel = document.getElementById('inst-side-panel');
+  const content = document.getElementById('inst-side-content');
+  if (!panel || !content) return;
+
+  panel.style.display = 'flex';
+  
+  const teamsOptions = installationTeams.map(t => `<option value="${t.team_name}" ${wo.AssignedTeam === t.team_name ? 'selected' : ''}>${t.team_name} (${t.status})</option>`).join('');
+
+  content.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+           <span style="font-weight: 800; font-size: 16px; color: var(--accent);">WO #${wo.WorkOrder}</span>
+           <span class="status-badge badge-${wo.InstallationStatus}">${wo.InstallationStatus}</span>
+        </div>
+        <div style="font-size: 12px; font-weight: 600;">${wo.Description || 'No description'}</div>
+        <div style="font-size: 11px; color: var(--muted); margin-top: 4px;"><i class="fas fa-map-marker-alt"></i> ${wo.Location}</div>
+      </div>
+
+      <div style="background: var(--surface2); padding: 16px; border-radius: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+         <div class="form-group">
+            <label style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Priority</label>
+            <div style="font-size: 13px; font-weight: 700;">${wo.Priority || 'Normal'}</div>
+         </div>
+         <div class="form-group">
+            <label style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Finish Date</label>
+            <div style="font-size: 13px; font-weight: 700; color: var(--red);">${formatDate(wo.TargetFinish)}</div>
+         </div>
+      </div>
+
+      <div class="form-group">
+         <label style="font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Assign Team</label>
+         <select id="inst-panel-team" class="filter-input" style="width: 100%; margin-top: 6px;">
+            <option value="">— Unassigned —</option>
+            ${teamsOptions}
+         </select>
+      </div>
+
+      <div class="form-group">
+         <label style="font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Scheduled Date</label>
+         <input type="date" id="inst-panel-date" class="filter-input" style="width: 100%; margin-top: 6px;" value="${wo.PlannedInstallationDate || ''}">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+         <button class="btn btn-primary flex-1" id="inst-panel-save" onclick="saveInstAssignment('${wo.WorkOrder}')">Save Assignment</button>
+         <button class="btn btn-blue" onclick="openCompletionModal('${wo.WorkOrder}')" title="Complete Installation"><i class="fas fa-check-circle"></i></button>
+         <button class="btn btn-ghost" onclick="openDetail('${wo.WorkOrder}')"><i class="fas fa-external-link-alt"></i></button>
+      </div>
+      
+      <div id="inst-panel-history" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 16px;">
+         <label style="font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Fabrication Link</label>
+         <div style="font-size: 12px; margin-top: 4px;">Status: <b>${wo.FabStatus || 'Pending'}</b></div>
+         <button class="btn btn-ghost btn-sm w-100 mt-2" onclick="openFabModal('${wo.WorkOrder}')"><i class="fas fa-file-pdf"></i> Fabrication Spec</button>
+      </div>
+    </div>
+  `;
+  
+  if (instMap) instMap.invalidateSize();
+}
+
+function closeInstSidePanel() {
+  const panel = document.getElementById('inst-side-panel');
+  if (panel) panel.style.display = 'none';
+  if (instMap) instMap.invalidateSize();
+}
+
+function openCompletionModal(woId) {
+  const wo = allData.find(r => String(r.WorkOrder) === String(woId));
+  if (!wo) return;
+  
+  currentCompletionWO = woId;
+  document.getElementById('comp-wo-num').textContent = woId;
+  document.getElementById('comp-notes').value = '';
+  document.getElementById('comp-gps').value = '';
+  
+  // Reset Photo Previews
+  document.getElementById('comp-prev-before').innerHTML = '<span style="color:var(--muted); font-size:12px;">Click to upload "Before" photo</span>';
+  document.getElementById('comp-prev-after').innerHTML = '<span style="color:var(--muted); font-size:12px;">Click to upload "After" photo</span>';
+  
+  // Show any existing photos
+  const existing = installationPhotos.filter(p => String(p.work_order) === String(woId));
+  existing.forEach(p => updateCompPhotoPreview(p.category, p.url));
+
+  openModal('completionModal');
+  
+  // Init Signature Pad
+  setTimeout(() => {
+    const canvas = document.getElementById('signature-pad');
+    if (signaturePad) signaturePad.clear();
+    signaturePad = new SignaturePad(canvas, {
+       backgroundColor: 'rgb(255, 255, 255)',
+       penColor: 'rgb(0, 0, 0)'
+    });
+    
+    // Auto-fetch GPS
+    fetchCurrentGPS();
+  }, 300);
+}
+
+function updateCompPhotoPreview(category, url) {
+  const id = category === 'Before' ? 'comp-prev-before' : 'comp-prev-after';
+  const el = document.getElementById(id);
+  if (el) {
+    el.innerHTML = `<img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">`;
+  }
+}
+
+function clearSignature() {
+  if (signaturePad) signaturePad.clear();
+}
+
+function fetchCurrentGPS() {
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(pos => {
+       document.getElementById('comp-gps').value = \`\${pos.coords.latitude.toFixed(6)}, \${pos.coords.longitude.toFixed(6)}\`;
+    }, err => {
+       showToast("GPS Access Denied", "amber");
+    });
+  }
+}
+
+async function saveCompletion() {
+  const woId = currentCompletionWO;
+  const wo = allData.find(r => String(r.WorkOrder) === String(woId));
+  if (!wo) return;
+
+  const notes = document.getElementById('comp-notes').value;
+  const gps = document.getElementById('comp-gps').value;
+  
+  if (signaturePad && signaturePad.isEmpty()) {
+    showToast("Installer signature is required", "amber");
+    return;
+  }
+  
+  const photos = installationPhotos.filter(p => String(p.work_order) === String(woId));
+  const hasAfter = photos.some(p => p.category === 'After');
+  if (!hasAfter) {
+    showToast("After-installation photo is required", "amber");
+    return;
+  }
+
+  const btn = document.getElementById('comp-save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Finalizing...';
+
+  try {
+    const signatureBase64 = signaturePad.toDataURL();
+    
+    // 1. Update Master Work Order
+    wo.InstallationStatus = 'Completed';
+    wo.Status = 'COMP';
+    wo.ActualInstallationDate = new Date().toISOString().split('T')[0];
+    await saveWorkOrderToSupabase(wo);
+
+    // 2. Save to installation_records
+    const record = {
+       work_order: woId,
+       team_name: wo.AssignedTeam,
+       status: 'Completed',
+       completion_date: new Date().toISOString(),
+       gps_coordinates: gps,
+       notes: notes,
+       signature_url: signatureBase64, // In a real app, upload this to storage first
+       recorded_by: currentUser ? currentUser.email : 'System'
+    };
+    
+    if (supabaseClient) {
+       await supabaseClient.from('installation_records').insert(record);
+    }
+
+    logAudit("Completed Installation", \`WO: \${woId}, Team: \${wo.AssignedTeam}\`, woId);
+    showToast(\`Work Order #\${woId} marked as Completed\`);
+    closeModal('completionModal');
+    currentCompletionWO = null;
+    
+    refreshUI();
+  } catch (e) {
+    console.error("Completion save failed:", e);
+    showToast("Failed to save completion", "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Confirm Completion';
+  }
+}
+
+async function saveInstAssignment(woId) {
+  const wo = allData.find(r => String(r.WorkOrder) === String(woId));
+  if (!wo) return;
+
+  const team = document.getElementById('inst-panel-team').value;
+  const date = document.getElementById('inst-panel-date').value;
+  
+  const btn = document.getElementById('inst-panel-save');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+  try {
+    wo.AssignedTeam = team;
+    wo.PlannedInstallationDate = date;
+    wo.AssignedDate = team ? new Date().toISOString().split('T')[0] : null;
+    
+    // Automation: maintain consistency
+    if (wo.InstallationStatus !== 'Completed' && wo.InstallationStatus !== 'Dispatched') {
+        if (team) wo.InstallationStatus = 'Assigned';
+        else if (date) wo.InstallationStatus = 'Planned';
+        else wo.InstallationStatus = 'Pending';
+    }
+
+    await saveWorkOrderToSupabase(wo);
+    showToast(`Work Order #${woId} updated successfully`);
+    loadInstMarkers();
+    updateInstKPIs();
+    updateProgramContent();
+  } catch (e) {
+    showToast("Error updating assignment", "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Save Assignment';
+  }
+}
+
 async function loadMapPresets() {
   if (!supabaseClient) return;
   try {
@@ -5812,9 +6115,9 @@ function loadInstMarkers() {
 
   ready.forEach(r => {
     let color = '#64748b'; // Unassigned
-    if (r.AssignedTeam && r.AssignedTeam !== '') color = '#22c55e'; // Assigned
-    if (r.InstallationStatus === 'Planned') color = '#f59e0b'; // Planned
-    if (r.TargetFinish && new Date(r.TargetFinish) < today && r.InstallationStatus !== 'Completed') color = '#ef4444'; // Overdue
+    if (r.InstallationStatus === 'Planned') color = '#f59e0b';
+    if (r.InstallationStatus === 'Assigned' || r.InstallationStatus === 'Dispatched') color = '#22c55e';
+    if (r.TargetFinish && new Date(r.TargetFinish) < today && r.InstallationStatus !== 'Completed') color = '#ef4444';
 
     const marker = L.marker([r.Lat, r.Lng], {
       icon: L.divIcon({
@@ -5825,27 +6128,25 @@ function loadInstMarkers() {
       })
     }).addTo(instMap);
 
-    marker.bindPopup(`
-      <div style="font-family:'Inter',sans-serif; min-width:200px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <strong style="color:var(--accent);">#${r.WorkOrder}</strong>
-          <span class="status-badge badge-${r.InstallationStatus}" style="font-size:10px;">${r.InstallationStatus}</span>
+    const teamsOptions = installationTeams.map(t => `<option value="${t.team_name}" ${r.AssignedTeam === t.team_name ? 'selected' : ''}>${t.team_name}</option>`).join('');
+    const popupHtml = `
+      <div style="font-family:'Inter', sans-serif; min-width:200px;">
+        <div style="font-weight:800; color:var(--accent); margin-bottom:4px;">WO #${r.WorkOrder}</div>
+        <div style="font-size:11px; margin-bottom:12px;">${r.Location || 'No location'}</div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label style="font-size:10px; text-transform:uppercase; color:var(--muted);">Assign Team</label>
+          <select id="pop-team-${r.WorkOrder}" class="filter-input" style="width:100%; height:28px; font-size:11px;">
+            <option value="">— Unassigned —</option>
+            ${teamsOptions}
+          </select>
         </div>
-        <div style="font-size:11px; font-weight:600; margin-bottom:4px;">${r.Description || 'No description'}</div>
-        <div style="font-size:11px; color:var(--muted); margin-bottom:8px;"><i class="fas fa-map-marker-alt"></i> ${r.Location}</div>
-        
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:10px; margin-bottom:12px; padding:8px; background:var(--surface2); border-radius:6px;">
-          <div><label style="color:var(--muted); display:block;">Finish Date</label>${formatDate(r.TargetFinish)}</div>
-          <div><label style="color:var(--muted); display:block;">Priority</label>${r.Priority || 'Normal'}</div>
-          <div style="grid-column: span 2;"><label style="color:var(--muted); display:block;">Team</label>${r.AssignedTeam || 'Unassigned'}</div>
-        </div>
-        
         <div style="display:flex; gap:6px;">
-          <button class="btn btn-primary btn-xs flex-1" onclick="openDetail('${r.WorkOrder}')">View Details</button>
-          <button class="btn btn-ghost btn-xs" onclick="quickAssign('${r.WorkOrder}')"><i class="fas fa-user-plus"></i></button>
+          <button class="btn btn-primary btn-xs flex-1" onclick="processQuickAssign('${r.WorkOrder}', document.getElementById('pop-team-${r.WorkOrder}').value)">Assign</button>
+          <button class="btn btn-ghost btn-xs" onclick="openInstSidePanel('${r.WorkOrder}')"><i class="fas fa-expand"></i></button>
         </div>
       </div>
-    `);
+    `;
+    marker.bindPopup(popupHtml);
   });
 }
 
@@ -5975,7 +6276,7 @@ function optimizeAllRoutes() {
     instMap.eachLayer(l => { if (l instanceof L.Polyline && !l.isBoundary) instMap.removeLayer(l); });
   }
 
-  teams.forEach(team => {
+  teams.forEach(async team => {
     const teamOrders = ready.filter(r => r.AssignedTeam === team);
     if (teamOrders.length < 1) return;
 
@@ -5999,6 +6300,19 @@ function optimizeAllRoutes() {
     
     optimizedRoutes[team] = route;
 
+    // Persist sequence to DB
+    const updates = route.map((r, idx) => {
+       r.SequenceOrder = idx + 1;
+       return {
+         work_order: r.WorkOrder,
+         sequence_order: r.SequenceOrder
+       };
+    });
+    
+    if (supabaseClient) {
+       await supabaseClient.from('work_orders').upsert(updates, { onConflict: 'work_order' });
+    }
+
     // Visualize on map
     if (instMap && route.length > 1) {
        const latlngs = route.map(r => [r.Lat, r.Lng]);
@@ -6007,7 +6321,7 @@ function optimizeAllRoutes() {
     }
   });
 
-  showToast("Routes optimized and visualized");
+  showToast("Routes optimized, saved, and visualized");
   updateProgramContent();
 }
 
@@ -7661,9 +7975,57 @@ async function generateTeamPackage(teamName) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${teamName.replace(/\s+/g, '_')}_Package.pdf`;
+  const fileName = `${teamName.replace(/\s+/g, '_')}_Package_${new Date().toISOString().split('T')[0]}.pdf`;
+  a.download = fileName;
   a.click();
   showToast("Package generated successfully");
+  return fileName;
+}
+
+async function dispatchTeam(teamName) {
+  if (!confirm(`Are you sure you want to dispatch ${teamName}? This will update the status of all assigned work orders.`)) return;
+
+  const assignedWos = allData.filter(r => r.AssignedTeam === teamName && r.InstallationStatus !== 'Completed');
+  if (assignedWos.length === 0) {
+    showToast("No active work orders to dispatch for this team", "amber");
+    return;
+  }
+
+  try {
+    const fileName = await generateTeamPackage(teamName);
+    
+    const updates = assignedWos.map(wo => {
+      wo.InstallationStatus = 'Dispatched';
+      return {
+        work_order: wo.WorkOrder,
+        installation_status: 'Dispatched',
+        dispatch_time: new Date().toISOString(),
+        dispatch_user: currentUser ? currentUser.email : 'System'
+      };
+    });
+
+    if (supabaseClient) {
+       await supabaseClient.from('work_orders').upsert(updates, { onConflict: 'work_order' });
+       
+       const snapshots = assignedWos.map(wo => ({
+          work_order: wo.WorkOrder,
+          team_name: teamName,
+          status: 'Dispatched',
+          recorded_by: currentUser ? currentUser.email : 'System',
+          notes: `Dispatched in package: ${fileName}`
+       }));
+       await supabaseClient.from('installation_records').insert(snapshots);
+    }
+
+    logAudit("Dispatched Team", `Team: ${teamName}, WO Count: ${assignedWos.length}, PDF: ${fileName}`);
+    showToast(`Team ${teamName} dispatched successfully`);
+    loadInstMarkers();
+    updateInstKPIs();
+    updateProgramContent();
+  } catch (e) {
+    console.error("Dispatch failed:", e);
+    showToast("Dispatch action failed", "error");
+  }
 }
 
 async function exportTeamKMZ(teamName) {
@@ -7715,6 +8077,7 @@ async function generateCompletionCertificate(woId) {
   const photos = installationPhotos.filter(p => String(p.work_order) === String(woId));
   const before = photos.find(p => p.category === 'Before');
   const after = photos.find(p => p.category === 'After');
+  const record = (installationRecords || []).find(r => String(r.work_order) === String(woId));
 
   if (!after) { showToast("After installation photo is required for certificate", "amber"); return; }
 
@@ -7723,46 +8086,96 @@ async function generateCompletionCertificate(woId) {
   const { PDFDocument, rgb, StandardFonts } = PDFLib;
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const regularFont = await pdf.embedFont(StandardFonts.Helvetica);
   const page = pdf.addPage([595.28, 841.89]);
 
-  page.drawText('INSTALLATION COMPLETION CERTIFICATE', { x: 50, y: 780, size: 20, font, color: rgb(0, 0.49, 1) });
+  // Branding Header
+  pdf.setTitle(`Completion Certificate - WO ${wo.WorkOrder}`);
+  page.drawRectangle({ x: 0, y: 760, width: 595.28, height: 81.89, color: rgb(0.04, 0.06, 0.1) });
   
-  let y = 730;
+  if (companyLogo) {
+     try {
+       const logoBytes = await fetch(companyLogo).then(res => res.arrayBuffer());
+       const logoImg = companyLogo.toLowerCase().endsWith('.png') ? await pdf.embedPng(logoBytes) : await pdf.embedJpg(logoBytes);
+       page.drawImage(logoImg, { x: 50, y: 775, width: 50, height: 50 });
+     } catch(e) {}
+  }
+
+  page.drawText('INSTALLATION COMPLETION CERTIFICATE', { x: 120, y: 795, size: 18, font, color: rgb(1, 1, 1) });
+  page.drawText('QBC Operations Center – Roads, Assets & GIS Management System', { x: 120, y: 775, size: 9, font: regularFont, color: rgb(0.8, 0.8, 0.8) });
+
+  let y = 710;
+  page.drawText('WORK ORDER DETAILS', { x: 50, y: 730, size: 12, font, color: rgb(0, 0.49, 1) });
+  page.drawLine({ start: { x: 50, y: 725 }, end: { x: 545, y: 725 }, thickness: 1, color: rgb(0.9, 0.9, 0.9) });
+
   const details = [
-    ['Work Order', wo.WorkOrder],
-    ['Location', wo.Location || '—'],
-    ['Team', wo.AssignedTeam || '—'],
+    ['Work Order Number', wo.WorkOrder],
+    ['Location / Highway', wo.Location || '—'],
+    ['Assigned Team', wo.AssignedTeam || '—'],
     ['Actual Install Date', wo.ActualInstallationDate || formatDate(new Date())],
-    ['GPS Coordinates', `${wo.Lat}, ${wo.Lng}`]
+    ['GPS Coordinates', record?.gps_coordinates || `${wo.Lat}, ${wo.Lng}`],
+    ['Sign Description', (wo.Description || '').substring(0, 80)],
+    ['Completion Notes', record?.notes || '—']
   ];
 
   details.forEach(([label, val]) => {
-    page.drawText(`${label}:`, { x: 50, y, size: 12, font });
-    page.drawText(String(val), { x: 180, y, size: 12 });
-    y -= 25;
+    page.drawText(`${label}:`, { x: 50, y, size: 10, font, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(String(val), { x: 200, y, size: 10, font: regularFont });
+    y -= 20;
   });
 
+  // Declaration
+  y -= 10;
+  page.drawRectangle({ x: 50, y: y - 25, width: 495, height: 35, color: rgb(0.97, 0.98, 1) });
+  page.drawText('COMPLETION DECLARATION:', { x: 60, y: y - 10, size: 9, font });
+  page.drawText('This is to certify that the fabrication and installation of the above-mentioned asset have been completed in accordance', { x: 60, y: y - 22, size: 8, font: regularFont });
+  page.drawText('with the approved project specifications and safety standards.', { x: 60, y: y - 32, size: 8, font: regularFont });
+
   // Images
-  page.drawText('Before Installation:', { x: 50, y: 550, size: 14, font });
+  y -= 60;
+  page.drawText('SITE PHOTOGRAPHS', { x: 50, y, size: 12, font, color: rgb(0, 0.49, 1) });
+  page.drawLine({ start: { x: 50, y: y-5 }, end: { x: 545, y: y-5 }, thickness: 1, color: rgb(0.9, 0.9, 0.9) });
+  
+  y -= 30;
+  page.drawText('Before Installation:', { x: 50, y, size: 10, font });
+  page.drawText('After Installation:', { x: 300, y, size: 10, font });
+
   if (before) {
     try {
       const resp = await fetch(before.url);
       const bytes = await resp.arrayBuffer();
-      // Detect if PNG or JPG
       const img = before.url.toLowerCase().endsWith('.png') ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
-      page.drawImage(img, { x: 50, y: 340, width: 220, height: 200 });
+      page.drawImage(img, { x: 50, y: y - 210, width: 220, height: 200 });
     } catch(e) { console.warn("Could not embed before photo", e); }
   }
 
-  page.drawText('After Installation:', { x: 300, y: 550, size: 14, font });
   if (after) {
     try {
       const resp = await fetch(after.url);
       const bytes = await resp.arrayBuffer();
       const img = after.url.toLowerCase().endsWith('.png') ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
-      page.drawImage(img, { x: 300, y: 340, width: 220, height: 200 });
+      page.drawImage(img, { x: 300, y: y - 210, width: 220, height: 200 });
     } catch(e) { console.warn("Could not embed after photo", e); }
   }
+
+  y -= 260;
+  // Signatures
+  page.drawText('SIGNATURES & APPROVALS', { x: 50, y, size: 12, font, color: rgb(0, 0.49, 1) });
+  page.drawLine({ start: { x: 50, y: y-5 }, end: { x: 545, y: y-5 }, thickness: 1, color: rgb(0.9, 0.9, 0.9) });
+  
+  if (record && record.signature_url) {
+    try {
+      const sigImg = await pdf.embedPng(record.signature_url);
+      page.drawImage(sigImg, { x: 50, y: y - 50, width: 150, height: 50 });
+    } catch(e) { console.warn("Could not embed signature", e); }
+  }
+
+  y -= 60;
+  page.drawLine({ start: { x: 50, y }, end: { x: 220, y }, thickness: 1, color: rgb(0.4, 0.4, 0.4) });
+  page.drawLine({ start: { x: 330, y }, end: { x: 500, y }, thickness: 1, color: rgb(0.4, 0.4, 0.4) });
+  
+  page.drawText('Installation Supervisor', { x: 50, y: y - 15, size: 9, font: regularFont });
+  page.drawText('Client / PWA Representative', { x: 330, y: y - 15, size: 9, font: regularFont });
 
   const pdfBytes = await pdf.save();
   const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -7864,6 +8277,15 @@ function makeEditable(cell, woId, field, type = 'text') {
     if (newValue !== originalValue) {
       const prevValue = wo[field];
       wo[field] = newValue;
+
+      // --- AUTOMATION HOOKS ---
+      if (field === 'FabStatus' && newValue === 'Done') wo.ReadyForInstallation = true;
+      if (field === 'InstallationStatus' && newValue === 'Completed') {
+         wo.Status = 'COMP';
+         if (!wo.ActualInstallationDate) wo.ActualInstallationDate = new Date().toISOString().split('T')[0];
+      }
+      // ------------------------
+
       try {
         await saveWorkOrderToSupabase(wo);
         showToast(`${field} updated`);
@@ -7964,6 +8386,14 @@ async function saveEdit() {
   });
 
   if (!r.WorkOrder) { showToast('Work Order is required','error'); return; }
+
+  // --- AUTOMATION HOOKS ---
+  if (r.FabStatus === 'Done') r.ReadyForInstallation = true;
+  if (r.InstallationStatus === 'Completed') {
+     r.Status = 'COMP';
+     if (!r.ActualInstallationDate) r.ActualInstallationDate = new Date().toISOString().split('T')[0];
+  }
+  // ------------------------
 
   const btn = document.getElementById('save-edit-btn');
   const originalText = btn ? btn.innerHTML : "Save Changes";
@@ -8556,9 +8986,25 @@ function updateInstKPIs() {
 
 function renderInstMap(container) {
   container.innerHTML = `
-    <div style="height: calc(100vh - 250px); position: relative; border-radius:16px; overflow:hidden; border:1px solid var(--border);">
-       <div id="instMap" style="height: 100%; width: 100%;"></div>
-       <div style="position:absolute; top:20px; right:20px; z-index:1000; display:flex; flex-direction:column; gap:10px;">
+    <div style="height: calc(100vh - 250px); position: relative; border-radius:16px; overflow:hidden; border:1px solid var(--border); display: flex;">
+       <div id="instMap" style="flex: 1; height: 100%;"></div>
+       
+       <!-- Integrated Side Panel -->
+       <div id="inst-side-panel" style="width: 350px; background: var(--surface); border-left: 1px solid var(--border); display: none; flex-direction: column; animation: slideInRight 0.3s ease;">
+          <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+             <h3 style="font-size: 14px; font-weight: 800; color: var(--accent);">Planning Details</h3>
+             <button class="btn-reset" onclick="closeInstSidePanel()"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="inst-side-content" style="flex: 1; overflow-y: auto; padding: 20px;">
+             <!-- Dynamic Content -->
+             <div style="text-align: center; color: var(--muted); margin-top: 40px;">
+                <i class="fas fa-map-marker-alt" style="font-size: 32px; opacity: 0.2; margin-bottom: 16px;"></i>
+                <p>Select a location on the map to manage assignment</p>
+             </div>
+          </div>
+       </div>
+
+       <div style="position:absolute; top:20px; left:20px; z-index:1000; display:flex; flex-direction:column; gap:10px;">
           <button class="btn btn-primary" onclick="autoGroupNearby()"><i class="fas fa-object-group"></i> Auto Group Nearby</button>
           <button class="btn btn-ghost" style="background:var(--surface); border:1px solid var(--border);" onclick="optimizeAllRoutes()"><i class="fas fa-route"></i> Optimize All Routes</button>
        </div>
@@ -8599,13 +9045,14 @@ function updateTeamsList() {
         <td style="font-weight:700; color:var(--accent);">${t.team_name}</td>
         <td>${t.supervisor}</td>
         <td>${t.crew_size}</td>
-        <td>${t.vehicle}</td>
         <td>${t.capacity_per_day} Signs</td>
+        <td><div style="font-size:10px; color:var(--muted);">${t.specialization || '—'}</div></td>
+        <td><div style="font-size:10px; color:var(--muted);">${t.equipment || '—'}</div></td>
         <td><span class="status-badge" style="background:var(--surface2); color:var(--text);">${t.status}</span></td>
         <td>
            <div style="display:flex; gap:4px;">
               <button class="btn btn-ghost btn-xs" onclick="editTeam('${t.id}')" title="Edit Team"><i class="fas fa-edit"></i></button>
-              <button class="btn btn-ghost btn-xs" onclick="generateTeamPackage('${t.team_name}')" title="PDF Package"><i class="fas fa-file-pdf"></i></button>
+              <button class="btn btn-ghost btn-xs" onclick="dispatchTeam('${t.team_name}')" title="Dispatch Team"><i class="fas fa-shipping-fast"></i></button>
               <button class="btn btn-ghost btn-xs" onclick="exportTeamKMZ('${t.team_name}')" title="Export KMZ"><i class="fas fa-map-marked-alt"></i></button>
               <button class="btn btn-ghost btn-xs" style="color:var(--red);" onclick="deleteTeam('${t.id}')" title="Delete Team"><i class="fas fa-trash"></i></button>
            </div>
@@ -8641,6 +9088,9 @@ function openAddTeamModal() {
   document.getElementById('tm-vehicle').value = '';
   document.getElementById('tm-capacity').value = '10';
   document.getElementById('tm-status').value = 'Available';
+  document.getElementById('tm-specialization').value = '';
+  document.getElementById('tm-equipment').value = '';
+  document.getElementById('tm-remarks').value = '';
   openModal('teamModal');
 }
 
@@ -8649,12 +9099,15 @@ function editTeam(id) {
   if(!team) return;
   editingTeamId = id;
   document.getElementById('teamModalTitle').textContent = 'Edit Installation Team';
-  document.getElementById('tm-name').value = team.team_name;
-  document.getElementById('tm-supervisor').value = team.supervisor;
-  document.getElementById('tm-size').value = team.crew_size;
-  document.getElementById('tm-vehicle').value = team.vehicle;
-  document.getElementById('tm-capacity').value = team.capacity_per_day;
-  document.getElementById('tm-status').value = team.status;
+  document.getElementById('tm-name').value = team.team_name || '';
+  document.getElementById('tm-supervisor').value = team.supervisor || '';
+  document.getElementById('tm-size').value = team.crew_size || '';
+  document.getElementById('tm-vehicle').value = team.vehicle || '';
+  document.getElementById('tm-capacity').value = team.capacity_per_day || '';
+  document.getElementById('tm-status').value = team.status || 'Available';
+  document.getElementById('tm-specialization').value = team.specialization || '';
+  document.getElementById('tm-equipment').value = team.equipment || '';
+  document.getElementById('tm-remarks').value = team.remarks || '';
   openModal('teamModal');
 }
 
@@ -8665,7 +9118,10 @@ async function saveTeam() {
     crew_size: parseInt(document.getElementById('tm-size').value),
     vehicle: document.getElementById('tm-vehicle').value,
     capacity_per_day: parseInt(document.getElementById('tm-capacity').value),
-    status: document.getElementById('tm-status').value
+    status: document.getElementById('tm-status').value,
+    specialization: document.getElementById('tm-specialization').value,
+    equipment: document.getElementById('tm-equipment').value,
+    remarks: document.getElementById('tm-remarks').value
   };
 
   if(!payload.team_name) { showToast("Team name required", "error"); return; }
@@ -8710,13 +9166,13 @@ function updateProgramContent() {
     } else {
       const teams = [...new Set(ready.map(r => r.AssignedTeam))];
       dailyCont.innerHTML = teams.map(t => {
-         const items = optimizedRoutes[t] || ready.filter(r => r.AssignedTeam === t);
+         const items = optimizedRoutes[t] || ready.filter(r => r.AssignedTeam === t).sort((a,b) => (a.SequenceOrder || 99) - (b.SequenceOrder || 99));
          return `
          <div style="margin-bottom:20px; padding:12px; background:var(--surface2); border-radius:12px; border:1px solid var(--border);">
             <div style="font-weight:700; color:var(--accent); margin-bottom:8px; display:flex; justify-content:space-between;">
                <span>${t}</span>
                <div style="display:flex; gap:6px;">
-                  <button class="btn btn-ghost btn-xs" onclick="generateTeamPackage('${t}')"><i class="fas fa-file-pdf"></i> PDF Package</button>
+                  <button class="btn btn-ghost btn-xs" onclick="dispatchTeam('${t}')"><i class="fas fa-shipping-fast"></i> Dispatch</button>
                </div>
             </div>
             <div style="display:flex; flex-direction:column; gap:6px;">
@@ -8753,17 +9209,16 @@ function updateProgramContent() {
 
 function renderInstCalendar(container) {
   const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   container.innerHTML = `
     <div class="dash-card" style="min-height:600px;">
        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <div class="dash-card-title">Installation Schedule - ${monthNames[currentMonth]} ${currentYear}</div>
+          <div class="dash-card-title">Installation Schedule - ${monthNames[calMonth]} ${calYear}</div>
           <div style="display:flex; gap:8px;">
-             <button class="btn btn-ghost btn-sm"><i class="fas fa-chevron-left"></i></button>
-             <button class="btn btn-ghost btn-sm"><i class="fas fa-chevron-right"></i></button>
+             <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+             <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(1)"><i class="fas fa-chevron-right"></i></button>
+             <button class="btn btn-primary btn-sm" onclick="resetCalMonth()">Today</button>
           </div>
        </div>
        <div style="display:grid; grid-template-columns: repeat(7, 1fr); border-top:1px solid var(--border); border-left:1px solid var(--border);">
@@ -8774,24 +9229,28 @@ function renderInstCalendar(container) {
   `;
 
   const daysGrid = document.getElementById('calendar-days-grid');
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
 
   let html = '';
   for (let i = 0; i < firstDay; i++) {
-    html += `<div style="height:100px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); background:var(--bg); opacity:0.3;"></div>`;
+    html += `<div style="height:120px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); background:var(--bg); opacity:0.1;"></div>`;
   }
 
   for (let day = 1; day <= daysInMonth; day++) {
-    const dStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayWos = allData.filter(r => r.PlannedInstallationDate === dStr);
-    const isToday = day === today.getDate() && currentMonth === today.getMonth();
+    const isToday = day === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
 
     html += `
-       <div style="height:120px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:8px; position:relative; ${isToday ? 'background:rgba(0, 200, 255, 0.05);' : ''}">
+       <div style="height:120px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:8px; position:relative; ${isToday ? 'background:rgba(0, 200, 255, 0.05);' : ''}" ondragover="event.preventDefault()" ondrop="handleCalDrop(event, '${dStr}')">
           <div style="font-size:12px; font-weight:700; margin-bottom:6px; ${isToday ? 'color:var(--accent);' : ''}">${day}</div>
-          <div style="display:flex; flex-direction:column; gap:4px; max-height:80px; overflow-y:auto;">
-             ${dayWos.map(r => `<div onclick="openDetail('${r.WorkOrder}')" title="${r.Location}" style="font-size:9px; padding:2px 4px; background:var(--surface2); border-left:2px solid var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;">#${r.WorkOrder}</div>`).join('')}
+          <div style="display:flex; flex-direction:column; gap:4px; max-height:85px; overflow-y:auto; scrollbar-width: none;">
+             ${dayWos.map(r => `
+                <div draggable="true" ondragstart="handleCalDragStart(event, '${r.WorkOrder}')" onclick="openDetail('${r.WorkOrder}')" title="${r.Location}" 
+                     style="font-size:9px; padding:3px 6px; background:var(--surface2); border-left:2px solid var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:grab; border-radius:3px; transition:0.2s;">
+                   <i class="fas fa-tools" style="font-size:8px; opacity:0.5; margin-right:4px;"></i> #${r.WorkOrder}
+                </div>`).join('')}
           </div>
        </div>
     `;
@@ -8799,11 +9258,68 @@ function renderInstCalendar(container) {
   daysGrid.innerHTML = html;
 }
 
+function changeCalMonth(delta) {
+  calMonth += delta;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderInstCalendar(document.getElementById('inst-content'));
+}
+
+function resetCalMonth() {
+  calMonth = new Date().getMonth();
+  calYear = new Date().getFullYear();
+  renderInstCalendar(document.getElementById('inst-content'));
+}
+
+function handleCalDragStart(e, woId) {
+  e.dataTransfer.setData('text/plain', woId);
+  e.target.style.opacity = '0.5';
+}
+
+async function handleCalDrop(e, date) {
+  e.preventDefault();
+  const woId = e.dataTransfer.getData('text/plain');
+  const wo = allData.find(r => String(r.WorkOrder) === String(woId));
+  if (!wo) return;
+
+  if (wo.PlannedInstallationDate === date) return;
+
+  try {
+    wo.PlannedInstallationDate = date;
+    if (wo.InstallationStatus !== 'Completed' && wo.InstallationStatus !== 'Dispatched') {
+       wo.InstallationStatus = wo.AssignedTeam ? 'Assigned' : 'Planned';
+    }
+    await saveWorkOrderToSupabase(wo);
+    showToast(`Work Order #${woId} rescheduled to ${date}`);
+    renderInstCalendar(document.getElementById('inst-content'));
+    updateProgramContent();
+  } catch (err) {
+    showToast("Rescheduling failed", "error");
+  }
+}
+
+function updateNavBadges() {
+  const mfgCount = allData.filter(r => r.isSentToFab && r.FabStatus !== 'Done' && r.FabStatus !== 'COMP' && r.FabStatus !== 'COMPLETED').length;
+  const navBadge = document.getElementById('mfg-nav-badge');
+  const mobileBadge = document.getElementById('mfg-mobile-badge');
+  
+  if (navBadge) {
+    navBadge.textContent = mfgCount;
+    navBadge.style.display = mfgCount > 0 ? 'inline-block' : 'none';
+  }
+  if (mobileBadge) {
+    mobileBadge.textContent = mfgCount;
+    mobileBadge.style.display = mfgCount > 0 ? 'inline-block' : 'none';
+  }
+}
+
 function refreshUI() {
    applyFilters(false);
    applyManufacturingFilters();
    updateDashboard();
+   updateNavBadges();
    if (map) loadMarkers();
+   if (instMap) loadInstMarkers();
 }
 
 </script>
