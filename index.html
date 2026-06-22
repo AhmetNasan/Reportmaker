@@ -270,6 +270,29 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .btn-green{background:var(--green);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
 
+.btn-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+}
+.btn-reset:hover {
+  opacity: 0.8;
+}
+.btn-reset:active {
+  transform: scale(0.95);
+}
+.btn-reset:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ─── UPLOAD PROGRESS ─── */
 .upload-progress-container { margin-top: 16px; display: none; flex-direction: column; gap: 8px; }
 .upload-progress-text { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; }
@@ -1145,7 +1168,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div id="notif-panel" class="notif-panel">
   <div class="notif-header">
     <div class="notif-title">Notifications</div>
-    <button class="btn-reset" onclick="toggleNotifPanel()"><i class="fas fa-times"></i></button>
+    <button class="btn-reset" onclick="toggleNotifPanel()" aria-label="Close notification panel"><i class="fas fa-times"></i></button>
   </div>
   <div class="notif-tabs">
     <button class="notif-tab active" onclick="switchNotifTab('all')">All</button>
@@ -1280,7 +1303,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <div class="dash-card" id="dueSoonCard">
           <div class="dash-card-header">
             <div class="dash-card-title"><i class="fa-solid fa-bell"></i> Due / Overdue</div>
-            <button class="btn btn-sm btn-ghost" onclick="exportDueSoonCSV()" title="Export Due/Overdue"><i class="fas fa-file-csv"></i></button>
+        <button class="btn btn-sm btn-ghost" onclick="exportDueSoonCSV()" title="Export Due/Overdue" aria-label="Export Due or Overdue work orders to CSV"><i class="fas fa-file-csv"></i></button>
           </div>
           <div class="dash-card-body" id="dueOverdueContainer" style="overflow-y: auto;">
             <div class="empty-state">No pending items</div>
@@ -1310,7 +1333,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="teamModal">
   <div class="modal" style="max-width:400px;">
-    <button class="modal-close" onclick="closeModal('teamModal')">×</button>
+    <button class="modal-close" aria-label="Close modal" onclick="closeModal('teamModal')">×</button>
     <div class="modal-title" id="teamModalTitle">Add Installation Team</div>
     <div class="form-grid" style="grid-template-columns:1fr;">
        <div class="form-group"><label>Team Name</label><input type="text" id="tm-name" class="filter-input"></div>
@@ -1336,7 +1359,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="waitingPermitsModal">
   <div class="modal" style="max-width:1200px; width:95%;">
-    <button class="modal-close" onclick="closeModal('waitingPermitsModal')">×</button>
+    <button class="modal-close" aria-label="Close modal" onclick="closeModal('waitingPermitsModal')">×</button>
     <div class="modal-title">Work Orders Waiting Permits (WPERM)</div>
     <div class="table-wrap" style="max-height: 70vh; overflow-y: auto;">
       <table class="main-table" style="table-layout: fixed; width: 100%;">
@@ -1363,7 +1386,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <!-- Drill-Down Modal -->
 <div class="modal-overlay" id="drillDownModal">
   <div class="modal" style="max-width:1200px; width:95%;">
-    <button class="modal-close" onclick="closeModal('drillDownModal')">×</button>
+    <button class="modal-close" aria-label="Close modal" onclick="closeModal('drillDownModal')">×</button>
     <div class="modal-title" id="drill-modal-title">Filtered Work Orders</div>
     <div class="filters" style="margin-bottom:16px;">
       <input type="text" class="filter-input" id="drill-search" placeholder="Search in results..." style="flex:1;">
@@ -1390,7 +1413,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="profileModal">
   <div class="modal" style="max-width:400px;">
-    <button class="modal-close" onclick="closeModal('profileModal')">×</button>
+    <button class="modal-close" aria-label="Close modal" onclick="closeModal('profileModal')">×</button>
     <div class="modal-title">Edit Profile</div>
     <div class="form-group mb-3">
       <label>Full Name</label>
@@ -1430,7 +1453,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="recoveryModal">
   <div class="modal" style="max-width:360px;">
-    <button class="modal-close" onclick="closeModal('recoveryModal')">×</button>
+    <button class="modal-close" aria-label="Close modal" onclick="closeModal('recoveryModal')">×</button>
     <div class="modal-title">Password Recovery</div>
     <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Please enter your email address. We will send you a link to reset your password.</p>
     <div class="form-group">
@@ -1508,9 +1531,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
 
       <div class="gis-top-actions" style="display: flex; gap: 8px;">
-        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('kml-upload').click()"><i class="fas fa-upload"></i></button>
-        <button class="btn btn-ghost btn-sm" onclick="exportMapKML()"><i class="fas fa-download"></i></button>
-        <button class="btn btn-ghost btn-sm" onclick="toggleGisTheme()" title="Toggle GIS Theme"><i class="fas fa-circle-half-stroke"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('kml-upload').click()" aria-label="Upload KML file"><i class="fas fa-upload"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="exportMapKML()" aria-label="Download Map KML"><i class="fas fa-download"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleGisTheme()" title="Toggle GIS Theme" aria-label="Toggle GIS Theme"><i class="fas fa-circle-half-stroke"></i></button>
       </div>
     </header>
 
@@ -1541,7 +1564,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="gis-details-panel glass-panel" id="gis-details-panel">
       <div class="gis-details-header">
         <h3 id="gis-det-title" style="font-size: 14px; color: var(--accent);">Work Order Details</h3>
-        <button class="btn-reset" onclick="closeGisDetails()"><i class="fas fa-times"></i></button>
+        <button class="btn-reset" onclick="closeGisDetails()" aria-label="Close work order details"><i class="fas fa-times"></i></button>
       </div>
       <div class="gis-details-content" id="gis-details-content">
         <!-- Content will be injected here -->
@@ -2052,7 +2075,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="adminModal">
   <div class="modal" style="max-width:360px;">
-    <button class="modal-close" onclick="closeModal('adminModal')">×</button>
+    <button class="modal-close" aria-label="Close modal" onclick="closeModal('adminModal')">×</button>
     <div class="modal-title">Admin Login</div>
     <div class="form-group">
       <label>Password</label>
@@ -2068,7 +2091,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="editModal">
   <div class="modal" style="max-width:850px;">
-    <button class="modal-close" onclick="closeModal('editModal')">×</button>
+    <button class="modal-close" aria-label="Close modal" onclick="closeModal('editModal')">×</button>
     <div class="modal-title" id="editModalTitle">Edit Work Order</div>
     <div class="form-grid" id="editFormGrid"></div>
     <div class="fab-section">
@@ -2084,7 +2107,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="completionModal">
   <div class="modal" style="max-width: 800px; width: 95%;">
-    <button class="modal-close" onclick="closeModal('completionModal')">×</button>
+    <button class="modal-close" aria-label="Close modal" onclick="closeModal('completionModal')">×</button>
     <div class="modal-title">Work Order Completion – <span id="comp-wo-num"></span></div>
     
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 20px;">
@@ -2136,7 +2159,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="fabModal">
   <div class="modal pdf-modal">
-    <button class="modal-close" onclick="closeModal('fabModal')">×</button>
+    <button class="modal-close" aria-label="Close modal" onclick="closeModal('fabModal')">×</button>
     <div class="modal-title">Fabrication – <span id="fabModalWO"></span></div>
     <div id="pdfPreview"></div>
     <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;">
@@ -8994,7 +9017,7 @@ function renderInstMap(container) {
        <div id="inst-side-panel" style="width: 350px; background: var(--surface); border-left: 1px solid var(--border); display: none; flex-direction: column; animation: slideInRight 0.3s ease;">
           <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
              <h3 style="font-size: 14px; font-weight: 800; color: var(--accent);">Planning Details</h3>
-             <button class="btn-reset" onclick="closeInstSidePanel()"><i class="fas fa-times"></i></button>
+             <button class="btn-reset" onclick="closeInstSidePanel()" aria-label="Close planning details panel"><i class="fas fa-times"></i></button>
           </div>
           <div id="inst-side-content" style="flex: 1; overflow-y: auto; padding: 20px;">
              <!-- Dynamic Content -->
@@ -9052,10 +9075,10 @@ function updateTeamsList() {
         <td><span class="status-badge" style="background:var(--surface2); color:var(--text);">${t.status}</span></td>
         <td>
            <div style="display:flex; gap:4px;">
-              <button class="btn btn-ghost btn-xs" onclick="editTeam('${t.id}')" title="Edit Team"><i class="fas fa-edit"></i></button>
-              <button class="btn btn-ghost btn-xs" onclick="dispatchTeam('${t.team_name}')" title="Dispatch Team"><i class="fas fa-shipping-fast"></i></button>
-              <button class="btn btn-ghost btn-xs" onclick="exportTeamKMZ('${t.team_name}')" title="Export KMZ"><i class="fas fa-map-marked-alt"></i></button>
-              <button class="btn btn-ghost btn-xs" style="color:var(--red);" onclick="deleteTeam('${t.id}')" title="Delete Team"><i class="fas fa-trash"></i></button>
+              <button class="btn btn-ghost btn-xs" onclick="editTeam('${t.id}')" title="Edit Team" aria-label="Edit Team ${t.team_name}"><i class="fas fa-edit"></i></button>
+              <button class="btn btn-ghost btn-xs" onclick="dispatchTeam('${t.team_name}')" title="Dispatch Team" aria-label="Dispatch Team ${t.team_name}"><i class="fas fa-shipping-fast"></i></button>
+              <button class="btn btn-ghost btn-xs" onclick="exportTeamKMZ('${t.team_name}')" title="Export KMZ" aria-label="Export KMZ for Team ${t.team_name}"><i class="fas fa-map-marked-alt"></i></button>
+              <button class="btn btn-ghost btn-xs" style="color:var(--red);" onclick="deleteTeam('${t.id}')" title="Delete Team" aria-label="Delete Team ${t.team_name}"><i class="fas fa-trash"></i></button>
            </div>
         </td>
      </tr>
@@ -9217,8 +9240,8 @@ function renderInstCalendar(container) {
        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
           <div class="dash-card-title">Installation Schedule - ${monthNames[calMonth]} ${calYear}</div>
           <div style="display:flex; gap:8px;">
-             <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(-1)"><i class="fas fa-chevron-left"></i></button>
-             <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(1)"><i class="fas fa-chevron-right"></i></button>
+             <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(-1)" aria-label="Previous Month"><i class="fas fa-chevron-left"></i></button>
+             <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(1)" aria-label="Next Month"><i class="fas fa-chevron-right"></i></button>
              <button class="btn btn-primary btn-sm" onclick="resetCalMonth()">Today</button>
           </div>
        </div>
