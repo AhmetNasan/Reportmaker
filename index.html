@@ -270,29 +270,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .btn-green{background:var(--green);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
 
-.btn-reset {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all .2s;
-}
-.btn-reset:hover {
-  opacity: 0.8;
-}
-.btn-reset:active {
-  transform: scale(0.95);
-}
-.btn-reset:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
 /* ─── UPLOAD PROGRESS ─── */
 .upload-progress-container { margin-top: 16px; display: none; flex-direction: column; gap: 8px; }
 .upload-progress-text { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; }
@@ -851,53 +828,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   margin-top: 4px;
 }
 
-/* ─── INSTALLATION SIDEBAR REFINEMENT ─── */
-.inst-sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  padding: 8px;
-  gap: 4px;
-}
-
-.inst-side-tab {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border-radius: 8px;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  transition: 0.2s;
-  border: none;
-  background: none;
-  width: 100%;
-  cursor: pointer;
-  text-transform: none;
-  letter-spacing: normal;
-}
-
-.inst-side-tab i {
-  width: 18px;
-  text-align: center;
-  font-size: 14px;
-}
-
-.inst-side-tab:hover {
-  background: var(--surface2);
-  color: var(--text);
-}
-
-.inst-side-tab.active {
-  background: var(--accent) !important;
-  color: #000 !important;
-}
-
-.inst-side-tab.active i {
-  color: #000;
-}
-
 .gis-details-panel {
   position: absolute;
   top: 70px;
@@ -1215,7 +1145,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <div id="notif-panel" class="notif-panel">
   <div class="notif-header">
     <div class="notif-title">Notifications</div>
-    <button class="btn-reset" onclick="toggleNotifPanel()" aria-label="Close notification panel"><i class="fas fa-times"></i></button>
+    <button class="btn-reset" onclick="toggleNotifPanel()"><i class="fas fa-times"></i></button>
   </div>
   <div class="notif-tabs">
     <button class="notif-tab active" onclick="switchNotifTab('all')">All</button>
@@ -1350,7 +1280,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <div class="dash-card" id="dueSoonCard">
           <div class="dash-card-header">
             <div class="dash-card-title"><i class="fa-solid fa-bell"></i> Due / Overdue</div>
-        <button class="btn btn-sm btn-ghost" onclick="exportDueSoonCSV()" title="Export Due/Overdue" aria-label="Export Due or Overdue work orders to CSV"><i class="fas fa-file-csv"></i></button>
+            <button class="btn btn-sm btn-ghost" onclick="exportDueSoonCSV()" title="Export Due/Overdue"><i class="fas fa-file-csv"></i></button>
           </div>
           <div class="dash-card-body" id="dueOverdueContainer" style="overflow-y: auto;">
             <div class="empty-state">No pending items</div>
@@ -1380,7 +1310,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="teamModal">
   <div class="modal" style="max-width:400px;">
-    <button class="modal-close" aria-label="Close modal" onclick="closeModal('teamModal')">×</button>
+    <button class="modal-close" onclick="closeModal('teamModal')">×</button>
     <div class="modal-title" id="teamModalTitle">Add Installation Team</div>
     <div class="form-grid" style="grid-template-columns:1fr;">
        <div class="form-group"><label>Team Name</label><input type="text" id="tm-name" class="filter-input"></div>
@@ -1406,7 +1336,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="waitingPermitsModal">
   <div class="modal" style="max-width:1200px; width:95%;">
-    <button class="modal-close" aria-label="Close modal" onclick="closeModal('waitingPermitsModal')">×</button>
+    <button class="modal-close" onclick="closeModal('waitingPermitsModal')">×</button>
     <div class="modal-title">Work Orders Waiting Permits (WPERM)</div>
     <div class="table-wrap" style="max-height: 70vh; overflow-y: auto;">
       <table class="main-table" style="table-layout: fixed; width: 100%;">
@@ -1433,7 +1363,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <!-- Drill-Down Modal -->
 <div class="modal-overlay" id="drillDownModal">
   <div class="modal" style="max-width:1200px; width:95%;">
-    <button class="modal-close" aria-label="Close modal" onclick="closeModal('drillDownModal')">×</button>
+    <button class="modal-close" onclick="closeModal('drillDownModal')">×</button>
     <div class="modal-title" id="drill-modal-title">Filtered Work Orders</div>
     <div class="filters" style="margin-bottom:16px;">
       <input type="text" class="filter-input" id="drill-search" placeholder="Search in results..." style="flex:1;">
@@ -1460,7 +1390,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="profileModal">
   <div class="modal" style="max-width:400px;">
-    <button class="modal-close" aria-label="Close modal" onclick="closeModal('profileModal')">×</button>
+    <button class="modal-close" onclick="closeModal('profileModal')">×</button>
     <div class="modal-title">Edit Profile</div>
     <div class="form-group mb-3">
       <label>Full Name</label>
@@ -1500,7 +1430,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="recoveryModal">
   <div class="modal" style="max-width:360px;">
-    <button class="modal-close" aria-label="Close modal" onclick="closeModal('recoveryModal')">×</button>
+    <button class="modal-close" onclick="closeModal('recoveryModal')">×</button>
     <div class="modal-title">Password Recovery</div>
     <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Please enter your email address. We will send you a link to reset your password.</p>
     <div class="form-group">
@@ -1578,9 +1508,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
 
       <div class="gis-top-actions" style="display: flex; gap: 8px;">
-        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('kml-upload').click()" aria-label="Upload KML file"><i class="fas fa-upload"></i></button>
-        <button class="btn btn-ghost btn-sm" onclick="exportMapKML()" aria-label="Download Map KML"><i class="fas fa-download"></i></button>
-        <button class="btn btn-ghost btn-sm" onclick="toggleGisTheme()" title="Toggle GIS Theme" aria-label="Toggle GIS Theme"><i class="fas fa-circle-half-stroke"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('kml-upload').click()"><i class="fas fa-upload"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="exportMapKML()"><i class="fas fa-download"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleGisTheme()" title="Toggle GIS Theme"><i class="fas fa-circle-half-stroke"></i></button>
       </div>
     </header>
 
@@ -1611,7 +1541,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="gis-details-panel glass-panel" id="gis-details-panel">
       <div class="gis-details-header">
         <h3 id="gis-det-title" style="font-size: 14px; color: var(--accent);">Work Order Details</h3>
-        <button class="btn-reset" onclick="closeGisDetails()" aria-label="Close work order details"><i class="fas fa-times"></i></button>
+        <button class="btn-reset" onclick="closeGisDetails()"><i class="fas fa-times"></i></button>
       </div>
       <div class="gis-details-content" id="gis-details-content">
         <!-- Content will be injected here -->
@@ -1979,45 +1909,27 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<div class="page" id="page-installation" style="padding:0; height: calc(100vh - var(--header-h));">
-  <div class="gis-container gis-theme-dark" id="inst-main-container" style="height:100%; width:100%;">
-    <header class="gis-top-bar">
-       <div style="display:flex; align-items:center; gap:12px;">
-         <i class="fas fa-tools" style="color:var(--accent); font-size:20px;"></i>
-         <h2 style="font-size:18px; font-weight:800;">Installation <span style="color:var(--accent);">Control Center</span></h2>
-       </div>
-       <div style="flex:1;"></div>
-       <div id="inst-top-actions" style="display:flex; gap:8px;">
-          <button class="btn btn-ghost btn-sm" onclick="fetchData()"><i class="fas fa-sync"></i> Refresh</button>
-       </div>
+<div class="page" id="page-installation">
+  <div class="wrapper">
+    <header style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
+      <div>
+        <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;gap:12px;">
+          Installation Planning & Dispatch
+        </h2>
+        <p style="font-size:12px; color:var(--muted); margin-top:4px;">Manage site execution, team scheduling, and progress tracking</p>
+      </div>
     </header>
-    
-    <div class="gis-main-content">
-      <aside class="gis-sidebar">
-        <div class="gis-sidebar-header">
-          <div class="gis-sidebar-title">Operations</div>
-          <div class="gis-sidebar-stats" id="inst-sidebar-stats">Ready: 0 | Assigned: 0</div>
-        </div>
-        <div class="gis-sidebar-content">
-          <nav class="inst-sidebar-nav" id="inst-tabs">
-            <button class="inst-side-tab active" onclick="switchInstTab('dashboard')"><i class="fas fa-chart-line"></i><span>Dashboard</span></button>
-            <button class="inst-side-tab" onclick="switchInstTab('map')"><i class="fas fa-map-marked-alt"></i><span>Planning Map</span></button>
-            <button class="inst-side-tab" onclick="switchInstTab('teams')"><i class="fas fa-users"></i><span>Teams & Crews</span></button>
-            <button class="inst-side-tab" onclick="switchInstTab('programs')"><i class="fas fa-calendar-day"></i><span>Programs</span></button>
-            <button class="inst-side-tab" onclick="switchInstTab('calendar')"><i class="fas fa-calendar-alt"></i><span>Calendar</span></button>
-            <button class="inst-side-tab" onclick="switchInstTab('records')"><i class="fas fa-file-invoice"></i><span>Records</span></button>
-            <button class="inst-side-tab" onclick="switchInstTab('photos')"><i class="fas fa-images"></i><span>Photos & Docs</span></button>
-            <button class="inst-side-tab" onclick="switchInstTab('logistics')"><i class="fas fa-truck-loading"></i><span>Logistics & Exports</span></button>
-          </nav>
-        </div>
-        <div class="gis-sidebar-footer" style="padding:16px;">
-          <button class="btn btn-primary w-100" onclick="autoGroupNearby()"><i class="fas fa-magic"></i> Auto-Plan All</button>
-        </div>
-      </aside>
-      
-      <main class="gis-map-canvas" id="inst-content" style="background:var(--bg); padding:24px; overflow-y:auto; position:relative;">
-        <!-- Dynamic content here -->
-      </main>
+
+    <nav class="mfg-tabs-container" id="inst-tabs">
+      <button class="mfg-tab-btn active" onclick="switchInstTab('dashboard')">Dashboard</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('map')">Planning Map</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('teams')">Teams Module</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('programs')">Programs</button>
+      <button class="mfg-tab-btn" onclick="switchInstTab('calendar')">Calendar</button>
+    </nav>
+
+    <div id="inst-content">
+      <!-- Content loaded dynamically via switchInstTab -->
     </div>
   </div>
 </div>
@@ -2140,7 +2052,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="adminModal">
   <div class="modal" style="max-width:360px;">
-    <button class="modal-close" aria-label="Close modal" onclick="closeModal('adminModal')">×</button>
+    <button class="modal-close" onclick="closeModal('adminModal')">×</button>
     <div class="modal-title">Admin Login</div>
     <div class="form-group">
       <label>Password</label>
@@ -2156,7 +2068,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="editModal">
   <div class="modal" style="max-width:850px;">
-    <button class="modal-close" aria-label="Close modal" onclick="closeModal('editModal')">×</button>
+    <button class="modal-close" onclick="closeModal('editModal')">×</button>
     <div class="modal-title" id="editModalTitle">Edit Work Order</div>
     <div class="form-grid" id="editFormGrid"></div>
     <div class="fab-section">
@@ -2172,7 +2084,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="completionModal">
   <div class="modal" style="max-width: 800px; width: 95%;">
-    <button class="modal-close" aria-label="Close modal" onclick="closeModal('completionModal')">×</button>
+    <button class="modal-close" onclick="closeModal('completionModal')">×</button>
     <div class="modal-title">Work Order Completion – <span id="comp-wo-num"></span></div>
     
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 20px;">
@@ -2224,7 +2136,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 <div class="modal-overlay" id="fabModal">
   <div class="modal pdf-modal">
-    <button class="modal-close" aria-label="Close modal" onclick="closeModal('fabModal')">×</button>
+    <button class="modal-close" onclick="closeModal('fabModal')">×</button>
     <div class="modal-title">Fabrication – <span id="fabModalWO"></span></div>
     <div id="pdfPreview"></div>
     <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;">
@@ -2917,19 +2829,11 @@ function switchMfgTab(tab) {
 
 function switchInstTab(tab) {
   currentInstTab = tab;
-  document.querySelectorAll('#inst-tabs .inst-side-tab').forEach(btn => {
+  document.querySelectorAll('#inst-tabs .mfg-tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${tab}'`));
   });
   if (tab === 'calendar') resetCalMonth();
   else updateInstallationUI();
-  updateInstSidebarStats();
-}
-
-function updateInstSidebarStats() {
-  const ready = allData.filter(r => r.ReadyForInstallation);
-  const assigned = ready.filter(r => r.AssignedTeam && r.AssignedTeam !== '');
-  const stats = document.getElementById('inst-sidebar-stats');
-  if(stats) stats.textContent = `Ready: ${ready.length} | Assigned: ${assigned.length}`;
 }
 
 function buildColumnFilters(tableId, data) {
@@ -8993,148 +8897,7 @@ function updateInstallationUI() {
     renderInstPrograms(content);
   } else if (currentInstTab === 'calendar') {
     renderInstCalendar(content);
-  } else if (currentInstTab === 'records') {
-    renderInstRecords(content);
-  } else if (currentInstTab === 'photos') {
-    renderInstPhotosGallery(content);
-  } else if (currentInstTab === 'logistics') {
-    renderInstLogistics(content);
   }
-}
-
-function renderInstRecords(container) {
-  container.innerHTML = `
-    <div class="dash-card glass-panel" style="background:var(--surface);">
-       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <div class="dash-card-title">Installation Records & Audit Trail</div>
-          <button class="btn btn-ghost btn-sm" onclick="exportTableCSV('inst-records')"><i class="fas fa-file-csv"></i> Export Records</button>
-       </div>
-       <div class="table-wrap">
-          <table class="main-table">
-             <thead><tr><th>WO No.</th><th>Completion Date</th><th>Team</th><th>Installer</th><th>GPS</th><th>Status</th><th>Actions</th></tr></thead>
-             <tbody id="inst-records-list"></tbody>
-          </table>
-       </div>
-    </div>
-  `;
-  updateInstRecordsList();
-}
-
-function updateInstRecordsList() {
-  const tbody = document.getElementById('inst-records-list');
-  if(!tbody) return;
-  tbody.innerHTML = installationRecords.map(r => `
-    <tr>
-       <td><span class="wo-num">${r.work_order}</span></td>
-       <td>${formatDate(r.completion_date)}</td>
-       <td>${r.team || '—'}</td>
-       <td>${r.recorded_by || '—'}</td>
-       <td><span style="font-size:10px; color:var(--muted);">${r.gps_lat || '0'}, ${r.gps_lng || '0'}</span></td>
-       <td><span class="status-badge badge-COMP">COMP</span></td>
-       <td>
-          <div style="display:flex; gap:4px;">
-             <button class="btn btn-ghost btn-xs" onclick="generateCompletionCertificate('${r.work_order}')" title="Certificate"><i class="fas fa-certificate"></i></button>
-             <button class="btn btn-ghost btn-xs" onclick="openDetail('${r.work_order}')" title="View Details"><i class="fas fa-eye"></i></button>
-          </div>
-       </td>
-    </tr>
-  `).join('');
-}
-
-function renderInstPhotosGallery(container) {
-  container.innerHTML = `
-    <div class="dash-card glass-panel" style="background:var(--surface);">
-       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-          <div class="dash-card-title">Installation Photo Gallery</div>
-          <div style="display:flex; gap:12px;">
-             <select id="gallery-category-filter" class="filter-input" style="width:180px; background:var(--surface2); border-color:var(--border);" onchange="updateInstPhotosGallery()">
-                <option value="all">All Categories</option>
-                <option value="Before">Before Installation</option>
-                <option value="During">During Installation</option>
-                <option value="After">After Installation</option>
-             </select>
-             <input type="text" id="gallery-search" class="filter-input" placeholder="Search WO..." style="width:180px; background:var(--surface2); border-color:var(--border);" oninput="updateInstPhotosGallery()">
-          </div>
-       </div>
-       <div class="attachment-gallery" id="inst-gallery-grid"></div>
-    </div>
-  `;
-  updateInstPhotosGallery();
-}
-
-function updateInstPhotosGallery() {
-  const grid = document.getElementById('inst-gallery-grid');
-  if(!grid) return;
-  const category = document.getElementById('gallery-category-filter').value;
-  const search = document.getElementById('gallery-search').value.toLowerCase();
-  
-  let filtered = installationPhotos;
-  if(category !== 'all') filtered = filtered.filter(p => p.category === category);
-  if(search) filtered = filtered.filter(p => p.work_order.toLowerCase().includes(search));
-
-  if(filtered.length === 0) {
-    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--muted);">No photos found matching your filters</div>';
-    return;
-  }
-
-  grid.innerHTML = filtered.map(p => `
-    <div class="attachment-item" onclick="viewImageFull('${p.url}')">
-       <img src="${p.url}" loading="lazy">
-       <div class="attachment-overlay">
-          <i class="fas fa-expand"></i>
-       </div>
-       <div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); padding:4px 8px; font-size:9px; color:white;">
-          <div style="font-weight:700;">${p.work_order}</div>
-          <div style="opacity:0.8;">${p.category} | ${p.created_at ? new Date(p.created_at).toLocaleDateString() : ''}</div>
-       </div>
-    </div>
-  `).join('');
-}
-
-function renderInstLogistics(container) {
-  container.innerHTML = `
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
-       <div class="dash-card glass-panel" style="background:var(--surface);">
-          <div class="dash-card-title">KMZ & KML Bulk Exports</div>
-          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">Generate and download geographic files for navigation and field use.</p>
-          <div id="logistics-team-exports" style="display:flex; flex-direction:column; gap:12px;"></div>
-       </div>
-       <div class="dash-card glass-panel" style="background:var(--surface);">
-          <div class="dash-card-title">Team Installation Packages</div>
-          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">Generate consolidated PDF packages for each team including all work orders.</p>
-          <div id="logistics-pdf-exports" style="display:flex; flex-direction:column; gap:12px;"></div>
-       </div>
-    </div>
-  `;
-  updateLogisticsContent();
-}
-
-function updateLogisticsContent() {
-  const kmzCont = document.getElementById('logistics-team-exports');
-  const pdfCont = document.getElementById('logistics-pdf-exports');
-  if(!kmzCont || !pdfCont) return;
-
-  if(installationTeams.length === 0) {
-    kmzCont.innerHTML = pdfCont.innerHTML = '<div class="empty-state">No teams configured</div>';
-    return;
-  }
-
-  kmzCont.innerHTML = installationTeams.map(t => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--surface2); border-radius:8px;">
-       <div style="font-weight:700;">${t.team_name}</div>
-       <div style="display:flex; gap:8px;">
-          <button class="btn btn-ghost btn-sm" onclick="exportTeamKMZ('${t.team_name}')"><i class="fas fa-map-marked-alt"></i> KMZ</button>
-          <button class="btn btn-ghost btn-sm" onclick="exportTeamKMZ('${t.team_name}', 'kml')"><i class="fas fa-file-code"></i> KML</button>
-       </div>
-    </div>
-  `).join('');
-
-  pdfCont.innerHTML = installationTeams.map(t => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--surface2); border-radius:8px;">
-       <div style="font-weight:700;">${t.team_name}</div>
-       <button class="btn btn-primary btn-sm" onclick="generateTeamPackage('${t.team_name}')"><i class="fas fa-file-pdf"></i> Generate Package</button>
-    </div>
-  `).join('');
 }
 
 function renderInstDashboard(container) {
@@ -9231,7 +8994,7 @@ function renderInstMap(container) {
        <div id="inst-side-panel" style="width: 350px; background: var(--surface); border-left: 1px solid var(--border); display: none; flex-direction: column; animation: slideInRight 0.3s ease;">
           <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
              <h3 style="font-size: 14px; font-weight: 800; color: var(--accent);">Planning Details</h3>
-             <button class="btn-reset" onclick="closeInstSidePanel()" aria-label="Close planning details panel"><i class="fas fa-times"></i></button>
+             <button class="btn-reset" onclick="closeInstSidePanel()"><i class="fas fa-times"></i></button>
           </div>
           <div id="inst-side-content" style="flex: 1; overflow-y: auto; padding: 20px;">
              <!-- Dynamic Content -->
@@ -9289,10 +9052,10 @@ function updateTeamsList() {
         <td><span class="status-badge" style="background:var(--surface2); color:var(--text);">${t.status}</span></td>
         <td>
            <div style="display:flex; gap:4px;">
-              <button class="btn btn-ghost btn-xs" onclick="editTeam('${t.id}')" title="Edit Team" aria-label="Edit Team ${t.team_name}"><i class="fas fa-edit"></i></button>
-              <button class="btn btn-ghost btn-xs" onclick="dispatchTeam('${t.team_name}')" title="Dispatch Team" aria-label="Dispatch Team ${t.team_name}"><i class="fas fa-shipping-fast"></i></button>
-              <button class="btn btn-ghost btn-xs" onclick="exportTeamKMZ('${t.team_name}')" title="Export KMZ" aria-label="Export KMZ for Team ${t.team_name}"><i class="fas fa-map-marked-alt"></i></button>
-              <button class="btn btn-ghost btn-xs" style="color:var(--red);" onclick="deleteTeam('${t.id}')" title="Delete Team" aria-label="Delete Team ${t.team_name}"><i class="fas fa-trash"></i></button>
+              <button class="btn btn-ghost btn-xs" onclick="editTeam('${t.id}')" title="Edit Team"><i class="fas fa-edit"></i></button>
+              <button class="btn btn-ghost btn-xs" onclick="dispatchTeam('${t.team_name}')" title="Dispatch Team"><i class="fas fa-shipping-fast"></i></button>
+              <button class="btn btn-ghost btn-xs" onclick="exportTeamKMZ('${t.team_name}')" title="Export KMZ"><i class="fas fa-map-marked-alt"></i></button>
+              <button class="btn btn-ghost btn-xs" style="color:var(--red);" onclick="deleteTeam('${t.id}')" title="Delete Team"><i class="fas fa-trash"></i></button>
            </div>
         </td>
      </tr>
@@ -9454,8 +9217,8 @@ function renderInstCalendar(container) {
        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
           <div class="dash-card-title">Installation Schedule - ${monthNames[calMonth]} ${calYear}</div>
           <div style="display:flex; gap:8px;">
-             <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(-1)" aria-label="Previous Month"><i class="fas fa-chevron-left"></i></button>
-             <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(1)" aria-label="Next Month"><i class="fas fa-chevron-right"></i></button>
+             <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+             <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(1)"><i class="fas fa-chevron-right"></i></button>
              <button class="btn btn-primary btn-sm" onclick="resetCalMonth()">Today</button>
           </div>
        </div>
