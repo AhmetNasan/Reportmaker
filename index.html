@@ -851,6 +851,53 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   margin-top: 4px;
 }
 
+/* ─── INSTALLATION SIDEBAR REFINEMENT ─── */
+.inst-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 4px;
+}
+
+.inst-side-tab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: 0.2s;
+  border: none;
+  background: none;
+  width: 100%;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.inst-side-tab i {
+  width: 18px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.inst-side-tab:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.inst-side-tab.active {
+  background: var(--accent) !important;
+  color: #000 !important;
+}
+
+.inst-side-tab.active i {
+  color: #000;
+}
+
 .gis-details-panel {
   position: absolute;
   top: 70px;
@@ -1932,27 +1979,45 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<div class="page" id="page-installation">
-  <div class="wrapper">
-    <header style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
-      <div>
-        <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;gap:12px;">
-          Installation Planning & Dispatch
-        </h2>
-        <p style="font-size:12px; color:var(--muted); margin-top:4px;">Manage site execution, team scheduling, and progress tracking</p>
-      </div>
+<div class="page" id="page-installation" style="padding:0; height: calc(100vh - var(--header-h));">
+  <div class="gis-container gis-theme-dark" id="inst-main-container" style="height:100%; width:100%;">
+    <header class="gis-top-bar">
+       <div style="display:flex; align-items:center; gap:12px;">
+         <i class="fas fa-tools" style="color:var(--accent); font-size:20px;"></i>
+         <h2 style="font-size:18px; font-weight:800;">Installation <span style="color:var(--accent);">Control Center</span></h2>
+       </div>
+       <div style="flex:1;"></div>
+       <div id="inst-top-actions" style="display:flex; gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="fetchData()"><i class="fas fa-sync"></i> Refresh</button>
+       </div>
     </header>
-
-    <nav class="mfg-tabs-container" id="inst-tabs">
-      <button class="mfg-tab-btn active" onclick="switchInstTab('dashboard')">Dashboard</button>
-      <button class="mfg-tab-btn" onclick="switchInstTab('map')">Planning Map</button>
-      <button class="mfg-tab-btn" onclick="switchInstTab('teams')">Teams Module</button>
-      <button class="mfg-tab-btn" onclick="switchInstTab('programs')">Programs</button>
-      <button class="mfg-tab-btn" onclick="switchInstTab('calendar')">Calendar</button>
-    </nav>
-
-    <div id="inst-content">
-      <!-- Content loaded dynamically via switchInstTab -->
+    
+    <div class="gis-main-content">
+      <aside class="gis-sidebar">
+        <div class="gis-sidebar-header">
+          <div class="gis-sidebar-title">Operations</div>
+          <div class="gis-sidebar-stats" id="inst-sidebar-stats">Ready: 0 | Assigned: 0</div>
+        </div>
+        <div class="gis-sidebar-content">
+          <nav class="inst-sidebar-nav" id="inst-tabs">
+            <button class="inst-side-tab active" onclick="switchInstTab('dashboard')"><i class="fas fa-chart-line"></i><span>Dashboard</span></button>
+            <button class="inst-side-tab" onclick="switchInstTab('map')"><i class="fas fa-map-marked-alt"></i><span>Planning Map</span></button>
+            <button class="inst-side-tab" onclick="switchInstTab('teams')"><i class="fas fa-users"></i><span>Teams & Crews</span></button>
+            <button class="inst-side-tab" onclick="switchInstTab('programs')"><i class="fas fa-calendar-day"></i><span>Programs</span></button>
+            <button class="inst-side-tab" onclick="switchInstTab('calendar')"><i class="fas fa-calendar-alt"></i><span>Calendar</span></button>
+            <button class="inst-side-tab" onclick="switchInstTab('records')"><i class="fas fa-file-invoice"></i><span>Records</span></button>
+            <button class="inst-side-tab" onclick="switchInstTab('photos')"><i class="fas fa-images"></i><span>Photos & Docs</span></button>
+            <button class="inst-side-tab" onclick="switchInstTab('logistics')"><i class="fas fa-truck-loading"></i><span>Logistics & Exports</span></button>
+          </nav>
+        </div>
+        <div class="gis-sidebar-footer" style="padding:16px;">
+          <button class="btn btn-primary w-100" onclick="autoGroupNearby()"><i class="fas fa-magic"></i> Auto-Plan All</button>
+        </div>
+      </aside>
+      
+      <main class="gis-map-canvas" id="inst-content" style="background:var(--bg); padding:24px; overflow-y:auto; position:relative;">
+        <!-- Dynamic content here -->
+      </main>
     </div>
   </div>
 </div>
@@ -2852,11 +2917,19 @@ function switchMfgTab(tab) {
 
 function switchInstTab(tab) {
   currentInstTab = tab;
-  document.querySelectorAll('#inst-tabs .mfg-tab-btn').forEach(btn => {
+  document.querySelectorAll('#inst-tabs .inst-side-tab').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${tab}'`));
   });
   if (tab === 'calendar') resetCalMonth();
   else updateInstallationUI();
+  updateInstSidebarStats();
+}
+
+function updateInstSidebarStats() {
+  const ready = allData.filter(r => r.ReadyForInstallation);
+  const assigned = ready.filter(r => r.AssignedTeam && r.AssignedTeam !== '');
+  const stats = document.getElementById('inst-sidebar-stats');
+  if(stats) stats.textContent = `Ready: ${ready.length} | Assigned: ${assigned.length}`;
 }
 
 function buildColumnFilters(tableId, data) {
@@ -8920,7 +8993,148 @@ function updateInstallationUI() {
     renderInstPrograms(content);
   } else if (currentInstTab === 'calendar') {
     renderInstCalendar(content);
+  } else if (currentInstTab === 'records') {
+    renderInstRecords(content);
+  } else if (currentInstTab === 'photos') {
+    renderInstPhotosGallery(content);
+  } else if (currentInstTab === 'logistics') {
+    renderInstLogistics(content);
   }
+}
+
+function renderInstRecords(container) {
+  container.innerHTML = `
+    <div class="dash-card glass-panel" style="background:var(--surface);">
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div class="dash-card-title">Installation Records & Audit Trail</div>
+          <button class="btn btn-ghost btn-sm" onclick="exportTableCSV('inst-records')"><i class="fas fa-file-csv"></i> Export Records</button>
+       </div>
+       <div class="table-wrap">
+          <table class="main-table">
+             <thead><tr><th>WO No.</th><th>Completion Date</th><th>Team</th><th>Installer</th><th>GPS</th><th>Status</th><th>Actions</th></tr></thead>
+             <tbody id="inst-records-list"></tbody>
+          </table>
+       </div>
+    </div>
+  `;
+  updateInstRecordsList();
+}
+
+function updateInstRecordsList() {
+  const tbody = document.getElementById('inst-records-list');
+  if(!tbody) return;
+  tbody.innerHTML = installationRecords.map(r => `
+    <tr>
+       <td><span class="wo-num">${r.work_order}</span></td>
+       <td>${formatDate(r.completion_date)}</td>
+       <td>${r.team || '—'}</td>
+       <td>${r.recorded_by || '—'}</td>
+       <td><span style="font-size:10px; color:var(--muted);">${r.gps_lat || '0'}, ${r.gps_lng || '0'}</span></td>
+       <td><span class="status-badge badge-COMP">COMP</span></td>
+       <td>
+          <div style="display:flex; gap:4px;">
+             <button class="btn btn-ghost btn-xs" onclick="generateCompletionCertificate('${r.work_order}')" title="Certificate"><i class="fas fa-certificate"></i></button>
+             <button class="btn btn-ghost btn-xs" onclick="openDetail('${r.work_order}')" title="View Details"><i class="fas fa-eye"></i></button>
+          </div>
+       </td>
+    </tr>
+  `).join('');
+}
+
+function renderInstPhotosGallery(container) {
+  container.innerHTML = `
+    <div class="dash-card glass-panel" style="background:var(--surface);">
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+          <div class="dash-card-title">Installation Photo Gallery</div>
+          <div style="display:flex; gap:12px;">
+             <select id="gallery-category-filter" class="filter-input" style="width:180px; background:var(--surface2); border-color:var(--border);" onchange="updateInstPhotosGallery()">
+                <option value="all">All Categories</option>
+                <option value="Before">Before Installation</option>
+                <option value="During">During Installation</option>
+                <option value="After">After Installation</option>
+             </select>
+             <input type="text" id="gallery-search" class="filter-input" placeholder="Search WO..." style="width:180px; background:var(--surface2); border-color:var(--border);" oninput="updateInstPhotosGallery()">
+          </div>
+       </div>
+       <div class="attachment-gallery" id="inst-gallery-grid"></div>
+    </div>
+  `;
+  updateInstPhotosGallery();
+}
+
+function updateInstPhotosGallery() {
+  const grid = document.getElementById('inst-gallery-grid');
+  if(!grid) return;
+  const category = document.getElementById('gallery-category-filter').value;
+  const search = document.getElementById('gallery-search').value.toLowerCase();
+  
+  let filtered = installationPhotos;
+  if(category !== 'all') filtered = filtered.filter(p => p.category === category);
+  if(search) filtered = filtered.filter(p => p.work_order.toLowerCase().includes(search));
+
+  if(filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--muted);">No photos found matching your filters</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => `
+    <div class="attachment-item" onclick="viewImageFull('${p.url}')">
+       <img src="${p.url}" loading="lazy">
+       <div class="attachment-overlay">
+          <i class="fas fa-expand"></i>
+       </div>
+       <div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); padding:4px 8px; font-size:9px; color:white;">
+          <div style="font-weight:700;">${p.work_order}</div>
+          <div style="opacity:0.8;">${p.category} | ${p.created_at ? new Date(p.created_at).toLocaleDateString() : ''}</div>
+       </div>
+    </div>
+  `).join('');
+}
+
+function renderInstLogistics(container) {
+  container.innerHTML = `
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+       <div class="dash-card glass-panel" style="background:var(--surface);">
+          <div class="dash-card-title">KMZ & KML Bulk Exports</div>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">Generate and download geographic files for navigation and field use.</p>
+          <div id="logistics-team-exports" style="display:flex; flex-direction:column; gap:12px;"></div>
+       </div>
+       <div class="dash-card glass-panel" style="background:var(--surface);">
+          <div class="dash-card-title">Team Installation Packages</div>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">Generate consolidated PDF packages for each team including all work orders.</p>
+          <div id="logistics-pdf-exports" style="display:flex; flex-direction:column; gap:12px;"></div>
+       </div>
+    </div>
+  `;
+  updateLogisticsContent();
+}
+
+function updateLogisticsContent() {
+  const kmzCont = document.getElementById('logistics-team-exports');
+  const pdfCont = document.getElementById('logistics-pdf-exports');
+  if(!kmzCont || !pdfCont) return;
+
+  if(installationTeams.length === 0) {
+    kmzCont.innerHTML = pdfCont.innerHTML = '<div class="empty-state">No teams configured</div>';
+    return;
+  }
+
+  kmzCont.innerHTML = installationTeams.map(t => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--surface2); border-radius:8px;">
+       <div style="font-weight:700;">${t.team_name}</div>
+       <div style="display:flex; gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="exportTeamKMZ('${t.team_name}')"><i class="fas fa-map-marked-alt"></i> KMZ</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportTeamKMZ('${t.team_name}', 'kml')"><i class="fas fa-file-code"></i> KML</button>
+       </div>
+    </div>
+  `).join('');
+
+  pdfCont.innerHTML = installationTeams.map(t => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--surface2); border-radius:8px;">
+       <div style="font-weight:700;">${t.team_name}</div>
+       <button class="btn btn-primary btn-sm" onclick="generateTeamPackage('${t.team_name}')"><i class="fas fa-file-pdf"></i> Generate Package</button>
+    </div>
+  `).join('');
 }
 
 function renderInstDashboard(container) {
