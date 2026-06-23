@@ -1173,13 +1173,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Roads, Assets & GIS Management System</p>
     
     <div id="signup-fields" style="display: none;">
-      <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name">
-      <input type="text" id="auth-mobile" class="auth-input" placeholder="Mobile Number">
-      <input type="text" id="auth-position" class="auth-input" placeholder="Position / Job Title">
+      <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name" aria-label="Full Name">
+      <input type="text" id="auth-mobile" class="auth-input" placeholder="Mobile Number" aria-label="Mobile Number">
+      <input type="text" id="auth-position" class="auth-input" placeholder="Position / Job Title" aria-label="Position / Job Title">
     </div>
 
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address">
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password">
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" aria-label="Email Address">
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password" aria-label="Password">
     
     <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
     <div style="margin-top: 16px; font-size: 11px; color: var(--accent); cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
@@ -1205,7 +1205,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <span class="dot" id="conn-dot" style="background: var(--muted); width: 8px; height: 8px;"></span>
       <span id="conn-text">Checking...</span>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode" aria-label="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
+    <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Mode" aria-label="Toggle Light/Dark Mode"><i class="fas fa-moon" id="theme-icon" aria-hidden="true"></i></button>
     
     <button class="notif-btn" id="notif-trigger" onclick="toggleNotifPanel()" aria-label="Notifications">
       <i class="fas fa-bell"></i>
@@ -1519,7 +1519,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Please enter your email address. We will send you a link to reset your password.</p>
     <div class="form-group">
       <label>Email Address</label>
-      <input type="email" id="recovery-email" class="auth-input" placeholder="Enter your email">
+      <input type="email" id="recovery-email" class="auth-input" placeholder="Enter your email" aria-label="Email Address for recovery">
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('recoveryModal')">Cancel</button>
@@ -2231,8 +2231,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <button class="btn btn-ghost btn-sm" id="detail-edit-btn" onclick="toggleDetailEdit()" title="Edit Work Order"><i class="fas fa-edit"></i> Edit</button>
       <button class="btn btn-green btn-sm" id="detail-save-btn" onclick="saveDetailChanges()" style="display:none;" title="Save Changes"><i class="fas fa-save"></i> Save</button>
       <button class="btn btn-red btn-sm" id="detail-cancel-btn" onclick="cancelDetailEdit()" style="display:none;" title="Cancel Edit"><i class="fas fa-times"></i> Cancel</button>
-      <button class="btn btn-ghost btn-sm" onclick="navigateDetail('prev')" title="Previous Work Order"><i class="fas fa-chevron-up"></i></button>
-      <button class="btn btn-ghost btn-sm" onclick="navigateDetail('next')" title="Next Work Order"><i class="fas fa-chevron-down"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="navigateDetail('prev')" title="Previous Work Order" aria-label="Previous Work Order"><i class="fas fa-chevron-up" aria-hidden="true"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="navigateDetail('next')" title="Next Work Order" aria-label="Next Work Order"><i class="fas fa-chevron-down" aria-hidden="true"></i></button>
         <button class="btn btn-ghost btn-sm" onclick="showContextMenu(event, 'detail-modal')" title="More Actions" aria-label="More Actions"><i class="fas fa-ellipsis-v"></i></button>
       <button class="btn btn-primary btn-sm" onclick="closeDetail()"><i class="fas fa-times"></i> Close</button>
     </div>
@@ -3268,7 +3268,7 @@ async function fetchData() {
   updateFileManagerStats();
 }
 
-async async function useLocalFallback() {
+async function useLocalFallback() {
   if (typeof loadInstallationData === "function") await loadInstallationData();
   if (typeof loadInstallationData === "function") await loadInstallationData();
   console.log("Using local data fallback");
@@ -8981,45 +8981,6 @@ async function loadInstallationData() {
   } catch (e) { console.error("Failed to load installation data:", e); }
 }
 
-
-// --- INTEGRATED INSTALLATION & CONFIGURATION MODULE (COMPREHENSIVE) ---
-
-let currentInstTab = 'dashboard';
-let installationTeams = [];
-let installationRecords = [];
-let installationPhotos = [];
-
-async function loadInstallationData() {
-  if (!supabaseClient) return;
-  try {
-    const { data: teams } = await supabaseClient.from('installation_teams').select('*');
-    if (teams) installationTeams = teams;
-    const { data: records } = await supabaseClient.from('installation_records').select('*').order('created_at', { ascending: false });
-    if (records) installationRecords = records;
-    const { data: instPhotos } = await supabaseClient.from('installation_photos').select('*').order('created_at', { ascending: false });
-    if (instPhotos) installationPhotos = instPhotos;
-    updateInstallationUI();
-  } catch (e) { console.error("Failed to load installation data:", e); }
-}
-
-let currentInstTab = 'dashboard';
-let installationTeams = [];
-let installationRecords = [];
-let installationPhotos = [];
-
-async function loadInstallationData() {
-  if (!supabaseClient) return;
-  try {
-    const { data: teams } = await supabaseClient.from('installation_teams').select('*');
-    if (teams) installationTeams = teams;
-    const { data: records } = await supabaseClient.from('installation_records').select('*').order('created_at', { ascending: false });
-    if (records) installationRecords = records;
-    const { data: instPhotos } = await supabaseClient.from('installation_photos').select('*').order('created_at', { ascending: false });
-    if (instPhotos) installationPhotos = instPhotos;
-    updateInstallationUI();
-  } catch (e) { console.error("Failed to load installation data:", e); }
-}
-
 function updateInstallationUI() {
   const content = document.getElementById('inst-content');
   if (!content) return;
@@ -9162,7 +9123,7 @@ function autoGroupNearby() { showToast("Grouping locations..."); }
 function optimizeAllRoutes() { showToast("Optimizing routes..."); }
 function triggerExport(t) { showToast(`Exporting ${t}...`); }
 
-async async function refreshUI() {
+async function refreshUI() {
   if (typeof loadInstallationData === "function") await loadInstallationData();
   if (typeof loadInstallationData === "function") await loadInstallationData();
    applyFilters(false);
