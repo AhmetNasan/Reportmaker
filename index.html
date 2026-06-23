@@ -1170,7 +1170,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   <div class="auth-card">
     <div class="auth-logo">QBC Operations Center</div>
     <h2 id="auth-title">Welcome Back</h2>
-    <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Roads, Assets & GIS Management System</p>
+    <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Signage Asset & GIS Management System</p>
     
     <div id="signup-fields" style="display: none;">
       <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name">
@@ -1269,7 +1269,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <div class="header-left">
         <div class="tag">▸ QBC Operations Center</div>
         <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Operations <span style="color:var(--accent)">Center</span></h1>
-        <p style="font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500; letter-spacing: 0.02em;">Roads, Assets & GIS Management System</p>
+        <p style="font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500; letter-spacing: 0.02em;">Signage Asset & GIS Management System</p>
       </div>
       <div class="header-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
         <div style="font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px;">
@@ -5116,14 +5116,14 @@ function toggleAuthMode() {
   
   if (btn.textContent === 'Sign In') {
     title.textContent = 'Create Account';
-    if (subtitle) subtitle.textContent = 'Roads, Assets & GIS Management System';
+    if (subtitle) subtitle.textContent = 'Signage Asset & GIS Management System';
     btn.textContent = 'Sign Up';
     toggleText.textContent = 'Sign In';
     if (helperText) helperText.textContent = 'Already have an account? ';
     if (signupFields) signupFields.style.display = 'block';
   } else {
     title.textContent = 'Welcome Back';
-    if (subtitle) subtitle.textContent = 'Roads, Assets & GIS Management System';
+    if (subtitle) subtitle.textContent = 'Signage Asset & GIS Management System';
     btn.textContent = 'Sign In';
     toggleText.textContent = 'Sign Up';
     if (helperText) helperText.textContent = "Don't have an account? ";
@@ -7647,7 +7647,7 @@ function openFabModal(wo) {
         ${companyLogo ? `<img src="${companyLogo}" style="max-height: 50px; width: auto;">` : ''}
         <div>
           <div style="font-size:24px;font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:1px;">Fabrication</div>
-          <div style="font-size:12px;color:#64748b;margin-top:4px;">QBC Operations Center – Roads, Assets & GIS Management System</div>
+          <div style="font-size:12px;color:#64748b;margin-top:4px;">QBC Operations Center – Signage Asset & GIS Management System</div>
         </div>
       </div>
       <div style="text-align:right;">
@@ -7782,7 +7782,7 @@ async function exportDashboardPDF() {
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(148, 163, 184);
-  pdf.text("Roads, Assets & GIS Management System Dashboard", margin + (companyLogo ? 25 : 0), 25);
+  pdf.text("Signage Asset & GIS Management System Dashboard", margin + (companyLogo ? 25 : 0), 25);
   
   const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   pdf.setFontSize(9);
@@ -8184,7 +8184,7 @@ async function generateCompletionCertificate(woId) {
   }
 
   page.drawText('INSTALLATION COMPLETION CERTIFICATE', { x: 120, y: 795, size: 18, font, color: rgb(1, 1, 1) });
-  page.drawText('QBC Operations Center – Roads, Assets & GIS Management System', { x: 120, y: 775, size: 9, font: regularFont, color: rgb(0.8, 0.8, 0.8) });
+  page.drawText('QBC Operations Center – Signage Asset & GIS Management System', { x: 120, y: 775, size: 9, font: regularFont, color: rgb(0.8, 0.8, 0.8) });
 
   let y = 710;
   page.drawText('WORK ORDER DETAILS', { x: 50, y: 730, size: 12, font, color: rgb(0, 0.49, 1) });
