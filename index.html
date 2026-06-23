@@ -3268,8 +3268,7 @@ async function fetchData() {
   updateFileManagerStats();
 }
 
-async async function useLocalFallback() {
-  if (typeof loadInstallationData === "function") await loadInstallationData();
+async function useLocalFallback() {
   if (typeof loadInstallationData === "function") await loadInstallationData();
   console.log("Using local data fallback");
   const connDot = document.getElementById('conn-dot');
@@ -8982,43 +8981,6 @@ async function loadInstallationData() {
 }
 
 
-// --- INTEGRATED INSTALLATION & CONFIGURATION MODULE (COMPREHENSIVE) ---
-
-let currentInstTab = 'dashboard';
-let installationTeams = [];
-let installationRecords = [];
-let installationPhotos = [];
-
-async function loadInstallationData() {
-  if (!supabaseClient) return;
-  try {
-    const { data: teams } = await supabaseClient.from('installation_teams').select('*');
-    if (teams) installationTeams = teams;
-    const { data: records } = await supabaseClient.from('installation_records').select('*').order('created_at', { ascending: false });
-    if (records) installationRecords = records;
-    const { data: instPhotos } = await supabaseClient.from('installation_photos').select('*').order('created_at', { ascending: false });
-    if (instPhotos) installationPhotos = instPhotos;
-    updateInstallationUI();
-  } catch (e) { console.error("Failed to load installation data:", e); }
-}
-
-let currentInstTab = 'dashboard';
-let installationTeams = [];
-let installationRecords = [];
-let installationPhotos = [];
-
-async function loadInstallationData() {
-  if (!supabaseClient) return;
-  try {
-    const { data: teams } = await supabaseClient.from('installation_teams').select('*');
-    if (teams) installationTeams = teams;
-    const { data: records } = await supabaseClient.from('installation_records').select('*').order('created_at', { ascending: false });
-    if (records) installationRecords = records;
-    const { data: instPhotos } = await supabaseClient.from('installation_photos').select('*').order('created_at', { ascending: false });
-    if (instPhotos) installationPhotos = instPhotos;
-    updateInstallationUI();
-  } catch (e) { console.error("Failed to load installation data:", e); }
-}
 
 function updateInstallationUI() {
   const content = document.getElementById('inst-content');
@@ -9162,8 +9124,7 @@ function autoGroupNearby() { showToast("Grouping locations..."); }
 function optimizeAllRoutes() { showToast("Optimizing routes..."); }
 function triggerExport(t) { showToast(`Exporting ${t}...`); }
 
-async async function refreshUI() {
-  if (typeof loadInstallationData === "function") await loadInstallationData();
+async function refreshUI() {
   if (typeof loadInstallationData === "function") await loadInstallationData();
    applyFilters(false);
    applyManufacturingFilters();
