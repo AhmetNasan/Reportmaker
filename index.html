@@ -131,7 +131,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 /* ─── PAGES ─── */
 .page{display:none;padding-top:var(--header-h);min-height:100vh;position:relative;z-index:1;}
-#page-installation.active{display:flex;}
+#page-installation.active{display:block;}
 .page.active{display:block;}
 .wrapper{max-width:100%;margin:0 auto;padding:32px 24px;}
 @media (max-width: 600px) { .wrapper { padding: 20px 15px; } }
@@ -1106,13 +1106,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 /* ─── ENTERPRISE INSTALLATION MODULE REDESIGN ─── */
 #page-installation { background: #0d1117; padding-top: 0; }
-.inst-wrapper { display: flex; height: 100vh; overflow: hidden; }
-.inst-sidebar { width: 240px; background: #161b22; border-right: 1px solid #30363d; display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.3s; z-index: 200; }
+.inst-wrapper { display: flex; flex-direction: row; width: 100%; height: 100vh; overflow: hidden; }
+.inst-sidebar { width: 240px; min-width: 240px; background: #161b22; border-right: 1px solid #30363d; display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.3s; z-index: 200; }
 .inst-sidebar-brand { height: 60px; display: flex; align-items: center; padding: 0 20px; gap: 12px; border-bottom: 1px solid #30363d; }
 .inst-sidebar-logo { color: #00bcd4; width: 24px; height: 24px; }
 .inst-sidebar-brand span { font-weight: 800; font-size: 14px; letter-spacing: 0.05em; color: #f0f6fc; text-transform: uppercase; }
-.inst-sidebar-nav { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 4px; }
-.inst-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 8px; color: #8b949e; border: none; background: none; cursor: pointer; transition: 0.2s; font-size: 14px; font-weight: 500; width: 100%; text-align: left; }
+.inst-sidebar-nav { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 4px; position: static; width: auto; height: auto; background: none; border: none; backdrop-filter: none; }
+.inst-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 8px; color: #8b949e; border: none; background: none; cursor: pointer; transition: 0.2s; font-size: 14px; font-weight: 500; width: 100%; text-align: left; overflow: hidden; white-space: nowrap; }
 .inst-nav-item i { width: 18px; height: 18px; }
 .inst-nav-item:hover { background: rgba(240, 246, 252, 0.05); color: #f0f6fc; }
 .inst-nav-item.active { background: rgba(0, 188, 212, 0.1); color: #00bcd4; }
@@ -1123,7 +1123,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .inst-user-name { font-size: 13px; font-weight: 600; color: #f0f6fc; white-space: nowrap; text-overflow: ellipsis; }
 .inst-user-role { font-size: 11px; color: #8b949e; }
 
-.inst-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #0d1117; }
+.inst-main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: #0d1117; }
 .inst-top-bar { height: 60px; border-bottom: 1px solid #30363d; background: #161b22; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
 .inst-top-bar-left h2 { font-size: 18px; font-weight: 700; color: #f0f6fc; }
 .inst-top-bar-right { display: flex; align-items: center; gap: 16px; }
@@ -1177,7 +1177,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 
 /* Mobile Adaptability */
 @media (max-width: 768px) {
-  .inst-sidebar { width: 60px; }
+  .inst-sidebar { width: 60px; min-width: 60px; }
   .inst-sidebar span, .inst-sidebar-brand span, .inst-user-details { display: none; }
   .inst-sidebar-brand { padding: 0; justify-content: center; }
   .inst-nav-item { padding: 10px; justify-content: center; }
