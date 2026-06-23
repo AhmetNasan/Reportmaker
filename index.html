@@ -1169,31 +1169,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 .inst-list-item:hover { border-color: #00bcd4; }
 
 /* Planning Page Specifics */
-.planning-container { display: flex; height: 100%; gap: 20px; overflow: hidden; }
-.planning-sidebar { width: 300px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; }
-.planning-main { flex: 1; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-.planning-map-wrap { flex: 1; min-height: 400px; background: #161b22; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; position: relative; }
-.planning-calendar-wrap { height: 400px; background: #161b22; border: 1px solid #30363d; border-radius: 12px; display: flex; flex-direction: column; }
-
-.inst-calendar-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.inst-calendar-table th, .inst-calendar-table td { border: 1px solid #30363d; padding: 8px; vertical-align: top; }
-.inst-calendar-table th { background: #0d1117; color: #8b949e; font-size: 11px; text-transform: uppercase; font-weight: 700; text-align: center; }
-.inst-calendar-team-cell { width: 120px; background: #0d1117; font-weight: 700; color: #c9d1d9; font-size: 12px; }
-.inst-calendar-day-cell { height: 80px; position: relative; }
-.inst-calendar-day-cell.capacity-amber { background: rgba(255, 152, 0, 0.1); }
-.inst-calendar-day-cell.capacity-red { background: rgba(244, 67, 54, 0.1); }
-.inst-calendar-drop-zone { position: absolute; inset: 4px; border: 1px dashed rgba(240,246,252,0.1); border-radius: 4px; display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; overflow-y: auto; }
-.inst-calendar-drop-zone:hover { border-color: #00bcd4; background: rgba(0, 188, 212, 0.05); }
-
-.inst-calendar-item { background: #30363d; border-radius: 4px; padding: 4px 8px; font-size: 10px; color: #fff; cursor: grab; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #00bcd4; }
-.inst-calendar-item:active { cursor: grabbing; }
+.planning-container { display: flex; height: 100%; gap: 20px; }
+.planning-sidebar { width: 350px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; }
+.planning-map-wrap { flex: 1; background: #161b22; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; position: relative; }
+.planning-bottom-drawer { position: absolute; bottom: 0; left: 0; right: 0; height: 250px; background: #161b22; border-top: 1px solid #30363d; transform: translateY(100%); transition: transform 0.3s; z-index: 10; }
+.planning-bottom-drawer.open { transform: translateY(0); }
 
 /* Mobile Adaptability */
-@media (max-width: 1024px) {
-  .planning-container { flex-direction: column; overflow-y: auto; }
-  .planning-sidebar { width: 100%; height: auto; }
-}
-
 @media (max-width: 768px) {
   .inst-sidebar { width: 60px; }
   .inst-sidebar span, .inst-sidebar-brand span, .inst-user-details { display: none; }
@@ -1201,18 +1183,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   .inst-nav-item { padding: 10px; justify-content: center; }
   .inst-nav-item i { margin: 0; }
   .inst-user-info { justify-content: center; }
-  
-  .inst-grid-3, .inst-grid-2 { grid-template-columns: 1fr; }
-  .inst-kpi-strip { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 390px) {
-  .inst-kpi-strip { grid-template-columns: 1fr; }
-  .inst-calendar-table { min-width: 800px; }
-  .planning-calendar-wrap { overflow-x: auto; }
-  .execution-kanban-wrap { display: flex; overflow-x: auto; gap: 16px; }
-  .inst-sidebar { display: none; } /* Hide sidebar on extremely small screens */
-  .inst-wrapper { grid-template-columns: 1fr; }
 }
 
 </style>
@@ -3271,7 +3241,8 @@ window.addEventListener('touchend', () => {
 }, {passive: true});
 
 async function fetchData() {
-  if (typeof loadInstData === "function") await loadInstData();
+  if (typeof loadInstallationData === "function") await loadInstallationData();
+  if (typeof loadInstallationData === "function") await loadInstallationData();
   const connDot = document.getElementById('conn-dot');
   const connText = document.getElementById('conn-text');
 
@@ -3369,7 +3340,7 @@ async function fetchData() {
 }
 
 async function useLocalFallback() {
-  if (typeof loadInstData === "function") await loadInstData();
+  if (typeof loadInstallationData === "function") await loadInstallationData();
   console.log("Using local data fallback");
   const connDot = document.getElementById('conn-dot');
   const connText = document.getElementById('conn-text');
@@ -9431,18 +9402,6 @@ function editTeam(id) {
 }
 
 async function generateDailyProgram(teamName) {
-  const teamWOs = InstState.workOrders.filter(w => w.assigned_team === teamName && w.installation_status === 'Assigned');
-  const unlocked = teamWOs.some(w => !w.sequence_order);
-
-  if (unlocked && teamWOs.length > 1) {
-    return Swal.fire({
-      title: 'Route Not Locked',
-      text: 'You must optimize and lock the route sequence before exporting the Daily Program PDF.',
-      icon: 'warning',
-      confirmButtonColor: '#00bcd4'
-    });
-  }
-
   showToast(`Generating Daily Program for ${teamName}...`);
   // This would typically involve pdf-lib to create a daily manifest
   setTimeout(() => {
@@ -9456,43 +9415,69 @@ function renderPlanningPage(container) {
   container.innerHTML = `
     <div class="planning-container">
       <div class="planning-sidebar">
-        <div class="inst-card" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+        <div class="inst-card" style="flex: 1; display: flex; flex-direction: column;">
           <div class="inst-card-header">
-            <div class="inst-card-title"><i data-lucide="list"></i> Unassigned Queue</div>
+            <div class="inst-card-title"><i data-lucide="list"></i> Work Order Queue</div>
           </div>
-          <div class="inst-card-body" style="padding: 12px; overflow-y: auto;" 
-               ondrop="handleUnassignDrop(event)" ondragover="event.preventDefault()">
+          <div class="inst-card-body" style="padding: 12px; overflow-y: auto;">
             <div style="display:flex; gap:8px; margin-bottom:12px;">
               <input type="text" class="filter-input" placeholder="Search WO..." style="flex:1" oninput="filterPlanningQueue(this.value)">
               <button class="inst-btn inst-btn-primary btn-xs" onclick="autoGroupSelected()" title="Auto Group"><i data-lucide="brain"></i> Group</button>
             </div>
-            <div id="planning-queue" class="inst-list" style="min-height: 200px;">
+            <div id="planning-queue" class="inst-list">
               ${renderPlanningQueue()}
             </div>
-            <div style="font-size:10px; color:#8b949e; text-align:center; margin-top:10px; border:1px dashed #30363d; padding:10px; border-radius:4px;">
-              Drop here to unassign
+          </div>
+        </div>
+        
+        <div class="inst-card">
+          <div class="inst-card-header">
+            <div class="inst-card-title"><i data-lucide="info"></i> Quick Assign</div>
+          </div>
+          <div class="inst-card-body">
+            <div class="form-group">
+              <label>Select Team</label>
+              <select id="planning-assign-team" class="filter-input" style="width:100%">
+                <option value="">— Choose Team —</option>
+                ${InstState.teams.map(t => `<option value="${t.team_name}">${t.team_name}</option>`).join('')}
+              </select>
             </div>
+            <button class="inst-btn inst-btn-primary w-100 mt-2" onclick="assignSelectedWOs()">Assign Selected</button>
           </div>
         </div>
       </div>
 
-      <div class="planning-main">
-        <div class="planning-map-wrap">
-          <div id="planning-map" style="width:100%; height:100%;"></div>
-          <div style="position:absolute; top:20px; right:20px; z-index:100; display:flex; flex-direction:column; gap:8px;">
-            <button class="inst-icon-btn glass-panel" onclick="optimizePlanningRoute()" title="Preview Optimized Route"><i data-lucide="route"></i></button>
-            <button id="lock-route-btn" class="inst-icon-btn glass-panel" onclick="lockPlanningRoute()" title="Lock & Save Route" style="display:none; color:#4caf50;"><i data-lucide="lock"></i></button>
-            <button class="inst-icon-btn glass-panel" onclick="toggleMapHeatmap()" title="Toggle Heatmap"><i data-lucide="flame"></i></button>
-          </div>
+      <div class="planning-map-wrap">
+        <div id="planning-map" style="width:100%; height:100%;"></div>
+        
+        <div style="position:absolute; top:20px; right:20px; z-index:100; display:flex; flex-direction:column; gap:8px;">
+          <button class="inst-icon-btn glass-panel" onclick="optimizePlanningRoute()" title="Optimize Route">
+            <i data-lucide="route"></i>
+          </button>
+          <button class="inst-icon-btn glass-panel" onclick="toggleMapHeatmap()" title="Toggle Heatmap">
+            <i data-lucide="flame"></i>
+          </button>
+          <button class="inst-icon-btn glass-panel" onclick="togglePlanningDrawer()" title="Calendar Scheduler">
+            <i data-lucide="calendar"></i>
+          </button>
         </div>
 
-        <div class="planning-calendar-wrap">
+        <div id="planning-drawer" class="planning-bottom-drawer">
           <div class="inst-card-header">
-            <div class="inst-card-title"><i data-lucide="calendar"></i> Team Schedule & Capacity Planner</div>
-            <div style="font-size: 11px; color: #8b949e;">Current Week</div>
+            <div class="inst-card-title"><i data-lucide="calendar"></i> Daily Scheduler (Week View)</div>
+            <button class="btn-reset" onclick="togglePlanningDrawer()"><i data-lucide="x"></i></button>
           </div>
-          <div class="inst-card-body" style="padding:0; overflow:auto;">
-            ${renderPlanningCalendar()}
+          <div class="inst-card-body" id="planning-calendar-content" style="padding:0">
+            <div style="display:flex; height:100%;">
+              ${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => `
+                <div style="flex:1; border-right:1px solid #30363d; padding:8px;">
+                  <div style="font-size:10px; font-weight:700; color:#8b949e; text-transform:uppercase; margin-bottom:8px; text-align:center;">${day}</div>
+                  <div style="height:calc(100% - 20px); border:1px dashed rgba(240,246,252,0.05); border-radius:4px; padding:4px;" 
+                       ondrop="handleSchedulerDrop(event, '${day}')" ondragover="event.preventDefault()">
+                  </div>
+                </div>
+              `).join('')}
+            </div>
           </div>
         </div>
       </div>
@@ -9502,75 +9487,9 @@ function renderPlanningPage(container) {
   setTimeout(initPlanningMap, 100);
 }
 
-function renderPlanningCalendar() {
-  const days = [];
-  const now = new Date();
-  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1))); // Monday
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(startOfWeek);
-    d.setDate(startOfWeek.getDate() + i);
-    days.push({
-      dateStr: d.toISOString().split('T')[0],
-      label: d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-    });
-  }
-
-  return `
-    <table class="inst-calendar-table">
-      <thead>
-        <tr>
-          <th style="width: 150px;">Team</th>
-          ${days.map(d => `<th>${d.label}</th>`).join('')}
-        </tr>
-      </thead>
-      <tbody>
-        ${InstState.teams.map(team => {
-          const cap = team.capacity_per_day || 5;
-          return `
-            <tr>
-              <td class="inst-calendar-team-cell">
-                <div>${team.team_name}</div>
-                <div style="font-size:9px; color:#8b949e; font-weight:400; margin-top:4px;">Cap: ${cap} signs/day</div>
-              </td>
-              ${days.map(d => {
-                const dayWOs = InstState.workOrders.filter(w => 
-                  w.assigned_team === team.team_name && 
-                  w.assigned_date && w.assigned_date.startsWith(d.dateStr)
-                );
-                const totalSigns = dayWOs.length; 
-                const util = (totalSigns / cap) * 100;
-                
-                let capClass = '';
-                if (util >= 100) capClass = 'capacity-red';
-                else if (util >= 80) capClass = 'capacity-amber';
-
-                return `
-                  <td class="inst-calendar-day-cell ${capClass}">
-                    <div class="inst-calendar-drop-zone" 
-                         ondrop="handleSchedulerDrop(event, '${team.team_name}', '${d.dateStr}')" 
-                         ondragover="event.preventDefault()">
-                      ${dayWOs.map(w => `
-                        <div class="inst-calendar-item" title="${w.location || ''}" draggable="true" ondragstart="handlePlanningDragStart(event, '${w.work_order}')">
-                          #${w.work_order}
-                        </div>
-                      `).join('')}
-                    </div>
-                    ${totalSigns > 0 ? `<div style="position:absolute; bottom:2px; right:4px; font-size:9px; color:#8b949e; pointer-events:none;">${util.toFixed(0)}%</div>` : ''}
-                  </td>
-                `;
-              }).join('')}
-            </tr>
-          `;
-        }).join('')}
-      </tbody>
-    </table>
-  `;
-}
-
 function renderPlanningQueue() {
-  const readyWOs = InstState.workOrders.filter(w => w.installation_status === 'Ready');
-  if (readyWOs.length === 0) return '<div class="inst-empty">No unassigned items</div>';
+  const readyWOs = InstState.workOrders.filter(w => w.installation_status === 'Ready' || w.installation_status === 'Assigned');
+  if (readyWOs.length === 0) return '<div class="inst-empty">No work orders ready</div>';
   
   return readyWOs.map(w => `
     <div class="inst-list-item" style="padding: 10px; cursor: move;" draggable="true" ondragstart="handlePlanningDragStart(event, '${w.work_order}')">
@@ -9588,8 +9507,6 @@ function renderPlanningQueue() {
 
 let planMap = null;
 let planMarkers = null;
-let currentRouteLine = null;
-let currentOptimizedRoute = [];
 
 function initPlanningMap() {
   if (planMap) { planMap.remove(); }
@@ -9642,66 +9559,8 @@ function initPlanningMap() {
   if (window.lucide) window.lucide.createIcons();
 }
 
-async function handleSchedulerDrop(e, teamName, dateStr) {
-  e.preventDefault();
-  const woId = e.dataTransfer.getData('text/plain');
-  if (!woId || !teamName || !dateStr) return;
-
-  const team = InstState.teams.find(t => t.team_name === teamName);
-  const cap = team ? (team.capacity_per_day || 5) : 5;
-  const currentLoad = InstState.workOrders.filter(w => w.assigned_team === teamName && w.assigned_date && w.assigned_date.startsWith(dateStr)).length;
-
-  if (currentLoad >= cap) {
-    const confirm = await Swal.fire({
-      title: 'Capacity Warning',
-      text: `${teamName} is already at full capacity (${cap} signs) for ${dateStr}. Proceed anyway?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, Overload',
-      confirmButtonColor: '#ff9800'
-    });
-    if (!confirm.isConfirmed) return;
-  }
-
-  if (supabaseClient) {
-    const { error } = await supabaseClient.from('work_orders')
-      .update({ 
-        assigned_team: teamName, 
-        assigned_date: dateStr,
-        installation_status: 'Assigned'
-      })
-      .eq('work_order', woId);
-
-    if (error) showToast(error.message, "error");
-    else {
-      await logInstActivity(woId, `Scheduled for ${teamName} on ${dateStr}`);
-      showToast(`Scheduled #${woId} to ${teamName} on ${dateStr}`);
-      await refreshInstData();
-    }
-  }
-}
-
-async function handleUnassignDrop(e) {
-  e.preventDefault();
-  const woId = e.dataTransfer.getData('text/plain');
-  if (!woId) return;
-
-  if (supabaseClient) {
-    const { error } = await supabaseClient.from('work_orders')
-      .update({ 
-        assigned_team: null, 
-        assigned_date: null,
-        installation_status: 'Ready'
-      })
-      .eq('work_order', woId);
-
-    if (error) showToast(error.message, "error");
-    else {
-      await logInstActivity(woId, `Unassigned from team`);
-      showToast(`Unassigned #${woId}`);
-      await refreshInstData();
-    }
-  }
+function togglePlanningDrawer() {
+  document.getElementById('planning-drawer').classList.toggle('open');
 }
 
 async function assignSelectedWOs() {
@@ -9761,12 +9620,11 @@ async function autoGroupSelected() {
 
 function optimizePlanningRoute() {
   showToast("Optimizing visit sequence (TSP)...");
+  // Simple Nearest Neighbor approach for demo
   if (planMap) {
-    if (currentRouteLine) planMap.removeLayer(currentRouteLine);
-    
     const selected = Array.from(document.querySelectorAll('.wo-checkbox:checked')).map(cb => cb.value);
     const wos = InstState.workOrders.filter(w => selected.includes(w.work_order) && w.latitude);
-    if (wos.length < 2) return showToast("Select at least 2 items to optimize", "amber");
+    if (wos.length < 2) return showToast("Select items to optimize", "amber");
     
     let unvisited = [...wos];
     let route = [unvisited.shift()];
@@ -9783,36 +9641,9 @@ function optimizePlanningRoute() {
       route.push(unvisited.splice(closestIdx, 1)[0]);
     }
     
-    currentOptimizedRoute = route;
     const latlngs = route.map(w => [w.latitude, w.longitude]);
-    currentRouteLine = L.polyline(latlngs, { color: '#00bcd4', weight: 3, dashArray: '8, 8', opacity: 0.7 }).addTo(planMap);
-    
-    document.getElementById('lock-route-btn').style.display = 'flex';
-    showToast("Route sequence previewed. Click Lock to save.");
-  }
-}
-
-async function lockPlanningRoute() {
-  if (currentOptimizedRoute.length === 0) return;
-  
-  showToast("Saving route sequence...");
-  
-  if (supabaseClient) {
-    const updates = currentOptimizedRoute.map((w, index) => {
-      return supabaseClient.from('work_orders').update({ sequence_order: index + 1 }).eq('work_order', w.work_order);
-    });
-    
-    try {
-      await Promise.all(updates);
-      if (currentRouteLine) {
-        currentRouteLine.setStyle({ dashArray: null, weight: 4, opacity: 1 });
-      }
-      document.getElementById('lock-route-btn').style.display = 'none';
-      showToast("Route locked and saved successfully", "success");
-      await refreshInstData();
-    } catch (e) {
-      showToast("Failed to lock route: " + e.message, "error");
-    }
+    L.polyline(latlngs, { color: '#00bcd4', weight: 4, dashArray: '10, 10' }).addTo(planMap);
+    showToast("Route sequence optimized");
   }
 }
 // ─── EXECUTION PAGE ───
@@ -9836,7 +9667,7 @@ function renderExecutionPage(container) {
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
           <h3 style="font-size:16px; font-weight:700; color:#f0f6fc;">Progress Tracker</h3>
         </div>
-        <div class="execution-kanban-wrap" style="padding-bottom:16px; min-height:500px;">
+        <div style="display:flex; gap:16px; overflow-x:auto; padding-bottom:16px; min-height:500px;">
           ${renderKanbanColumn('Validated', 'Ready')}
           ${renderKanbanColumn('Assigned', 'Assigned')}
           ${renderKanbanColumn('In Progress', 'In Progress')}
@@ -10115,116 +9946,53 @@ async function generateInstCertificate() {
   const wo = InstState.workOrders.find(w => w.work_order === woId);
   if (!wo) return;
   
-  showToast(`Generating Bilingual Certificate for #${woId}...`);
+  showToast(`Generating Certificate for #${woId}...`);
   
-  // Since we cannot easily embed RTL fonts in PDF-Lib without a custom TTF blob, 
-  // we will use a high-fidelity HTML-to-Canvas approach to ensure perfect Arabic RTL rendering.
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+  const pdf = await PDFDocument.create();
+  const fontBold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const fontRegular = await pdf.embedFont(StandardFonts.Helvetica);
   
-  const certModal = document.createElement('div');
-  certModal.style.position = 'fixed';
-  certModal.style.left = '-9999px';
-  certModal.style.top = '0';
-  certModal.style.width = '800px';
-  certModal.style.background = '#fff';
-  certModal.style.color = '#000';
-  certModal.style.padding = '40px';
-  certModal.style.fontFamily = "'Inter', 'Noto Sans Arabic', sans-serif";
+  const page = pdf.addPage([595.28, 841.89]);
   
-  certModal.innerHTML = `
-    <div style="border: 10px solid #0d1117; padding: 40px; position: relative;">
-      <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #0d1117; padding-bottom: 20px; margin-bottom: 30px;">
-        <div style="text-align: left;">
-          <h1 style="margin: 0; font-size: 24px;">INSTALLATION COMPLETION</h1>
-          <h2 style="margin: 0; font-size: 18px; color: #666;">CERTIFICATE</h2>
-        </div>
-        <div style="text-align: right; direction: rtl;">
-          <h1 style="margin: 0; font-size: 24px;">شهادة إتمام التركيب</h1>
-          <h2 style="margin: 0; font-size: 18px; color: #666;">قسم اللوحات الإرشادية</h2>
-        </div>
-      </div>
-      
-      <div style="margin-bottom: 40px;">
-        <p style="font-size: 16px; line-height: 1.6;">
-          This is to certify that the installation of signage assets under Work Order <b>#${wo.work_order}</b> 
-          has been completed and inspected in accordance with the contract requirements.
-        </p>
-        <p style="font-size: 16px; line-height: 1.6; direction: rtl; text-align: right;">
-          نشهد بموجبه أن أعمال تركيب اللوحات بموجب أمر العمل رقم <b>#${wo.work_order}</b> 
-          قد تم إنجازها وفحصها وفقاً لمتطلبات العقد.
-        </p>
-      </div>
-
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
-        <tr>
-          <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 25%;">Location / Road</td>
-          <td style="padding: 10px; border: 1px solid #ddd;">${wo.location || '—'}</td>
-          <td style="padding: 10px; border: 1px solid #ddd; direction: rtl; text-align: right; font-weight: bold; width: 25%;">الموقع / الطريق</td>
-        </tr>
-        <tr>
-          <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Completion Date</td>
-          <td style="padding: 10px; border: 1px solid #ddd;">${new Date().toLocaleDateString('en-GB')}</td>
-          <td style="padding: 10px; border: 1px solid #ddd; direction: rtl; text-align: right; font-weight: bold;">تاريخ الإتمام</td>
-        </tr>
-        <tr>
-          <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">GPS Coordinates</td>
-          <td style="padding: 10px; border: 1px solid #ddd;">${wo.latitude}, ${wo.longitude}</td>
-          <td style="padding: 10px; border: 1px solid #ddd; direction: rtl; text-align: right; font-weight: bold;">إحداثيات GPS</td>
-        </tr>
-      </table>
-
-      <div style="display: flex; justify-content: space-between; margin-top: 60px;">
-        <div style="width: 200px; border-top: 1px solid #000; text-align: center; padding-top: 10px;">
-          Operations Manager<br><span style="font-size: 12px; color: #666;">مدير العمليات</span>
-        </div>
-        <div style="width: 200px; text-align: center;">
-          <div id="cert-qr-target"></div>
-          <div style="font-size: 10px; margin-top: 5px;">VERIFY RECORD</div>
-        </div>
-        <div style="width: 200px; border-top: 1px solid #000; text-align: center; padding-top: 10px;">
-          Client Approval<br><span style="font-size: 12px; color: #666;">اعتماد العميل</span>
-        </div>
-      </div>
-      
-      <div style="position: absolute; bottom: 10px; left: 40px; font-size: 10px; color: #999;">
-        Generated by QBC Operations Center – C/2025/53
-      </div>
-    </div>
-  `;
+  // Header
+  page.drawRectangle({ x: 0, y: 760, width: 595.28, height: 81.89, color: rgb(0.04, 0.06, 0.1) });
+  page.drawText('INSTALLATION COMPLETION CERTIFICATE', { x: 50, y: 795, size: 20, font: fontBold, color: rgb(1, 1, 1) });
+  page.drawText('QBC Operations Center – Signage Management System', { x: 50, y: 775, size: 10, font: fontRegular, color: rgb(0.7, 0.7, 0.7) });
   
-  document.body.appendChild(certModal);
+  // Body
+  let y = 710;
+  const details = [
+    ['Work Order Number', wo.work_order],
+    ['Location / Road', wo.location || '—'],
+    ['Assigned Team', wo.assigned_team || '—'],
+    ['Status', wo.installation_status],
+    ['GPS Coordinates', `${wo.latitude || 0}, ${wo.longitude || 0}`],
+    ['Contract Ref', 'C/2025/53']
+  ];
   
-  // Generate QR
-  if (window.QRCode) {
-    new QRCode(certModal.querySelector('#cert-qr-target'), {
-      text: `https://qbc-ops.center/verify/${wo.work_order}`,
-      width: 80,
-      height: 80
-    });
-  }
-
-  // Allow QR to render
-  setTimeout(async () => {
-    try {
-      const canvas = await html2canvas(certModal, { scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
-      
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('p', 'mm', 'a4');
-      const imgProps = doc.getImageProperties(imgData);
-      const pdfWidth = doc.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
-      doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      doc.save(`QBC_Certificate_${wo.work_order}.pdf`);
-      
-      showToast("Bilingual Certificate generated successfully", "success");
-    } catch (e) {
-      console.error(e);
-      showToast("PDF generation failed: " + e.message, "error");
-    } finally {
-      document.body.removeChild(certModal);
-    }
-  }, 500);
+  details.forEach(([label, val]) => {
+    page.drawText(`${label}:`, { x: 50, y, size: 11, font: fontBold });
+    page.drawText(String(val), { x: 200, y, size: 11, font: fontRegular });
+    y -= 25;
+  });
+  
+  // QR Code space (placeholder)
+  page.drawRectangle({ x: 450, y: 620, width: 100, height: 100, color: rgb(0.9, 0.9, 0.9) });
+  page.drawText('SYSTEM QR CODE', { x: 460, y: 665, size: 8, font: fontRegular });
+  
+  // Footer
+  page.drawText('Digitally certified by QBC Operations Center', { x: 50, y: 50, size: 8, font: fontRegular, color: rgb(0.5, 0.5, 0.5) });
+  
+  const pdfBytes = await pdf.save();
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Certificate_${woId}.pdf`;
+  a.click();
+  
+  showToast("Certificate downloaded");
 }
 
 function exportInstExcel() {
@@ -10324,21 +10092,21 @@ async function seedInstallationModule() {
 
     // 2. Sample Work Orders (Updates existing or creates if missing)
     const sampleWOs = [
-      { work_order: 'INST-2025-001', description: 'Directional sign installation - Al Shamal Rd', status: 'APPR', latitude: 25.3548, longitude: 51.1839, pwa_engineer: 'Adnan Khdair', location: 'Al Shamal Road (Near Al Khor Exit)', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-002', description: 'Warning sign replacement - Corniche', status: 'APPR', latitude: 25.2867, longitude: 51.5333, pwa_engineer: 'Saeed Mubarak', location: 'Doha Corniche (Near Sheraton)', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-003', description: 'Speed limit signs - Lusail Express', status: 'APPR', latitude: 25.3500, longitude: 51.5167, pwa_engineer: 'Mohammed Issa', location: 'Lusail Expressway (North Bound)', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-004', description: 'Regulatory signage - West Bay', status: 'APPR', latitude: 25.3200, longitude: 51.5300, pwa_engineer: 'Adnan Khdair', location: 'West Bay (Diplomatic Area)', installation_status: 'Pending', fabrication_status: 'Ongoing', ready_for_installation: false },
-      { work_order: 'INST-2025-005', description: 'Information boards - Education City', status: 'APPR', latitude: 25.3100, longitude: 51.4300, pwa_engineer: 'Saeed Mubarak', location: 'Education City (Gate 2)', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-006', description: 'Pedestrian crossing signs - Hamad Port', status: 'APPR', latitude: 25.0100, longitude: 51.6100, pwa_engineer: 'Mohammed Issa', location: 'Hamad Port (Access Road)', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-007', description: 'No parking signs - Souq Waqif', status: 'APPR', latitude: 25.2867, longitude: 51.5267, pwa_engineer: 'Adnan Khdair', location: 'Souq Waqif (East Entrance)', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-008', description: 'Street name plates - Al Sadd', status: 'APPR', latitude: 25.2800, longitude: 51.5000, pwa_engineer: 'Saeed Mubarak', location: 'Al Sadd St (Near Hamad Hospital)', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-009', description: 'Variable message signs - Salwa Rd', status: 'APPR', latitude: 25.2500, longitude: 51.4500, pwa_engineer: 'Mohammed Issa', location: 'Salwa Road (Industrial Area exit)', installation_status: 'Pending', fabrication_status: 'Pending', ready_for_installation: false },
-      { work_order: 'INST-2025-010', description: 'Bridge height markers - F-Ring', status: 'APPR', latitude: 25.2200, longitude: 51.5500, pwa_engineer: 'Adnan Khdair', location: 'F-Ring Road (Airport Bridge)', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-011', description: 'Cyclist route signage - Aspire', status: 'APPR', latitude: 25.2600, longitude: 51.4400, pwa_engineer: 'Saeed Mubarak', location: 'Aspire Zone (Bike Trail)', installation_status: 'Assigned', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Hassan' },
-      { work_order: 'INST-2025-012', description: 'Bus stop signage - Airport Rd', status: 'APPR', latitude: 25.2400, longitude: 51.5600, pwa_engineer: 'Mohammed Issa', location: 'Old Airport Road', installation_status: 'In Progress', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Ahmed' },
-      { work_order: 'INST-2025-013', description: 'Directional gantry - D-Ring', status: 'APPR', latitude: 25.2600, longitude: 51.5200, pwa_engineer: 'Adnan Khdair', location: 'D-Ring Road (Lulu Intersection)', installation_status: 'Completed', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Ali' },
-      { work_order: 'INST-2025-014', description: 'Hospital wayfinding - HMC', status: 'APPR', latitude: 25.2900, longitude: 51.4900, pwa_engineer: 'Saeed Mubarak', location: 'Hamad Medical Corp (Heart Hospital)', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-015', description: 'Metro station signs - Msherieb', status: 'APPR', latitude: 25.2860, longitude: 51.5220, pwa_engineer: 'Mohammed Issa', location: 'Msherieb Downtown (Station Ent.)', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true }
+      { work_order: 'INST-2025-001', description: 'Directional sign installation - Al Shamal Rd', status: 'APPR', latitude: 25.3548, longitude: 51.1839, pwa_engineer: 'Adnan Khdair', location: 'Al Shamal Road', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-002', description: 'Warning sign replacement - Corniche', status: 'APPR', latitude: 25.2867, longitude: 51.5333, pwa_engineer: 'Saeed Mubarak', location: 'Doha Corniche', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-003', description: 'Speed limit signs - Lusail Express', status: 'APPR', latitude: 25.3500, longitude: 51.5167, pwa_engineer: 'Mohammed Issa', location: 'Lusail Expressway', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-004', description: 'Regulatory signage - West Bay', status: 'APPR', latitude: 25.3200, longitude: 51.5300, pwa_engineer: 'Adnan Khdair', location: 'West Bay', installation_status: 'Pending', fabrication_status: 'Ongoing', ready_for_installation: false },
+      { work_order: 'INST-2025-005', description: 'Information boards - Education City', status: 'APPR', latitude: 25.3100, longitude: 51.4300, pwa_engineer: 'Saeed Mubarak', location: 'Education City', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-006', description: 'Pedestrian crossing signs - Hamad Port', status: 'APPR', latitude: 25.0100, longitude: 51.6100, pwa_engineer: 'Mohammed Issa', location: 'Hamad Port', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-007', description: 'No parking signs - Souq Waqif', status: 'APPR', latitude: 25.2867, longitude: 51.5267, pwa_engineer: 'Adnan Khdair', location: 'Souq Waqif', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-008', description: 'Street name plates - Al Sadd', status: 'APPR', latitude: 25.2800, longitude: 51.5000, pwa_engineer: 'Saeed Mubarak', location: 'Al Sadd', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-009', description: 'Variable message signs - Salwa Rd', status: 'APPR', latitude: 25.2500, longitude: 51.4500, pwa_engineer: 'Mohammed Issa', location: 'Salwa Road', installation_status: 'Pending', fabrication_status: 'Pending', ready_for_installation: false },
+      { work_order: 'INST-2025-010', description: 'Bridge height markers - F-Ring', status: 'APPR', latitude: 25.2200, longitude: 51.5500, pwa_engineer: 'Adnan Khdair', location: 'F-Ring Road', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-011', description: 'Cyclist route signage - Aspire', status: 'APPR', latitude: 25.2600, longitude: 51.4400, pwa_engineer: 'Saeed Mubarak', location: 'Aspire Zone', installation_status: 'Assigned', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Hassan' },
+      { work_order: 'INST-2025-012', description: 'Bus stop signage - Airport Rd', status: 'APPR', latitude: 25.2400, longitude: 51.5600, pwa_engineer: 'Mohammed Issa', location: 'Airport Road', installation_status: 'In Progress', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Ahmed' },
+      { work_order: 'INST-2025-013', description: 'Directional gantry - D-Ring', status: 'APPR', latitude: 25.2600, longitude: 51.5200, pwa_engineer: 'Adnan Khdair', location: 'D-Ring Road', installation_status: 'Completed', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Ali' },
+      { work_order: 'INST-2025-014', description: 'Hospital wayfinding - HMC', status: 'APPR', latitude: 25.2900, longitude: 51.4900, pwa_engineer: 'Saeed Mubarak', location: 'Hamad Medical Corp', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-015', description: 'Metro station signs - Msherieb', status: 'APPR', latitude: 25.2860, longitude: 51.5220, pwa_engineer: 'Mohammed Issa', location: 'Msherieb Downtown', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true }
     ];
     await supabaseClient.from('work_orders').upsert(sampleWOs, { onConflict: 'work_order' });
 
