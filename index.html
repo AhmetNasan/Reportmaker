@@ -4537,9 +4537,19 @@ function renderManufacturingTable() {
       <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
     ` : '';
 
+    const reminderList = reminders.filter(rem => String(rem.work_order_number) === String(r.WorkOrder));
+    const activeReminders = reminderList.filter(rem => !['completed','cancelled'].includes(rem.status));
+    const totalPhotos = reminderList.reduce((sum, rem) => sum + (rem.photo_count || 0), 0);
+
     return `<tr oncontextmenu="showContextMenu(event, 'row-mfg', '${r.WorkOrder}')">
       <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
-      <td><span class="wo-num">${r.WorkOrder}</span></td>
+      <td>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="wo-num">${r.WorkOrder}</span>
+          ${activeReminders.length > 0 ? `<span class="ctx-badge" title="${activeReminders.length} active reminders" onclick="event.stopPropagation(); showPage('reminders');">📌 ${activeReminders.length}</span>` : ''}
+          ${totalPhotos > 0 ? `<span class="wo-photo-badge" title="${totalPhotos} photos in reminders" onclick="event.stopPropagation(); showPage('reminders');">📎 ${totalPhotos}</span>` : ''}
+        </div>
+      </td>
       <td class="desc-cell mfg-hide-cols" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td class="mfg-hide-cols">${stBadge}</td>
       <td class="mfg-hide-cols">${r.PWA_ENG||'—'}</td>
@@ -7734,9 +7744,10 @@ function openGisDetails(woId) {
 
       <div class="info-group">
         <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Documents & History</label>
-        <div style="display: flex; gap: 8px; margin-top: 6px;">
+        <div style="display: flex; gap: 8px; margin-top: 6px; flex-wrap:wrap;">
           <button class="btn btn-ghost btn-sm" onclick="openFabModal('${wo.WorkOrder}')"><i class="fas fa-file-pdf"></i> PDF</button>
           <button class="btn btn-ghost btn-sm" onclick="showFabHistory('${wo.WorkOrder}')"><i class="fas fa-history"></i> History</button>
+          <button class="btn btn-ghost btn-sm" onclick="openReminderModal(null, '${wo.WorkOrder}')"><i class="fas fa-thumbtack"></i> Remind</button>
         </div>
       </div>
 
@@ -9261,16 +9272,27 @@ function renderNotifications() {
     return;
   }
   
-  list.innerHTML = filtered.map(n => `
-    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="handleNotifClick(${n.id})">
+  list.innerHTML = filtered.map(n => {
+    const reminder = n.reminder_id ? reminders.find(r => r.id === n.reminder_id) : null;
+    const photoCount = reminder ? (reminder.photo_count || 0) : 0;
+    
+    return `
+    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="handleNotifClick('${n.id}')">
       <div class="notif-user">${n.user}</div>
       <div class="notif-action">${n.action}</div>
       <div class="notif-meta">
         <span><i class="far fa-clock"></i> ${formatNotifTime(n.time)}</span>
         ${n.woId ? `<span><i class="fas fa-hashtag"></i> ${n.woId}</span>` : ''}
       </div>
+      ${photoCount > 0 ? `
+        <div class="notif-photo-strip">
+          ${Array(Math.min(3, photoCount)).fill('<div style="width:36px; height:36px; background:var(--surface2); border-radius:4px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-image" style="opacity:0.3"></i></div>').join('')}
+          ${photoCount > 3 ? `<span class="notif-photo-more">+${photoCount - 3}</span>` : ''}
+        </div>
+      ` : ''}
     </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function formatNotifTime(isoString) {
@@ -9754,30 +9776,50 @@ function renderOpsDashboard(container) {
 function renderUnassignedList() {
   const list = InstState.workOrders.filter(w => w.installation_status === 'Ready' && !w.assigned_team).slice(0, 10);
   if (list.length === 0) return '<div style="text-align:center; padding:20px; color:var(--muted)">No unassigned items</div>';
-  return list.map(w => `
+  return list.map(w => {
+    const reminderList = reminders.filter(rem => String(rem.work_order_number) === String(w.work_order));
+    const activeReminders = reminderList.filter(rem => !['completed','cancelled'].includes(rem.status));
+    const totalPhotos = reminderList.reduce((sum, rem) => sum + (rem.photo_count || 0), 0);
+
+    return `
     <div class="inst-list-item">
       <div style="overflow:hidden">
-        <div style="font-weight:700; color:#00bcd4; font-size:13px;">#${w.work_order}</div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <div style="font-weight:700; color:#00bcd4; font-size:13px;">#${w.work_order}</div>
+          ${activeReminders.length > 0 ? `<span class="ctx-badge" style="font-size:9px; padding:0 4px;">📌 ${activeReminders.length}</span>` : ''}
+          ${totalPhotos > 0 ? `<span class="wo-photo-badge" style="font-size:9px; padding:0 4px;">📎 ${totalPhotos}</span>` : ''}
+        </div>
         <div style="font-size:11px; color:#8b949e; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${w.location || 'N/A'}</div>
       </div>
       <button class="inst-btn inst-btn-primary btn-xs" style="padding:4px 8px" onclick="quickAssignWO('${w.work_order}')">Assign</button>
     </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function renderOverdueList() {
   const now = new Date();
   const list = InstState.workOrders.filter(w => w.installation_status !== 'Completed' && w.target_finish_date && new Date(w.target_finish_date) < now).slice(0, 10);
   if (list.length === 0) return '<div style="text-align:center; padding:20px; color:var(--muted)">No overdue items</div>';
-  return list.map(w => `
+  return list.map(w => {
+    const reminderList = reminders.filter(rem => String(rem.work_order_number) === String(w.work_order));
+    const activeReminders = reminderList.filter(rem => !['completed','cancelled'].includes(rem.status));
+    const totalPhotos = reminderList.reduce((sum, rem) => sum + (rem.photo_count || 0), 0);
+
+    return `
     <div class="inst-list-item" style="border-left: 3px solid var(--red)">
       <div style="overflow:hidden">
-        <div style="font-weight:700; color:#f44336; font-size:13px;">#${w.work_order}</div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <div style="font-weight:700; color:#f44336; font-size:13px;">#${w.work_order}</div>
+          ${activeReminders.length > 0 ? `<span class="ctx-badge" style="font-size:9px; padding:0 4px;">📌 ${activeReminders.length}</span>` : ''}
+          ${totalPhotos > 0 ? `<span class="wo-photo-badge" style="font-size:9px; padding:0 4px;">📎 ${totalPhotos}</span>` : ''}
+        </div>
         <div style="font-size:11px; color:#8b949e;">Due: ${formatDate(w.target_finish_date)}</div>
       </div>
       <div style="font-size:10px; padding:2px 6px; background:rgba(244,67,54,0.1); color:#f44336; border-radius:4px;">${w.installation_status}</div>
     </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function renderActivityFeed() {
@@ -10865,6 +10907,17 @@ function updateRemindersUI() {
     renderDetailReminderList();
   }
   updateNavBadges();
+  
+  // Update badges on active tables
+  if (document.getElementById('page-workorders')?.classList.contains('active')) {
+    renderTable();
+  }
+  if (document.getElementById('page-manufacturing')?.classList.contains('active')) {
+    renderManufacturingTable();
+  }
+  if (document.getElementById('page-installation')?.classList.contains('active')) {
+    renderInstPage();
+  }
 }
 
 function updateReminderKPIs() {
