@@ -37,6 +37,10 @@
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/plugin/relativeTime.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
 
 <style>
 :root{
@@ -103,6 +107,66 @@
   --shadow-teal:  0 0 20px rgba(0,200,180,0.2);
   --transition-fast:0.12s ease; --transition-normal:0.22s ease; --transition-slow:0.35s ease;
 }
+
+/* ALARM POPUP CSS */
+.alarm-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+.alarm-card {
+  background: var(--color-alarm-bg);
+  border: 2px solid var(--color-alarm-border);
+  border-radius: var(--radius-xl);
+  width: 480px; max-width: 90vw;
+  box-shadow: var(--shadow-alarm);
+  padding: var(--space-8);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.alarm-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at center, var(--color-alarm-pulse), transparent);
+  animation: alarmPulse 2s infinite;
+  pointer-events: none;
+}
+@keyframes alarmPulse {
+  0% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+  100% { opacity: 0.3; transform: scale(0.8); }
+}
+.alarm-header { margin-bottom: var(--space-6); position: relative; z-index: 1; }
+.alarm-icon-pulse {
+  font-size: 64px; margin-bottom: var(--space-4);
+  animation: bellRing 0.5s infinite;
+}
+@keyframes bellRing {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(15deg); }
+  75% { transform: rotate(-15deg); }
+  100% { transform: rotate(0); }
+}
+.alarm-title {
+  font-family: var(--font-data); font-size: var(--text-xl); font-weight: var(--fw-bold);
+  color: var(--color-alarm-border); letter-spacing: 0.1em;
+}
+.alarm-body { margin-bottom: var(--space-8); position: relative; z-index: 1; }
+.alarm-wo-info { font-family: var(--font-data); font-size: var(--text-md); color: var(--color-accent-teal); margin-bottom: var(--space-2); }
+.alarm-rem-title { font-size: var(--text-2xl); font-weight: var(--fw-bold); color: var(--color-text-primary); margin-bottom: var(--space-4); }
+.alarm-rem-notes { font-size: var(--text-md); color: var(--color-text-secondary); line-height: 1.6; }
+.alarm-field { margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--color-border-subtle); text-align: left; }
+.alarm-field-label { font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+.alarm-field-value { font-size: 13px; color: var(--color-text-primary); }
+
+.alarm-footer { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); position: relative; z-index: 1; }
+.btn-alarm-snooze, .btn-alarm-dismiss, .btn-alarm-view {
+  padding: var(--space-3); border-radius: var(--radius-md); font-family: var(--font-ui); font-weight: var(--fw-semibold); cursor: pointer; transition: all 0.2s;
+}
+.btn-alarm-snooze { background: var(--color-bg-overlay); border: 1px solid var(--color-border-default); color: var(--color-text-primary); }
+.btn-alarm-dismiss { background: var(--color-alarm-border); border: none; color: white; }
+.btn-alarm-view { grid-column: span 2; background: transparent; border: 1px solid var(--color-accent-teal-dim); color: var(--color-accent-teal); }
 
 [data-theme="light"] {
   --bg:#f4f6f8;--surface:#ffffff;--surface2:#f8fafc;--border:#dfe5ec;
@@ -2450,6 +2514,32 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
+<div class="alarm-overlay" id="alarmOverlay" style="display:none">
+    <div class="alarm-card">
+      <div class="alarm-header">
+         <div class="alarm-icon-pulse">🔔</div>
+         <div class="alarm-title">REMINDER ALERT</div>
+      </div>
+      <div class="alarm-body">
+         <div class="alarm-wo-info" id="alarm-wo-info">WO #123456</div>
+         <div class="alarm-rem-title" id="alarm-rem-title">Follow up on TDP permit</div>
+         <div class="alarm-rem-notes" id="alarm-rem-notes">Notes go here...</div>
+         
+         <div class="alarm-field" id="alarmPhotoRow" style="display:none">
+           <div class="alarm-field-label">Attachments</div>
+           <div class="alarm-field-value">
+             <span id="alarmPhotoCount">0</span> photo(s) attached — open reminder to view
+           </div>
+         </div>
+      </div>
+      <div class="alarm-footer">
+         <button class="btn-alarm-snooze" onclick="snoozeAlarm()">Snooze (5m)</button>
+         <button class="btn-alarm-dismiss" onclick="dismissAlarm()">Dismiss</button>
+         <button class="btn-alarm-view" onclick="viewReminderFromAlarm()">View Details</button>
+      </div>
+    </div>
+</div>
+
 <!-- REMINDER CREATION/EDIT MODAL -->
 <div class="reminder-modal-overlay" id="reminderModalOverlay" style="display:none">
   <div class="reminder-modal" id="reminderModal">
@@ -2886,12 +2976,14 @@ let currentCompletionWO = null;
 // Reminder State
 let reminders = [];
 let reminderCalendar = null;
+let triggeredAlarms = new Set();
+let activeAlarmReminder = null;
+let alarmInterval = null;
 let currentOpenReminderId = null;
 let pendingPhotos = [];
 let existingPhotos = [];
 let lightboxIndex = 0;
 let reminderListViewMode = 'pending';
-let alarmInterval = null;
 let alarmActiveReminder = null;
 
 // INITIALIZATION
@@ -3061,6 +3153,12 @@ async function onAuthenticated() {
   loadLogo();
   await loadNotifications();
   setupNotifListener();
+  fetchReminders();
+  setupReminderSubscriptions();
+  
+  if (window.alarmInterval) clearInterval(window.alarmInterval);
+  window.alarmInterval = setInterval(checkAlarms, 30000);
+  
   showPage('dashboard');
   fetchData();
 }
@@ -9120,8 +9218,25 @@ async function addNotification(action, woId = null, category = 'system') {
 function updateNotifBadge() {
   const unreadCount = notifications.filter(n => !n.read).length;
   const badge = document.getElementById('notif-badge');
-  badge.textContent = unreadCount;
-  badge.classList.toggle('show', unreadCount > 0);
+  if (badge) {
+    badge.textContent = unreadCount;
+    badge.classList.toggle('show', unreadCount > 0);
+  }
+}
+
+function updateNavBadges() {
+  updateNotifBadge();
+  const activeReminders = reminders.filter(r => r.status !== 'completed' && r.status !== 'cancelled').length;
+  const badge = document.getElementById('rem-nav-badge');
+  const mBadge = document.getElementById('rem-mobile-badge');
+  if (badge) {
+    badge.textContent = activeReminders;
+    badge.style.display = activeReminders > 0 ? 'inline-block' : 'none';
+  }
+  if (mBadge) {
+    mBadge.textContent = activeReminders;
+    mBadge.style.display = activeReminders > 0 ? 'inline-block' : 'none';
+  }
 }
 
 function switchNotifTab(tab) {
@@ -10736,10 +10851,126 @@ async function fetchReminders() {
     
     if (error) throw error;
     reminders = data || [];
-    if (typeof updateRemindersUI === 'function') updateRemindersUI();
+    updateRemindersUI();
   } catch (e) {
     console.error("Fetch Reminders Error:", e);
   }
+}
+
+function updateRemindersUI() {
+  updateReminderKPIs();
+  renderReminders();
+  initCalendar();
+  if (document.getElementById('pane-reminders').classList.contains('active')) {
+    renderDetailReminderList();
+  }
+  updateNavBadges();
+}
+
+function updateReminderKPIs() {
+  const now = new Date();
+  const todayStr = dayjs().format('YYYY-MM-DD');
+  
+  const stats = {
+    total: reminders.length,
+    today: reminders.filter(r => r.status !== 'completed' && dayjs(r.reminder_datetime).format('YYYY-MM-DD') === todayStr).length,
+    overdue: reminders.filter(r => r.status !== 'completed' && new Date(r.reminder_datetime) < now).length,
+    upcoming: reminders.filter(r => r.status !== 'completed' && new Date(r.reminder_datetime) > now).length,
+    completed: reminders.filter(r => r.status === 'completed').length
+  };
+  
+  const elTotal = document.getElementById('rem-kpi-total');
+  const elToday = document.getElementById('rem-kpi-today');
+  const elOverdue = document.getElementById('rem-kpi-overdue');
+  const elUpcoming = document.getElementById('rem-kpi-upcoming');
+  const elCompleted = document.getElementById('rem-kpi-completed');
+  
+  if (elTotal) elTotal.textContent = stats.total;
+  if (elToday) elToday.textContent = stats.today;
+  if (elOverdue) elOverdue.textContent = stats.overdue;
+  if (elUpcoming) elUpcoming.textContent = stats.upcoming;
+  if (elCompleted) elCompleted.textContent = stats.completed;
+}
+
+function renderReminders() {
+  const container = document.getElementById('reminder-agenda-list');
+  if (!container) return;
+  
+  const filter = document.querySelector('.rem-filter-btn.active')?.dataset.filter || 'active';
+  let filtered = reminders;
+  
+  if (filter === 'active') {
+    filtered = reminders.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
+  }
+  
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="rem-empty-state">No reminders found</div>';
+    return;
+  }
+  
+  container.innerHTML = filtered.map(r => `
+    <div class="rem-card" style="border-left: 4px solid ${getPriorityColor(r.priority)};">
+      <div class="rem-card-header">
+        <div class="rem-card-title">${r.title}</div>
+        <div class="rem-card-priority" style="color: ${getPriorityColor(r.priority)}; background: ${getPriorityColor(r.priority)}15;">${r.priority.toUpperCase()}</div>
+      </div>
+      <div class="rem-card-meta">
+        <span><i class="fas fa-hashtag"></i> ${r.work_order_number}</span>
+        <span><i class="fas fa-calendar-alt"></i> ${dayjs(r.reminder_datetime).format('DD MMM YYYY, HH:mm')}</span>
+      </div>
+      <div class="rem-card-notes">${r.notes || 'No additional notes'}</div>
+      <div class="rem-card-footer">
+        <div class="rem-card-user"><i class="fas fa-user-circle"></i> ${r.assigned_to_name || 'Unassigned'}</div>
+        <div class="rem-card-actions">
+          <button class="btn btn-ghost btn-xs" onclick="openReminderModal('${r.id}')"><i class="fas fa-edit"></i></button>
+          ${r.status !== 'completed' ? `<button class="btn btn-green btn-xs" onclick="completeReminder('${r.id}')"><i class="fas fa-check"></i></button>` : ''}
+          <button class="btn btn-red btn-xs" onclick="deleteReminder('${r.id}')"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function getPriorityColor(p) {
+  switch(p) {
+    case 'critical': return '#ef4444';
+    case 'high': return '#f97316';
+    case 'medium': return '#eab308';
+    case 'low': return '#22c55e';
+    default: return '#64748b';
+  }
+}
+
+function initCalendar() {
+  const calendarEl = document.getElementById('reminder-calendar-main');
+  if (!calendarEl || !window.FullCalendar) return;
+  
+  if (reminderCalendar) {
+    reminderCalendar.destroy();
+  }
+  
+  reminderCalendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    themeSystem: 'standard',
+    events: reminders.map(r => ({
+      id: r.id,
+      title: r.title,
+      start: r.reminder_datetime,
+      color: getPriorityColor(r.priority),
+      extendedProps: { ...r }
+    })),
+    eventClick: function(info) {
+      openReminderModal(info.event.id);
+    },
+    height: 'auto'
+  });
+  
+  reminderCalendar.render();
 }
 
 async function saveReminder() {
@@ -10980,6 +11211,109 @@ async function seedInstallationModule() {
   } catch (e) {
     console.error("Seeding failed:", e);
   }
+}
+
+function playAlarmSound() {
+  if (!window.Tone) return;
+  try {
+    const synth = new Tone.Synth().toDestination();
+    const now = Tone.now();
+    // 3 ascending beeps
+    synth.triggerAttackRelease("C5", "8n", now);
+    synth.triggerAttackRelease("E5", "8n", now + 0.2);
+    synth.triggerAttackRelease("G5", "8n", now + 0.4);
+  } catch (e) {
+    console.error("Tone.js play failed:", e);
+  }
+}
+
+function showAlarmPopup(rem) {
+  activeAlarmReminder = rem;
+  document.getElementById('alarm-wo-info').textContent = `WO #${rem.work_order_number}`;
+  document.getElementById('alarm-rem-title').textContent = rem.title;
+  document.getElementById('alarm-rem-notes').textContent = rem.notes || 'No notes provided.';
+  
+  const photoRow = document.getElementById('alarmPhotoRow');
+  const photoCount = document.getElementById('alarmPhotoCount');
+  if (rem.photo_count > 0) {
+    photoRow.style.display = 'block';
+    photoCount.textContent = rem.photo_count;
+  } else {
+    photoRow.style.display = 'none';
+  }
+  
+  document.getElementById('alarmOverlay').style.display = 'flex';
+  playAlarmSound();
+  
+  // Log alarm trigger
+  logReminderActivity(rem.id, 'alarm_triggered');
+}
+
+function dismissAlarm() {
+  document.getElementById('alarmOverlay').style.display = 'none';
+  activeAlarmReminder = null;
+}
+
+async function snoozeAlarm() {
+  if (!activeAlarmReminder) return;
+  const snoozeTime = 5; // minutes
+  const snoozeUntil = dayjs().add(snoozeTime, 'minutes').toISOString();
+  
+  try {
+    const { error } = await supabaseClient
+      .from('work_order_reminders')
+      .update({ 
+        status: 'snoozed', 
+        snoozed_until: snoozeUntil,
+        snooze_count: (activeAlarmReminder.snooze_count || 0) + 1
+      })
+      .eq('id', activeAlarmReminder.id);
+      
+    if (error) throw error;
+    
+    // Log snooze history
+    await supabaseClient.from('reminder_snooze_history').insert({
+      reminder_id: activeAlarmReminder.id,
+      user_id: currentUser?.id,
+      snoozed_until: snoozeUntil,
+      duration_minutes: snoozeTime
+    });
+    
+    logReminderActivity(activeAlarmReminder.id, 'snoozed');
+    dismissAlarm();
+    fetchReminders();
+    showToast(`Snoozed for ${snoozeTime} minutes`);
+  } catch (e) {
+    console.error("Snooze Error:", e);
+    showToast("Error snoozing reminder", "error");
+  }
+}
+
+function viewReminderFromAlarm() {
+  const remId = activeAlarmReminder?.id;
+  dismissAlarm();
+  if (remId) {
+    openReminderModal(remId);
+  }
+}
+
+function checkAlarms() {
+  const now = dayjs();
+  reminders.forEach(rem => {
+    if (rem.status === 'completed' || rem.status === 'cancelled' || !rem.alarm_enabled) return;
+    
+    let dueTime = dayjs(rem.reminder_datetime);
+    if (rem.status === 'snoozed' && rem.snoozed_until) {
+      dueTime = dayjs(rem.snoozed_until);
+    }
+    
+    if (dueTime.isBefore(now) || dueTime.isSame(now, 'minute')) {
+      if (!triggeredAlarms.has(rem.id)) {
+        showAlarmPopup(rem);
+        triggeredAlarms.add(rem.id);
+      }
+    }
+  });
 }
 
 async function refreshUI() {
