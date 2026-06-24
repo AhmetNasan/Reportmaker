@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -45,6 +45,63 @@
   --text:#e2e8f0;--muted:#64748b;--r:10px;--card-radius: 16px;
   --header-h: 60px;
   --shadow: 0 4px 20px rgba(0,0,0,0.2);
+
+  /* === QBC DESIGN SYSTEM — REMINDER MODULE === */
+  --color-bg-base:        #0d0f12;
+  --color-bg-surface:     #13161b;
+  --color-bg-elevated:    #1a1e26;
+  --color-bg-overlay:     #20252f;
+  --color-bg-input:       #0f1217;
+  --color-border-subtle:  #1f2430;
+  --color-border-default: #2a3040;
+  --color-border-strong:  #3a4455;
+  --color-accent-teal:    #00c8b4;
+  --color-accent-teal-dim:#007a6e;
+  --color-accent-teal-bg: #00c8b410;
+  --color-priority-low:      #22c55e;
+  --color-priority-low-bg:   #22c55e12;
+  --color-priority-medium:   #eab308;
+  --color-priority-medium-bg:#eab30812;
+  --color-priority-high:     #f97316;
+  --color-priority-high-bg:  #f9731612;
+  --color-priority-critical: #ef4444;
+  --color-priority-critical-bg:#ef444412;
+  --color-status-pending:    #64748b;
+  --color-status-upcoming:   #3b82f6;
+  --color-status-due-today:  #eab308;
+  --color-status-overdue:    #ef4444;
+  --color-status-completed:  #22c55e;
+  --color-status-cancelled:  #475569;
+  --color-status-snoozed:    #a855f7;
+  --color-photo-border:   #2a3040;
+  --color-photo-hover:    #00c8b420;
+  --color-photo-drop:     #00c8b430;
+  --color-alarm-bg:       #1a0f0f;
+  --color-alarm-border:   #ef4444;
+  --color-alarm-pulse:    #ef444430;
+  --color-text-primary:   #e8eaf0;
+  --color-text-secondary: #8892a4;
+  --color-text-muted:     #4a5568;
+  --color-text-inverse:   #0d0f12;
+  --color-bell-badge:     #ef4444;
+  --color-bell-icon:      #e8eaf0;
+  --font-ui:   'Inter', sans-serif;
+  --font-data: 'JetBrains Mono', monospace;
+  --text-xs:   11px;   --text-sm:  12px;
+  --text-base: 13px;   --text-md:  14px;
+  --text-lg:   16px;   --text-xl:  20px;
+  --text-2xl:  24px;   --text-3xl: 30px;
+  --fw-regular: 400;  --fw-medium:  500;
+  --fw-semibold:600;  --fw-bold:    700;
+  --space-1:4px; --space-2:8px;  --space-3:12px; --space-4:16px;
+  --space-5:20px;--space-6:24px; --space-8:32px; --space-10:40px;
+  --radius-sm:4px; --radius-md:8px; --radius-lg:12px;
+  --radius-xl:16px;--radius-full:9999px;
+  --shadow-card:  0 2px 8px rgba(0,0,0,0.5);
+  --shadow-modal: 0 8px 40px rgba(0,0,0,0.8);
+  --shadow-alarm: 0 0 60px rgba(239,68,68,0.3);
+  --shadow-teal:  0 0 20px rgba(0,200,180,0.2);
+  --transition-fast:0.12s ease; --transition-normal:0.22s ease; --transition-slow:0.35s ease;
 }
 
 [data-theme="light"] {
@@ -1259,6 +1316,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="notif-tab active" onclick="switchNotifTab('all')">All</button>
     <button class="notif-tab" onclick="switchNotifTab('workorders')">Work</button>
     <button class="notif-tab" onclick="switchNotifTab('manufacturing')">Fab</button>
+    <button class="notif-tab" onclick="switchNotifTab('reminders')">Reminders</button>
     <button class="notif-tab" onclick="switchNotifTab('system')">Alerts</button>
   </div>
   <div class="notif-list" id="notif-list">
@@ -2079,6 +2137,107 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
+<div class="page" id="page-reminders">
+  <div class="wrapper">
+    <header class="dash-header">
+      <div class="header-left">
+        <div class="tag">▸ QBC Operations Center</div>
+        <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Reminder <span style="color:var(--accent-teal)">Management</span></h1>
+        <p style="font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500; letter-spacing: 0.02em;">Follow-up, Scheduling & Automated Alerts</p>
+      </div>
+      <div class="header-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
+        <div style="font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px;">
+          <i class="fas fa-sync-alt"></i> Last updated: <span id="reminders-last-refresh">--:--</span>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" onclick="openReminderModal(null)">
+            <i class="fa-solid fa-plus"></i> New Reminder
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="dash-layout">
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card total cursor-pointer" onclick="filterReminders('all')">
+          <div class="kpi-label">Total Reminders</div>
+          <div id="rem-kpi-total" class="kpi-value">0</div>
+          <div class="kpi-pct">All Records</div>
+          <i class="fa-solid fa-bell kpi-icon"></i>
+        </div>
+        <div class="kpi-card on-time cursor-pointer" onclick="filterReminders('due_today')">
+          <div class="kpi-label">Due Today</div>
+          <div id="rem-kpi-today" class="kpi-value" style="color:var(--color-status-due-today)">0</div>
+          <div class="kpi-pct">Requires Action</div>
+          <i class="fa-solid fa-calendar-day kpi-icon"></i>
+        </div>
+        <div class="kpi-card failed cursor-pointer" onclick="filterReminders('overdue')">
+          <div class="kpi-label">Overdue</div>
+          <div id="rem-kpi-overdue" class="kpi-value" style="color:var(--color-status-overdue)">0</div>
+          <div class="kpi-pct">Immediate Attention</div>
+          <i class="fa-solid fa-circle-exclamation kpi-icon"></i>
+        </div>
+        <div class="kpi-card pending cursor-pointer" onclick="filterReminders('upcoming')">
+          <div class="kpi-label">Upcoming</div>
+          <div id="rem-kpi-upcoming" class="kpi-value" style="color:var(--color-status-upcoming)">0</div>
+          <div class="kpi-pct">Next 7 Days</div>
+          <i class="fa-solid fa-calendar-week kpi-icon"></i>
+        </div>
+        <div class="kpi-card on-time cursor-pointer" onclick="filterReminders('completed')">
+          <div class="kpi-label">Completed</div>
+          <div id="rem-kpi-completed" class="kpi-value" style="color:var(--color-status-completed)">0</div>
+          <div class="kpi-pct">Archived Items</div>
+          <i class="fa-solid fa-circle-check kpi-icon"></i>
+        </div>
+      </div>
+
+      <!-- Main Layout: Calendar + List -->
+      <div style="display: grid; grid-template-columns: 1fr 380px; gap: 24px; min-height: 600px;">
+        <!-- Calendar Column -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title"><i class="fa-solid fa-calendar"></i> Reminder Calendar</div>
+            <div style="display:flex; gap:8px;">
+               <button class="btn btn-ghost btn-xs" onclick="reminderCalendar.changeView('dayGridMonth')">Month</button>
+               <button class="btn btn-ghost btn-xs" onclick="reminderCalendar.changeView('timeGridWeek')">Week</button>
+               <button class="btn btn-ghost btn-xs" onclick="reminderCalendar.changeView('timeGridDay')">Day</button>
+            </div>
+          </div>
+          <div class="dash-card-body" id="reminderCalendarContainer" style="padding: 10px;">
+            <!-- FullCalendar injected here -->
+          </div>
+        </div>
+
+        <!-- List Column -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+           <div class="dash-card" style="flex: 1;">
+              <div class="dash-card-header">
+                <div class="dash-card-title"><i class="fa-solid fa-list-ul"></i> Agenda</div>
+                <div class="gis-view-toggle">
+                  <button class="gis-toggle-btn active" onclick="switchReminderListView('pending')">Active</button>
+                  <button class="gis-toggle-btn" onclick="switchReminderListView('all')">All</button>
+                </div>
+              </div>
+              <div class="dash-card-body" id="reminderAgendaList" style="overflow-y: auto; max-height: 500px; padding: 12px;">
+                <div class="empty-state">No reminders scheduled</div>
+              </div>
+           </div>
+           
+           <div class="dash-card">
+              <div class="dash-card-header">
+                 <div class="dash-card-title"><i class="fa-solid fa-chart-pie"></i> Distribution</div>
+              </div>
+              <div class="dash-card-body" style="height: 200px;">
+                 <canvas id="reminderDistCanvas"></canvas>
+              </div>
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-settings">
   <div class="wrapper">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
@@ -2291,6 +2450,109 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
+<!-- REMINDER CREATION/EDIT MODAL -->
+<div class="reminder-modal-overlay" id="reminderModalOverlay" style="display:none">
+  <div class="reminder-modal" id="reminderModal">
+    <div class="reminder-modal-header">
+      <div class="modal-icon">📌</div>
+      <h2 id="reminderModalTitle">Set New Reminder</h2>
+      <button class="modal-close" onclick="closeReminderModal()">✕</button>
+    </div>
+    <div class="reminder-modal-body">
+      <div class="reminder-wo-banner" id="reminderWoBanner">
+        <span class="wo-num" id="rem-wo-num">#00000000</span>
+        <span class="wo-title" id="rem-wo-title">Work Order Title</span>
+      </div>
+
+      <div class="reminder-section-label">Reminder Details</div>
+      
+      <div class="reminder-field">
+        <label>Reminder Title <span class="required">*</span></label>
+        <input type="text" id="rem-title" class="reminder-input" placeholder="e.g. Follow up on TDP permit">
+      </div>
+
+      <div class="reminder-date-row">
+        <div class="reminder-field">
+          <label>Date & Time <span class="required">*</span></label>
+          <input type="datetime-local" id="rem-datetime" class="reminder-input">
+        </div>
+        <div class="reminder-field">
+          <label>Reason <span class="required">*</span></label>
+          <select id="rem-reason" class="reminder-select" onchange="toggleCustomReason()">
+            <option value="Follow-up">Follow-up</option>
+            <option value="Permit Expiry">Permit Expiry</option>
+            <option value="Fabrication Ready">Fabrication Ready</option>
+            <option value="Site Inspection">Site Inspection</option>
+            <option value="Client Meeting">Client Meeting</option>
+            <option value="Other">Other (Custom)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="reminder-field" id="customReasonField" style="display:none">
+        <label>Custom Reason</label>
+        <input type="text" id="rem-custom-reason" class="reminder-input" placeholder="Enter custom reason">
+      </div>
+
+      <div class="reminder-field">
+        <label>Priority</label>
+        <div class="priority-selector">
+          <button class="priority-btn" data-priority="low" onclick="setReminderPriority('low')">Low</button>
+          <button class="priority-btn active" data-priority="medium" onclick="setReminderPriority('medium')">Medium</button>
+          <button class="priority-btn" data-priority="high" onclick="setReminderPriority('high')">High</button>
+          <button class="priority-btn" data-priority="critical" onclick="setReminderPriority('critical')">Critical</button>
+        </div>
+      </div>
+
+      <div class="reminder-field">
+        <label>Assigned To</label>
+        <select id="rem-assigned-to" class="reminder-select">
+           <option value="">Self (Default)</option>
+        </select>
+      </div>
+
+      <div class="reminder-field">
+        <label>Internal Notes</label>
+        <textarea id="rem-notes" class="reminder-textarea" placeholder="Additional context for this reminder..."></textarea>
+      </div>
+
+      <!-- PHOTO ATTACHMENT SECTION -->
+      <div class="reminder-section-label" style="margin-top:var(--space-6)">
+        📎 Photo Attachments
+        <span class="photo-section-count" id="photoCountBadge">0 photos</span>
+      </div>
+      <div class="reminder-field">
+        <div class="photo-dropzone" id="photoDropzone">
+          <input type="file" id="photoFileInput" accept="image/jpeg,image/png,image/webp" multiple />
+          <div class="photo-dropzone-icon">🖼️</div>
+          <div class="photo-dropzone-label">
+            <strong>Click to upload</strong> or drag & drop photos here
+          </div>
+          <div class="photo-dropzone-hint">
+            JPEG · PNG · WEBP &nbsp;|&nbsp; Max 10 MB per file &nbsp;|&nbsp; Up to 20 photos
+          </div>
+        </div>
+        <div class="photo-upload-progress" id="photoUploadProgress">
+          <div class="photo-upload-bar" id="photoUploadBar"></div>
+        </div>
+        <div class="photo-thumb-grid" id="photoThumbGrid"></div>
+      </div>
+
+      <div class="reminder-section-label" style="margin-top:var(--space-6)">Automation & Notifications</div>
+      <div class="reminder-toggles">
+        <label class="reminder-toggle"><input type="checkbox" id="rem-alarm" checked> 🔊 Trigger Alarm</label>
+        <label class="reminder-toggle"><input type="checkbox" id="rem-calendar" checked> 📅 Show on Calendar</label>
+        <label class="reminder-toggle"><input type="checkbox" id="rem-desktop" checked> 🖥️ Desktop Notification</label>
+        <label class="reminder-toggle"><input type="checkbox" id="rem-email"> 📧 Email Alert</label>
+      </div>
+    </div>
+    <div class="reminder-modal-footer">
+      <button class="btn-reminder-cancel" onclick="closeReminderModal()">Cancel</button>
+      <button class="btn-reminder-save" id="btnReminderSave" onclick="saveReminder()">Save Reminder</button>
+    </div>
+  </div>
+</div>
+
 <div class="detail-modal" id="detailModal">
     <div class="detail-header" oncontextmenu="showContextMenu(event, 'detail-modal')">
     <button class="btn btn-ghost btn-sm" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Back</button>
@@ -2345,6 +2607,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <button class="detail-tab" onclick="switchDetailTab('manufacturing')"><i class="fas fa-industry"></i> Manufacturing</button>
       <button class="detail-tab" onclick="switchDetailTab('history')"><i class="fas fa-history"></i> History</button>
       <button class="detail-tab" onclick="switchDetailTab('comments')"><i class="fas fa-comments"></i> Comments</button>
+      <button class="detail-tab" onclick="switchDetailTab('reminders')"><i class="fas fa-bell"></i> Reminders</button>
     </div>
 
     <!-- Toolbar -->
@@ -2523,6 +2786,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
     </div>
 
+    <div class="detail-pane" id="pane-reminders">
+      <div class="detail-section">
+        <div class="detail-section-title">Work Order Reminders</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+           <p style="font-size:12px; color:var(--muted); margin:0;">Track follow-ups and deadlines specifically for this Work Order.</p>
+           <button class="btn btn-primary btn-sm" onclick="openReminderModal(null, selectedWorkOrder)"><i class="fas fa-plus"></i> New Reminder</button>
+        </div>
+        <div id="pane-reminders-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+      </div>
+    </div>
+
     <div class="detail-pane" id="pane-comments">
       <div class="detail-section">
         <div class="detail-section-title">Internal Comments</div>
@@ -2546,7 +2820,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <script>
 // CONFIG & STATE
 const SUPABASE_URL = 'https://srdxtvchpuncdkfabiid.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyZHh0dmNocHVuY2RrZmFiaWlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2ODg4MjEsImV4cCI6MjA5NTI2NDgyMX0.SlvxONu_OUlmnJ3H60EXw3hdjiWHnUca62907uxU1Fk';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyZHh0dmNocHVuY2RrZmFiaWlkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY4ODgyMSwiZXhwIjoyMDk1MjY0ODIxfQ.KJTy3y0n5i6q_B4WjyYO8frehP4NFY3HPDwUlHN-g70';
 
 let supabaseClient = null;
 try {
@@ -2608,6 +2882,17 @@ let calMonth = new Date().getMonth();
 let calYear = new Date().getFullYear();
 let signaturePad = null;
 let currentCompletionWO = null;
+
+// Reminder State
+let reminders = [];
+let reminderCalendar = null;
+let currentOpenReminderId = null;
+let pendingPhotos = [];
+let existingPhotos = [];
+let lightboxIndex = 0;
+let reminderListViewMode = 'pending';
+let alarmInterval = null;
+let alarmActiveReminder = null;
 
 // INITIALIZATION
 window.addEventListener('paste', async (e) => {
@@ -3141,6 +3426,15 @@ function showContextMenu(e, context, woId = null) {
       items.push({ divider: true });
       items.push({ label: 'Delete Record', icon: 'fa-trash', action: () => deleteWO(woId), danger: true });
     }
+
+    if (hasPermission('edit')) {
+      const existingReminders = reminders.filter(r => String(r.work_order_number) === String(woId));
+      items.splice(items.length - (isAdmin ? 3 : 0), 0, 
+        { divider: true },
+        { label: 'Remind Me', icon: 'fa-thumbtack', action: () => openReminderModal(null, woId), badge: existingReminders.length },
+        { divider: true }
+      );
+    }
   } else if (context === 'detail-modal') {
     const isEditing = document.getElementById('detailModal').classList.contains('editing');
     if (isEditing) {
@@ -3176,7 +3470,7 @@ function showContextMenu(e, context, woId = null) {
     }
     const div = document.createElement('div');
     div.className = `context-menu-item ${item.danger ? 'danger' : ''}`;
-    div.innerHTML = `<i class="fas ${item.icon}"></i> ${item.label}`;
+    div.innerHTML = `<i class="fas ${item.icon}"></i> ${item.label} ${item.badge ? `<span class="ctx-badge">${item.badge}</span>` : ''}`;
     div.onclick = () => {
       item.action();
       menu.style.display = 'none';
@@ -3581,6 +3875,10 @@ function toggleMobileMenu() {
 }
 
 function showPage(id) {
+  if (id === 'reminders') {
+    fetchReminders();
+    setupReminderSubscriptions();
+  }
   if (id === 'settings' && !hasPermission('view_settings')) {
     showToast("Access Denied", "error");
     return;
@@ -4497,6 +4795,36 @@ function switchDetailTab(tabId) {
   document.querySelectorAll('.detail-pane').forEach(p => {
     p.classList.toggle('active', p.id === `pane-${tabId}`);
   });
+  if (tabId === 'reminders') {
+    renderDetailReminderList();
+  }
+}
+
+function renderDetailReminderList() {
+  const container = document.getElementById('pane-reminders-list');
+  if (!container) return;
+  
+  const woId = selectedWorkOrder;
+  const list = reminders.filter(r => String(r.work_order_number) === String(woId));
+  
+  if (list.length === 0) {
+    container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">No reminders for this Work Order</div>';
+  } else {
+    container.innerHTML = list.map(r => `
+      <div class="notif-item" style="border-left: 3px solid ${getPriorityColor(r.priority)};">
+        <div style="display:flex; justify-content:space-between;">
+          <div style="font-weight:700;">${r.title}</div>
+          <div class="status-badge" style="background:${getPriorityColor(r.priority)}20; color:${getPriorityColor(r.priority)};">${r.status.toUpperCase()}</div>
+        </div>
+        <div style="font-size:11px; color:var(--muted); margin-top:4px;">${dayjs(r.reminder_datetime).format('DD MMM YYYY, HH:mm')}</div>
+        <div style="font-size:12px; margin-top:8px;">${r.notes || ''}</div>
+        <div style="display:flex; gap:10px; margin-top:12px;">
+           <button class="btn btn-ghost btn-xs" onclick="openReminderModal('${r.id}')">Edit</button>
+           ${r.status !== 'completed' ? `<button class="btn btn-green btn-xs" onclick="completeReminder('${r.id}')">Complete</button>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
 }
 
 function toggleDetailEdit() {
@@ -4881,11 +5209,21 @@ function renderTable() {
       `;
     }
 
+    const reminderList = reminders.filter(rem => String(rem.work_order_number) === String(r.WorkOrder));
+    const activeReminders = reminderList.filter(rem => !['completed','cancelled'].includes(rem.status));
+    const totalPhotos = reminderList.reduce((sum, rem) => sum + (rem.photo_count || 0), 0);
+
     return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" 
       onclick="selectWorkOrderRow('${r.WorkOrder}')" 
       ondblclick="openDetail('${r.WorkOrder}')"
       oncontextmenu="showContextMenu(event, 'row-wo', '${r.WorkOrder}')">
-      <td><span class="wo-num">${r.WorkOrder}</span></td>
+      <td>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="wo-num">${r.WorkOrder}</span>
+          ${activeReminders.length > 0 ? `<span class="ctx-badge" title="${activeReminders.length} active reminders" onclick="event.stopPropagation(); showPage('reminders');">📌 ${activeReminders.length}</span>` : ''}
+          ${totalPhotos > 0 ? `<span class="wo-photo-badge" title="${totalPhotos} photos in reminders" onclick="event.stopPropagation(); showPage('reminders');">📎 ${totalPhotos}</span>` : ''}
+        </div>
+      </td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td>${stBadge}</td>
       <td style="font-size:11px">${r.Lat||'—'}</td>
@@ -8837,7 +9175,9 @@ function handleNotifClick(id) {
   n.read = true;
   updateNotifBadge();
   renderNotifications();
-  if (n.woId) {
+  if (n.category === 'reminders') {
+    openReminderModal(n.reminder_id);
+  } else if (n.woId) {
     openDetail(n.woId);
   }
 }
@@ -8857,7 +9197,12 @@ function clearAllNotifs() {
 async function loadNotifications() {
   if (!supabaseClient) return;
   try {
-    const { data } = await supabaseClient.from('notifications').select('*').order('created_at', { ascending: false }).limit(50);
+    const [notifRes, remNotifRes] = await Promise.all([
+      supabaseClient.from('notifications').select('*').order('created_at', { ascending: false }).limit(50),
+      supabaseClient.from('reminder_notifications').select('*').order('created_at', { ascending: false }).limit(50)
+    ]);
+
+    const { data } = notifRes;
     if (data) {
       notifications = data.map(d => ({
         id: d.id,
@@ -8868,14 +9213,53 @@ async function loadNotifications() {
         time: d.created_at,
         read: d.is_read || false
       }));
-      updateNotifBadge();
     }
+
+    if (remNotifRes.data) {
+      const remNotifs = remNotifRes.data.map(d => ({
+        id: d.id,
+        reminder_id: d.reminder_id,
+        user: 'System',
+        action: `${d.title}: ${d.message}`,
+        category: 'reminders',
+        time: d.created_at,
+        read: d.is_read || false
+      }));
+      notifications = [...notifications, ...remNotifs].sort((a,b) => new Date(b.time) - new Date(a.time));
+    }
+    updateNotifBadge();
   } catch(e) {}
 }
 
 // Set up real-time listener
 function setupNotifListener() {
   if (!supabaseClient) return;
+
+  supabaseClient
+    .channel('public:reminder_notifications')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reminder_notifications' }, payload => {
+      const d = payload.new;
+      if (currentUser && d.user_id !== currentUser.id) return;
+      
+      const notif = {
+        id: d.id,
+        reminder_id: d.reminder_id,
+        user: 'System',
+        action: `${d.title}: ${d.message}`,
+        category: 'reminders',
+        time: d.created_at,
+        read: false
+      };
+      notifications.unshift(notif);
+      updateNotifBadge();
+      showToast(`Reminder: ${d.title}`);
+      if (document.getElementById('notif-panel').classList.contains('open')) {
+        renderNotifications();
+      }
+      fetchReminders();
+    })
+    .subscribe();
+
   supabaseClient
     .channel('public:notifications')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, payload => {
@@ -10073,6 +10457,486 @@ function saveInstConfig() {
 
 // ─── DATA SEEDING ───
 
+// ─── REMINDER MODULE LOGIC ───
+
+// REMINDER MODAL LOGIC
+function openReminderModal(reminderId = null, woId = null) {
+  // RBAC: Technician View Only
+  if (userRole === 'Technician') {
+    if (!reminderId) {
+      showToast("Access Denied: Technicians cannot create reminders", "error");
+      return;
+    }
+  }
+
+  currentOpenReminderId = reminderId;
+  resetReminderModal();
+  
+  if (woId) selectedWorkOrder = woId;
+  const wo = allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder));
+  
+  document.getElementById('rem-wo-num').textContent = `#${selectedWorkOrder || '00000000'}`;
+  document.getElementById('rem-wo-title').textContent = wo?.Description || 'Work Order Title';
+  document.getElementById('reminderModalTitle').textContent = reminderId ? 'Edit Reminder' : 'Set New Reminder';
+  
+  loadUsersForAssignment();
+  initPhotoDropzone();
+
+  const isTechnician = userRole === 'Technician';
+  const dropzone = document.getElementById('photoDropzone');
+  if (dropzone) dropzone.style.display = isTechnician ? 'none' : 'block';
+
+  if (reminderId) {
+    const rem = reminders.find(r => r.id === reminderId);
+    if (rem) {
+      // RBAC: Check if user can edit this reminder
+      const isOwner = rem.created_by === currentUser?.id;
+      const canEdit = hasPermission('admin') || 
+                      (userRole === 'Manager') || 
+                      ((userRole === 'Engineer' || userRole === 'Supervisor') && isOwner);
+
+      const btnSave = document.getElementById('btnReminderSave');
+      if (btnSave) {
+        btnSave.style.display = canEdit ? 'block' : 'none';
+        btnSave.textContent = reminderId ? 'Save Changes' : 'Save Reminder';
+      }
+
+      document.getElementById('rem-title').value = rem.title;
+      document.getElementById('rem-datetime').value = rem.reminder_datetime.substring(0, 16);
+      document.getElementById('rem-reason').value = rem.reason;
+      if (rem.reason === 'Other') {
+        document.getElementById('customReasonField').style.display = 'block';
+        document.getElementById('rem-custom-reason').value = rem.custom_reason || '';
+      }
+      setReminderPriority(rem.priority);
+      document.getElementById('rem-assigned-to').value = rem.assigned_to || '';
+      document.getElementById('rem-notes').value = rem.notes || '';
+      document.getElementById('rem-alarm').checked = rem.alarm_enabled;
+      document.getElementById('rem-calendar').checked = rem.calendar_enabled;
+      document.getElementById('rem-desktop').checked = rem.desktop_notif;
+      document.getElementById('rem-email').checked = rem.email_enabled;
+      
+      loadExistingPhotos(reminderId);
+    }
+  }
+
+  document.getElementById('reminderModalOverlay').style.display = 'flex';
+}
+
+function closeReminderModal() {
+  document.getElementById('reminderModalOverlay').style.display = 'none';
+  resetPhotoState();
+}
+
+function resetReminderModal() {
+  document.getElementById('rem-title').value = '';
+  document.getElementById('rem-datetime').value = '';
+  document.getElementById('rem-reason').value = 'Follow-up';
+  document.getElementById('customReasonField').style.display = 'none';
+  document.getElementById('rem-custom-reason').value = '';
+  document.getElementById('rem-notes').value = '';
+  setReminderPriority('medium');
+  document.getElementById('rem-assigned-to').value = '';
+  document.getElementById('rem-alarm').checked = true;
+  document.getElementById('rem-calendar').checked = true;
+  document.getElementById('rem-desktop').checked = true;
+  document.getElementById('rem-email').checked = false;
+  resetPhotoState();
+}
+
+function toggleCustomReason() {
+  const isOther = document.getElementById('rem-reason').value === 'Other';
+  document.getElementById('customReasonField').style.display = isOther ? 'block' : 'none';
+}
+
+function setReminderPriority(p) {
+  document.querySelectorAll('.priority-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.priority === p);
+  });
+}
+
+async function loadUsersForAssignment() {
+  const select = document.getElementById('rem-assigned-to');
+  if (!supabaseClient || select.options.length > 1) return;
+  
+  try {
+    const { data } = await supabaseClient.from('profiles').select('id, full_name, email');
+    if (data) {
+      data.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.full_name || u.email;
+        select.appendChild(opt);
+      });
+    }
+  } catch (e) {}
+}
+
+// REMINDER PHOTOS LOGIC
+const PHOTO_BUCKET = 'reminder-photos';
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_PHOTOS = 20;
+const ALLOWED_TYPES = ['image/jpeg','image/png','image/webp','image/heic'];
+
+function initPhotoDropzone() {
+  const zone = document.getElementById('photoDropzone');
+  const input = document.getElementById('photoFileInput');
+  if (!zone || !input) return;
+
+  zone.onclick = () => input.click();
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    handleReminderPhotoFiles([...e.dataTransfer.files]);
+  });
+  input.onchange = e => handleReminderPhotoFiles([...e.target.files]);
+}
+
+function handleReminderPhotoFiles(files) {
+  const totalAllowed = MAX_PHOTOS - pendingPhotos.length - existingPhotos.length;
+  if (totalAllowed <= 0) { showToast('Maximum 20 photos per reminder', 'warning'); return; }
+
+  files.slice(0, totalAllowed).forEach(file => {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      showToast(`${file.name}: unsupported format`, 'error'); return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      showToast(`${file.name}: exceeds 10 MB limit`, 'error'); return;
+    }
+    const previewUrl = URL.createObjectURL(file);
+    pendingPhotos.push({ file, previewUrl, caption: '' });
+  });
+  renderPhotoThumbs();
+}
+
+function renderPhotoThumbs() {
+  const grid = document.getElementById('photoThumbGrid');
+  const badge = document.getElementById('photoCountBadge');
+  const total = pendingPhotos.length + existingPhotos.length;
+
+  if (badge) badge.textContent = `${total} photo${total !== 1 ? 's' : ''}`;
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const canModifyPhotos = userRole !== 'Technician';
+
+  existingPhotos.forEach((photo, i) => {
+    grid.appendChild(buildThumbEl(photo.public_url, photo.caption, () => deleteExistingPhoto(photo.id), () => openLightbox('existing', i), canModifyPhotos));
+  });
+
+  pendingPhotos.forEach((p, i) => {
+    grid.appendChild(buildThumbEl(p.previewUrl, p.caption, () => removePendingPhoto(i), () => openLightbox('pending', i), canModifyPhotos));
+  });
+}
+
+function buildThumbEl(src, caption, onDelete, onOpen, canDelete = true) {
+  const wrap = document.createElement('div');
+  wrap.className = 'photo-thumb';
+  wrap.innerHTML = `
+    <img src="${src}" alt="attachment" loading="lazy" />
+    ${canDelete ? '<div class="photo-thumb-delete" title="Remove">✕</div>' : ''}
+  `;
+  const delBtn = wrap.querySelector('.photo-thumb-delete');
+  if (delBtn) delBtn.addEventListener('click', e => { e.stopPropagation(); onDelete(); });
+  wrap.addEventListener('click', onOpen);
+  return wrap;
+}
+
+function removePendingPhoto(index) {
+  URL.revokeObjectURL(pendingPhotos[index].previewUrl);
+  pendingPhotos.splice(index, 1);
+  renderPhotoThumbs();
+}
+
+async function deleteExistingPhoto(photoId) {
+  if (!confirm('Remove this photo?')) return;
+  const { data: photo } = await supabaseClient.from('reminder_photos').select('*').eq('id', photoId).single();
+  if (!photo) return;
+
+  await supabaseClient.storage.from(PHOTO_BUCKET).remove([photo.storage_path]);
+  await supabaseClient.from('reminder_photos').delete().eq('id', photoId);
+  logReminderActivity(photo.reminder_id, 'photo_deleted', { file_name: photo.file_name });
+
+  existingPhotos = existingPhotos.filter(p => p.id !== photoId);
+  renderPhotoThumbs();
+}
+
+async function loadExistingPhotos(reminderId) {
+  const { data } = await supabaseClient
+    .from('reminder_photos')
+    .select('*')
+    .eq('reminder_id', reminderId)
+    .order('sort_order', { ascending: true });
+  existingPhotos = data || [];
+  renderPhotoThumbs();
+}
+
+function resetPhotoState() {
+  pendingPhotos.forEach(p => URL.revokeObjectURL(p.previewUrl));
+  pendingPhotos = [];
+  existingPhotos = [];
+  renderPhotoThumbs();
+}
+
+function openLightbox(source, index) {
+  const allPhotos = [
+    ...existingPhotos.map(p => ({ url: p.public_url, caption: p.caption })),
+    ...pendingPhotos.map(p => ({ url: p.previewUrl, caption: p.caption }))
+  ];
+  lightboxIndex = (source === 'pending') ? existingPhotos.length + index : index;
+
+  const lb = document.createElement('div');
+  lb.className = 'photo-lightbox';
+  lb.id = 'photoLightbox';
+  lb.innerHTML = `
+    <button class="photo-lightbox-close" onclick="closeLightbox()">✕</button>
+    <div class="photo-lightbox-counter" id="lbCounter"></div>
+    <button class="photo-lightbox-nav photo-lightbox-prev" onclick="lightboxNav(-1)">‹</button>
+    <img class="photo-lightbox-img" id="lbImg" src="" alt="" />
+    <button class="photo-lightbox-nav photo-lightbox-next" onclick="lightboxNav(1)">›</button>
+    <div class="photo-lightbox-caption" id="lbCaption"></div>
+  `;
+  document.body.appendChild(lb);
+  lb.onclick = e => { if (e.target === lb) closeLightbox(); };
+  updateLightboxSlide(allPhotos);
+}
+
+function updateLightboxSlide(photos) {
+  const img = document.getElementById('lbImg');
+  const caption = document.getElementById('lbCaption');
+  const counter = document.getElementById('lbCounter');
+  if (!img) return;
+  img.src = photos[lightboxIndex].url;
+  caption.textContent = photos[lightboxIndex].caption || '';
+  counter.textContent = `${lightboxIndex + 1} / ${photos.length}`;
+}
+
+function lightboxNav(dir) {
+  const allPhotos = [
+    ...existingPhotos.map(p => ({ url: p.public_url, caption: p.caption })),
+    ...pendingPhotos.map(p => ({ url: p.previewUrl, caption: p.caption }))
+  ];
+  lightboxIndex = (lightboxIndex + dir + allPhotos.length) % allPhotos.length;
+  updateLightboxSlide(allPhotos);
+}
+
+function closeLightbox() {
+  document.getElementById('photoLightbox')?.remove();
+}
+
+// REMINDER DB CRUD
+async function fetchReminders() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('work_order_reminders')
+      .select('*')
+      .order('reminder_datetime', { ascending: true });
+    
+    if (error) throw error;
+    reminders = data || [];
+    if (typeof updateRemindersUI === 'function') updateRemindersUI();
+  } catch (e) {
+    console.error("Fetch Reminders Error:", e);
+  }
+}
+
+async function saveReminder() {
+  const title = document.getElementById('rem-title').value.trim();
+  const datetime = document.getElementById('rem-datetime').value;
+  const reason = document.getElementById('rem-reason').value;
+  const customReason = document.getElementById('rem-custom-reason').value.trim();
+  const notes = document.getElementById('rem-notes').value.trim();
+  const priority = document.querySelector('.priority-btn.active').dataset.priority;
+  const assignedTo = document.getElementById('rem-assigned-to').value;
+  
+  if (!title || !datetime) {
+    showToast("Please fill in required fields", "error");
+    return;
+  }
+
+  const reminderData = {
+    work_order_id: selectedWorkOrder,
+    work_order_number: selectedWorkOrder,
+    work_order_title: allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder))?.Description || '',
+    title,
+    reminder_datetime: new Date(datetime).toISOString(),
+    reason,
+    custom_reason: reason === 'Other' ? customReason : null,
+    notes,
+    priority,
+    assigned_to: assignedTo || currentUser?.id,
+    assigned_to_name: assignedTo ? document.querySelector(`#rem-assigned-to option[value="${assignedTo}"]`)?.textContent : (currentUser?.user_metadata?.full_name || currentUser?.email),
+    alarm_enabled: document.getElementById('rem-alarm').checked,
+    calendar_enabled: document.getElementById('rem-calendar').checked,
+    desktop_notif: document.getElementById('rem-desktop').checked,
+    email_enabled: document.getElementById('rem-email').checked,
+    created_by: currentUser?.id,
+    created_by_name: currentUser?.user_metadata?.full_name || currentUser?.email,
+    updated_by: currentUser?.id
+  };
+
+  try {
+    let result;
+    if (currentOpenReminderId) {
+      result = await supabaseClient.from('work_order_reminders').update(reminderData).eq('id', currentOpenReminderId).select();
+    } else {
+      result = await supabaseClient.from('work_order_reminders').insert([reminderData]).select();
+    }
+
+    if (result.error) throw result.error;
+    
+    const reminderId = result.data[0].id;
+    await uploadPendingPhotos(reminderId);
+    
+    showToast(currentOpenReminderId ? "Reminder updated" : "Reminder created");
+    if (typeof closeReminderModal === 'function') closeReminderModal();
+    fetchReminders();
+    
+    // Log activity
+    logReminderActivity(reminderId, currentOpenReminderId ? 'updated' : 'created', null, reminderData);
+    
+  } catch (e) {
+    console.error("Save Reminder Error:", e);
+    showToast(e.message || "Error saving reminder", "error");
+  }
+}
+
+async function deleteReminder(id) {
+  if (userRole === 'Technician') {
+    showToast("Access Denied: Technicians cannot delete reminders", "error");
+    return;
+  }
+  if (!hasPermission('admin')) {
+    const rem = reminders.find(r => r.id === id);
+    if (rem && rem.created_by !== currentUser?.id) {
+      showToast("Access Denied: Can only delete own reminders", "error");
+      return;
+    }
+  }
+
+  if (!confirm("Are you sure you want to delete this reminder?")) return;
+
+  try {
+    const { data: photos } = await getReminderPhotos(id);
+    if (photos?.length) {
+      const paths = photos.map(p => p.storage_path);
+      await supabaseClient.storage.from('reminder-photos').remove(paths);
+    }
+    
+    const { error } = await supabaseClient.from('work_order_reminders').delete().eq('id', id);
+    if (error) throw error;
+    
+    showToast("Reminder deleted");
+    fetchReminders();
+  } catch (e) {
+    console.error("Delete Reminder Error:", e);
+    showToast("Error deleting reminder", "error");
+  }
+}
+
+async function completeReminder(id) {
+  try {
+    const { error } = await supabaseClient
+      .from('work_order_reminders')
+      .update({ status: 'completed', completed_by: currentUser?.id, completed_at: new Date().toISOString() })
+      .eq('id', id);
+    
+    if (error) throw error;
+    showToast("Reminder completed");
+    fetchReminders();
+    logReminderActivity(id, 'completed');
+  } catch (e) {
+    console.error("Complete Reminder Error:", e);
+  }
+}
+
+async function logReminderActivity(reminderId, action, previousValue = null, newValue = null) {
+  if (!supabaseClient) return;
+  try {
+    await supabaseClient.from('reminder_activity_log').insert({
+      reminder_id: reminderId,
+      user_id: currentUser?.id,
+      username: currentUser?.user_metadata?.full_name || currentUser?.email,
+      action,
+      previous_value: previousValue,
+      new_value: newValue
+    });
+  } catch (e) { console.warn("Reminder Log failed", e); }
+}
+
+async function getReminderPhotos(reminderId) {
+  if (!supabaseClient) return { data: [] };
+  return await supabaseClient
+    .from('reminder_photos')
+    .select('*')
+    .eq('reminder_id', reminderId)
+    .order('sort_order', { ascending: true });
+}
+
+async function uploadPendingPhotos(reminderId) {
+  if (pendingPhotos.length === 0 || !supabaseClient) return;
+
+  const bar = document.getElementById('photoUploadBar');
+  const progress = document.getElementById('photoUploadProgress');
+  if (progress) progress.classList.add('active');
+  if (bar) bar.style.width = '0%';
+
+  for (let i = 0; i < pendingPhotos.length; i++) {
+    const { file, caption } = pendingPhotos[i];
+    const timestamp = Date.now();
+    const ext = file.name.split('.').pop();
+    const path = `${currentUser?.id}/${reminderId}/${timestamp}-${i}.${ext}`;
+
+    const { error: uploadErr } = await supabaseClient.storage
+      .from('reminder-photos')
+      .upload(path, file, { contentType: file.type, upsert: false });
+
+    if (uploadErr) { showToast(`Upload failed: ${file.name}`, 'error'); continue; }
+
+    const { data: urlData } = supabaseClient.storage.from('reminder-photos').getPublicUrl(path);
+
+    await supabaseClient.from('reminder_photos').insert([{
+      reminder_id: reminderId,
+      storage_path: path,
+      public_url: urlData.publicUrl,
+      file_name: file.name,
+      file_size: file.size,
+      mime_type: file.type,
+      caption: caption || null,
+      sort_order: (existingPhotos?.length || 0) + i,
+      uploaded_by: currentUser?.id
+    }]);
+
+    if (bar) bar.style.width = `${Math.round(((i + 1) / pendingPhotos.length) * 100)}%`;
+  }
+
+  pendingPhotos = [];
+  if (progress) progress.classList.remove('active');
+}
+
+// REALTIME SUBSCRIPTIONS
+function setupReminderSubscriptions() {
+  if (!supabaseClient) return;
+  
+  supabaseClient
+    .channel('public:work_order_reminders')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'work_order_reminders' }, payload => {
+      fetchReminders();
+    })
+    .subscribe();
+    
+  supabaseClient
+    .channel('public:reminder_photos')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'reminder_photos' }, payload => {
+       if (currentOpenReminderId === (payload.new?.reminder_id || payload.old?.reminder_id)) {
+         if (typeof loadExistingPhotos === 'function') loadExistingPhotos(currentOpenReminderId);
+       }
+    })
+    .subscribe();
+}
+
 async function seedInstallationModule() {
   if (!supabaseClient) return;
   
@@ -10122,6 +10986,9 @@ async function refreshUI() {
   if (document.getElementById('page-installation').classList.contains('active')) {
     await loadInstData();
     renderInstPage();
+  }
+  if (document.getElementById('page-reminders').classList.contains('active')) {
+    await fetchReminders();
   }
    applyFilters(false);
    applyManufacturingFilters();
