@@ -106,6 +106,331 @@
   --shadow-alarm: 0 0 60px rgba(239,68,68,0.3);
   --shadow-teal:  0 0 20px rgba(0,200,180,0.2);
   --transition-fast:0.12s ease; --transition-normal:0.22s ease; --transition-slow:0.35s ease;
+
+  /* ── FOLLOW-UP CENTER ADDITIONAL TOKENS ── */
+  --note-yellow:      #f59e0b;
+  --note-yellow-bg:   #f59e0b14;
+  --note-teal:        #00c8b4;
+  --note-teal-bg:     #00c8b414;
+  --note-purple:      #a855f7;
+  --note-purple-bg:   #a855f714;
+  --note-red:         #ef4444;
+  --note-red-bg:      #ef444414;
+  --note-blue:        #3b82f6;
+  --note-blue-bg:     #3b82f614;
+  --note-green:       #22c55e;
+  --note-green-bg:    #22c55e14;
+
+  /* Board Layout */
+  --board-gap:        20px;
+  --card-min-width:   260px;
+  --card-max-width:   320px;
+  --sticker-size:     180px;
+
+  /* Sticker Shadows */
+  --shadow-sticker:       4px 4px 12px rgba(0,0,0,0.5);
+  --shadow-sticker-hover: 6px 6px 20px rgba(0,0,0,0.7);
+}
+
+/* FOLLOW-UP CENTER CSS */
+.fuc-reminder-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-left: 4px solid var(--priority-color);   /* set via JS per priority */
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  box-shadow: var(--shadow-card);
+  min-width: var(--card-min-width);
+}
+.fuc-reminder-card:hover {
+  border-color: var(--color-accent-teal);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sticker-hover);
+}
+.fuc-reminder-card .card-wo-tag {
+  font-family: var(--font-data);
+  font-size: var(--text-xs);
+  color: var(--color-accent-teal);
+  background: var(--color-accent-teal-bg);
+  border: 1px solid var(--color-accent-teal-dim);
+  border-radius: var(--radius-full);
+  padding: 2px 8px;
+  display: inline-block;
+  margin-bottom: var(--space-2);
+}
+.fuc-reminder-card .card-title {
+  font-size: var(--text-md);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+  line-height: 1.4;
+}
+.fuc-reminder-card .card-reason {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+}
+.fuc-reminder-card .card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.fuc-reminder-card .card-datetime {
+  font-family: var(--font-data);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+.fuc-reminder-card .card-photo-chip {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.fuc-reminder-card.overdue {
+  border-left-color: var(--color-priority-critical);
+  animation: overdueGlow 2.5s ease-in-out infinite;
+}
+@keyframes overdueGlow {
+  0%,100% { box-shadow: var(--shadow-card); }
+  50%      { box-shadow: 0 0 16px rgba(239,68,68,0.25); }
+}
+
+.fuc-sticky-note {
+  width: var(--sticker-size);
+  min-height: var(--sticker-size);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  position: relative;
+  box-shadow: var(--shadow-sticker);
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  transform: rotate(var(--note-rotation, 0deg));
+}
+.fuc-sticky-note:hover {
+  transform: rotate(0deg) translateY(-4px) scale(1.03);
+  box-shadow: var(--shadow-sticker-hover);
+  z-index: 10;
+}
+.fuc-sticky-note.yellow  { background: var(--note-yellow-bg);  border: 1px solid var(--note-yellow);  }
+.fuc-sticky-note.teal    { background: var(--note-teal-bg);    border: 1px solid var(--note-teal);    }
+.fuc-sticky-note.purple  { background: var(--note-purple-bg);  border: 1px solid var(--note-purple);  }
+.fuc-sticky-note.red     { background: var(--note-red-bg);     border: 1px solid var(--note-red);     }
+.fuc-sticky-note.blue    { background: var(--note-blue-bg);    border: 1px solid var(--note-blue);    }
+.fuc-sticky-note.green   { background: var(--note-green-bg);   border: 1px solid var(--note-green);   }
+.fuc-sticky-note .note-pin {
+  position: absolute;
+  top: -10px; left: 50%; transform: translateX(-50%);
+  font-size: 20px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+.fuc-sticky-note .note-title {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+.fuc-sticky-note .note-body {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  flex: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+}
+.fuc-sticky-note .note-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: var(--space-2);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.fuc-sticky-note .note-tag {
+  font-family: var(--font-data);
+  font-size: 9px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.fuc-sticky-note .note-wo-link {
+  font-family: var(--font-data);
+  font-size: var(--text-xs);
+  color: var(--color-accent-teal);
+  cursor: pointer;
+  text-decoration: none;
+}
+.fuc-sticky-note .note-wo-link:hover { text-decoration: underline; }
+.fuc-sticky-note .note-photo-strip {
+  display: flex; gap: 3px; flex-wrap: nowrap; overflow: hidden;
+}
+.fuc-sticky-note .note-photo-strip img {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.fuc-toolbar {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-4) 0; flex-wrap: wrap;
+}
+.fuc-search {
+  flex: 1; min-width: 220px;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui); font-size: var(--text-md);
+  padding: var(--space-2) var(--space-4) var(--space-2) 36px;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238892a4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 18px;
+}
+.fuc-search:focus { border-color: var(--color-accent-teal); }
+.fuc-filter-btn {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm); cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.fuc-filter-btn:hover, .fuc-filter-btn.active {
+  border-color: var(--color-accent-teal);
+  color: var(--color-accent-teal);
+  background: var(--color-accent-teal-bg);
+}
+.fuc-view-toggle {
+  display: flex; border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md); overflow: hidden;
+}
+.fuc-view-btn {
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-surface);
+  border: none; color: var(--color-text-muted);
+  cursor: pointer; transition: all var(--transition-fast);
+  font-size: var(--text-sm);
+}
+.fuc-view-btn.active {
+  background: var(--color-accent-teal);
+  color: var(--color-text-inverse);
+}
+
+.fuc-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 8000;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--color-accent-teal);
+  border: none; color: var(--color-text-inverse);
+  font-size: 26px; cursor: pointer;
+  box-shadow: var(--shadow-teal);
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition-normal);
+}
+.fuc-fab:hover { transform: scale(1.1) rotate(45deg); }
+.fuc-fab-menu {
+  position: fixed; bottom: 90px; right: 28px; z-index: 8000;
+  display: none; flex-direction: column; gap: var(--space-2);
+  align-items: flex-end;
+}
+.fuc-fab-menu.open { display: flex; }
+.fuc-fab-option {
+  display: flex; align-items: center; gap: var(--space-2);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm); color: var(--color-text-primary);
+  cursor: pointer; box-shadow: var(--shadow-card);
+  animation: slideUp var(--transition-fast);
+  white-space: nowrap;
+}
+.fuc-fab-option:hover { border-color: var(--color-accent-teal); color: var(--color-accent-teal); }
+
+.fuc-board {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--board-gap); margin-top: var(--space-6);
+}
+@media (max-width: 768px) { .fuc-board { grid-template-columns: 1fr; } }
+.fuc-column { display: flex; flex-direction: column; gap: var(--space-4); }
+.fuc-column-header {
+  font-size: var(--text-xs); font-weight: var(--fw-bold); text-transform: uppercase;
+  color: var(--color-text-muted); letter-spacing: 0.1em; margin-bottom: var(--space-2);
+  display: flex; align-items: center; gap: 8px;
+}
+.fuc-column-header::after { content: ''; flex: 1; height: 1px; background: var(--color-border-subtle); }
+
+.fuc-pinned-strip {
+  display: flex; gap: var(--space-4); overflow-x: auto; padding: var(--space-4) 0;
+  margin-bottom: var(--space-6); scrollbar-width: none; border-bottom: 1px solid var(--color-border-subtle);
+}
+.fuc-pinned-strip::-webkit-scrollbar { display: none; }
+@media (max-width: 768px) {
+  .fuc-pinned-strip { flex-direction: column; overflow-x: visible; }
+}
+
+.quick-note-popover {
+  position: fixed;
+  bottom: var(--space-8); right: var(--space-8);
+  width: 280px;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-modal);
+  z-index: 8500;
+  animation: slideUp var(--transition-normal);
+  display: none;
+}
+.quick-note-color-row {
+  display: flex; gap: var(--space-2); margin-bottom: var(--space-3);
+}
+.quick-note-swatch {
+  width: 22px; height: 22px; border-radius: 50%;
+  cursor: pointer; border: 2px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+.quick-note-swatch.active { border-color: white; }
+.quick-note-textarea {
+  width: 100%; min-height: 100px; resize: none;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui); font-size: var(--text-md);
+  padding: var(--space-3); outline: none; box-sizing: border-box;
+}
+.quick-note-textarea:focus { border-color: var(--color-accent-teal); }
+.quick-note-save {
+  width: 100%; margin-top: var(--space-3);
+  padding: var(--space-2);
+  background: var(--color-accent-teal);
+  color: var(--color-text-inverse);
+  border: none; border-radius: var(--radius-md);
+  font-weight: var(--fw-semibold); cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+.quick-note-save:hover { opacity: 0.85; }
+
+.note-detail-modal {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-top: 4px solid var(--note-accent-color);
+  border-radius: var(--radius-xl);
+  width: 580px; max-width: 96vw;
+  max-height: 88vh; overflow-y: auto;
+  box-shadow: var(--shadow-modal);
+  animation: slideUp var(--transition-normal);
 }
 
 /* REMINDER MODAL CSS */
@@ -1459,6 +1784,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing <span id="mfg-nav-badge" class="status-badge badge-WPERM" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <button class="nav-tab" id="nav-installation-btn" onclick="showPage('installation')"><i class="fas fa-tools"></i> Installation</button>
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
+    <button class="nav-tab" onclick="showPage('reminders')"><i class="fas fa-bell"></i> Reminders <span id="rem-nav-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
+    <button class="nav-tab" onclick="showPage('followup')"><i class="fas fa-thumbtack"></i> Follow-Up Center</button>
     <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="nav-tab" id="nav-tab-settings" onclick="showPage('settings')" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
   </div>
@@ -1519,6 +1846,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing <span id="mfg-mobile-badge" class="status-badge badge-WPERM" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <button class="mobile-nav-item" onclick="showPage('installation'); toggleMobileMenu();"><i class="fas fa-tools"></i> Installation</button>
     <button class="mobile-nav-item" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
+    <button class="mobile-nav-item" onclick="showPage('reminders'); toggleMobileMenu();"><i class="fas fa-bell"></i> Reminders <span id="rem-mobile-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
+    <button class="mobile-nav-item" onclick="showPage('followup'); toggleMobileMenu();"><i class="fas fa-thumbtack"></i> Follow-Up Center</button>
     <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="mobile-nav-item" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0;">
@@ -2419,6 +2748,129 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
+<div class="page" id="page-followup">
+  <div class="wrapper">
+    <header class="dash-header">
+      <div class="header-left">
+        <div class="tag">▸ QBC Operations Center</div>
+        <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Follow-Up <span style="color:var(--accent-teal)">Center</span></h1>
+        <p style="font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500; letter-spacing: 0.02em;">Smart Workspace: Reminders, Site Notes & Action Board</p>
+      </div>
+      <div class="header-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
+        <div style="font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px;">
+          <i class="fas fa-sync-alt"></i> Last updated: <span id="fuc-last-refresh">--:--</span>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" onclick="toggleQuickNotePopover()">
+            <i class="fa-solid fa-plus"></i> New Note
+          </button>
+          <button class="btn btn-ghost" onclick="openReminderModal(null)">
+            <i class="fa-solid fa-bell"></i> New Reminder
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="dash-layout">
+      <!-- KPI Strip -->
+      <div class="kpi-grid">
+        <div class="kpi-card total cursor-pointer" onclick="filterFUC('all')">
+          <div class="kpi-label">Total Items</div>
+          <div id="fuc-kpi-total" class="kpi-value">0</div>
+          <div class="kpi-pct">Unified View</div>
+          <i class="fa-solid fa-layer-group kpi-icon"></i>
+        </div>
+        <div class="kpi-card on-time cursor-pointer" onclick="filterFUC('reminders')">
+          <div class="kpi-label">Reminders</div>
+          <div id="fuc-kpi-reminders" class="kpi-value" style="color:var(--color-accent-teal)">0</div>
+          <div class="kpi-pct">Linked to WOs</div>
+          <i class="fa-solid fa-bell kpi-icon"></i>
+        </div>
+        <div class="kpi-card failed cursor-pointer" onclick="filterFUC('notes')">
+          <div class="kpi-label">Sticky Notes</div>
+          <div id="fuc-kpi-notes" class="kpi-value" style="color:var(--note-yellow)">0</div>
+          <div class="kpi-pct">Free-form Tasks</div>
+          <i class="fa-solid fa-sticky-note kpi-icon"></i>
+        </div>
+        <div class="kpi-card total cursor-pointer" onclick="filterFUC('overdue')">
+          <div class="kpi-label">Overdue</div>
+          <div id="fuc-kpi-overdue" class="kpi-value" style="color:var(--color-status-overdue)">0</div>
+          <div class="kpi-pct">Attention Required</div>
+          <i class="fa-solid fa-circle-exclamation kpi-icon"></i>
+        </div>
+        <div class="kpi-card total cursor-pointer" onclick="filterFUC('pinned')">
+          <div class="kpi-label">Pinned</div>
+          <div id="fuc-kpi-pinned" class="kpi-value" style="color:var(--accent)">0</div>
+          <div class="kpi-pct">Workspace Priority</div>
+          <i class="fa-solid fa-thumbtack kpi-icon"></i>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="fuc-toolbar">
+        <input type="text" id="fuc-search" class="fuc-search" placeholder="Search title, body, tags, or WO#..." oninput="applyFUCFilters()">
+        <button class="fuc-filter-btn active" data-filter="all" onclick="setFUCFilter('all')">All</button>
+        <button class="fuc-filter-btn" data-filter="pinned" onclick="setFUCFilter('pinned')">Pinned</button>
+        <button class="fuc-filter-btn" data-filter="archived" onclick="setFUCFilter('archived')">Archived</button>
+
+        <div style="flex: 1;"></div>
+
+        <button class="btn btn-ghost btn-sm" onclick="exportFUCPDF()"><i class="fas fa-file-pdf"></i> Export</button>
+
+        <div class="fuc-view-toggle">
+          <button class="fuc-view-btn active" id="fuc-view-board" onclick="setFUCView('board')" title="Board View"><i class="fas fa-columns"></i></button>
+          <button class="fuc-view-btn" id="fuc-view-list" onclick="setFUCView('list')" title="List View"><i class="fas fa-list"></i></button>
+        </div>
+      </div>
+
+      <!-- Pinned Row -->
+      <div id="fuc-pinned-row" class="fuc-pinned-strip" style="display: none;">
+        <!-- Pinned items injected here -->
+      </div>
+
+      <!-- Board View -->
+      <div id="fuc-board-view" class="fuc-board">
+        <div class="fuc-column">
+          <div class="fuc-column-header"><i class="fas fa-bell"></i> Reminders (Linked to WOs)</div>
+          <div id="fuc-reminders-col" class="fuc-column-content" style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <!-- Reminder cards injected here -->
+          </div>
+        </div>
+        <div class="fuc-column">
+          <div class="fuc-column-header"><i class="fas fa-sticky-note"></i> Sticky Notes (Personal / General)</div>
+          <div id="fuc-notes-col" class="fuc-column-content" style="display: flex; flex-wrap: wrap; gap: var(--space-4);">
+            <!-- Note stickers injected here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- List View (Table) -->
+      <div id="fuc-list-view" class="table-wrap" style="display: none;">
+        <table class="main-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th style="width: 80px;">Type</th>
+              <th>Title / Description</th>
+              <th style="width: 100px;">Linked WO</th>
+              <th style="width: 100px;">Category</th>
+              <th style="width: 120px;">Priority / Color</th>
+              <th style="width: 140px;">Due / Created</th>
+              <th style="width: 60px; text-align: center;">Photos</th>
+              <th style="width: 100px;">Status</th>
+              <th style="width: 80px; text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="fuc-list-body">
+            <!-- Table rows injected here -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-settings">
   <div class="wrapper">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
@@ -3092,11 +3544,13 @@ let currentCompletionWO = null;
 
 // Reminder State
 let reminders = [];
+let followupNotes = [];
 let reminderCalendar = null;
 let triggeredAlarms = new Set();
 let activeAlarmReminder = null;
 let alarmInterval = null;
 let currentOpenReminderId = null;
+let currentOpenNoteId = null;
 let pendingPhotos = [];
 let existingPhotos = [];
 let lightboxIndex = 0;
@@ -3271,6 +3725,7 @@ async function onAuthenticated() {
   await loadNotifications();
   setupNotifListener();
   fetchReminders();
+  fetchFollowUpNotes();
   setupReminderSubscriptions();
   
   if (window.alarmInterval) clearInterval(window.alarmInterval);
@@ -4094,6 +4549,9 @@ function showPage(id) {
     fetchReminders();
     setupReminderSubscriptions();
   }
+  if (id === 'followup') {
+    initFollowUpCenter();
+  }
   if (id === 'settings' && !hasPermission('view_settings')) {
     showToast("Access Denied", "error");
     return;
@@ -4110,6 +4568,11 @@ function showPage(id) {
   
   const targetPage = document.getElementById('page-' + id);
   if (targetPage) targetPage.classList.add('active');
+
+  const fucFab = document.getElementById('fuc-fab');
+  const fucFabMenu = document.getElementById('fuc-fab-menu');
+  if (fucFab) fucFab.style.display = (id === 'followup') ? 'flex' : 'none';
+  if (fucFabMenu) fucFabMenu.classList.remove('open');
   
   const navBtn = document.querySelector(`.nav-tab[onclick*="showPage('${id}')"]`);
   if (navBtn) {
@@ -5517,6 +5980,11 @@ window.addEventListener('click', (e) => {
   if (dropdown && dropdown.classList.contains('show') && !dropdown.contains(e.target) && !btn.contains(e.target)) {
     dropdown.classList.remove('show');
     btn.setAttribute('aria-expanded', 'false');
+  }
+
+  const popover = document.getElementById('quickNotePopover');
+  if (popover && popover.style.display === 'block' && !popover.contains(e.target) && !e.target.closest('[onclick*="toggleQuickNotePopover"]')) {
+    popover.style.display = 'none';
   }
 });
 
@@ -10800,6 +11268,7 @@ function openReminderModal(reminderId = null, woId = null) {
 function closeReminderModal() {
   document.getElementById('reminderModalOverlay').style.display = 'none';
   resetPhotoState();
+  window.pendingNoteToArchive = null; // Clear if cancelled
 }
 
 function resetReminderModal() {
@@ -11011,8 +11480,29 @@ async function fetchReminders() {
     if (error) throw error;
     reminders = data || [];
     updateRemindersUI();
+    if (document.getElementById('page-followup')?.classList.contains('active')) {
+      renderFollowUpCenter();
+    }
   } catch (e) {
     console.error("Fetch Reminders Error:", e);
+  }
+}
+
+async function fetchFollowUpNotes() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('followup_notes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    followupNotes = data || [];
+    if (document.getElementById('page-followup')?.classList.contains('active')) {
+      renderFollowUpCenter();
+    }
+  } catch (e) {
+    console.error("Fetch Follow-Up Notes Error:", e);
   }
 }
 
@@ -11175,7 +11665,8 @@ async function saveReminder() {
     email_enabled: document.getElementById('rem-email').checked,
     created_by: currentUser?.id,
     created_by_name: currentUser?.user_metadata?.full_name || currentUser?.email,
-    updated_by: currentUser?.id
+    updated_by: currentUser?.id,
+    is_pinned: currentOpenReminderId ? reminders.find(r => r.id === currentOpenReminderId)?.is_pinned || false : false
   };
 
   try {
@@ -11192,6 +11683,14 @@ async function saveReminder() {
     await uploadPendingPhotos(reminderId);
     
     showToast(currentOpenReminderId ? "Reminder updated" : "Reminder created");
+
+    // NOTE-TO-REMINDER CONVERSION LOGIC
+    if (window.pendingNoteToArchive) {
+      await supabaseClient.from('followup_notes').update({ is_archived: true }).eq('id', window.pendingNoteToArchive);
+      window.pendingNoteToArchive = null;
+      fetchFollowUpNotes();
+    }
+
     if (typeof closeReminderModal === 'function') closeReminderModal();
     fetchReminders();
     
@@ -11334,6 +11833,22 @@ function setupReminderSubscriptions() {
        if (currentOpenReminderId === (payload.new?.reminder_id || payload.old?.reminder_id)) {
          if (typeof loadExistingPhotos === 'function') loadExistingPhotos(currentOpenReminderId);
        }
+    })
+    .subscribe();
+
+  supabaseClient
+    .channel('public:followup_notes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'followup_notes' }, payload => {
+      fetchFollowUpNotes();
+    })
+    .subscribe();
+
+  supabaseClient
+    .channel('public:followup_note_photos')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'followup_note_photos' }, payload => {
+      if (currentOpenNoteId === (payload.new?.note_id || payload.old?.note_id)) {
+        loadNotePhotos(currentOpenNoteId);
+      }
     })
     .subscribe();
 }
@@ -11486,6 +12001,699 @@ function checkAlarms() {
   });
 }
 
+let fucFilter = 'all';
+let fucView = 'board';
+let currentQuickNoteColor = 'yellow';
+
+async function initFollowUpCenter() {
+  await Promise.all([fetchReminders(), fetchFollowUpNotes()]);
+  renderFollowUpCenter();
+  setupFUCListeners();
+}
+
+function renderFollowUpCenter() {
+  updateFUCKPIs();
+  renderFUCContent();
+  document.getElementById('fuc-last-refresh').textContent = dayjs().format('HH:mm');
+}
+
+function updateFUCKPIs() {
+  const now = new Date();
+  const pinnedCount = followupNotes.filter(n => n.is_pinned && !n.is_archived).length +
+                    reminders.filter(r => r.is_pinned && r.status !== 'completed').length; // Assuming reminders might have is_pinned
+
+  const overdueCount = reminders.filter(r => r.status !== 'completed' && new Date(r.reminder_datetime) < now).length;
+
+  document.getElementById('fuc-kpi-total').textContent = followupNotes.filter(n => !n.is_archived).length + reminders.filter(r => r.status !== 'completed').length;
+  document.getElementById('fuc-kpi-reminders').textContent = reminders.filter(r => r.status !== 'completed').length;
+  document.getElementById('fuc-kpi-notes').textContent = followupNotes.filter(n => !n.is_archived).length;
+  document.getElementById('fuc-kpi-overdue').textContent = overdueCount;
+  document.getElementById('fuc-kpi-pinned').textContent = pinnedCount;
+}
+
+function setFUCFilter(filter) {
+  fucFilter = filter;
+  document.querySelectorAll('.fuc-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  renderFUCContent();
+}
+
+function filterFUC(type) {
+  const searchInput = document.getElementById('fuc-search');
+  if (type === 'all') {
+    setFUCFilter('all');
+    searchInput.value = '';
+  } else if (type === 'reminders') {
+    setFUCFilter('reminders_only');
+    searchInput.value = '';
+  } else if (type === 'notes') {
+    setFUCFilter('notes_only');
+    searchInput.value = '';
+  } else if (type === 'overdue') {
+    setFUCFilter('overdue_only');
+    searchInput.value = '';
+  } else if (type === 'pinned') {
+    setFUCFilter('pinned');
+    searchInput.value = '';
+  }
+}
+
+function applyFUCFilters() {
+  renderFUCContent();
+}
+
+function setFUCView(view) {
+  fucView = view;
+  document.getElementById('fuc-view-board').classList.toggle('active', view === 'board');
+  document.getElementById('fuc-view-list').classList.toggle('active', view === 'list');
+  document.getElementById('fuc-board-view').style.display = view === 'board' ? 'grid' : 'none';
+  document.getElementById('fuc-list-view').style.display = view === 'list' ? 'block' : 'none';
+  renderFUCContent();
+}
+
+function renderFUCContent() {
+  const searchTerm = document.getElementById('fuc-search').value.toLowerCase();
+
+  let filteredNotes = followupNotes;
+  let filteredReminders = reminders;
+
+  // Filter by search
+  if (searchTerm) {
+    filteredNotes = filteredNotes.filter(n =>
+      (n.title?.toLowerCase().includes(searchTerm)) ||
+      (n.body?.toLowerCase().includes(searchTerm)) ||
+      (n.work_order_number?.toLowerCase().includes(searchTerm)) ||
+      (n.tags?.some(t => t.toLowerCase().includes(searchTerm)))
+    );
+    filteredReminders = filteredReminders.filter(r =>
+      (r.title?.toLowerCase().includes(searchTerm)) ||
+      (r.notes?.toLowerCase().includes(searchTerm)) ||
+      (r.work_order_number?.toLowerCase().includes(searchTerm))
+    );
+  }
+
+  // Filter by tab
+  if (fucFilter === 'pinned') {
+    filteredNotes = filteredNotes.filter(n => n.is_pinned && !n.is_archived);
+    filteredReminders = filteredReminders.filter(r => r.is_pinned && r.status !== 'completed');
+  } else if (fucFilter === 'archived') {
+    filteredNotes = filteredNotes.filter(n => n.is_archived);
+    filteredReminders = [];
+  } else if (fucFilter === 'reminders_only') {
+    filteredNotes = [];
+    filteredReminders = filteredReminders.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
+  } else if (fucFilter === 'notes_only') {
+    filteredNotes = filteredNotes.filter(n => !n.is_archived);
+    filteredReminders = [];
+  } else if (fucFilter === 'overdue_only') {
+    const now = new Date();
+    filteredNotes = [];
+    filteredReminders = filteredReminders.filter(r => r.status !== 'completed' && new Date(r.reminder_datetime) < now);
+  } else if (fucFilter === 'all') {
+    filteredNotes = filteredNotes.filter(n => !n.is_archived);
+    filteredReminders = filteredReminders.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
+  }
+
+  if (fucView === 'board') {
+    renderFUCBoard(filteredNotes, filteredReminders);
+  } else {
+    renderFUCList(filteredNotes, filteredReminders);
+  }
+}
+
+function renderFUCBoard(notes, rems) {
+  // Pinned items must appear regardless of column filters, but should honor search if present
+  const searchTerm = document.getElementById('fuc-search').value.toLowerCase();
+  let allPinnedNotes = followupNotes.filter(n => n.is_pinned && !n.is_archived);
+  let allPinnedRems = reminders.filter(r => r.is_pinned && r.status !== 'completed' && r.status !== 'cancelled');
+
+  if (searchTerm) {
+    allPinnedNotes = allPinnedNotes.filter(n => (n.title?.toLowerCase().includes(searchTerm)) || (n.body?.toLowerCase().includes(searchTerm)) || (n.work_order_number?.toLowerCase().includes(searchTerm)));
+    allPinnedRems = allPinnedRems.filter(r => (r.title?.toLowerCase().includes(searchTerm)) || (r.notes?.toLowerCase().includes(searchTerm)) || (r.work_order_number?.toLowerCase().includes(searchTerm)));
+  }
+
+  const pinnedRow = document.getElementById('fuc-pinned-row');
+  if (allPinnedNotes.length > 0 || allPinnedRems.length > 0) {
+    pinnedRow.style.display = 'flex';
+    pinnedRow.innerHTML = '';
+    allPinnedRems.forEach(r => pinnedRow.appendChild(createReminderCard(r)));
+    allPinnedNotes.forEach(n => pinnedRow.appendChild(createStickyNote(n)));
+  } else {
+    pinnedRow.style.display = 'none';
+  }
+
+  const remCol = document.getElementById('fuc-reminders-col');
+  const noteCol = document.getElementById('fuc-notes-col');
+
+  remCol.innerHTML = '';
+  noteCol.innerHTML = '';
+
+  const activeRems = rems.filter(r => !r.is_pinned || fucFilter === 'pinned');
+  const activeNotes = notes.filter(n => (!n.is_pinned || fucFilter === 'pinned') && !n.is_archived);
+
+  activeRems.forEach(r => remCol.appendChild(createReminderCard(r)));
+  activeNotes.forEach(n => noteCol.appendChild(createStickyNote(n)));
+
+  if (activeRems.length === 0) remCol.innerHTML = '<div class="empty-state">No active reminders</div>';
+  if (activeNotes.length === 0 && fucFilter !== 'archived') noteCol.innerHTML = '<div class="empty-state">No site notes</div>';
+
+  if (fucFilter === 'archived') {
+    const archivedNotes = notes.filter(n => n.is_archived);
+    archivedNotes.forEach(n => noteCol.appendChild(createStickyNote(n)));
+  }
+}
+
+function createReminderCard(r) {
+  const card = document.createElement('div');
+  const isOverdue = new Date(r.reminder_datetime) < new Date() && r.status !== 'completed';
+  card.className = `fuc-reminder-card ${isOverdue ? 'overdue' : ''}`;
+  card.style.setProperty('--priority-color', getPriorityColor(r.priority));
+
+  card.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div class="card-wo-tag" onclick="event.stopPropagation(); navigateToWO('${r.work_order_number}')">${r.work_order_number}</div>
+      <button class="btn-reset" onclick="event.stopPropagation(); setReminderPinned('${r.id}', ${!r.is_pinned})" style="font-size:12px; color:${r.is_pinned ? 'var(--accent)' : 'var(--color-text-muted)'}"><i class="fas fa-thumbtack"></i></button>
+    </div>
+    <div class="card-title">${r.title}</div>
+    <div class="card-reason">${r.reason === 'Other' ? r.custom_reason : r.reason}</div>
+    <div class="card-footer">
+      <div class="card-datetime"><i class="far fa-clock"></i> ${dayjs(r.reminder_datetime).format('DD MMM, HH:mm')}</div>
+      ${r.photo_count > 0 ? `<div class="card-photo-chip"><i class="fas fa-image"></i> ${r.photo_count}</div>` : ''}
+    </div>
+  `;
+
+  card.ondblclick = () => openReminderModal(r.id);
+  return card;
+}
+
+function createStickyNote(n) {
+  const note = document.createElement('div');
+  note.className = `fuc-sticky-note ${n.color || 'yellow'}`;
+  note.style.setProperty('--note-rotation', `${n.rotation_deg || 0}deg`);
+
+  note.innerHTML = `
+    <div class="note-pin" onclick="event.stopPropagation(); setNotePinned('${n.id}', ${!n.is_pinned})" style="cursor:pointer; ${n.is_pinned ? '' : 'opacity:0.2; top:5px;'}">📌</div>
+    <div class="note-title" style="margin-top: ${n.is_pinned ? '0' : '10px'}">${n.title || 'Untitled'}</div>
+    <div class="note-body">${n.body}</div>
+    <div class="note-footer">
+      ${n.work_order_number ? `<div class="note-wo-link" onclick="navigateToWO('${n.work_order_number}')">${n.work_order_number}</div>` : `<div class="note-tag">${n.category || 'general'}</div>`}
+      ${n.photo_count > 0 ? `<div class="note-photo-strip" id="note-strip-${n.id}"></div>` : ''}
+    </div>
+  `;
+
+  if (n.photo_count > 0) {
+    loadNoteStrip(n.id);
+  }
+
+  note.ondblclick = () => openNoteDetailModal(n.id);
+  return note;
+}
+
+async function loadNoteStrip(noteId) {
+  if (!supabaseClient) return;
+  const { data } = await supabaseClient.from('followup_note_photos').select('public_url').eq('note_id', noteId).limit(3);
+  if (data) {
+    const strip = document.getElementById(`note-strip-${noteId}`);
+    if (strip) {
+      strip.innerHTML = data.map(p => `<img src="${p.public_url}" alt="note photo">`).join('');
+    }
+  }
+}
+
+function renderFUCList(notes, rems) {
+  const body = document.getElementById('fuc-list-body');
+  body.innerHTML = '';
+
+  const allItems = [
+    ...rems.map(r => ({ ...r, fucType: 'Reminder' })),
+    ...notes.map(n => ({ ...n, fucType: 'Note' }))
+  ].sort((a, b) => new Date(b.created_at || b.reminder_datetime) - new Date(a.created_at || a.reminder_datetime));
+
+  allItems.forEach((item, idx) => {
+    const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.ondblclick = () => item.fucType === 'Reminder' ? openReminderModal(item.id) : openNoteDetailModal(item.id);
+
+    const isOverdue = item.fucType === 'Reminder' && new Date(item.reminder_datetime) < new Date() && item.status !== 'completed';
+
+    tr.innerHTML = `
+      <td>${idx + 1}</td>
+      <td><i class="${item.fucType === 'Reminder' ? 'fas fa-bell' : 'fas fa-sticky-note'}"></i> ${item.fucType}</td>
+      <td><div style="font-weight:600;">${item.title || 'Untitled'}</div><div style="font-size:10px; color:var(--muted);">${(item.body || item.notes || '').substring(0, 50)}...</div></td>
+      <td class="wo-num" onclick="navigateToWO('${item.work_order_number}')">${item.work_order_number || '—'}</td>
+      <td>${item.category || item.reason || '—'}</td>
+      <td><span class="status-badge" style="background:${item.fucType === 'Reminder' ? getPriorityColor(item.priority)+'15' : 'var(--note-'+(item.color || 'yellow')+'-bg)'}; color:${item.fucType === 'Reminder' ? getPriorityColor(item.priority) : 'var(--note-'+(item.color || 'yellow')+')'}">${(item.priority || item.color || 'yellow').toUpperCase()}</span></td>
+      <td style="font-family:var(--font-data);">${dayjs(item.reminder_datetime || item.created_at).format('YYYY-MM-DD HH:mm')}</td>
+      <td style="text-align:center;">${item.photo_count || 0}</td>
+      <td><span class="status-badge ${isOverdue ? 'badge-RTNENG' : ''}">${isOverdue ? 'OVERDUE' : (item.status || 'Active')}</span></td>
+      <td style="text-align:center;">
+        <button class="btn btn-ghost btn-icon" onclick="item.fucType === 'Reminder' ? openReminderModal('${item.id}') : openNoteDetailModal('${item.id}')"><i class="fas fa-edit"></i></button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function navigateToWO(woId) {
+  if (!woId) return;
+  showPage('workorders');
+  // Highlight logic for WO table
+  setTimeout(() => {
+    const rows = document.querySelectorAll('#woBody tr');
+    rows.forEach(r => {
+      if (r.querySelector('.wo-num')?.textContent === woId) {
+        r.classList.add('selected');
+        r.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        r.classList.remove('selected');
+      }
+    });
+  }, 500);
+}
+
+function toggleQuickNotePopover() {
+  const popover = document.getElementById('quickNotePopover');
+  const isVisible = popover.style.display === 'block';
+  popover.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) {
+    currentQuickNoteColor = 'yellow';
+    document.querySelectorAll('.quick-note-swatch').forEach(s => s.classList.toggle('active', s.dataset.color === 'yellow'));
+    document.getElementById('quick-note-text').value = '';
+    document.getElementById('quick-note-text').focus();
+  }
+}
+
+function setQuickNoteColor(color, el) {
+  currentQuickNoteColor = color;
+  document.querySelectorAll('.quick-note-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function saveQuickNote() {
+  const body = document.getElementById('quick-note-text').value.trim();
+  if (!body) return;
+
+  const note = {
+    body,
+    color: currentQuickNoteColor,
+    created_by: currentUser?.id,
+    created_by_name: currentUser?.user_metadata?.full_name || currentUser?.email,
+    rotation_deg: getRandomRotationDeg()
+  };
+
+  try {
+    const { data, error } = await supabaseClient.from('followup_notes').insert([note]).select();
+    if (error) throw error;
+    showToast("Note saved");
+    toggleQuickNotePopover();
+    fetchFollowUpNotes();
+  } catch (e) {
+    showToast(e.message, "error");
+  }
+}
+
+function getRandomRotationDeg() {
+  const angles = [-1.8, -1.2, -0.6, 0, 0.6, 1.2, 1.8];
+  return angles[Math.floor(Math.random() * angles.length)];
+}
+
+function openNoteDetailModal(noteId) {
+  currentOpenNoteId = noteId;
+  const n = followupNotes.find(x => x.id === noteId);
+  if (!n) return;
+
+  document.getElementById('noteModalTitle').textContent = 'Edit Note';
+  document.getElementById('note-det-title').value = n.title || '';
+  document.getElementById('note-det-body').value = n.body || '';
+  document.getElementById('note-det-category').value = n.category || 'general';
+  document.getElementById('note-det-wo').value = n.work_order_number || '';
+  document.getElementById('note-det-tags').value = (n.tags || []).join(', ');
+  document.getElementById('note-pin-check').checked = n.is_pinned;
+  document.getElementById('note-pin-icon').style.color = n.is_pinned ? 'var(--accent)' : 'var(--color-text-muted)';
+
+  setNoteDetailColor(n.color || 'yellow', document.querySelector(`.quick-note-swatch[onclick*="setNoteDetailColor('${n.color || 'yellow'}'"]`));
+
+  loadNotePhotos(noteId);
+  initNotePhotoDropzone();
+
+  document.getElementById('noteDetailModalOverlay').style.display = 'flex';
+}
+
+function closeNoteDetailModal() {
+  document.getElementById('noteDetailModalOverlay').style.display = 'none';
+  currentOpenNoteId = null;
+  pendingPhotos = []; // Reuse this global but clear it
+}
+
+function setNoteDetailColor(color, el) {
+  document.getElementById('noteDetailModal').style.setProperty('--note-accent-color', `var(--note-${color})`);
+  document.querySelectorAll('.quick-note-swatch').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function toggleNotePin() {
+  const chk = document.getElementById('note-pin-check');
+  chk.checked = !chk.checked;
+  document.getElementById('note-pin-icon').style.color = chk.checked ? 'var(--accent)' : 'var(--color-text-muted)';
+}
+
+async function saveNoteDetail() {
+  if (!currentOpenNoteId) return;
+
+  const tagsRaw = document.getElementById('note-det-tags').value;
+  const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(t => t) : [];
+
+  const activeSwatch = document.querySelector('#noteDetailModal .quick-note-swatch.active');
+  const color = activeSwatch ? activeSwatch.dataset.color : 'yellow';
+
+  const noteData = {
+    title: document.getElementById('note-det-title').value.trim(),
+    body: document.getElementById('note-det-body').value.trim(),
+    category: document.getElementById('note-det-category').value,
+    work_order_number: document.getElementById('note-det-wo').value.trim(),
+    tags,
+    color,
+    is_pinned: document.getElementById('note-pin-check').checked,
+    updated_by: currentUser?.id
+  };
+
+  try {
+    const { error } = await supabaseClient.from('followup_notes').update(noteData).eq('id', currentOpenNoteId);
+    if (error) throw error;
+
+    await uploadNotePendingPhotos(currentOpenNoteId);
+
+    showToast("Note updated");
+    closeNoteDetailModal();
+    fetchFollowUpNotes();
+  } catch (e) {
+    showToast(e.message, "error");
+  }
+}
+
+async function deleteNote() {
+  if (!currentOpenNoteId) return;
+  if (!confirm("Delete this note permanently?")) return;
+
+  try {
+    const { error } = await supabaseClient.from('followup_notes').delete().eq('id', currentOpenNoteId);
+    if (error) throw error;
+    showToast("Note deleted");
+    closeNoteDetailModal();
+    fetchFollowUpNotes();
+  } catch (e) {
+    showToast(e.message, "error");
+  }
+}
+
+async function archiveNote() {
+  if (!currentOpenNoteId) return;
+  try {
+    const { error } = await supabaseClient.from('followup_notes').update({ is_archived: true }).eq('id', currentOpenNoteId);
+    if (error) throw error;
+    showToast("Note archived");
+    closeNoteDetailModal();
+    fetchFollowUpNotes();
+  } catch (e) {
+    showToast(e.message, "error");
+  }
+}
+
+function initNotePhotoDropzone() {
+  const zone = document.getElementById('notePhotoDropzone');
+  const input = document.getElementById('notePhotoFileInput');
+  if (!zone || !input) return;
+
+  zone.onclick = () => input.click();
+  input.onchange = e => handleNotePhotoFiles([...e.target.files]);
+}
+
+function handleNotePhotoFiles(files) {
+  files.forEach(file => {
+    const previewUrl = URL.createObjectURL(file);
+    pendingPhotos.push({ file, previewUrl });
+  });
+  renderNotePhotoThumbs();
+}
+
+function renderNotePhotoThumbs() {
+  const grid = document.getElementById('notePhotoThumbGrid');
+  grid.innerHTML = '';
+
+  existingPhotos.forEach((photo, i) => {
+    grid.appendChild(buildThumbEl(photo.public_url, '', () => deleteNotePhoto(photo.id), () => {}));
+  });
+
+  pendingPhotos.forEach((p, i) => {
+    grid.appendChild(buildThumbEl(p.previewUrl, '', () => {
+      URL.revokeObjectURL(p.previewUrl);
+      pendingPhotos.splice(i, 1);
+      renderNotePhotoThumbs();
+    }, () => {}));
+  });
+}
+
+async function loadNotePhotos(noteId) {
+  const { data } = await supabaseClient.from('followup_note_photos').select('*').eq('note_id', noteId);
+  existingPhotos = data || [];
+  renderNotePhotoThumbs();
+}
+
+async function deleteNotePhoto(photoId) {
+  if (!confirm("Remove this photo?")) return;
+  const photo = existingPhotos.find(p => p.id === photoId);
+  if (!photo) return;
+
+  await supabaseClient.storage.from('followup-note-photos').remove([photo.storage_path]);
+  await supabaseClient.from('followup_note_photos').delete().eq('id', photoId);
+  existingPhotos = existingPhotos.filter(p => p.id !== photoId);
+  renderNotePhotoThumbs();
+}
+
+function setNotePinned(noteId, isPinned) {
+  if (!supabaseClient) return;
+  supabaseClient.from('followup_notes').update({ is_pinned: isPinned }).eq('id', noteId)
+    .then(({error}) => {
+      if (error) showToast(error.message, 'error');
+      else fetchFollowUpNotes();
+    });
+}
+
+function setReminderPinned(remId, isPinned) {
+  if (!supabaseClient) return;
+  // This assumes work_order_reminders has an is_pinned column
+  supabaseClient.from('work_order_reminders').update({ is_pinned: isPinned }).eq('id', remId)
+    .then(({error}) => {
+      if (error) showToast(error.message, 'error');
+      else fetchReminders();
+    });
+}
+
+async function uploadNotePendingPhotos(noteId) {
+  if (pendingPhotos.length === 0) return;
+  for (const p of pendingPhotos) {
+    const path = `${currentUser.id}/${noteId}/${Date.now()}-${p.file.name}`;
+    await supabaseClient.storage.from('followup-note-photos').upload(path, p.file);
+    const { data: { publicUrl } } = supabaseClient.storage.from('followup-note-photos').getPublicUrl(path);
+    await supabaseClient.from('followup_note_photos').insert([{
+      note_id: noteId,
+      storage_path: path,
+      public_url: publicUrl,
+      file_name: p.file.name,
+      uploaded_by: currentUser.id
+    }]);
+  }
+  pendingPhotos = [];
+}
+
+function toggleFUCFabMenu() {
+  document.getElementById('fuc-fab-menu').classList.toggle('open');
+}
+
+function convertNoteToReminder() {
+  if (!currentOpenNoteId) return;
+  const n = followupNotes.find(x => x.id === currentOpenNoteId);
+  if (!n) return;
+
+  const woId = n.work_order_number;
+  closeNoteDetailModal();
+
+  // Set global pending flag
+  window.pendingNoteToArchive = n.id;
+
+  // Open existing reminder modal with pre-filled data
+  openReminderModal(null, woId);
+
+  // Wait for modal to render then pre-fill
+  setTimeout(() => {
+    document.getElementById('rem-title').value = n.title || 'Note Follow-up';
+    document.getElementById('rem-notes').value = n.body || '';
+    // Reason defaults to Follow-up
+  }, 100);
+}
+
+async function exportFUCPDF() {
+  const { jsPDF } = window.jspdf;
+  showToast("Generating Follow-Up Report...");
+
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pdfWidth = 210;
+  const pdfHeight = 297;
+  const margin = 15;
+  const contentWidth = pdfWidth - (2 * margin);
+  let currentY = margin;
+
+  // 1. Header
+  pdf.setFillColor(11, 15, 26);
+  pdf.rect(0, 0, pdfWidth, 35, 'F');
+
+  if (companyLogo) {
+    try { pdf.addImage(companyLogo, 'PNG', margin, 7, 20, 20); } catch(e) {}
+  }
+
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(22);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text("QBC Operations Center", margin + (companyLogo ? 25 : 0), 18);
+
+  pdf.setFontSize(11);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(148, 163, 184);
+  pdf.text("Follow-Up Center – Reminders & Site Notes Report", margin + (companyLogo ? 25 : 0), 25);
+
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  pdf.setFontSize(9);
+  pdf.text(`Report Generated: ${today}`, pdfWidth - margin, 18, { align: 'right' });
+  pdf.text(`User: ${currentUser?.user_metadata?.full_name || currentUser?.email}`, pdfWidth - margin, 23, { align: 'right' });
+
+  currentY = 45;
+
+  // Render content
+  const searchTerm = document.getElementById('fuc-search').value.toLowerCase();
+  let filteredNotes = followupNotes.filter(n => !n.is_archived);
+  let filteredReminders = reminders.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
+
+  if (searchTerm) {
+    filteredNotes = filteredNotes.filter(n => (n.title?.toLowerCase().includes(searchTerm)) || (n.body?.toLowerCase().includes(searchTerm)) || (n.work_order_number?.toLowerCase().includes(searchTerm)));
+    filteredReminders = filteredReminders.filter(r => (r.title?.toLowerCase().includes(searchTerm)) || (r.notes?.toLowerCase().includes(searchTerm)) || (r.work_order_number?.toLowerCase().includes(searchTerm)));
+  }
+
+  // 2. Reminders Section
+  pdf.setTextColor(0, 200, 180);
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text("ACTIVE REMINDERS", margin, currentY);
+  currentY += 8;
+
+  if (filteredReminders.length === 0) {
+    pdf.setTextColor(100, 116, 139);
+    pdf.setFontSize(10);
+    pdf.text("No active reminders found.", margin, currentY);
+    currentY += 10;
+  } else {
+    for (const r of filteredReminders) {
+      if (currentY > pdfHeight - 40) { pdf.addPage(); currentY = margin; }
+
+      pdf.setDrawColor(226, 232, 240);
+      pdf.line(margin, currentY, pdfWidth - margin, currentY);
+      currentY += 5;
+
+      pdf.setTextColor(30, 41, 59);
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${r.title} [${r.work_order_number || 'No WO'}]`, margin, currentY);
+
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(100, 116, 139);
+      pdf.text(`Due: ${dayjs(r.reminder_datetime).format('DD MMM YYYY, HH:mm')} | Priority: ${r.priority.toUpperCase()}`, margin, currentY + 5);
+
+      pdf.setTextColor(51, 65, 85);
+      const notesLines = pdf.splitTextToSize(r.notes || 'No notes', contentWidth - 10);
+      pdf.text(notesLines, margin, currentY + 12);
+
+      currentY += 15 + (notesLines.length * 4);
+    }
+  }
+
+  currentY += 10;
+  if (currentY > pdfHeight - 40) { pdf.addPage(); currentY = margin; }
+
+  // 3. Notes Section
+  pdf.setTextColor(245, 158, 11);
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text("SITE NOTES", margin, currentY);
+  currentY += 8;
+
+  if (filteredNotes.length === 0) {
+    pdf.setTextColor(100, 116, 139);
+    pdf.setFontSize(10);
+    pdf.text("No active site notes found.", margin, currentY);
+  } else {
+    for (const n of filteredNotes) {
+      if (currentY > pdfHeight - 40) { pdf.addPage(); currentY = margin; }
+
+      pdf.setDrawColor(226, 232, 240);
+      pdf.line(margin, currentY, pdfWidth - margin, currentY);
+      currentY += 5;
+
+      pdf.setTextColor(30, 41, 59);
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${n.title || 'Untitled Note'} [${n.work_order_number || 'Personal'}]`, margin, currentY);
+
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(100, 116, 139);
+      pdf.text(`Created: ${dayjs(n.created_at).format('DD MMM YYYY')} | Category: ${n.category || 'general'}`, margin, currentY + 5);
+
+      pdf.setTextColor(51, 65, 85);
+      const bodyLines = pdf.splitTextToSize(n.body, contentWidth - 10);
+      pdf.text(bodyLines, margin, currentY + 12);
+
+      currentY += 15 + (bodyLines.length * 4);
+    }
+  }
+
+  pdf.save(`QBC_FollowUp_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
+function setupFUCListeners() {
+  window.addEventListener('keydown', e => {
+    if (document.getElementById('page-followup').classList.contains('active')) {
+      if (e.key === 'n' || e.key === 'N') {
+        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          toggleQuickNotePopover();
+        }
+      }
+      if (e.key === 'r' || e.key === 'R') {
+        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          openReminderModal(null);
+        }
+      }
+      if (e.key === 'f' || e.key === 'F') {
+        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          document.getElementById('fuc-search').focus();
+        }
+      }
+      if (e.key === 'p' || e.key === 'P') {
+        // Pin/unpin logic for "focused" card could be complex,
+        // let's skip for now or implement if there's a clear 'focus'
+      }
+    }
+    if (e.key === 'Escape') {
+      closeNoteDetailModal();
+      document.getElementById('quickNotePopover').style.display = 'none';
+      document.getElementById('fuc-fab-menu').classList.remove('open');
+    }
+  });
+}
+
 async function refreshUI() {
   if (document.getElementById('page-installation').classList.contains('active')) {
     await loadInstData();
@@ -11493,6 +12701,10 @@ async function refreshUI() {
   }
   if (document.getElementById('page-reminders').classList.contains('active')) {
     await fetchReminders();
+  }
+  if (document.getElementById('page-followup').classList.contains('active')) {
+    await Promise.all([fetchReminders(), fetchFollowUpNotes()]);
+    renderFollowUpCenter();
   }
    applyFilters(false);
    applyManufacturingFilters();
@@ -11503,6 +12715,111 @@ async function refreshUI() {
 }
 
 </script>
+<!-- QUICK NOTE POPOVER -->
+<div id="quickNotePopover" class="quick-note-popover">
+  <div class="quick-note-color-row">
+    <div class="quick-note-swatch active" data-color="yellow" style="background: var(--note-yellow);" onclick="setQuickNoteColor('yellow', this)"></div>
+    <div class="quick-note-swatch" data-color="teal" style="background: var(--note-teal);" onclick="setQuickNoteColor('teal', this)"></div>
+    <div class="quick-note-swatch" data-color="purple" style="background: var(--note-purple);" onclick="setQuickNoteColor('purple', this)"></div>
+    <div class="quick-note-swatch" data-color="red" style="background: var(--note-red);" onclick="setQuickNoteColor('red', this)"></div>
+    <div class="quick-note-swatch" data-color="blue" style="background: var(--note-blue);" onclick="setQuickNoteColor('blue', this)"></div>
+    <div class="quick-note-swatch" data-color="green" style="background: var(--note-green);" onclick="setQuickNoteColor('green', this)"></div>
+  </div>
+  <textarea id="quick-note-text" class="quick-note-textarea" placeholder="Type your note here..."></textarea>
+  <button class="quick-note-save" onclick="saveQuickNote()">Save Note</button>
+</div>
+
+<!-- NOTE DETAIL MODAL -->
+<div class="modal-overlay" id="noteDetailModalOverlay">
+  <div class="modal note-detail-modal" id="noteDetailModal">
+    <button class="modal-close" onclick="closeNoteDetailModal()">×</button>
+    <div class="reminder-modal-header" style="border-bottom:none; padding-bottom:0;">
+      <div class="modal-icon" style="color:var(--note-accent-color)"><i class="fas fa-sticky-note"></i></div>
+      <h2 id="noteModalTitle">Note Details</h2>
+    </div>
+
+    <div class="reminder-modal-body">
+      <div class="quick-note-color-row" style="margin-bottom: var(--space-5);">
+        <div class="quick-note-swatch" data-color="yellow" style="background: var(--note-yellow);" onclick="setNoteDetailColor('yellow', this)"></div>
+        <div class="quick-note-swatch" data-color="teal" style="background: var(--note-teal);" onclick="setNoteDetailColor('teal', this)"></div>
+        <div class="quick-note-swatch" data-color="purple" style="background: var(--note-purple);" onclick="setNoteDetailColor('purple', this)"></div>
+        <div class="quick-note-swatch" data-color="red" style="background: var(--note-red);" onclick="setNoteDetailColor('red', this)"></div>
+        <div class="quick-note-swatch" data-color="blue" style="background: var(--note-blue);" onclick="setNoteDetailColor('blue', this)"></div>
+        <div class="quick-note-swatch" data-color="green" style="background: var(--note-green);" onclick="setNoteDetailColor('green', this)"></div>
+        <div style="flex:1"></div>
+        <div class="reminder-toggle" onclick="toggleNotePin()">
+          <input type="checkbox" id="note-pin-check" style="display:none">
+          <i class="fas fa-thumbtack" id="note-pin-icon" style="color:var(--color-text-muted)"></i>
+          <span>Pin to top</span>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group" style="grid-column: 1/-1;">
+          <label>Title</label>
+          <input type="text" id="note-det-title" class="reminder-input" placeholder="Note Title (Optional)">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="note-det-category" class="reminder-select">
+            <option value="general">General</option>
+            <option value="technical">Technical</option>
+            <option value="approval">Approval</option>
+            <option value="site">Site</option>
+            <option value="material">Material</option>
+            <option value="meeting">Meeting</option>
+            <option value="personal">Personal</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Linked Work Order</label>
+          <input type="text" id="note-det-wo" class="reminder-input" placeholder="Search WO# (e.g. 26800018)">
+        </div>
+        <div class="form-group" style="grid-column: 1/-1;">
+          <label>Content</label>
+          <textarea id="note-det-body" class="reminder-textarea" style="height: 150px;" placeholder="Write your note content..."></textarea>
+        </div>
+        <div class="form-group" style="grid-column: 1/-1;">
+          <label>Tags (Comma separated)</label>
+          <input type="text" id="note-det-tags" class="reminder-input" placeholder="e.g. ashghal, survey, urgent">
+        </div>
+      </div>
+
+      <div class="reminder-section-label" style="margin-top: var(--space-6);">Photo Attachments</div>
+      <div class="photo-dropzone" id="notePhotoDropzone">
+        <input type="file" id="notePhotoFileInput" multiple accept="image/*" style="display:none">
+        <div class="photo-dropzone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+        <div class="photo-dropzone-label">Drop photos here or click to upload</div>
+        <div class="photo-dropzone-hint">Max 10MB per image. Supports JPG, PNG, WebP</div>
+      </div>
+      <div id="notePhotoThumbGrid" class="photo-thumb-grid"></div>
+
+    </div>
+
+    <div class="reminder-modal-footer">
+      <button class="btn btn-ghost" onclick="convertNoteToReminder()" id="btn-convert-note"><i class="fas fa-bell"></i> Convert to Reminder</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-red" onclick="deleteNote()" id="btn-delete-note"><i class="fas fa-trash"></i> Delete</button>
+      <button class="btn btn-ghost" onclick="archiveNote()" id="btn-archive-note"><i class="fas fa-archive"></i> Archive</button>
+      <button class="btn btn-primary" onclick="saveNoteDetail()" id="btn-save-note">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- FUC FAB -->
+<button class="fuc-fab" id="fuc-fab" style="display:none;" onclick="toggleFUCFabMenu()" title="Add New">
+  <i class="fas fa-plus"></i>
+</button>
+<div class="fuc-fab-menu" id="fuc-fab-menu">
+  <div class="fuc-fab-option" onclick="toggleQuickNotePopover(); toggleFUCFabMenu();">
+    <i class="fas fa-sticky-note"></i> New Note
+  </div>
+  <div class="fuc-fab-option" onclick="openReminderModal(null); toggleFUCFabMenu();">
+    <i class="fas fa-bell"></i> New Reminder
+  </div>
+</div>
+
 </body>
 </html>
 
