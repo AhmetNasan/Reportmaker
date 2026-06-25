@@ -375,6 +375,9 @@
   margin-bottom: var(--space-6); scrollbar-width: none; border-bottom: 1px solid var(--color-border-subtle);
 }
 .fuc-pinned-strip::-webkit-scrollbar { display: none; }
+@media (max-width: 768px) {
+  .fuc-pinned-strip { flex-direction: column; overflow-x: visible; }
+}
 
 .quick-note-popover {
   position: fixed;
@@ -3722,6 +3725,7 @@ async function onAuthenticated() {
   await loadNotifications();
   setupNotifListener();
   fetchReminders();
+  fetchFollowUpNotes();
   setupReminderSubscriptions();
   
   if (window.alarmInterval) clearInterval(window.alarmInterval);
@@ -11264,6 +11268,7 @@ function openReminderModal(reminderId = null, woId = null) {
 function closeReminderModal() {
   document.getElementById('reminderModalOverlay').style.display = 'none';
   resetPhotoState();
+  window.pendingNoteToArchive = null; // Clear if cancelled
 }
 
 function resetReminderModal() {
@@ -11660,7 +11665,8 @@ async function saveReminder() {
     email_enabled: document.getElementById('rem-email').checked,
     created_by: currentUser?.id,
     created_by_name: currentUser?.user_metadata?.full_name || currentUser?.email,
-    updated_by: currentUser?.id
+    updated_by: currentUser?.id,
+    is_pinned: currentOpenReminderId ? reminders.find(r => r.id === currentOpenReminderId)?.is_pinned || false : false
   };
 
   try {
@@ -12117,15 +12123,22 @@ function renderFUCContent() {
 }
 
 function renderFUCBoard(notes, rems) {
-  const pinnedNotes = notes.filter(n => n.is_pinned && !n.is_archived);
-  const pinnedRems = rems.filter(r => r.is_pinned && r.status !== 'completed');
+  // Pinned items must appear regardless of column filters, but should honor search if present
+  const searchTerm = document.getElementById('fuc-search').value.toLowerCase();
+  let allPinnedNotes = followupNotes.filter(n => n.is_pinned && !n.is_archived);
+  let allPinnedRems = reminders.filter(r => r.is_pinned && r.status !== 'completed' && r.status !== 'cancelled');
+
+  if (searchTerm) {
+    allPinnedNotes = allPinnedNotes.filter(n => (n.title?.toLowerCase().includes(searchTerm)) || (n.body?.toLowerCase().includes(searchTerm)) || (n.work_order_number?.toLowerCase().includes(searchTerm)));
+    allPinnedRems = allPinnedRems.filter(r => (r.title?.toLowerCase().includes(searchTerm)) || (r.notes?.toLowerCase().includes(searchTerm)) || (r.work_order_number?.toLowerCase().includes(searchTerm)));
+  }
+
   const pinnedRow = document.getElementById('fuc-pinned-row');
-  
-  if (pinnedNotes.length > 0 || pinnedRems.length > 0) {
+  if (allPinnedNotes.length > 0 || allPinnedRems.length > 0) {
     pinnedRow.style.display = 'flex';
     pinnedRow.innerHTML = '';
-    pinnedRems.forEach(r => pinnedRow.appendChild(createReminderCard(r)));
-    pinnedNotes.forEach(n => pinnedRow.appendChild(createStickyNote(n)));
+    allPinnedRems.forEach(r => pinnedRow.appendChild(createReminderCard(r)));
+    allPinnedNotes.forEach(n => pinnedRow.appendChild(createStickyNote(n)));
   } else {
     pinnedRow.style.display = 'none';
   }
