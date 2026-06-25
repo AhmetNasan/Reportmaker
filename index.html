@@ -108,6 +108,123 @@
   --transition-fast:0.12s ease; --transition-normal:0.22s ease; --transition-slow:0.35s ease;
 }
 
+/* REMINDER MODAL CSS */
+.reminder-modal-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+.reminder-modal {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  width: 600px; max-width: 95vw;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-modal);
+  display: flex; flex-direction: column;
+}
+.reminder-modal-header {
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: flex; align-items: center; gap: var(--space-3);
+}
+.reminder-modal-header .modal-icon { font-size: 20px; }
+.reminder-modal-header h2 { 
+  font-size: var(--text-lg); font-weight: var(--fw-bold); color: var(--color-accent-teal);
+  margin: 0; flex: 1;
+}
+.reminder-modal-header .modal-close {
+  background: none; border: none; color: var(--color-text-muted);
+  font-size: 20px; cursor: pointer; transition: color 0.2s;
+}
+.reminder-modal-header .modal-close:hover { color: var(--color-text-primary); }
+
+.reminder-modal-body { padding: var(--space-6); }
+.reminder-wo-banner {
+  background: var(--color-accent-teal-bg);
+  border-left: 3px solid var(--color-accent-teal);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-6);
+  display: flex; gap: var(--space-3); align-items: baseline;
+}
+.reminder-wo-banner .wo-num { font-family: var(--font-data); font-weight: var(--fw-bold); color: var(--color-accent-teal); }
+.reminder-wo-banner .wo-title { font-size: var(--text-sm); color: var(--color-text-secondary); }
+
+.reminder-section-label {
+  font-size: 11px; font-weight: var(--fw-bold); text-transform: uppercase;
+  color: var(--color-text-muted); letter-spacing: 0.05em; margin-bottom: var(--space-3);
+}
+.reminder-field { margin-bottom: var(--space-4); }
+.reminder-field label { display: block; font-size: 11px; color: var(--color-text-secondary); margin-bottom: var(--space-1); }
+.reminder-field .required { color: var(--color-priority-critical); }
+.reminder-input, .reminder-select, .reminder-textarea {
+  width: 100%; background: var(--color-bg-input); border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
+  color: var(--color-text-primary); font-family: var(--font-ui); font-size: var(--text-sm);
+  outline: none; transition: border-color 0.2s;
+}
+.reminder-input:focus, .reminder-select:focus, .reminder-textarea:focus { border-color: var(--color-accent-teal); }
+.reminder-textarea { height: 80px; resize: vertical; }
+
+.reminder-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+
+.priority-selector { display: flex; gap: var(--space-2); }
+.priority-btn {
+  flex: 1; padding: var(--space-2); border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default); background: var(--color-bg-input);
+  color: var(--color-text-muted); font-size: 11px; font-weight: var(--fw-semibold);
+  cursor: pointer; transition: all 0.2s;
+}
+.priority-btn[data-priority="low"].active { background: var(--color-priority-low-bg); border-color: var(--color-priority-low); color: var(--color-priority-low); }
+.priority-btn[data-priority="medium"].active { background: var(--color-priority-medium-bg); border-color: var(--color-priority-medium); color: var(--color-priority-medium); }
+.priority-btn[data-priority="high"].active { background: var(--color-priority-high-bg); border-color: var(--color-priority-high); color: var(--color-priority-high); }
+.priority-btn[data-priority="critical"].active { background: var(--color-priority-critical-bg); border-color: var(--color-priority-critical); color: var(--color-priority-critical); }
+
+.photo-dropzone {
+  border: 2px dashed var(--color-border-default); border-radius: var(--radius-lg);
+  padding: var(--space-6); text-align: center; cursor: pointer; transition: all 0.2s;
+  position: relative;
+}
+.photo-dropzone:hover { border-color: var(--color-accent-teal); background: var(--color-photo-hover); }
+.photo-dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.photo-dropzone-icon { font-size: 24px; margin-bottom: var(--space-2); }
+.photo-dropzone-label { font-size: var(--text-sm); color: var(--color-text-primary); }
+.photo-dropzone-hint { font-size: 10px; color: var(--color-text-muted); margin-top: var(--space-1); }
+
+.photo-thumb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: var(--space-3); margin-top: var(--space-4); }
+.photo-thumb { aspect-ratio: 1; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border-default); position: relative; }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-thumb-delete {
+  position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.5);
+  color: white; width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer;
+}
+
+.reminder-toggles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.reminder-toggle {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-sm); color: var(--color-text-secondary); cursor: pointer;
+}
+
+.reminder-modal-footer {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border-subtle);
+  display: flex; justify-content: flex-end; gap: var(--space-3);
+  background: var(--color-bg-base);
+}
+.btn-reminder-cancel {
+  padding: var(--space-2) var(--space-5); border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default); background: transparent;
+  color: var(--color-text-secondary); font-weight: var(--fw-semibold); cursor: pointer;
+}
+.btn-reminder-save {
+  padding: var(--space-2) var(--space-5); border-radius: var(--radius-md);
+  border: none; background: var(--color-accent-teal);
+  color: var(--color-text-inverse); font-weight: var(--fw-bold); cursor: pointer;
+}
+
 /* ALARM POPUP CSS */
 .alarm-overlay {
   position: fixed; inset: 0; z-index: 10000;
