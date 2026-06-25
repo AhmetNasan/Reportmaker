@@ -10325,44 +10325,79 @@ async function loadInstData() {
   if (!supabaseClient) return;
   
   try {
-    // In a real scenario, we'd fetch from multiple tables. 
-    // For now, let's focus on work_orders and seed if necessary.
-    const { data: woData } = await supabaseClient.from('work_orders').select('*');
+    // Fetch all WOs where fabrication is 'Done' and ready for installation
+    const { data: woData, error: woError } = await supabaseClient
+      .from('work_orders')
+      .select(`
+        id,
+        work_order,
+        description,
+        latitude,
+        longitude,
+        location,
+        pwa_engineer,
+        target_finish_date,
+        fab_status,
+        installation_status,
+        assigned_team_id,
+        assigned_date,
+        planned_installation_date,
+        actual_installation_date,
+        qbc_comments,
+        road_name,
+        road_direction,
+        chainage,
+        asset_type,
+        asset_description,
+        priority
+      `)
+      .eq('fab_status', 'Done')
+      .order('target_finish_date', { ascending: true });
+
+    if (woError) throw woError;
     InstState.workOrders = woData || [];
     
-    // Fetch installation specific tables (these might fail if not created yet)
     try {
-      const { data: teams } = await supabaseClient.from('installation_teams').select('*');
+      const { data: teams } = await supabaseClient.from('installation_teams').select('*').order('team_name');
       InstState.teams = teams || [];
       
-      const { data: packages } = await supabaseClient.from('installation_packages').select('*');
-      InstState.packages = packages || [];
-      
-      const { data: programs } = await supabaseClient.from('installation_programs').select('*');
-      InstState.programs = programs || [];
+      const { data: groups } = await supabaseClient.from('installation_groups').select('*');
+      InstState.packages = groups || [];
 
       const { data: acts } = await supabaseClient.from('installation_activities').select('*').order('timestamp', { ascending: false }).limit(20);
       InstState.activities = acts || [];
     } catch (err) {
-      console.warn("Installation tables might be missing:", err.message);
+      console.warn("Installation support tables might be missing:", err.message);
     }
 
     calculateInstKPIs();
   } catch (e) {
     console.error("Failed to load installation data:", e);
+    showToast("Error loading installation data", "error");
   }
 }
 
 function calculateInstKPIs() {
   const wos = InstState.workOrders;
+  const today = dayjs().format('YYYY-MM-DD');
+  
   InstState.kpis.total = wos.length;
-  InstState.kpis.ready = wos.filter(w => w.installation_status === 'Ready').length;
-  InstState.kpis.assigned = wos.filter(w => w.installation_status === 'Assigned').length;
-  InstState.kpis.inProgress = wos.filter(w => w.installation_status === 'In Progress').length;
-  InstState.kpis.completed = wos.filter(w => w.installation_status === 'Completed').length;
-  // Overdue logic: Target finish in past and not completed
+  InstState.kpis.ready = wos.filter(w => !w.assigned_team_id).length;
+  InstState.kpis.assigned = wos.filter(w => w.assigned_team_id).length;
+  InstState.kpis.pending = wos.filter(w => !w.assigned_team_id).length;
+  InstState.kpis.inProgress = wos.filter(w => w.installation_status === 'In Progress' || w.installation_status === 'Assigned').length;
+  InstState.kpis.completed = wos.filter(w => ['Completed', 'COMP'].includes(w.installation_status)).length;
+  
+  InstState.kpis.completedToday = wos.filter(w => 
+    ['Completed', 'COMP'].includes(w.installation_status) && 
+    w.actual_installation_date && dayjs(w.actual_installation_date).format('YYYY-MM-DD') === today
+  ).length;
+
   const now = new Date();
-  InstState.kpis.overdue = wos.filter(w => w.installation_status !== 'Completed' && w.target_finish_date && new Date(w.target_finish_date) < now).length;
+  InstState.kpis.overdue = wos.filter(w => 
+    !['Completed', 'COMP', 'Returned'].includes(w.installation_status) && 
+    w.target_finish_date && new Date(w.target_finish_date) < now
+  ).length;
 }
 
 function switchInstPage(pageId, btn) {
@@ -10495,7 +10530,7 @@ function renderOpsDashboard(container) {
 }
 
 function renderUnassignedList() {
-  const list = InstState.workOrders.filter(w => w.installation_status === 'Ready' && !w.assigned_team).slice(0, 10);
+  const list = InstState.workOrders.filter(w => !w.assigned_team_id).slice(0, 10);
   if (list.length === 0) return '<div style="text-align:center; padding:20px; color:var(--muted)">No unassigned items</div>';
   return list.map(w => {
     const reminderList = reminders.filter(rem => String(rem.work_order_number) === String(w.work_order));
@@ -10520,7 +10555,10 @@ function renderUnassignedList() {
 
 function renderOverdueList() {
   const now = new Date();
-  const list = InstState.workOrders.filter(w => w.installation_status !== 'Completed' && w.target_finish_date && new Date(w.target_finish_date) < now).slice(0, 10);
+  const list = InstState.workOrders.filter(w => 
+    !['Completed', 'COMP', 'Returned'].includes(w.installation_status) && 
+    w.target_finish_date && new Date(w.target_finish_date) < now
+  ).slice(0, 10);
   if (list.length === 0) return '<div style="text-align:center; padding:20px; color:var(--muted)">No overdue items</div>';
   return list.map(w => {
     const reminderList = reminders.filter(rem => String(rem.work_order_number) === String(w.work_order));
@@ -10779,8 +10817,9 @@ function renderPlanningPage(container) {
 }
 
 function renderPlanningQueue() {
-  const readyWOs = InstState.workOrders.filter(w => w.installation_status === 'Ready' || w.installation_status === 'Assigned');
-  if (readyWOs.length === 0) return '<div class="inst-empty">No work orders ready</div>';
+  // Show all WOs fetched (which are fab_status = 'Done') that are not fully completed
+  const readyWOs = InstState.workOrders.filter(w => !['Completed', 'COMP', 'Returned'].includes(w.installation_status));
+  if (readyWOs.length === 0) return '<div class="inst-empty">No work orders ready for planning</div>';
   
   return readyWOs.map(w => `
     <div class="inst-list-item" style="padding: 10px; cursor: move;" draggable="true" ondragstart="handlePlanningDragStart(event, '${w.work_order}')">
