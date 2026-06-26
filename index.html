@@ -3721,6 +3721,7 @@ async function onAuthenticated() {
   }
 
   await loadSystemSettings();
+  await loadAISettings();
   loadLogo();
   await loadNotifications();
   setupNotifListener();
@@ -3782,6 +3783,149 @@ async function saveSystemSettings() {
   } catch(e) { 
     console.error(e);
     showToast("Failed to save settings", "error"); 
+  }
+}
+
+// AI CONFIGURATION LOGIC
+let currentAISettings = {
+  id: null,
+  provider_name: 'BadTheory',
+  api_base_url: 'https://api.badtheorylabs.com/v1',
+  api_key: 'gw_engineer_03ff7a16869220efd3f0ad64fa5b5b9ad967d3b6ee495bd2',
+  ai_model: 'btl-2',
+  default_grouping_instructions: 'Analyze the following work orders and group them into logical installation packages.',
+  minutes_per_sign: 45,
+  ai_enabled: true
+};
+
+async function loadAISettings() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient.from('ai_settings').select('*').maybeSingle();
+    if (error) throw error;
+    if (data) {
+      currentAISettings = data;
+      // Update button visibility if on installation page
+      const aiBtn = document.getElementById('ai-group-btn');
+      if (aiBtn) {
+        aiBtn.style.display = (currentAISettings.ai_enabled && (isAdmin || userRole === 'Supervisor')) ? 'flex' : 'none';
+      }
+    }
+  } catch (e) {
+    console.warn("Could not load AI settings (table may not exist yet):", e.message);
+  }
+}
+
+function openAIConfigModal() {
+  if (!isAdmin) return showToast("Admin access required", "error");
+
+  document.getElementById('ai-enabled-toggle').checked = currentAISettings.ai_enabled;
+  document.getElementById('ai-provider').value = currentAISettings.provider_name || 'BadTheory';
+  document.getElementById('ai-model').value = currentAISettings.ai_model || 'btl-2';
+  document.getElementById('ai-base-url').value = currentAISettings.api_base_url || 'https://api.badtheorylabs.com/v1';
+  document.getElementById('ai-api-key').value = currentAISettings.api_key || '';
+  document.getElementById('ai-mins-per-sign').value = currentAISettings.minutes_per_sign || 45;
+  document.getElementById('ai-instructions').value = currentAISettings.default_grouping_instructions || '';
+
+  openModal('aiConfigModal');
+}
+
+function toggleAIKeyVis() {
+  const inp = document.getElementById('ai-api-key');
+  const icon = document.getElementById('ai-key-eye');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    inp.type = 'password';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+}
+
+async function saveAISettings() {
+  if (!isAdmin) return showToast("Admin access required", "error");
+
+  const settings = {
+    ai_enabled: document.getElementById('ai-enabled-toggle').checked,
+    provider_name: document.getElementById('ai-provider').value.trim(),
+    ai_model: document.getElementById('ai-model').value.trim(),
+    api_base_url: document.getElementById('ai-base-url').value.trim(),
+    api_key: document.getElementById('ai-api-key').value.trim(),
+    minutes_per_sign: parseInt(document.getElementById('ai-mins-per-sign').value) || 45,
+    default_grouping_instructions: document.getElementById('ai-instructions').value.trim(),
+    updated_at: new Date().toISOString(),
+    updated_by: currentUser?.id
+  };
+
+  if (!settings.api_key) return showToast("API Key is required", "error");
+
+  try {
+    const { data: existing } = await supabaseClient.from('ai_settings').select('id').maybeSingle();
+    let res;
+    if (existing) {
+      res = await supabaseClient.from('ai_settings').update(settings).eq('id', existing.id);
+    } else {
+      res = await supabaseClient.from('ai_settings').insert([settings]);
+    }
+
+    if (res.error) throw res.error;
+
+    currentAISettings = { ...currentAISettings, ...settings };
+    showToast("AI settings saved successfully");
+    closeModal('aiConfigModal');
+
+    // Update button visibility if on installation page
+    const aiBtn = document.getElementById('ai-group-btn');
+    if (aiBtn) {
+      aiBtn.style.display = (currentAISettings.ai_enabled && (isAdmin || userRole === 'Supervisor')) ? 'flex' : 'none';
+    }
+  } catch (e) {
+    console.error("Save AI Settings Error:", e);
+    showToast(e.message, "error");
+  }
+}
+
+async function testAIConnection() {
+  const provider = document.getElementById('ai-provider').value.trim();
+  const baseUrl = document.getElementById('ai-base-url').value.trim();
+  const apiKey = document.getElementById('ai-api-key').value.trim();
+  const model = document.getElementById('ai-model').value.trim();
+
+  if (!apiKey || !baseUrl) return showToast("API Key and Base URL are required for testing", "warning");
+
+  showToast("Testing connection...");
+
+  try {
+    const isAnthropic = provider.toLowerCase().includes('anthropic');
+    const headers = { 'Content-Type': 'application/json' };
+
+    if (isAnthropic) {
+      headers['x-api-key'] = apiKey;
+      headers['anthropic-version'] = '2023-06-01';
+      headers['dangerouslyAllowBrowser'] = 'true'; // Note: In production this should be server-side
+    } else {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    }
+
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 10,
+        messages: [{ role: 'user', content: 'Say OK' }]
+      })
+    });
+
+    if (response.ok) {
+      showToast("AI connection successful!", "success");
+    } else {
+      const err = await response.json();
+      showToast(`Connection failed: ${err.error?.message || response.status}`, "error");
+    }
+  } catch (e) {
+    console.error("AI Test Connection Error:", e);
+    showToast(`Error: ${e.message}`, "error");
   }
 }
 
@@ -4205,8 +4349,6 @@ window.addEventListener('touchend', () => {
 }, {passive: true});
 
 async function fetchData() {
-  if (typeof loadInstallationData === "function") await loadInstallationData();
-  if (typeof loadInstallationData === "function") await loadInstallationData();
   const connDot = document.getElementById('conn-dot');
   const connText = document.getElementById('conn-text');
 
@@ -4616,9 +4758,7 @@ function showPage(id) {
     applyManufacturingFilters();
   }
   if(id === 'installation') {
-    if (typeof updateInstallationUI === 'function') {
-      updateInstallationUI();
-    }
+    initInstallationModule();
   }
 }
 
@@ -6578,6 +6718,9 @@ function updateAdminUI() {
     
     const savePresetBtn = document.getElementById('admin-save-presets');
     if (savePresetBtn) savePresetBtn.style.display = isFullAdmin ? 'block' : 'none';
+
+    const aiSettingsEntry = document.getElementById('ai-settings-entry');
+    if (aiSettingsEntry) aiSettingsEntry.style.display = isFullAdmin ? 'block' : 'none';
   } else {
     if (btn) btn.textContent = '🔒 Locked';
     if (btn) btn.classList.remove('unlocked');
@@ -6589,6 +6732,8 @@ function updateAdminUI() {
     if (saveSystemBtn) saveSystemBtn.style.display = 'none';
     const savePresetBtn = document.getElementById('admin-save-presets');
     if (savePresetBtn) savePresetBtn.style.display = 'none';
+    const aiSettingsEntry = document.getElementById('ai-settings-entry');
+    if (aiSettingsEntry) aiSettingsEntry.style.display = 'none';
   }
 }
 
@@ -10053,6 +10198,9 @@ function setupNotifListener() {
                Priority: d.priority
             };
             refreshUI();
+            if (document.getElementById('page-installation').classList.contains('active')) {
+              loadInstData().then(() => renderInstPage());
+            }
          }
        } else if (payload.eventType === 'DELETE') {
          allData = allData.filter(x => String(x.WorkOrder) !== String(old.work_order));
@@ -10100,16 +10248,9 @@ function setupNotifListener() {
     .channel('public:installation_records')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_records' }, payload => {
        console.log("Installation Record change detected:", payload);
-       const d = payload.new;
-       if (payload.eventType === 'INSERT') {
-         installationRecords.push(d);
-       } else if (payload.eventType === 'UPDATE') {
-         const idx = installationRecords.findIndex(r => r.id === d.id);
-         if (idx !== -1) installationRecords[idx] = d;
-       } else if (payload.eventType === 'DELETE') {
-         installationRecords = installationRecords.filter(r => r.id !== payload.old.id);
+       if (document.getElementById('page-installation').classList.contains('active')) {
+         loadInstData().then(() => renderInstPage());
        }
-       updateInstallationUI();
     })
     .subscribe();
 
@@ -10118,16 +10259,9 @@ function setupNotifListener() {
     .channel('public:installation_teams')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_teams' }, payload => {
        console.log("Installation Team change detected:", payload);
-       const d = payload.new;
-       if (payload.eventType === 'INSERT') {
-         installationTeams.push(d);
-       } else if (payload.eventType === 'UPDATE') {
-         const idx = installationTeams.findIndex(t => t.id === d.id);
-         if (idx !== -1) installationTeams[idx] = d;
-       } else if (payload.eventType === 'DELETE') {
-         installationTeams = installationTeams.filter(t => t.id !== payload.old.id);
+       if (document.getElementById('page-installation').classList.contains('active')) {
+         loadInstData().then(() => renderInstPage());
        }
-       updateInstallationUI();
     })
     .subscribe();
 
@@ -10136,13 +10270,9 @@ function setupNotifListener() {
     .channel('public:installation_photos')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_photos' }, payload => {
        console.log("Installation Photo change detected:", payload);
-       const d = payload.new;
-       if (payload.eventType === 'INSERT') {
-         installationPhotos.push(d);
-       } else if (payload.eventType === 'DELETE') {
-         installationPhotos = installationPhotos.filter(p => p.id !== payload.old.id);
+       if (document.getElementById('page-installation').classList.contains('active')) {
+         loadInstData().then(() => renderInstPage());
        }
-       updateInstallationUI();
     })
     .subscribe();
 }
@@ -10183,6 +10313,12 @@ async function initInstallationModule() {
   await seedInstallationModule();
   await loadInstData();
   renderInstPage();
+
+  // AI Button Visibility based on settings and role
+  const aiBtn = document.getElementById('ai-group-btn');
+  if (aiBtn) {
+    aiBtn.style.display = (currentAISettings.ai_enabled && (isAdmin || userRole === 'Supervisor')) ? 'flex' : 'none';
+  }
 }
 
 async function loadInstData() {
@@ -10548,7 +10684,7 @@ function renderPlanningPage(container) {
           <div class="inst-card-body" style="padding: 12px; overflow-y: auto;">
             <div style="display:flex; gap:8px; margin-bottom:12px;">
               <input type="text" class="filter-input" placeholder="Search WO..." style="flex:1" oninput="filterPlanningQueue(this.value)">
-              <button class="inst-btn inst-btn-primary btn-xs" onclick="autoGroupSelected()" title="Auto Group"><i data-lucide="brain"></i> Group</button>
+              <button class="inst-btn inst-btn-primary btn-xs" onclick="runAIGrouping()" title="AI Auto Group"><i data-lucide="brain"></i> AI Group</button>
             </div>
             <div id="planning-queue" class="inst-list">
               ${renderPlanningQueue()}
@@ -10577,6 +10713,9 @@ function renderPlanningPage(container) {
         <div id="planning-map" style="width:100%; height:100%;"></div>
         
         <div style="position:absolute; top:20px; right:20px; z-index:100; display:flex; flex-direction:column; gap:8px;">
+            <button id="ai-group-btn" class="inst-icon-btn glass-panel" onclick="runAIGrouping()" title="AI Auto Group" style="display: none; background: rgba(0, 200, 180, 0.2); border-color: var(--accent-teal);">
+              <i data-lucide="brain"></i>
+            </button>
           <button class="inst-icon-btn glass-panel" onclick="optimizePlanningRoute()" title="Optimize Route">
             <i data-lucide="route"></i>
           </button>
@@ -10586,6 +10725,32 @@ function renderPlanningPage(container) {
           <button class="inst-icon-btn glass-panel" onclick="togglePlanningDrawer()" title="Calendar Scheduler">
             <i data-lucide="calendar"></i>
           </button>
+        </div>
+
+        <div id="ai-group-panel" class="planning-bottom-drawer" style="height: 350px;">
+          <div class="inst-card-header">
+            <div class="inst-card-title"><i data-lucide="brain"></i> AI Generated Installation Packages</div>
+            <div style="display:flex; gap:10px;">
+              <button class="inst-btn inst-btn-primary btn-xs" onclick="saveAIGroups()"><i data-lucide="save"></i> Save All Groups</button>
+              <button class="inst-btn inst-btn-ghost btn-xs" onclick="closeAIGroupPanel()"><i data-lucide="x"></i></button>
+            </div>
+          </div>
+          <div class="inst-card-body" style="padding:0; overflow:auto;">
+            <table class="main-table" style="width:100%">
+              <thead>
+                <tr>
+                  <th>Group Name</th>
+                  <th>Road / Direction</th>
+                  <th>Chainage</th>
+                  <th>WOs</th>
+                  <th>Duration</th>
+                  <th>Suggested Team</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ai-group-body"></tbody>
+            </table>
+          </div>
         </div>
 
         <div id="planning-drawer" class="planning-bottom-drawer">
@@ -10651,6 +10816,9 @@ function initPlanningMap() {
   planMarkers = L.markerClusterGroup();
   
   InstState.workOrders.forEach(w => {
+    // Requirements: Completed WOs immediately disappear from the Planning Map
+    if (['Completed', 'COMP'].includes(w.installation_status)) return;
+
     if (w.latitude && w.longitude) {
       let color = '#64748b';
       if (w.installation_status === 'Ready') color = '#00bcd4';
@@ -10724,23 +10892,362 @@ function filterPlanningQueue(q) {
   });
 }
 
-async function autoGroupSelected() {
+let aiGeneratedGroups = [];
+let aiGroupLayers = [];
+
+async function runAIGrouping() {
+  if (!currentAISettings.ai_enabled) return showToast("AI features are currently disabled in settings", "warning");
+  if (!isAdmin && userRole !== 'Supervisor') return showToast("Access Denied", "error");
+
   const selected = Array.from(document.querySelectorAll('.wo-checkbox:checked')).map(cb => cb.value);
-  if (selected.length < 2) return showToast("Select at least 2 WOs to cluster", "amber");
+  let targetWOs = [];
+
+  if (selected.length > 0) {
+    targetWOs = InstState.workOrders.filter(w => selected.includes(w.work_order));
+  } else {
+    targetWOs = InstState.workOrders.filter(w => !['Completed', 'COMP', 'Returned'].includes(w.installation_status));
+  }
+
+  if (targetWOs.length === 0) return showToast("No eligible work orders found for grouping", "warning");
+
+  showToast(`Initiating AI Grouping for ${targetWOs.length} items...`);
+
+  try {
+    const payload = targetWOs.map(wo => ({
+      id: wo.work_order,
+      road_name: wo.road_name,
+      road_direction: wo.road_direction,
+      chainage: wo.chainage,
+      latitude: wo.latitude,
+      longitude: wo.longitude,
+      asset_type: wo.asset_type,
+      description: wo.asset_description || wo.description
+    }));
+
+    const teamsPayload = InstState.teams.map(t => {
+      const assignedCount = InstState.workOrders.filter(w => w.assigned_team_id === t.id && !['Completed', 'COMP'].includes(w.installation_status)).length;
+      return {
+        id: t.id,
+        name: t.team_name,
+        capacity: t.daily_capacity,
+        current_load: assignedCount,
+        remaining_capacity: Math.max(0, t.daily_capacity - assignedCount)
+      };
+    });
+
+    const prompt = `
+      ${currentAISettings.default_grouping_instructions}
+
+      Available installation teams: ${JSON.stringify(teamsPayload)}
+
+      Analyze the following work orders and group them into logical installation packages.
+
+      Grouping priority rules:
+      1. Road Name — group work orders on the same road together.
+      2. Road Direction — within the same road, separate by direction.
+      3. Chainage Sequence — within the same road+direction, order by chainage value ascending.
+      4. GPS Distance — if chainage is missing, use lat/lng proximity as fallback.
+
+      Additional rules:
+      - Each group should ideally not exceed the suggested team's daily_capacity.
+      - Suggest a team for each group based on current load and remaining capacity.
+      - Estimate installation duration per group assuming ${currentAISettings.minutes_per_sign} minutes per sign.
+
+      Work orders to group:
+      ${JSON.stringify(payload)}
+
+      Respond ONLY with a valid JSON array. No explanation, no markdown. Format:
+      [
+        {
+          "group_id": "G001",
+          "group_name": "Road Name — Direction — Chainage Range",
+          "road_name": "...",
+          "road_direction": "...",
+          "chainage_from": "...",
+          "chainage_to": "...",
+          "assigned_team_id": "<uuid from teams list>",
+          "work_order_ids": ["WO1", "WO2"],
+          "sign_count": 2,
+          "estimated_duration_hours": 1.5,
+          "color_hex": "#00c9b1"
+        }
+      ]
+    `;
+
+    const headers = { 'Content-Type': 'application/json' };
+    const isAnthropic = currentAISettings.provider_name.toLowerCase().includes('anthropic');
+
+    if (isAnthropic) {
+      headers['x-api-key'] = currentAISettings.api_key;
+      headers['anthropic-version'] = '2023-06-01';
+    } else {
+      headers['Authorization'] = `Bearer ${currentAISettings.api_key}`;
+    }
+
+    const response = await fetch(`${currentAISettings.api_base_url}/chat/completions`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        model: currentAISettings.ai_model,
+        max_tokens: 4096,
+        messages: [
+          { role: 'system', content: 'You are an expert installation planning assistant for Qatar signage works. Return only valid JSON array.' },
+          { role: 'user', content: prompt }
+        ]
+      })
+    });
+
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
+    const data = await response.json();
+    const raw = data.choices?.[0]?.message?.content || data.content?.[0]?.text || '';
+    aiGeneratedGroups = JSON.parse(raw.replace(/```json|```/g, '').trim());
+
+    renderAIGroups();
+    showToast(`AI successfully created ${aiGeneratedGroups.length} packages`);
+
+  } catch (e) {
+    console.error("AI Grouping Error:", e);
+    showToast(`Grouping failed: ${e.message}`, "error");
+  }
+}
+
+function renderAIGroups() {
+  const body = document.getElementById('ai-group-body');
+  if (!body) return;
+
+  body.innerHTML = aiGeneratedGroups.map((g, idx) => {
+    const team = InstState.teams.find(t => t.id === g.assigned_team_id);
+    const teamOptions = InstState.teams.map(t => `<option value="${t.id}" ${t.id === g.assigned_team_id ? 'selected' : ''}>${t.team_name}</option>`).join('');
+
+    return `
+      <tr>
+        <td><input type="text" class="filter-input" value="${g.group_name}" onchange="updateAIGroupField(${idx}, 'group_name', this.value)"></td>
+        <td>${g.road_name || '—'} / ${g.road_direction || '—'}</td>
+        <td>${g.chainage_from || '—'} to ${g.chainage_to || '—'}</td>
+        <td><span class="ctx-badge">${g.work_order_ids.length} WOs</span></td>
+        <td>${g.estimated_duration_hours}h</td>
+        <td>
+          <select class="filter-input" onchange="updateAIGroupField(${idx}, 'assigned_team_id', this.value)">
+            <option value="">— Unassigned —</option>
+            ${teamOptions}
+          </select>
+        </td>
+        <td>
+          <div style="display:flex; gap:5px;">
+            <button class="btn btn-ghost btn-icon" onclick="splitAIGroup(${idx})" title="Split Group"><i data-lucide="split"></i></button>
+            <button class="btn btn-ghost btn-icon" style="color:var(--red)" onclick="removeAIGroup(${idx})" title="Discard Group"><i data-lucide="trash"></i></button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
+  document.getElementById('ai-group-panel').classList.add('open');
+  visualizeGroupsOnMap();
+}
+
+function updateAIGroupField(idx, field, val) {
+  aiGeneratedGroups[idx][field] = val;
+  aiGeneratedGroups[idx].manually_modified = true;
+  visualizeGroupsOnMap();
+}
+
+function visualizeGroupsOnMap() {
+  if (!planMap) return;
   
-  showToast("Clustering by GPS proximity...");
-  // Logic: Identify centroid, find closest team, assign.
-  const wos = InstState.workOrders.filter(w => selected.includes(w.work_order) && w.latitude);
-  const centroidLat = wos.reduce((sum, w) => sum + w.latitude, 0) / wos.length;
-  const centroidLng = wos.reduce((sum, w) => sum + w.longitude, 0) / wos.length;
+  // Clear previous group layers
+  aiGroupLayers.forEach(l => planMap.removeLayer(l));
+  aiGroupLayers = [];
+
+  aiGeneratedGroups.forEach(g => {
+    const coords = [];
+    g.work_order_ids.forEach(woId => {
+      const wo = InstState.workOrders.find(w => w.work_order === woId);
+      if (wo && wo.latitude && wo.longitude) {
+        coords.push([wo.latitude, wo.longitude]);
+      }
+    });
+
+    if (coords.length >= 3) {
+      // Use Convex Hull if possible (simplifying to a polygon of all points for now if hull lib not ready)
+      // Standard Leaflet doesn't have convex hull. We'll use a simple polygon of points for visualization
+      // Or just a bounding box if that's easier.
+      // Requirements asked for Convex Hull.
+      try {
+        const hullPoints = getConvexHull(coords);
+        const hull = L.polygon(hullPoints, {
+          color: g.color_hex || '#00c9b1',
+          fillOpacity: 0.2,
+          weight: 2,
+          dashArray: '5, 5'
+        }).addTo(planMap);
+
+        // Add label at centroid
+        const centroid = getCentroid(coords);
+        const label = L.marker(centroid, {
+          icon: L.divIcon({
+            className: 'group-label',
+            html: `<div style="background:${g.color_hex || '#00c9b1'}; color:#000; padding:2px 8px; border-radius:10px; font-size:9px; font-weight:800; white-space:nowrap; border:1px solid #fff;">${g.group_name}</div>`
+          })
+        }).addTo(planMap);
+
+        aiGroupLayers.push(hull, label);
+      } catch (e) { console.error("Hull calculation error:", e); }
+    } else if (coords.length > 0) {
+       // Just draw a line or markers for small groups
+       const poly = L.polyline(coords, { color: g.color_hex || '#00c9b1', weight: 4, opacity: 0.5 }).addTo(planMap);
+       aiGroupLayers.push(poly);
+    }
+  });
+}
+
+// Helper: Gift Wrap Algorithm for Convex Hull
+function getConvexHull(points) {
+  if (points.length < 3) return points;
   
-  const pkgId = `PKG-${new Date().getFullYear()}-${Math.floor(Math.random()*999).toString().padStart(3,'0')}`;
+  const hull = [];
+  let l = 0;
+  for (let i = 1; i < points.length; i++) {
+    if (points[i][1] < points[l][1]) l = i;
+  }
   
-  if (supabaseClient) {
-    // Update WOs with package ID
-    await supabaseClient.from('work_orders').update({ installation_package_id: pkgId }).in('work_order', selected);
-    showToast(`Created package ${pkgId} for ${selected.length} items`);
+  let p = l, q;
+  do {
+    hull.push(points[p]);
+    q = (p + 1) % points.length;
+    for (let i = 0; i < points.length; i++) {
+      if (orientation(points[p], points[i], points[q]) === 2) q = i;
+    }
+    p = q;
+  } while (p !== l);
+
+  return hull;
+}
+
+function orientation(p, q, r) {
+  const val = (q[0] - p[0]) * (r[1] - q[1]) - (q[1] - p[1]) * (r[0] - q[0]);
+  if (val === 0) return 0;
+  return (val > 0) ? 1 : 2;
+}
+
+function getCentroid(coords) {
+  let lat = 0, lng = 0;
+  coords.forEach(c => { lat += c[0]; lng += c[1]; });
+  return [lat / coords.length, lng / coords.length];
+}
+
+function closeAIGroupPanel() {
+  document.getElementById('ai-group-panel').classList.remove('open');
+  aiGroupLayers.forEach(l => planMap.removeLayer(l));
+  aiGroupLayers = [];
+}
+
+async function saveAIGroups() {
+  if (aiGeneratedGroups.length === 0) return;
+  if (!confirm(`Save all ${aiGeneratedGroups.length} installation packages to Supabase?`)) return;
+
+  showToast("Saving groups...");
+
+  try {
+    for (const g of aiGeneratedGroups) {
+      // 1. Insert/Upsert the group
+      const groupData = {
+        group_name: g.group_name,
+        road_name: g.road_name,
+        road_direction: g.road_direction,
+        chainage_from: g.chainage_from,
+        chainage_to: g.chainage_to,
+        assigned_team_id: g.assigned_team_id || null,
+        color_hex: g.color_hex || '#00c9b1',
+        sign_count: g.sign_count || g.work_order_ids.length,
+        estimated_duration_hours: g.estimated_duration_hours,
+        ai_generated: !g.manually_modified,
+        manually_modified: g.manually_modified || false
+      };
+
+      const { data: savedGroup, error: groupErr } = await supabaseClient
+        .from('installation_groups')
+        .insert([groupData])
+        .select()
+        .single();
+
+      if (groupErr) throw groupErr;
+
+      // 2. Insert members
+      const members = g.work_order_ids.map((woId, idx) => ({
+        group_id: savedGroup.id,
+        work_order_id: InstState.workOrders.find(w => w.work_order === woId)?.id || null, // Need UUID here if possible
+        sequence_order: idx
+      }));
+
+      // Find real UUIDs for work orders
+      // Note: If our InstState only has work_order string, we might need a quick fetch or join
+      const { data: realWOs } = await supabaseClient.from('work_orders').select('id, work_order').in('work_order', g.work_order_ids);
+      const uuidMembers = realWOs.map((wo, idx) => ({
+        group_id: savedGroup.id,
+        work_order_id: wo.id,
+        sequence_order: idx
+      }));
+
+      const { error: memberErr } = await supabaseClient.from('installation_group_members').insert(uuidMembers);
+      if (memberErr) throw memberErr;
+
+      // 3. Optional: If user finalized, we would update work_orders table directly.
+      // Requirement says: "just store group membership and let user decide when to finalize assignments"
+      // So we don't update work_orders.assigned_team_id yet.
+    }
+
+    showToast("All groups saved successfully", "success");
+    closeAIGroupPanel();
     await refreshInstData();
+
+  } catch (e) {
+    console.error("Save Groups Error:", e);
+    showToast(`Failed to save: ${e.message}`, "error");
+  }
+}
+
+function removeAIGroup(idx) {
+  aiGeneratedGroups.splice(idx, 1);
+  renderAIGroups();
+}
+
+async function splitAIGroup(idx) {
+  const group = aiGeneratedGroups[idx];
+  const { value: selectedWOs } = await Swal.fire({
+    title: 'Split Group',
+    text: 'Select work orders to move to a new group',
+    input: 'select',
+    inputOptions: group.work_order_ids.reduce((acc, id) => { acc[id] = id; return acc; }, {}),
+    inputPlaceholder: 'Select WO',
+    showCancelButton: true,
+    inputValidator: (value) => {
+      if (!value) return 'You need to choose a work order!';
+    }
+  });
+
+  if (selectedWOs) {
+    // Create new group with selected WO
+    const newGroup = {
+      ...group,
+      group_id: 'G' + Math.floor(Math.random()*1000),
+      group_name: group.group_name + ' (Split)',
+      work_order_ids: [selectedWOs],
+      manually_modified: true
+    };
+
+    // Remove from original
+    group.work_order_ids = group.work_order_ids.filter(id => id !== selectedWOs);
+    group.manually_modified = true;
+
+    if (group.work_order_ids.length === 0) {
+      aiGeneratedGroups.splice(idx, 1);
+    }
+
+    aiGeneratedGroups.push(newGroup);
+    renderAIGroups();
   }
 }
 
@@ -11854,48 +12361,7 @@ function setupReminderSubscriptions() {
 }
 
 async function seedInstallationModule() {
-  if (!supabaseClient) return;
-  
-  try {
-    const { count: teamCount } = await supabaseClient.from('installation_teams').select('*', { count: 'exact', head: true });
-    if (teamCount > 0) return; // Already seeded
-
-    showToast("Seeding initial installation data...");
-
-    // 1. Teams
-    const teams = [
-      { team_name: 'Team Ahmed', supervisor: 'Ahmed Al-Mansoori', crew_size: 4, vehicle: 'Toyota Hilux 4x4', capacity_per_day: 12, status: 'Available', skills: ['Ground Signs', 'Post Work'], color: '#00bcd4' },
-      { team_name: 'Team Ali', supervisor: 'Ali Hassan', crew_size: 5, vehicle: 'Isuzu NPR Crane', capacity_per_day: 8, status: 'Available', skills: ['Gantries', 'Cantilevers', 'Heavy Lifting'], color: '#ff9800' },
-      { team_name: 'Team Hassan', supervisor: 'Hassan Mahmoud', crew_size: 3, vehicle: 'Ford F-150', capacity_per_day: 15, status: 'Available', skills: ['Road Safety', 'Small Signage'], color: '#4caf50' }
-    ];
-    await supabaseClient.from('installation_teams').insert(teams);
-
-    // 2. Sample Work Orders (Updates existing or creates if missing)
-    const sampleWOs = [
-      { work_order: 'INST-2025-001', description: 'Directional sign installation - Al Shamal Rd', status: 'APPR', latitude: 25.3548, longitude: 51.1839, pwa_engineer: 'Adnan Khdair', location: 'Al Shamal Road', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-002', description: 'Warning sign replacement - Corniche', status: 'APPR', latitude: 25.2867, longitude: 51.5333, pwa_engineer: 'Saeed Mubarak', location: 'Doha Corniche', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-003', description: 'Speed limit signs - Lusail Express', status: 'APPR', latitude: 25.3500, longitude: 51.5167, pwa_engineer: 'Mohammed Issa', location: 'Lusail Expressway', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-004', description: 'Regulatory signage - West Bay', status: 'APPR', latitude: 25.3200, longitude: 51.5300, pwa_engineer: 'Adnan Khdair', location: 'West Bay', installation_status: 'Pending', fabrication_status: 'Ongoing', ready_for_installation: false },
-      { work_order: 'INST-2025-005', description: 'Information boards - Education City', status: 'APPR', latitude: 25.3100, longitude: 51.4300, pwa_engineer: 'Saeed Mubarak', location: 'Education City', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-006', description: 'Pedestrian crossing signs - Hamad Port', status: 'APPR', latitude: 25.0100, longitude: 51.6100, pwa_engineer: 'Mohammed Issa', location: 'Hamad Port', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-007', description: 'No parking signs - Souq Waqif', status: 'APPR', latitude: 25.2867, longitude: 51.5267, pwa_engineer: 'Adnan Khdair', location: 'Souq Waqif', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-008', description: 'Street name plates - Al Sadd', status: 'APPR', latitude: 25.2800, longitude: 51.5000, pwa_engineer: 'Saeed Mubarak', location: 'Al Sadd', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-009', description: 'Variable message signs - Salwa Rd', status: 'APPR', latitude: 25.2500, longitude: 51.4500, pwa_engineer: 'Mohammed Issa', location: 'Salwa Road', installation_status: 'Pending', fabrication_status: 'Pending', ready_for_installation: false },
-      { work_order: 'INST-2025-010', description: 'Bridge height markers - F-Ring', status: 'APPR', latitude: 25.2200, longitude: 51.5500, pwa_engineer: 'Adnan Khdair', location: 'F-Ring Road', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-011', description: 'Cyclist route signage - Aspire', status: 'APPR', latitude: 25.2600, longitude: 51.4400, pwa_engineer: 'Saeed Mubarak', location: 'Aspire Zone', installation_status: 'Assigned', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Hassan' },
-      { work_order: 'INST-2025-012', description: 'Bus stop signage - Airport Rd', status: 'APPR', latitude: 25.2400, longitude: 51.5600, pwa_engineer: 'Mohammed Issa', location: 'Airport Road', installation_status: 'In Progress', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Ahmed' },
-      { work_order: 'INST-2025-013', description: 'Directional gantry - D-Ring', status: 'APPR', latitude: 25.2600, longitude: 51.5200, pwa_engineer: 'Adnan Khdair', location: 'D-Ring Road', installation_status: 'Completed', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Ali' },
-      { work_order: 'INST-2025-014', description: 'Hospital wayfinding - HMC', status: 'APPR', latitude: 25.2900, longitude: 51.4900, pwa_engineer: 'Saeed Mubarak', location: 'Hamad Medical Corp', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
-      { work_order: 'INST-2025-015', description: 'Metro station signs - Msherieb', status: 'APPR', latitude: 25.2860, longitude: 51.5220, pwa_engineer: 'Mohammed Issa', location: 'Msherieb Downtown', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true }
-    ];
-    await supabaseClient.from('work_orders').upsert(sampleWOs, { onConflict: 'work_order' });
-
-    showToast("Sample installation data seeded.");
-    await loadInstData();
-    renderInstPage();
-  } catch (e) {
-    console.error("Seeding failed:", e);
-  }
+  // Hardcoded seeding removed. Module now uses live Supabase data.
 }
 
 function playAlarmSound() {
