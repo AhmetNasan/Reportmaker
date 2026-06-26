@@ -327,6 +327,10 @@
   background: var(--color-accent-teal);
   color: var(--color-text-inverse);
 }
+.fuc-view-btn:focus-visible {
+  outline: 2px solid var(--color-accent-teal);
+  outline-offset: 2px;
+}
 
 .fuc-fab {
   position: fixed; bottom: 28px; right: 28px; z-index: 8000;
@@ -339,6 +343,10 @@
   transition: all var(--transition-normal);
 }
 .fuc-fab:hover { transform: scale(1.1) rotate(45deg); }
+.fuc-fab:focus-visible {
+  outline: 2px solid var(--color-accent-teal);
+  outline-offset: 2px;
+}
 .fuc-fab-menu {
   position: fixed; bottom: 90px; right: 28px; z-index: 8000;
   display: none; flex-direction: column; gap: var(--space-2);
@@ -2818,8 +2826,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <button class="btn btn-ghost btn-sm" onclick="exportFUCPDF()"><i class="fas fa-file-pdf"></i> Export</button>
         
         <div class="fuc-view-toggle">
-          <button class="fuc-view-btn active" id="fuc-view-board" onclick="setFUCView('board')" title="Board View"><i class="fas fa-columns"></i></button>
-          <button class="fuc-view-btn" id="fuc-view-list" onclick="setFUCView('list')" title="List View"><i class="fas fa-list"></i></button>
+          <button class="fuc-view-btn active" id="fuc-view-board" onclick="setFUCView('board')" title="Board View" aria-label="Board View"><i class="fas fa-columns"></i></button>
+          <button class="fuc-view-btn" id="fuc-view-list" onclick="setFUCView('list')" title="List View" aria-label="List View"><i class="fas fa-list"></i></button>
         </div>
       </div>
 
@@ -13313,7 +13321,7 @@ async function refreshUI() {
 </div>
 
 <!-- FUC FAB -->
-<button class="fuc-fab" id="fuc-fab" style="display:none;" onclick="toggleFUCFabMenu()" title="Add New">
+<button class="fuc-fab" id="fuc-fab" style="display:none;" onclick="toggleFUCFabMenu()" title="Add New" aria-label="Add new note or reminder">
   <i class="fas fa-plus"></i>
 </button>
 <div class="fuc-fab-menu" id="fuc-fab-menu">
