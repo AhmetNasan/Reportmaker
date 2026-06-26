@@ -652,7 +652,19 @@ body::before {
 }
 
 /* ─── AUTH ─── */
-.auth-container { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.auth-container { 
+  position: fixed; 
+  inset: 0; 
+  background: url(https://srdxtvchpuncdkfabiid.supabase.co/storage/v1/object/public/qbc-storage/background.jpg); 
+  background-size: cover;
+  background-position: center;
+  border: 1px solid transparent;
+  border-image: fill 0 linear-gradient(#0001, #000);
+  z-index: 1000; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
 .auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 40px; width: 100%; max-width: 400px; text-align: center; }
 .auth-logo { font-size: 32px; margin-bottom: 24px; color: var(--accent); }
 .auth-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); margin-bottom: 16px; font-family: inherit; }
