@@ -4807,10 +4807,12 @@ function setTheme(theme) {
   currentTheme = theme;
   document.body.setAttribute('data-theme', theme);
   const icon = document.getElementById('theme-icon');
-  if (theme === 'dark') {
-    icon.className = 'fas fa-moon';
-  } else {
-    icon.className = 'fas fa-sun';
+  if (icon) {
+    if (theme === 'dark') {
+      icon.className = 'fas fa-moon';
+    } else {
+      icon.className = 'fas fa-sun';
+    }
   }
 }
 
