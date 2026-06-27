@@ -8,9 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
@@ -38,597 +37,15 @@
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/plugin/relativeTime.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
 
 <style>
 :root{
-  --bg:#0b0f1a;
-
-  --surface:#111827;
-  --surface-rgb:17,24,39;
-
-  --surface-glass: rgba(17,24,39,0.75);
-  --surface-glass-light: rgba(17,24,39,0.60);
-
-  --border:#1f2d45;
-  --border-rgb:31,45,69;
-  --border-glass: rgba(31,45,69,0.50);
-
-  --accent:#00c8ff;
-  --accent-rgb:0,200,255;
-
-  --text:#e2e8f0;
-  --muted:#64748b;
-
-  --r:10px;
-  --card-radius:16px;
-  --header-h:60px;
-
-  --shadow:0 4px 20px rgba(0,0,0,0.2);
+  --bg:#0b0f1a;--surface:#111827;--surface2:#1a2235;--border:#1f2d45;
+  --accent:#00c8ff;--accent2:#7c3aed;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7;--indigo:#6366f1;
+  --text:#e2e8f0;--muted:#64748b;--r:10px;--card-radius: 16px;
+  --header-h: 60px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
-
-  /* === QBC DESIGN SYSTEM — REMINDER MODULE === */
-  --color-bg-base:        #0d0f12;
-  --color-bg-surface:     #13161b;
-  --color-bg-elevated:    #1a1e26;
-  --color-bg-overlay:     #20252f;
-  --color-bg-input:       #0f1217;
-  --color-border-subtle:  #1f2430;
-  --color-border-default: #2a3040;
-  --color-border-strong:  #3a4455;
-  --color-accent-teal:    #00c8b4;
-  --color-accent-teal-dim:#007a6e;
-  --color-accent-teal-bg: #00c8b410;
-  --color-priority-low:      #22c55e;
-  --color-priority-low-bg:   #22c55e12;
-  --color-priority-medium:   #eab308;
-  --color-priority-medium-bg:#eab30812;
-  --color-priority-high:     #f97316;
-  --color-priority-high-bg:  #f9731612;
-  --color-priority-critical: #ef4444;
-  --color-priority-critical-bg:#ef444412;
-  --color-status-pending:    #64748b;
-  --color-status-upcoming:   #3b82f6;
-  --color-status-due-today:  #eab308;
-  --color-status-overdue:    #ef4444;
-  --color-status-completed:  #22c55e;
-  --color-status-cancelled:  #475569;
-  --color-status-snoozed:    #a855f7;
-  --color-photo-border:   #2a3040;
-  --color-photo-hover:    #00c8b420;
-  --color-photo-drop:     #00c8b430;
-  --color-alarm-bg:       #1a0f0f;
-  --color-alarm-border:   #ef4444;
-  --color-alarm-pulse:    #ef444430;
-  --color-text-primary:   #e8eaf0;
-  --color-text-secondary: #8892a4;
-  --color-text-muted:     #4a5568;
-  --color-text-inverse:   #0d0f12;
-  --color-bell-badge:     #ef4444;
-  --color-bell-icon:      #e8eaf0;
-  --font-ui:   'Inter', sans-serif;
-  --font-data: 'JetBrains Mono', monospace;
-  --text-xs:   11px;   --text-sm:  12px;
-  --text-base: 13px;   --text-md:  14px;
-  --text-lg:   16px;   --text-xl:  20px;
-  --text-2xl:  24px;   --text-3xl: 30px;
-  --fw-regular: 400;  --fw-medium:  500;
-  --fw-semibold:600;  --fw-bold:    700;
-  --space-1:4px; --space-2:8px;  --space-3:12px; --space-4:16px;
-  --space-5:20px;--space-6:24px; --space-8:32px; --space-10:40px;
-  --radius-sm:4px; --radius-md:8px; --radius-lg:12px;
-  --radius-xl:16px;--radius-full:9999px;
-  --shadow-card:  0 2px 8px rgba(0,0,0,0.5);
-  --shadow-modal: 0 8px 40px rgba(0,0,0,0.8);
-  --shadow-alarm: 0 0 60px rgba(239,68,68,0.3);
-  --shadow-teal:  0 0 20px rgba(0,200,180,0.2);
-  --transition-fast:0.12s ease; --transition-normal:0.22s ease; --transition-slow:0.35s ease;
-
-  /* ── FOLLOW-UP CENTER ADDITIONAL TOKENS ── */
-  --note-yellow:      #f59e0b;
-  --note-yellow-bg:   #f59e0b14;
-  --note-teal:        #00c8b4;
-  --note-teal-bg:     #00c8b414;
-  --note-purple:      #a855f7;
-  --note-purple-bg:   #a855f714;
-  --note-red:         #ef4444;
-  --note-red-bg:      #ef444414;
-  --note-blue:        #3b82f6;
-  --note-blue-bg:     #3b82f614;
-  --note-green:       #22c55e;
-  --note-green-bg:    #22c55e14;
-
-  /* Board Layout */
-  --board-gap:        20px;
-  --card-min-width:   260px;
-  --card-max-width:   320px;
-  --sticker-size:     180px;
-
-  /* Sticker Shadows */
-  --shadow-sticker:       4px 4px 12px rgba(0,0,0,0.5);
-  --shadow-sticker-hover: 6px 6px 20px rgba(0,0,0,0.7);
-}
-
-/* FOLLOW-UP CENTER CSS */
-.fuc-reminder-card {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-subtle);
-  border-left: 4px solid var(--priority-color);   /* set via JS per priority */
-  border-radius: var(--radius-lg);
-  padding: var(--space-4) var(--space-5);
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  position: relative;
-  box-shadow: var(--shadow-card);
-  min-width: var(--card-min-width);
-}
-.fuc-reminder-card:hover {
-  border-color: var(--color-accent-teal);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sticker-hover);
-}
-.fuc-reminder-card .card-wo-tag {
-  font-family: var(--font-data);
-  font-size: var(--text-xs);
-  color: var(--color-accent-teal);
-  background: var(--color-accent-teal-bg);
-  border: 1px solid var(--color-accent-teal-dim);
-  border-radius: var(--radius-full);
-  padding: 2px 8px;
-  display: inline-block;
-  margin-bottom: var(--space-2);
-}
-.fuc-reminder-card .card-title {
-  font-size: var(--text-md);
-  font-weight: var(--fw-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-2);
-  line-height: 1.4;
-}
-.fuc-reminder-card .card-reason {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-3);
-}
-.fuc-reminder-card .card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-.fuc-reminder-card .card-datetime {
-  font-family: var(--font-data);
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-}
-.fuc-reminder-card .card-photo-chip {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-.fuc-reminder-card.overdue {
-  border-left-color: var(--color-priority-critical);
-  animation: overdueGlow 2.5s ease-in-out infinite;
-}
-@keyframes overdueGlow {
-  0%,100% { box-shadow: var(--shadow-card); }
-  50%      { box-shadow: 0 0 16px rgba(239,68,68,0.25); }
-}
-
-.fuc-sticky-note {
-  width: var(--sticker-size);
-  min-height: var(--sticker-size);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  cursor: pointer;
-  position: relative;
-  box-shadow: var(--shadow-sticker);
-  transition: all var(--transition-normal);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  transform: rotate(var(--note-rotation, 0deg));
-}
-.fuc-sticky-note:hover {
-  transform: rotate(0deg) translateY(-4px) scale(1.03);
-  box-shadow: var(--shadow-sticker-hover);
-  z-index: 10;
-}
-.fuc-sticky-note.yellow  { background: var(--note-yellow-bg);  border: 1px solid var(--note-yellow);  }
-.fuc-sticky-note.teal    { background: var(--note-teal-bg);    border: 1px solid var(--note-teal);    }
-.fuc-sticky-note.purple  { background: var(--note-purple-bg);  border: 1px solid var(--note-purple);  }
-.fuc-sticky-note.red     { background: var(--note-red-bg);     border: 1px solid var(--note-red);     }
-.fuc-sticky-note.blue    { background: var(--note-blue-bg);    border: 1px solid var(--note-blue);    }
-.fuc-sticky-note.green   { background: var(--note-green-bg);   border: 1px solid var(--note-green);   }
-.fuc-sticky-note .note-pin {
-  position: absolute;
-  top: -10px; left: 50%; transform: translateX(-50%);
-  font-size: 20px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-}
-.fuc-sticky-note .note-title {
-  font-size: var(--text-sm);
-  font-weight: var(--fw-semibold);
-  color: var(--color-text-primary);
-  line-height: 1.3;
-}
-.fuc-sticky-note .note-body {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-  flex: 1;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-}
-.fuc-sticky-note .note-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: var(--space-2);
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
-.fuc-sticky-note .note-tag {
-  font-family: var(--font-data);
-  font-size: 9px;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.fuc-sticky-note .note-wo-link {
-  font-family: var(--font-data);
-  font-size: var(--text-xs);
-  color: var(--color-accent-teal);
-  cursor: pointer;
-  text-decoration: none;
-}
-.fuc-sticky-note .note-wo-link:hover { text-decoration: underline; }
-.fuc-sticky-note .note-photo-strip {
-  display: flex; gap: 3px; flex-wrap: nowrap; overflow: hidden;
-}
-.fuc-sticky-note .note-photo-strip img {
-  width: 28px; height: 28px;
-  border-radius: var(--radius-sm);
-  object-fit: cover;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.fuc-toolbar {
-  display: flex; align-items: center; gap: var(--space-3);
-  padding: var(--space-4) 0; flex-wrap: wrap;
-}
-.fuc-search {
-  flex: 1; min-width: 220px;
-  background: var(--color-bg-input);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  font-family: var(--font-ui); font-size: var(--text-md);
-  padding: var(--space-2) var(--space-4) var(--space-2) 36px;
-  outline: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238892a4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: 10px center;
-  background-size: 18px;
-}
-.fuc-search:focus { border-color: var(--color-accent-teal); }
-.fuc-filter-btn {
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-default);
-  background: var(--color-bg-surface);
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm); cursor: pointer;
-  transition: all var(--transition-fast);
-}
-.fuc-filter-btn:hover, .fuc-filter-btn.active {
-  border-color: var(--color-accent-teal);
-  color: var(--color-accent-teal);
-  background: var(--color-accent-teal-bg);
-}
-.fuc-view-toggle {
-  display: flex; border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md); overflow: hidden;
-}
-.fuc-view-btn {
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-bg-surface);
-  border: none; color: var(--color-text-muted);
-  cursor: pointer; transition: all var(--transition-fast);
-  font-size: var(--text-sm);
-}
-.fuc-view-btn.active {
-  background: var(--color-accent-teal);
-  color: var(--color-text-inverse);
-}
-
-.fuc-fab {
-  position: fixed; bottom: 28px; right: 28px; z-index: 8000;
-  width: 52px; height: 52px; border-radius: 50%;
-  background: var(--color-accent-teal);
-  border: none; color: var(--color-text-inverse);
-  font-size: 26px; cursor: pointer;
-  box-shadow: var(--shadow-teal);
-  display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition-normal);
-}
-.fuc-fab:hover { transform: scale(1.1) rotate(45deg); }
-.fuc-fab-menu {
-  position: fixed; bottom: 90px; right: 28px; z-index: 8000;
-  display: none; flex-direction: column; gap: var(--space-2);
-  align-items: flex-end;
-}
-.fuc-fab-menu.open { display: flex; }
-.fuc-fab-option {
-  display: flex; align-items: center; gap: var(--space-2);
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-full);
-  padding: var(--space-2) var(--space-4);
-  font-size: var(--text-sm); color: var(--color-text-primary);
-  cursor: pointer; box-shadow: var(--shadow-card);
-  animation: slideUp var(--transition-fast);
-  white-space: nowrap;
-}
-.fuc-fab-option:hover { border-color: var(--color-accent-teal); color: var(--color-accent-teal); }
-
-.fuc-board {
-  display: grid; grid-template-columns: 1fr 1fr; gap: var(--board-gap); margin-top: var(--space-6);
-}
-@media (max-width: 768px) { .fuc-board { grid-template-columns: 1fr; } }
-.fuc-column { display: flex; flex-direction: column; gap: var(--space-4); }
-.fuc-column-header {
-  font-size: var(--text-xs); font-weight: var(--fw-bold); text-transform: uppercase;
-  color: var(--color-text-muted); letter-spacing: 0.1em; margin-bottom: var(--space-2);
-  display: flex; align-items: center; gap: 8px;
-}
-.fuc-column-header::after { content: ''; flex: 1; height: 1px; background: var(--color-border-subtle); }
-
-.fuc-pinned-strip {
-  display: flex; gap: var(--space-4); overflow-x: auto; padding: var(--space-4) 0;
-  margin-bottom: var(--space-6); scrollbar-width: none; border-bottom: 1px solid var(--color-border-subtle);
-}
-.fuc-pinned-strip::-webkit-scrollbar { display: none; }
-@media (max-width: 768px) {
-  .fuc-pinned-strip { flex-direction: column; overflow-x: visible; }
-}
-
-.quick-note-popover {
-  position: fixed;
-  bottom: var(--space-8); right: var(--space-8);
-  width: 280px;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-xl);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-modal);
-  z-index: 8500;
-  animation: slideUp var(--transition-normal);
-  display: none;
-}
-.quick-note-color-row {
-  display: flex; gap: var(--space-2); margin-bottom: var(--space-3);
-}
-.quick-note-swatch {
-  width: 22px; height: 22px; border-radius: 50%;
-  cursor: pointer; border: 2px solid transparent;
-  transition: border-color var(--transition-fast);
-}
-.quick-note-swatch.active { border-color: white; }
-.quick-note-textarea {
-  width: 100%; min-height: 100px; resize: none;
-  background: var(--color-bg-input);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  font-family: var(--font-ui); font-size: var(--text-md);
-  padding: var(--space-3); outline: none; box-sizing: border-box;
-}
-.quick-note-textarea:focus { border-color: var(--color-accent-teal); }
-.quick-note-save {
-  width: 100%; margin-top: var(--space-3);
-  padding: var(--space-2);
-  background: var(--color-accent-teal);
-  color: var(--color-text-inverse);
-  border: none; border-radius: var(--radius-md);
-  font-weight: var(--fw-semibold); cursor: pointer;
-  transition: opacity var(--transition-fast);
-}
-.quick-note-save:hover { opacity: 0.85; }
-
-.note-detail-modal {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-default);
-  border-top: 4px solid var(--note-accent-color);
-  border-radius: var(--radius-xl);
-  width: 580px; max-width: 96vw;
-  max-height: 88vh; overflow-y: auto;
-  box-shadow: var(--shadow-modal);
-  animation: slideUp var(--transition-normal);
-}
-
-/* REMINDER MODAL CSS */
-.reminder-modal-overlay {
-  position: fixed; inset: 0; z-index: 9000;
-  background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-  display: flex; align-items: center; justify-content: center;
-  animation: fadeIn 0.3s ease;
-}
-.reminder-modal {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-xl);
-  width: 600px; max-width: 95vw;
-  max-height: 90vh; overflow-y: auto;
-  box-shadow: var(--shadow-modal);
-  display: flex; flex-direction: column;
-}
-.reminder-modal-header {
-  padding: var(--space-4) var(--space-6);
-  border-bottom: 1px solid var(--color-border-subtle);
-  display: flex; align-items: center; gap: var(--space-3);
-}
-.reminder-modal-header .modal-icon { font-size: 20px; }
-.reminder-modal-header h2 { 
-  font-size: var(--text-lg); font-weight: var(--fw-bold); color: var(--color-accent-teal);
-  margin: 0; flex: 1;
-}
-.reminder-modal-header .modal-close {
-  background: none; border: none; color: var(--color-text-muted);
-  font-size: 20px; cursor: pointer; transition: color 0.2s;
-}
-.reminder-modal-header .modal-close:hover { color: var(--color-text-primary); }
-
-.reminder-modal-body { padding: var(--space-6); }
-.reminder-wo-banner {
-  background: var(--color-accent-teal-bg);
-  border-left: 3px solid var(--color-accent-teal);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-6);
-  display: flex; gap: var(--space-3); align-items: baseline;
-}
-.reminder-wo-banner .wo-num { font-family: var(--font-data); font-weight: var(--fw-bold); color: var(--color-accent-teal); }
-.reminder-wo-banner .wo-title { font-size: var(--text-sm); color: var(--color-text-secondary); }
-
-.reminder-section-label {
-  font-size: 11px; font-weight: var(--fw-bold); text-transform: uppercase;
-  color: var(--color-text-muted); letter-spacing: 0.05em; margin-bottom: var(--space-3);
-}
-.reminder-field { margin-bottom: var(--space-4); }
-.reminder-field label { display: block; font-size: 11px; color: var(--color-text-secondary); margin-bottom: var(--space-1); }
-.reminder-field .required { color: var(--color-priority-critical); }
-.reminder-input, .reminder-select, .reminder-textarea {
-  width: 100%; background: var(--color-bg-input); border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
-  color: var(--color-text-primary); font-family: var(--font-ui); font-size: var(--text-sm);
-  outline: none; transition: border-color 0.2s;
-}
-.reminder-input:focus, .reminder-select:focus, .reminder-textarea:focus { border-color: var(--color-accent-teal); }
-.reminder-textarea { height: 80px; resize: vertical; }
-
-.reminder-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
-
-.priority-selector { display: flex; gap: var(--space-2); }
-.priority-btn {
-  flex: 1; padding: var(--space-2); border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-default); background: var(--color-bg-input);
-  color: var(--color-text-muted); font-size: 11px; font-weight: var(--fw-semibold);
-  cursor: pointer; transition: all 0.2s;
-}
-.priority-btn[data-priority="low"].active { background: var(--color-priority-low-bg); border-color: var(--color-priority-low); color: var(--color-priority-low); }
-.priority-btn[data-priority="medium"].active { background: var(--color-priority-medium-bg); border-color: var(--color-priority-medium); color: var(--color-priority-medium); }
-.priority-btn[data-priority="high"].active { background: var(--color-priority-high-bg); border-color: var(--color-priority-high); color: var(--color-priority-high); }
-.priority-btn[data-priority="critical"].active { background: var(--color-priority-critical-bg); border-color: var(--color-priority-critical); color: var(--color-priority-critical); }
-
-.photo-dropzone {
-  border: 2px dashed var(--color-border-default); border-radius: var(--radius-lg);
-  padding: var(--space-6); text-align: center; cursor: pointer; transition: all 0.2s;
-  position: relative;
-}
-.photo-dropzone:hover { border-color: var(--color-accent-teal); background: var(--color-photo-hover); }
-.photo-dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.photo-dropzone-icon { font-size: 24px; margin-bottom: var(--space-2); }
-.photo-dropzone-label { font-size: var(--text-sm); color: var(--color-text-primary); }
-.photo-dropzone-hint { font-size: 10px; color: var(--color-text-muted); margin-top: var(--space-1); }
-
-.photo-thumb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: var(--space-3); margin-top: var(--space-4); }
-.photo-thumb { aspect-ratio: 1; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border-default); position: relative; }
-.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.photo-thumb-delete {
-  position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.5);
-  color: white; width: 18px; height: 18px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer;
-}
-
-.reminder-toggles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
-.reminder-toggle {
-  display: flex; align-items: center; gap: var(--space-2);
-  font-size: var(--text-sm); color: var(--color-text-secondary); cursor: pointer;
-}
-
-.reminder-modal-footer {
-  padding: var(--space-4) var(--space-6);
-  border-top: 1px solid var(--color-border-subtle);
-  display: flex; justify-content: flex-end; gap: var(--space-3);
-  background: var(--color-bg-base);
-}
-.btn-reminder-cancel {
-  padding: var(--space-2) var(--space-5); border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-default); background: transparent;
-  color: var(--color-text-secondary); font-weight: var(--fw-semibold); cursor: pointer;
-}
-.btn-reminder-save {
-  padding: var(--space-2) var(--space-5); border-radius: var(--radius-md);
-  border: none; background: var(--color-accent-teal);
-  color: var(--color-text-inverse); font-weight: var(--fw-bold); cursor: pointer;
-}
-
-/* ALARM POPUP CSS */
-.alarm-overlay {
-  position: fixed; inset: 0; z-index: 10000;
-  background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
-  display: flex; align-items: center; justify-content: center;
-  animation: fadeIn 0.3s ease;
-}
-.alarm-card {
-  background: var(--color-alarm-bg);
-  border: 2px solid var(--color-alarm-border);
-  border-radius: var(--radius-xl);
-  width: 480px; max-width: 90vw;
-  box-shadow: var(--shadow-alarm);
-  padding: var(--space-8);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.alarm-card::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(circle at center, var(--color-alarm-pulse), transparent);
-  animation: alarmPulse 2s infinite;
-  pointer-events: none;
-}
-@keyframes alarmPulse {
-  0% { opacity: 0.3; transform: scale(0.8); }
-  50% { opacity: 0.6; transform: scale(1.1); }
-  100% { opacity: 0.3; transform: scale(0.8); }
-}
-.alarm-header { margin-bottom: var(--space-6); position: relative; z-index: 1; }
-.alarm-icon-pulse {
-  font-size: 64px; margin-bottom: var(--space-4);
-  animation: bellRing 0.5s infinite;
-}
-@keyframes bellRing {
-  0% { transform: rotate(0); }
-  25% { transform: rotate(15deg); }
-  75% { transform: rotate(-15deg); }
-  100% { transform: rotate(0); }
-}
-.alarm-title {
-  font-family: var(--font-data); font-size: var(--text-xl); font-weight: var(--fw-bold);
-  color: var(--color-alarm-border); letter-spacing: 0.1em;
-}
-.alarm-body { margin-bottom: var(--space-8); position: relative; z-index: 1; }
-.alarm-wo-info { font-family: var(--font-data); font-size: var(--text-md); color: var(--color-accent-teal); margin-bottom: var(--space-2); }
-.alarm-rem-title { font-size: var(--text-2xl); font-weight: var(--fw-bold); color: var(--color-text-primary); margin-bottom: var(--space-4); }
-.alarm-rem-notes { font-size: var(--text-md); color: var(--color-text-secondary); line-height: 1.6; }
-.alarm-field { margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--color-border-subtle); text-align: left; }
-.alarm-field-label { font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
-.alarm-field-value { font-size: 13px; color: var(--color-text-primary); }
-
-.alarm-footer { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); position: relative; z-index: 1; }
-.btn-alarm-snooze, .btn-alarm-dismiss, .btn-alarm-view {
-  padding: var(--space-3); border-radius: var(--radius-md); font-family: var(--font-ui); font-weight: var(--fw-semibold); cursor: pointer; transition: all 0.2s;
-}
-.btn-alarm-snooze { background: var(--color-bg-overlay); border: 1px solid var(--color-border-default); color: var(--color-text-primary); }
-.btn-alarm-dismiss { background: var(--color-alarm-border); border: none; color: white; }
-.btn-alarm-view { grid-column: span 2; background: transparent; border: 1px solid var(--color-accent-teal-dim); color: var(--color-accent-teal); }
 
 [data-theme="light"] {
   --bg:#f4f6f8;--surface:#ffffff;--surface2:#f8fafc;--border:#dfe5ec;
@@ -672,141 +89,14 @@ body::before {
 }
 
 /* ─── AUTH ─── */
-.auth-container { 
-  position: fixed; 
-  inset: 0; 
-  background-color: #1e1f26;
-  z-index: 1000; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-}
-.auth-container .background {
-  position: absolute;
-  top: 0; bottom: 0; left: 0; right: 0;
-  z-index: 0;
-}
-.auth-card { 
-  background: rgba(17, 24, 39, 0.7); 
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1); 
-  border-radius: var(--card-radius); 
-  padding: 40px; 
-  width: 100%; 
-  max-width: 400px; 
-  text-align: center; 
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  position: relative;
-  z-index: 10;
-}
-.auth-logo { 
-  font-family: "Josefin Sans", sans-serif;
-  font-size: 24px; 
-  margin: 0;
-  padding-bottom: 0.5rem;
-  letter-spacing: 0.05rem;
-  color: #137abf; 
-  transition: all 0.3s ease;
-  cursor: default;
-  white-space: nowrap;
-}
-.auth-logo:hover {
-  transform: translate3d(0, -5px, 20px);
-  text-shadow: 0 10px 20px rgba(19, 122, 191, 0.3);
-}
-#auth-title {
-  font-family: "Josefin Sans", sans-serif;
-  font-size: 24px;
-  color: #137abf;
-  margin-bottom: 8px;
-  transition: all 0.3s ease;
-}
-#auth-title:hover {
-  transform: translate3d(0, -3px, 10px);
-}
-.loader span {
-  transition: all 0.3s ease;
-}
-.loader span:hover {
-  color: #fff;
-  font-weight: 700;
-}
-.auth-input { 
-  width: 100%; 
-  background: rgba(31, 45, 69, 0.5); 
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.1); 
-  border-radius: 8px; 
-  padding: 12px; 
-  color: #fff; 
-  margin-bottom: 16px; 
-  font-family: inherit; 
-  outline: none;
-  transition: all 0.3s ease;
-}
-.auth-input:focus {
-  background: rgba(31, 45, 69, 0.8);
-  border-color: #137abf;
-  box-shadow: 0 0 15px rgba(19, 122, 191, 0.3);
-}
-.auth-btn { 
-  width: 100%; 
-  background: rgba(19, 122, 191, 0.7); 
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  color: #fff; 
-  border: 1px solid rgba(255, 255, 255, 0.1); 
-  border-radius: 8px; 
-  padding: 12px; 
-  font-weight: 700; 
-  cursor: pointer; 
-  transition: all 0.3s ease; 
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-.auth-btn:hover {
-  background: #137abf;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(19, 122, 191, 0.4);
-}
+.auth-container { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 40px; width: 100%; max-width: 400px; text-align: center; }
+.auth-logo { font-size: 32px; margin-bottom: 24px; color: var(--accent); }
+.auth-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); margin-bottom: 16px; font-family: inherit; }
+.auth-btn { width: 100%; background: var(--accent); color: #000; border: none; border-radius: 8px; padding: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.auth-btn:hover { opacity: 0.9; }
 .auth-toggle { margin-top: 24px; font-size: 13px; color: var(--muted); cursor: pointer; }
-.auth-toggle span { color: #137abf; }
-
-.loader .m {
-  display: inline-block;
-  -webkit-animation: loading 2s ease-in-out infinite alternate;
-}
-
-@-webkit-keyframes loading {
-  to {
-    text-shadow: 0 0 20px #137abf;
-    color: #fff;
-  }
-}
-
-.loader .m:nth-child(2) { -webkit-animation-delay: 0.1s; }
-.loader .m:nth-child(3) { -webkit-animation-delay: 0.2s; }
-.loader .m:nth-child(4) { -webkit-animation-delay: 0.3s; }
-.loader .m:nth-child(5) { -webkit-animation-delay: 0.4s; }
-.loader .m:nth-child(6) { -webkit-animation-delay: 0.5s; }
-.loader .m:nth-child(7) { -webkit-animation-delay: 0.6s; }
-.loader .m:nth-child(8) { -webkit-animation-delay: 0.7s; }
-.loader .m:nth-child(9) { -webkit-animation-delay: 0.8s; }
-.loader .m:nth-child(10) { -webkit-animation-delay: 0.9s; }
-.loader .m:nth-child(11) { -webkit-animation-delay: 1s; }
-.loader .m:nth-child(12) { -webkit-animation-delay: 1.1s; }
-.loader .m:nth-child(13) { -webkit-animation-delay: 1.2s; }
-.loader .m:nth-child(14) { -webkit-animation-delay: 1.3s; }
-.loader .m:nth-child(15) { -webkit-animation-delay: 1.4s; }
-.loader .m:nth-child(16) { -webkit-animation-delay: 1.5s; }
-.loader .m:nth-child(17) { -webkit-animation-delay: 1.6s; }
-.loader .m:nth-child(18) { -webkit-animation-delay: 1.7s; }
-.loader .m:nth-child(19) { -webkit-animation-delay: 1.8s; }
-.loader .m:nth-child(20) { -webkit-animation-delay: 1.9s; }
-.loader .m:nth-child(21) { -webkit-animation-delay: 2s; }
-.loader .m:nth-child(22) { -webkit-animation-delay: 2.1s; }
+.auth-toggle span { color: var(--accent); }
 
 /* ─── NAV ─── */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;height:var(--header-h);}
@@ -1901,14 +1191,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <a href="#page-dashboard" class="skip-link">Skip to main content</a>
 
 <div id="auth-container" class="auth-container">
-  <canvas class="background"></canvas>
   <div class="auth-card">
-    <div class="auth-logo loader">
-      <span class="m">Q</span><span class="m">B</span><span class="m">C</span><span class="m">&nbsp;</span><span class="m">O</span><span class="m">p</span><span class="m">e</span><span class="m">r</span><span class="m">a</span><span class="m">t</span><span class="m">i</span><span class="m">o</span><span class="m">n</span><span class="m">s</span><span class="m">&nbsp;</span><span class="m">C</span><span class="m">e</span><span class="m">n</span><span class="m">t</span><span class="m">e</span><span class="m">r</span>
-    </div>
-    <h2 id="auth-title" class="loader">
-      <span class="m">W</span><span class="m">e</span><span class="m">l</span><span class="m">c</span><span class="m">o</span><span class="m">m</span><span class="m">e</span><span class="m">&nbsp;</span><span class="m">B</span><span class="m">a</span><span class="m">c</span><span class="m">k</span>
-    </h2>
+    <div class="auth-logo">QBC Operations Center</div>
+    <h2 id="auth-title">Welcome Back</h2>
     <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Signage Asset & GIS Management System</p>
     
     <div id="signup-fields" style="display: none;">
@@ -1921,7 +1206,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <input type="password" id="auth-password" class="auth-input" placeholder="Password">
     
     <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
-    <div style="margin-top: 16px; font-size: 11px; color: #137abf; cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
+    <div style="margin-top: 16px; font-size: 11px; color: var(--accent); cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
     <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
   </div>
 </div>
@@ -1936,8 +1221,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="nav-tab" onclick="showPage('manufacturing')" id="nav-manufacturing-btn"><i class="fas fa-industry"></i> Manufacturing <span id="mfg-nav-badge" class="status-badge badge-WPERM" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <button class="nav-tab" id="nav-installation-btn" onclick="showPage('installation')"><i class="fas fa-tools"></i> Installation</button>
     <button class="nav-tab" onclick="showPage('map')"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
-    <button class="nav-tab" onclick="showPage('reminders')"><i class="fas fa-bell"></i> Reminders <span id="rem-nav-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
-    <button class="nav-tab" onclick="showPage('followup')"><i class="fas fa-thumbtack"></i> Follow-Up Center</button>
     <button class="nav-tab" onclick="showPage('filemanager')"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="nav-tab" id="nav-tab-settings" onclick="showPage('settings')" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
   </div>
@@ -1976,7 +1259,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="notif-tab active" onclick="switchNotifTab('all')">All</button>
     <button class="notif-tab" onclick="switchNotifTab('workorders')">Work</button>
     <button class="notif-tab" onclick="switchNotifTab('manufacturing')">Fab</button>
-    <button class="notif-tab" onclick="switchNotifTab('reminders')">Reminders</button>
     <button class="notif-tab" onclick="switchNotifTab('system')">Alerts</button>
   </div>
   <div class="notif-list" id="notif-list">
@@ -1998,8 +1280,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="mobile-nav-item" onclick="showPage('manufacturing'); toggleMobileMenu();"><i class="fas fa-industry"></i> Manufacturing <span id="mfg-mobile-badge" class="status-badge badge-WPERM" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <button class="mobile-nav-item" onclick="showPage('installation'); toggleMobileMenu();"><i class="fas fa-tools"></i> Installation</button>
     <button class="mobile-nav-item" onclick="showPage('map'); toggleMobileMenu();"><i class="fas fa-map-marked-alt"></i> GIS Mapping</button>
-    <button class="mobile-nav-item" onclick="showPage('reminders'); toggleMobileMenu();"><i class="fas fa-bell"></i> Reminders <span id="rem-mobile-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
-    <button class="mobile-nav-item" onclick="showPage('followup'); toggleMobileMenu();"><i class="fas fa-thumbtack"></i> Follow-Up Center</button>
     <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="mobile-nav-item" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0;">
@@ -2799,230 +2079,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<div class="page" id="page-reminders">
-  <div class="wrapper">
-    <header class="dash-header">
-      <div class="header-left">
-        <div class="tag">▸ QBC Operations Center</div>
-        <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Reminder <span style="color:var(--accent-teal)">Management</span></h1>
-        <p style="font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500; letter-spacing: 0.02em;">Follow-up, Scheduling & Automated Alerts</p>
-      </div>
-      <div class="header-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
-        <div style="font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px;">
-          <i class="fas fa-sync-alt"></i> Last updated: <span id="reminders-last-refresh">--:--</span>
-        </div>
-        <div style="display:flex; gap:10px;">
-          <button class="btn btn-primary" onclick="openReminderModal(null)">
-            <i class="fa-solid fa-plus"></i> New Reminder
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <div class="dash-layout">
-      <!-- KPI Cards -->
-      <div class="kpi-grid">
-        <div class="kpi-card total cursor-pointer" onclick="filterReminders('all')">
-          <div class="kpi-label">Total Reminders</div>
-          <div id="rem-kpi-total" class="kpi-value">0</div>
-          <div class="kpi-pct">All Records</div>
-          <i class="fa-solid fa-bell kpi-icon"></i>
-        </div>
-        <div class="kpi-card on-time cursor-pointer" onclick="filterReminders('due_today')">
-          <div class="kpi-label">Due Today</div>
-          <div id="rem-kpi-today" class="kpi-value" style="color:var(--color-status-due-today)">0</div>
-          <div class="kpi-pct">Requires Action</div>
-          <i class="fa-solid fa-calendar-day kpi-icon"></i>
-        </div>
-        <div class="kpi-card failed cursor-pointer" onclick="filterReminders('overdue')">
-          <div class="kpi-label">Overdue</div>
-          <div id="rem-kpi-overdue" class="kpi-value" style="color:var(--color-status-overdue)">0</div>
-          <div class="kpi-pct">Immediate Attention</div>
-          <i class="fa-solid fa-circle-exclamation kpi-icon"></i>
-        </div>
-        <div class="kpi-card pending cursor-pointer" onclick="filterReminders('upcoming')">
-          <div class="kpi-label">Upcoming</div>
-          <div id="rem-kpi-upcoming" class="kpi-value" style="color:var(--color-status-upcoming)">0</div>
-          <div class="kpi-pct">Next 7 Days</div>
-          <i class="fa-solid fa-calendar-week kpi-icon"></i>
-        </div>
-        <div class="kpi-card on-time cursor-pointer" onclick="filterReminders('completed')">
-          <div class="kpi-label">Completed</div>
-          <div id="rem-kpi-completed" class="kpi-value" style="color:var(--color-status-completed)">0</div>
-          <div class="kpi-pct">Archived Items</div>
-          <i class="fa-solid fa-circle-check kpi-icon"></i>
-        </div>
-      </div>
-
-      <!-- Main Layout: Calendar + List -->
-      <div style="display: grid; grid-template-columns: 1fr 380px; gap: 24px; min-height: 600px;">
-        <!-- Calendar Column -->
-        <div class="dash-card">
-          <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-calendar"></i> Reminder Calendar</div>
-            <div style="display:flex; gap:8px;">
-               <button class="btn btn-ghost btn-xs" onclick="reminderCalendar.changeView('dayGridMonth')">Month</button>
-               <button class="btn btn-ghost btn-xs" onclick="reminderCalendar.changeView('timeGridWeek')">Week</button>
-               <button class="btn btn-ghost btn-xs" onclick="reminderCalendar.changeView('timeGridDay')">Day</button>
-            </div>
-          </div>
-          <div class="dash-card-body" id="reminderCalendarContainer" style="padding: 10px;">
-            <!-- FullCalendar injected here -->
-          </div>
-        </div>
-
-        <!-- List Column -->
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-           <div class="dash-card" style="flex: 1;">
-              <div class="dash-card-header">
-                <div class="dash-card-title"><i class="fa-solid fa-list-ul"></i> Agenda</div>
-                <div class="gis-view-toggle">
-                  <button class="gis-toggle-btn active" onclick="switchReminderListView('pending')">Active</button>
-                  <button class="gis-toggle-btn" onclick="switchReminderListView('all')">All</button>
-                </div>
-              </div>
-              <div class="dash-card-body" id="reminderAgendaList" style="overflow-y: auto; max-height: 500px; padding: 12px;">
-                <div class="empty-state">No reminders scheduled</div>
-              </div>
-           </div>
-           
-           <div class="dash-card">
-              <div class="dash-card-header">
-                 <div class="dash-card-title"><i class="fa-solid fa-chart-pie"></i> Distribution</div>
-              </div>
-              <div class="dash-card-body" style="height: 200px;">
-                 <canvas id="reminderDistCanvas"></canvas>
-              </div>
-           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="page" id="page-followup">
-  <div class="wrapper">
-    <header class="dash-header">
-      <div class="header-left">
-        <div class="tag">▸ QBC Operations Center</div>
-        <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Follow-Up <span style="color:var(--accent-teal)">Center</span></h1>
-        <p style="font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500; letter-spacing: 0.02em;">Smart Workspace: Reminders, Site Notes & Action Board</p>
-      </div>
-      <div class="header-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
-        <div style="font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px;">
-          <i class="fas fa-sync-alt"></i> Last updated: <span id="fuc-last-refresh">--:--</span>
-        </div>
-        <div style="display:flex; gap:10px;">
-          <button class="btn btn-primary" onclick="toggleQuickNotePopover()">
-            <i class="fa-solid fa-plus"></i> New Note
-          </button>
-          <button class="btn btn-ghost" onclick="openReminderModal(null)">
-            <i class="fa-solid fa-bell"></i> New Reminder
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <div class="dash-layout">
-      <!-- KPI Strip -->
-      <div class="kpi-grid">
-        <div class="kpi-card total cursor-pointer" onclick="filterFUC('all')">
-          <div class="kpi-label">Total Items</div>
-          <div id="fuc-kpi-total" class="kpi-value">0</div>
-          <div class="kpi-pct">Unified View</div>
-          <i class="fa-solid fa-layer-group kpi-icon"></i>
-        </div>
-        <div class="kpi-card on-time cursor-pointer" onclick="filterFUC('reminders')">
-          <div class="kpi-label">Reminders</div>
-          <div id="fuc-kpi-reminders" class="kpi-value" style="color:var(--color-accent-teal)">0</div>
-          <div class="kpi-pct">Linked to WOs</div>
-          <i class="fa-solid fa-bell kpi-icon"></i>
-        </div>
-        <div class="kpi-card failed cursor-pointer" onclick="filterFUC('notes')">
-          <div class="kpi-label">Sticky Notes</div>
-          <div id="fuc-kpi-notes" class="kpi-value" style="color:var(--note-yellow)">0</div>
-          <div class="kpi-pct">Free-form Tasks</div>
-          <i class="fa-solid fa-sticky-note kpi-icon"></i>
-        </div>
-        <div class="kpi-card total cursor-pointer" onclick="filterFUC('overdue')">
-          <div class="kpi-label">Overdue</div>
-          <div id="fuc-kpi-overdue" class="kpi-value" style="color:var(--color-status-overdue)">0</div>
-          <div class="kpi-pct">Attention Required</div>
-          <i class="fa-solid fa-circle-exclamation kpi-icon"></i>
-        </div>
-        <div class="kpi-card total cursor-pointer" onclick="filterFUC('pinned')">
-          <div class="kpi-label">Pinned</div>
-          <div id="fuc-kpi-pinned" class="kpi-value" style="color:var(--accent)">0</div>
-          <div class="kpi-pct">Workspace Priority</div>
-          <i class="fa-solid fa-thumbtack kpi-icon"></i>
-        </div>
-      </div>
-
-      <!-- Toolbar -->
-      <div class="fuc-toolbar">
-        <input type="text" id="fuc-search" class="fuc-search" placeholder="Search title, body, tags, or WO#..." oninput="applyFUCFilters()">
-        <button class="fuc-filter-btn active" data-filter="all" onclick="setFUCFilter('all')">All</button>
-        <button class="fuc-filter-btn" data-filter="pinned" onclick="setFUCFilter('pinned')">Pinned</button>
-        <button class="fuc-filter-btn" data-filter="archived" onclick="setFUCFilter('archived')">Archived</button>
-        
-        <div style="flex: 1;"></div>
-        
-        <button class="btn btn-ghost btn-sm" onclick="exportFUCPDF()"><i class="fas fa-file-pdf"></i> Export</button>
-        
-        <div class="fuc-view-toggle">
-          <button class="fuc-view-btn active" id="fuc-view-board" onclick="setFUCView('board')" title="Board View"><i class="fas fa-columns"></i></button>
-          <button class="fuc-view-btn" id="fuc-view-list" onclick="setFUCView('list')" title="List View"><i class="fas fa-list"></i></button>
-        </div>
-      </div>
-
-      <!-- Pinned Row -->
-      <div id="fuc-pinned-row" class="fuc-pinned-strip" style="display: none;">
-        <!-- Pinned items injected here -->
-      </div>
-
-      <!-- Board View -->
-      <div id="fuc-board-view" class="fuc-board">
-        <div class="fuc-column">
-          <div class="fuc-column-header"><i class="fas fa-bell"></i> Reminders (Linked to WOs)</div>
-          <div id="fuc-reminders-col" class="fuc-column-content" style="display: flex; flex-direction: column; gap: var(--space-4);">
-            <!-- Reminder cards injected here -->
-          </div>
-        </div>
-        <div class="fuc-column">
-          <div class="fuc-column-header"><i class="fas fa-sticky-note"></i> Sticky Notes (Personal / General)</div>
-          <div id="fuc-notes-col" class="fuc-column-content" style="display: flex; flex-wrap: wrap; gap: var(--space-4);">
-            <!-- Note stickers injected here -->
-          </div>
-        </div>
-      </div>
-
-      <!-- List View (Table) -->
-      <div id="fuc-list-view" class="table-wrap" style="display: none;">
-        <table class="main-table">
-          <thead>
-            <tr>
-              <th style="width: 40px;">#</th>
-              <th style="width: 80px;">Type</th>
-              <th>Title / Description</th>
-              <th style="width: 100px;">Linked WO</th>
-              <th style="width: 100px;">Category</th>
-              <th style="width: 120px;">Priority / Color</th>
-              <th style="width: 140px;">Due / Created</th>
-              <th style="width: 60px; text-align: center;">Photos</th>
-              <th style="width: 100px;">Status</th>
-              <th style="width: 80px; text-align: center;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="fuc-list-body">
-            <!-- Table rows injected here -->
-          </tbody>
-        </table>
-      </div>
-
-    </div>
-  </div>
-</div>
-
 <div class="page" id="page-settings">
   <div class="wrapper">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
@@ -3235,135 +2291,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<div class="alarm-overlay" id="alarmOverlay" style="display:none">
-    <div class="alarm-card">
-      <div class="alarm-header">
-         <div class="alarm-icon-pulse">🔔</div>
-         <div class="alarm-title">REMINDER ALERT</div>
-      </div>
-      <div class="alarm-body">
-         <div class="alarm-wo-info" id="alarm-wo-info">WO #123456</div>
-         <div class="alarm-rem-title" id="alarm-rem-title">Follow up on TDP permit</div>
-         <div class="alarm-rem-notes" id="alarm-rem-notes">Notes go here...</div>
-         
-         <div class="alarm-field" id="alarmPhotoRow" style="display:none">
-           <div class="alarm-field-label">Attachments</div>
-           <div class="alarm-field-value">
-             <span id="alarmPhotoCount">0</span> photo(s) attached — open reminder to view
-           </div>
-         </div>
-      </div>
-      <div class="alarm-footer">
-         <button class="btn-alarm-snooze" onclick="snoozeAlarm()">Snooze (5m)</button>
-         <button class="btn-alarm-dismiss" onclick="dismissAlarm()">Dismiss</button>
-         <button class="btn-alarm-view" onclick="viewReminderFromAlarm()">View Details</button>
-      </div>
-    </div>
-</div>
-
-<!-- REMINDER CREATION/EDIT MODAL -->
-<div class="reminder-modal-overlay" id="reminderModalOverlay" style="display:none">
-  <div class="reminder-modal" id="reminderModal">
-    <div class="reminder-modal-header">
-      <div class="modal-icon">📌</div>
-      <h2 id="reminderModalTitle">Set New Reminder</h2>
-      <button class="modal-close" onclick="closeReminderModal()">✕</button>
-    </div>
-    <div class="reminder-modal-body">
-      <div class="reminder-wo-banner" id="reminderWoBanner">
-        <span class="wo-num" id="rem-wo-num">#00000000</span>
-        <span class="wo-title" id="rem-wo-title">Work Order Title</span>
-      </div>
-
-      <div class="reminder-section-label">Reminder Details</div>
-      
-      <div class="reminder-field">
-        <label>Reminder Title <span class="required">*</span></label>
-        <input type="text" id="rem-title" class="reminder-input" placeholder="e.g. Follow up on TDP permit">
-      </div>
-
-      <div class="reminder-date-row">
-        <div class="reminder-field">
-          <label>Date & Time <span class="required">*</span></label>
-          <input type="datetime-local" id="rem-datetime" class="reminder-input">
-        </div>
-        <div class="reminder-field">
-          <label>Reason <span class="required">*</span></label>
-          <select id="rem-reason" class="reminder-select" onchange="toggleCustomReason()">
-            <option value="Follow-up">Follow-up</option>
-            <option value="Permit Expiry">Permit Expiry</option>
-            <option value="Fabrication Ready">Fabrication Ready</option>
-            <option value="Site Inspection">Site Inspection</option>
-            <option value="Client Meeting">Client Meeting</option>
-            <option value="Other">Other (Custom)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="reminder-field" id="customReasonField" style="display:none">
-        <label>Custom Reason</label>
-        <input type="text" id="rem-custom-reason" class="reminder-input" placeholder="Enter custom reason">
-      </div>
-
-      <div class="reminder-field">
-        <label>Priority</label>
-        <div class="priority-selector">
-          <button class="priority-btn" data-priority="low" onclick="setReminderPriority('low')">Low</button>
-          <button class="priority-btn active" data-priority="medium" onclick="setReminderPriority('medium')">Medium</button>
-          <button class="priority-btn" data-priority="high" onclick="setReminderPriority('high')">High</button>
-          <button class="priority-btn" data-priority="critical" onclick="setReminderPriority('critical')">Critical</button>
-        </div>
-      </div>
-
-      <div class="reminder-field">
-        <label>Assigned To</label>
-        <select id="rem-assigned-to" class="reminder-select">
-           <option value="">Self (Default)</option>
-        </select>
-      </div>
-
-      <div class="reminder-field">
-        <label>Internal Notes</label>
-        <textarea id="rem-notes" class="reminder-textarea" placeholder="Additional context for this reminder..."></textarea>
-      </div>
-
-      <!-- PHOTO ATTACHMENT SECTION -->
-      <div class="reminder-section-label" style="margin-top:var(--space-6)">
-        📎 Photo Attachments
-        <span class="photo-section-count" id="photoCountBadge">0 photos</span>
-      </div>
-      <div class="reminder-field">
-        <div class="photo-dropzone" id="photoDropzone">
-          <input type="file" id="photoFileInput" accept="image/jpeg,image/png,image/webp" multiple />
-          <div class="photo-dropzone-icon">🖼️</div>
-          <div class="photo-dropzone-label">
-            <strong>Click to upload</strong> or drag & drop photos here
-          </div>
-          <div class="photo-dropzone-hint">
-            JPEG · PNG · WEBP &nbsp;|&nbsp; Max 10 MB per file &nbsp;|&nbsp; Up to 20 photos
-          </div>
-        </div>
-        <div class="photo-upload-progress" id="photoUploadProgress">
-          <div class="photo-upload-bar" id="photoUploadBar"></div>
-        </div>
-        <div class="photo-thumb-grid" id="photoThumbGrid"></div>
-      </div>
-
-      <div class="reminder-section-label" style="margin-top:var(--space-6)">Automation & Notifications</div>
-      <div class="reminder-toggles">
-        <label class="reminder-toggle"><input type="checkbox" id="rem-alarm" checked> 🔊 Trigger Alarm</label>
-        <label class="reminder-toggle"><input type="checkbox" id="rem-calendar" checked> 📅 Show on Calendar</label>
-        <label class="reminder-toggle"><input type="checkbox" id="rem-desktop" checked> 🖥️ Desktop Notification</label>
-        <label class="reminder-toggle"><input type="checkbox" id="rem-email"> 📧 Email Alert</label>
-      </div>
-    </div>
-    <div class="reminder-modal-footer">
-      <button class="btn-reminder-cancel" onclick="closeReminderModal()">Cancel</button>
-      <button class="btn-reminder-save" id="btnReminderSave" onclick="saveReminder()">Save Reminder</button>
-    </div>
-  </div>
-</div>
-
 <div class="detail-modal" id="detailModal">
     <div class="detail-header" oncontextmenu="showContextMenu(event, 'detail-modal')">
     <button class="btn btn-ghost btn-sm" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Back</button>
@@ -3418,7 +2345,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       <button class="detail-tab" onclick="switchDetailTab('manufacturing')"><i class="fas fa-industry"></i> Manufacturing</button>
       <button class="detail-tab" onclick="switchDetailTab('history')"><i class="fas fa-history"></i> History</button>
       <button class="detail-tab" onclick="switchDetailTab('comments')"><i class="fas fa-comments"></i> Comments</button>
-      <button class="detail-tab" onclick="switchDetailTab('reminders')"><i class="fas fa-bell"></i> Reminders</button>
     </div>
 
     <!-- Toolbar -->
@@ -3597,17 +2523,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
       </div>
     </div>
 
-    <div class="detail-pane" id="pane-reminders">
-      <div class="detail-section">
-        <div class="detail-section-title">Work Order Reminders</div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-           <p style="font-size:12px; color:var(--muted); margin:0;">Track follow-ups and deadlines specifically for this Work Order.</p>
-           <button class="btn btn-primary btn-sm" onclick="openReminderModal(null, selectedWorkOrder)"><i class="fas fa-plus"></i> New Reminder</button>
-        </div>
-        <div id="pane-reminders-list" style="display:flex; flex-direction:column; gap:12px;"></div>
-      </div>
-    </div>
-
     <div class="detail-pane" id="pane-comments">
       <div class="detail-section">
         <div class="detail-section-title">Internal Comments</div>
@@ -3631,7 +2546,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <script>
 // CONFIG & STATE
 const SUPABASE_URL = 'https://srdxtvchpuncdkfabiid.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyZHh0dmNocHVuY2RrZmFiaWlkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY4ODgyMSwiZXhwIjoyMDk1MjY0ODIxfQ.KJTy3y0n5i6q_B4WjyYO8frehP4NFY3HPDwUlHN-g70';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyZHh0dmNocHVuY2RrZmFiaWlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2ODg4MjEsImV4cCI6MjA5NTI2NDgyMX0.SlvxONu_OUlmnJ3H60EXw3hdjiWHnUca62907uxU1Fk';
 
 let supabaseClient = null;
 try {
@@ -3694,21 +2609,6 @@ let calYear = new Date().getFullYear();
 let signaturePad = null;
 let currentCompletionWO = null;
 
-// Reminder State
-let reminders = [];
-let followupNotes = [];
-let reminderCalendar = null;
-let triggeredAlarms = new Set();
-let activeAlarmReminder = null;
-let alarmInterval = null;
-let currentOpenReminderId = null;
-let currentOpenNoteId = null;
-let pendingPhotos = [];
-let existingPhotos = [];
-let lightboxIndex = 0;
-let reminderListViewMode = 'pending';
-let alarmActiveReminder = null;
-
 // INITIALIZATION
 window.addEventListener('paste', async (e) => {
   if (!selectedWorkOrder) return;
@@ -3726,22 +2626,6 @@ window.addEventListener('paste', async (e) => {
 });
 
 window.addEventListener('load', async () => {
-  if (typeof Particles !== 'undefined') {
-    Particles.init({
-      selector: '.background',
-      color: ['#137abf', '#ffffff', '#000000'],
-      connectParticles: true,
-      responsive: [
-        {
-          breakpoint: 768,
-          options: {
-            maxParticles: 43,
-            connectParticles: false
-          }
-        }
-      ]
-    });
-  }
   if (supabaseClient) {
     // Single source of truth for auth state
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -3889,17 +2773,9 @@ async function onAuthenticated() {
   }
 
   await loadSystemSettings();
-  await loadAISettings();
   loadLogo();
   await loadNotifications();
   setupNotifListener();
-  fetchReminders();
-  fetchFollowUpNotes();
-  setupReminderSubscriptions();
-  
-  if (window.alarmInterval) clearInterval(window.alarmInterval);
-  window.alarmInterval = setInterval(checkAlarms, 30000);
-  
   showPage('dashboard');
   fetchData();
 }
@@ -3951,149 +2827,6 @@ async function saveSystemSettings() {
   } catch(e) { 
     console.error(e);
     showToast("Failed to save settings", "error"); 
-  }
-}
-
-// AI CONFIGURATION LOGIC
-let currentAISettings = {
-  id: null,
-  provider_name: 'BadTheory',
-  api_base_url: 'https://api.badtheorylabs.com/v1',
-  api_key: 'gw_engineer_03ff7a16869220efd3f0ad64fa5b5b9ad967d3b6ee495bd2',
-  ai_model: 'btl-2',
-  default_grouping_instructions: 'Analyze the following work orders and group them into logical installation packages.',
-  minutes_per_sign: 45,
-  ai_enabled: true
-};
-
-async function loadAISettings() {
-  if (!supabaseClient) return;
-  try {
-    const { data, error } = await supabaseClient.from('ai_settings').select('*').maybeSingle();
-    if (error) throw error;
-    if (data) {
-      currentAISettings = data;
-      // Update button visibility if on installation page
-      const aiBtn = document.getElementById('ai-group-btn');
-      if (aiBtn) {
-        aiBtn.style.display = (currentAISettings.ai_enabled && (isAdmin || userRole === 'Supervisor')) ? 'flex' : 'none';
-      }
-    }
-  } catch (e) {
-    console.warn("Could not load AI settings (table may not exist yet):", e.message);
-  }
-}
-
-function openAIConfigModal() {
-  if (!isAdmin) return showToast("Admin access required", "error");
-  
-  document.getElementById('ai-enabled-toggle').checked = currentAISettings.ai_enabled;
-  document.getElementById('ai-provider').value = currentAISettings.provider_name || 'BadTheory';
-  document.getElementById('ai-model').value = currentAISettings.ai_model || 'btl-2';
-  document.getElementById('ai-base-url').value = currentAISettings.api_base_url || 'https://api.badtheorylabs.com/v1';
-  document.getElementById('ai-api-key').value = currentAISettings.api_key || '';
-  document.getElementById('ai-mins-per-sign').value = currentAISettings.minutes_per_sign || 45;
-  document.getElementById('ai-instructions').value = currentAISettings.default_grouping_instructions || '';
-  
-  openModal('aiConfigModal');
-}
-
-function toggleAIKeyVis() {
-  const inp = document.getElementById('ai-api-key');
-  const icon = document.getElementById('ai-key-eye');
-  if (inp.type === 'password') {
-    inp.type = 'text';
-    icon.classList.replace('fa-eye', 'fa-eye-slash');
-  } else {
-    inp.type = 'password';
-    icon.classList.replace('fa-eye-slash', 'fa-eye');
-  }
-}
-
-async function saveAISettings() {
-  if (!isAdmin) return showToast("Admin access required", "error");
-  
-  const settings = {
-    ai_enabled: document.getElementById('ai-enabled-toggle').checked,
-    provider_name: document.getElementById('ai-provider').value.trim(),
-    ai_model: document.getElementById('ai-model').value.trim(),
-    api_base_url: document.getElementById('ai-base-url').value.trim(),
-    api_key: document.getElementById('ai-api-key').value.trim(),
-    minutes_per_sign: parseInt(document.getElementById('ai-mins-per-sign').value) || 45,
-    default_grouping_instructions: document.getElementById('ai-instructions').value.trim(),
-    updated_at: new Date().toISOString(),
-    updated_by: currentUser?.id
-  };
-
-  if (!settings.api_key) return showToast("API Key is required", "error");
-
-  try {
-    const { data: existing } = await supabaseClient.from('ai_settings').select('id').maybeSingle();
-    let res;
-    if (existing) {
-      res = await supabaseClient.from('ai_settings').update(settings).eq('id', existing.id);
-    } else {
-      res = await supabaseClient.from('ai_settings').insert([settings]);
-    }
-    
-    if (res.error) throw res.error;
-    
-    currentAISettings = { ...currentAISettings, ...settings };
-    showToast("AI settings saved successfully");
-    closeModal('aiConfigModal');
-    
-    // Update button visibility if on installation page
-    const aiBtn = document.getElementById('ai-group-btn');
-    if (aiBtn) {
-      aiBtn.style.display = (currentAISettings.ai_enabled && (isAdmin || userRole === 'Supervisor')) ? 'flex' : 'none';
-    }
-  } catch (e) {
-    console.error("Save AI Settings Error:", e);
-    showToast(e.message, "error");
-  }
-}
-
-async function testAIConnection() {
-  const provider = document.getElementById('ai-provider').value.trim();
-  const baseUrl = document.getElementById('ai-base-url').value.trim();
-  const apiKey = document.getElementById('ai-api-key').value.trim();
-  const model = document.getElementById('ai-model').value.trim();
-
-  if (!apiKey || !baseUrl) return showToast("API Key and Base URL are required for testing", "warning");
-
-  showToast("Testing connection...");
-  
-  try {
-    const isAnthropic = provider.toLowerCase().includes('anthropic');
-    const headers = { 'Content-Type': 'application/json' };
-    
-    if (isAnthropic) {
-      headers['x-api-key'] = apiKey;
-      headers['anthropic-version'] = '2023-06-01';
-      headers['dangerouslyAllowBrowser'] = 'true'; // Note: In production this should be server-side
-    } else {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
-
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({
-        model: model,
-        max_tokens: 10,
-        messages: [{ role: 'user', content: 'Say OK' }]
-      })
-    });
-
-    if (response.ok) {
-      showToast("AI connection successful!", "success");
-    } else {
-      const err = await response.json();
-      showToast(`Connection failed: ${err.error?.message || response.status}`, "error");
-    }
-  } catch (e) {
-    console.error("AI Test Connection Error:", e);
-    showToast(`Error: ${e.message}`, "error");
   }
 }
 
@@ -4408,15 +3141,6 @@ function showContextMenu(e, context, woId = null) {
       items.push({ divider: true });
       items.push({ label: 'Delete Record', icon: 'fa-trash', action: () => deleteWO(woId), danger: true });
     }
-
-    if (hasPermission('edit')) {
-      const existingReminders = reminders.filter(r => String(r.work_order_number) === String(woId));
-      items.splice(items.length - (isAdmin ? 3 : 0), 0, 
-        { divider: true },
-        { label: 'Remind Me', icon: 'fa-thumbtack', action: () => openReminderModal(null, woId), badge: existingReminders.length },
-        { divider: true }
-      );
-    }
   } else if (context === 'detail-modal') {
     const isEditing = document.getElementById('detailModal').classList.contains('editing');
     if (isEditing) {
@@ -4452,7 +3176,7 @@ function showContextMenu(e, context, woId = null) {
     }
     const div = document.createElement('div');
     div.className = `context-menu-item ${item.danger ? 'danger' : ''}`;
-    div.innerHTML = `<i class="fas ${item.icon}"></i> ${item.label} ${item.badge ? `<span class="ctx-badge">${item.badge}</span>` : ''}`;
+    div.innerHTML = `<i class="fas ${item.icon}"></i> ${item.label}`;
     div.onclick = () => {
       item.action();
       menu.style.display = 'none';
@@ -4517,6 +3241,8 @@ window.addEventListener('touchend', () => {
 }, {passive: true});
 
 async function fetchData() {
+  if (typeof loadInstallationData === "function") await loadInstallationData();
+  if (typeof loadInstallationData === "function") await loadInstallationData();
   const connDot = document.getElementById('conn-dot');
   const connText = document.getElementById('conn-text');
 
@@ -4855,13 +3581,6 @@ function toggleMobileMenu() {
 }
 
 function showPage(id) {
-  if (id === 'reminders') {
-    fetchReminders();
-    setupReminderSubscriptions();
-  }
-  if (id === 'followup') {
-    initFollowUpCenter();
-  }
   if (id === 'settings' && !hasPermission('view_settings')) {
     showToast("Access Denied", "error");
     return;
@@ -4878,11 +3597,6 @@ function showPage(id) {
   
   const targetPage = document.getElementById('page-' + id);
   if (targetPage) targetPage.classList.add('active');
-
-  const fucFab = document.getElementById('fuc-fab');
-  const fucFabMenu = document.getElementById('fuc-fab-menu');
-  if (fucFab) fucFab.style.display = (id === 'followup') ? 'flex' : 'none';
-  if (fucFabMenu) fucFabMenu.classList.remove('open');
   
   const navBtn = document.querySelector(`.nav-tab[onclick*="showPage('${id}')"]`);
   if (navBtn) {
@@ -4926,7 +3640,9 @@ function showPage(id) {
     applyManufacturingFilters();
   }
   if(id === 'installation') {
-    initInstallationModule();
+    if (typeof updateInstallationUI === 'function') {
+      updateInstallationUI();
+    }
   }
 }
 
@@ -5425,19 +4141,9 @@ function renderManufacturingTable() {
       <button class="btn btn-ghost btn-sm" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
     ` : '';
 
-    const reminderList = reminders.filter(rem => String(rem.work_order_number) === String(r.WorkOrder));
-    const activeReminders = reminderList.filter(rem => !['completed','cancelled'].includes(rem.status));
-    const totalPhotos = reminderList.reduce((sum, rem) => sum + (rem.photo_count || 0), 0);
-
     return `<tr oncontextmenu="showContextMenu(event, 'row-mfg', '${r.WorkOrder}')">
       <td style="color:var(--muted);font-size:11px">${start+i+1}</td>
-      <td>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="wo-num">${r.WorkOrder}</span>
-          ${activeReminders.length > 0 ? `<span class="ctx-badge" title="${activeReminders.length} active reminders" onclick="event.stopPropagation(); showPage('reminders');">📌 ${activeReminders.length}</span>` : ''}
-          ${totalPhotos > 0 ? `<span class="wo-photo-badge" title="${totalPhotos} photos in reminders" onclick="event.stopPropagation(); showPage('reminders');">📎 ${totalPhotos}</span>` : ''}
-        </div>
-      </td>
+      <td><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell mfg-hide-cols" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td class="mfg-hide-cols">${stBadge}</td>
       <td class="mfg-hide-cols">${r.PWA_ENG||'—'}</td>
@@ -5791,36 +4497,6 @@ function switchDetailTab(tabId) {
   document.querySelectorAll('.detail-pane').forEach(p => {
     p.classList.toggle('active', p.id === `pane-${tabId}`);
   });
-  if (tabId === 'reminders') {
-    renderDetailReminderList();
-  }
-}
-
-function renderDetailReminderList() {
-  const container = document.getElementById('pane-reminders-list');
-  if (!container) return;
-  
-  const woId = selectedWorkOrder;
-  const list = reminders.filter(r => String(r.work_order_number) === String(woId));
-  
-  if (list.length === 0) {
-    container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">No reminders for this Work Order</div>';
-  } else {
-    container.innerHTML = list.map(r => `
-      <div class="notif-item" style="border-left: 3px solid ${getPriorityColor(r.priority)};">
-        <div style="display:flex; justify-content:space-between;">
-          <div style="font-weight:700;">${r.title}</div>
-          <div class="status-badge" style="background:${getPriorityColor(r.priority)}20; color:${getPriorityColor(r.priority)};">${r.status.toUpperCase()}</div>
-        </div>
-        <div style="font-size:11px; color:var(--muted); margin-top:4px;">${dayjs(r.reminder_datetime).format('DD MMM YYYY, HH:mm')}</div>
-        <div style="font-size:12px; margin-top:8px;">${r.notes || ''}</div>
-        <div style="display:flex; gap:10px; margin-top:12px;">
-           <button class="btn btn-ghost btn-xs" onclick="openReminderModal('${r.id}')">Edit</button>
-           ${r.status !== 'completed' ? `<button class="btn btn-green btn-xs" onclick="completeReminder('${r.id}')">Complete</button>` : ''}
-        </div>
-      </div>
-    `).join('');
-  }
 }
 
 function toggleDetailEdit() {
@@ -6205,21 +4881,11 @@ function renderTable() {
       `;
     }
 
-    const reminderList = reminders.filter(rem => String(rem.work_order_number) === String(r.WorkOrder));
-    const activeReminders = reminderList.filter(rem => !['completed','cancelled'].includes(rem.status));
-    const totalPhotos = reminderList.reduce((sum, rem) => sum + (rem.photo_count || 0), 0);
-
     return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" 
       onclick="selectWorkOrderRow('${r.WorkOrder}')" 
       ondblclick="openDetail('${r.WorkOrder}')"
       oncontextmenu="showContextMenu(event, 'row-wo', '${r.WorkOrder}')">
-      <td>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="wo-num">${r.WorkOrder}</span>
-          ${activeReminders.length > 0 ? `<span class="ctx-badge" title="${activeReminders.length} active reminders" onclick="event.stopPropagation(); showPage('reminders');">📌 ${activeReminders.length}</span>` : ''}
-          ${totalPhotos > 0 ? `<span class="wo-photo-badge" title="${totalPhotos} photos in reminders" onclick="event.stopPropagation(); showPage('reminders');">📎 ${totalPhotos}</span>` : ''}
-        </div>
-      </td>
+      <td><span class="wo-num">${r.WorkOrder}</span></td>
       <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
       <td>${stBadge}</td>
       <td style="font-size:11px">${r.Lat||'—'}</td>
@@ -6288,11 +4954,6 @@ window.addEventListener('click', (e) => {
   if (dropdown && dropdown.classList.contains('show') && !dropdown.contains(e.target) && !btn.contains(e.target)) {
     dropdown.classList.remove('show');
     btn.setAttribute('aria-expanded', 'false');
-  }
-  
-  const popover = document.getElementById('quickNotePopover');
-  if (popover && popover.style.display === 'block' && !popover.contains(e.target) && !e.target.closest('[onclick*="toggleQuickNotePopover"]')) {
-    popover.style.display = 'none';
   }
 });
 
@@ -6886,9 +5547,6 @@ function updateAdminUI() {
     
     const savePresetBtn = document.getElementById('admin-save-presets');
     if (savePresetBtn) savePresetBtn.style.display = isFullAdmin ? 'block' : 'none';
-    
-    const aiSettingsEntry = document.getElementById('ai-settings-entry');
-    if (aiSettingsEntry) aiSettingsEntry.style.display = isFullAdmin ? 'block' : 'none';
   } else {
     if (btn) btn.textContent = '🔒 Locked';
     if (btn) btn.classList.remove('unlocked');
@@ -6900,8 +5558,6 @@ function updateAdminUI() {
     if (saveSystemBtn) saveSystemBtn.style.display = 'none';
     const savePresetBtn = document.getElementById('admin-save-presets');
     if (savePresetBtn) savePresetBtn.style.display = 'none';
-    const aiSettingsEntry = document.getElementById('ai-settings-entry');
-    if (aiSettingsEntry) aiSettingsEntry.style.display = 'none';
   }
 }
 
@@ -8642,10 +7298,9 @@ function openGisDetails(woId) {
 
       <div class="info-group">
         <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Documents & History</label>
-        <div style="display: flex; gap: 8px; margin-top: 6px; flex-wrap:wrap;">
+        <div style="display: flex; gap: 8px; margin-top: 6px;">
           <button class="btn btn-ghost btn-sm" onclick="openFabModal('${wo.WorkOrder}')"><i class="fas fa-file-pdf"></i> PDF</button>
           <button class="btn btn-ghost btn-sm" onclick="showFabHistory('${wo.WorkOrder}')"><i class="fas fa-history"></i> History</button>
-          <button class="btn btn-ghost btn-sm" onclick="openReminderModal(null, '${wo.WorkOrder}')"><i class="fas fa-thumbtack"></i> Remind</button>
         </div>
       </div>
 
@@ -10127,25 +8782,8 @@ async function addNotification(action, woId = null, category = 'system') {
 function updateNotifBadge() {
   const unreadCount = notifications.filter(n => !n.read).length;
   const badge = document.getElementById('notif-badge');
-  if (badge) {
-    badge.textContent = unreadCount;
-    badge.classList.toggle('show', unreadCount > 0);
-  }
-}
-
-function updateNavBadges() {
-  updateNotifBadge();
-  const activeReminders = reminders.filter(r => r.status !== 'completed' && r.status !== 'cancelled').length;
-  const badge = document.getElementById('rem-nav-badge');
-  const mBadge = document.getElementById('rem-mobile-badge');
-  if (badge) {
-    badge.textContent = activeReminders;
-    badge.style.display = activeReminders > 0 ? 'inline-block' : 'none';
-  }
-  if (mBadge) {
-    mBadge.textContent = activeReminders;
-    mBadge.style.display = activeReminders > 0 ? 'inline-block' : 'none';
-  }
+  badge.textContent = unreadCount;
+  badge.classList.toggle('show', unreadCount > 0);
 }
 
 function switchNotifTab(tab) {
@@ -10170,27 +8808,16 @@ function renderNotifications() {
     return;
   }
   
-  list.innerHTML = filtered.map(n => {
-    const reminder = n.reminder_id ? reminders.find(r => r.id === n.reminder_id) : null;
-    const photoCount = reminder ? (reminder.photo_count || 0) : 0;
-    
-    return `
-    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="handleNotifClick('${n.id}')">
+  list.innerHTML = filtered.map(n => `
+    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="handleNotifClick(${n.id})">
       <div class="notif-user">${n.user}</div>
       <div class="notif-action">${n.action}</div>
       <div class="notif-meta">
         <span><i class="far fa-clock"></i> ${formatNotifTime(n.time)}</span>
         ${n.woId ? `<span><i class="fas fa-hashtag"></i> ${n.woId}</span>` : ''}
       </div>
-      ${photoCount > 0 ? `
-        <div class="notif-photo-strip">
-          ${Array(Math.min(3, photoCount)).fill('<div style="width:36px; height:36px; background:var(--surface2); border-radius:4px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-image" style="opacity:0.3"></i></div>').join('')}
-          ${photoCount > 3 ? `<span class="notif-photo-more">+${photoCount - 3}</span>` : ''}
-        </div>
-      ` : ''}
     </div>
-    `;
-  }).join('');
+  `).join('');
 }
 
 function formatNotifTime(isoString) {
@@ -10210,9 +8837,7 @@ function handleNotifClick(id) {
   n.read = true;
   updateNotifBadge();
   renderNotifications();
-  if (n.category === 'reminders') {
-    openReminderModal(n.reminder_id);
-  } else if (n.woId) {
+  if (n.woId) {
     openDetail(n.woId);
   }
 }
@@ -10232,12 +8857,7 @@ function clearAllNotifs() {
 async function loadNotifications() {
   if (!supabaseClient) return;
   try {
-    const [notifRes, remNotifRes] = await Promise.all([
-      supabaseClient.from('notifications').select('*').order('created_at', { ascending: false }).limit(50),
-      supabaseClient.from('reminder_notifications').select('*').order('created_at', { ascending: false }).limit(50)
-    ]);
-
-    const { data } = notifRes;
+    const { data } = await supabaseClient.from('notifications').select('*').order('created_at', { ascending: false }).limit(50);
     if (data) {
       notifications = data.map(d => ({
         id: d.id,
@@ -10248,53 +8868,14 @@ async function loadNotifications() {
         time: d.created_at,
         read: d.is_read || false
       }));
+      updateNotifBadge();
     }
-
-    if (remNotifRes.data) {
-      const remNotifs = remNotifRes.data.map(d => ({
-        id: d.id,
-        reminder_id: d.reminder_id,
-        user: 'System',
-        action: `${d.title}: ${d.message}`,
-        category: 'reminders',
-        time: d.created_at,
-        read: d.is_read || false
-      }));
-      notifications = [...notifications, ...remNotifs].sort((a,b) => new Date(b.time) - new Date(a.time));
-    }
-    updateNotifBadge();
   } catch(e) {}
 }
 
 // Set up real-time listener
 function setupNotifListener() {
   if (!supabaseClient) return;
-
-  supabaseClient
-    .channel('public:reminder_notifications')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reminder_notifications' }, payload => {
-      const d = payload.new;
-      if (currentUser && d.user_id !== currentUser.id) return;
-      
-      const notif = {
-        id: d.id,
-        reminder_id: d.reminder_id,
-        user: 'System',
-        action: `${d.title}: ${d.message}`,
-        category: 'reminders',
-        time: d.created_at,
-        read: false
-      };
-      notifications.unshift(notif);
-      updateNotifBadge();
-      showToast(`Reminder: ${d.title}`);
-      if (document.getElementById('notif-panel').classList.contains('open')) {
-        renderNotifications();
-      }
-      fetchReminders();
-    })
-    .subscribe();
-
   supabaseClient
     .channel('public:notifications')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, payload => {
@@ -10366,9 +8947,6 @@ function setupNotifListener() {
                Priority: d.priority
             };
             refreshUI();
-            if (document.getElementById('page-installation').classList.contains('active')) {
-              loadInstData().then(() => renderInstPage());
-            }
          }
        } else if (payload.eventType === 'DELETE') {
          allData = allData.filter(x => String(x.WorkOrder) !== String(old.work_order));
@@ -10416,9 +8994,16 @@ function setupNotifListener() {
     .channel('public:installation_records')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_records' }, payload => {
        console.log("Installation Record change detected:", payload);
-       if (document.getElementById('page-installation').classList.contains('active')) {
-         loadInstData().then(() => renderInstPage());
+       const d = payload.new;
+       if (payload.eventType === 'INSERT') {
+         installationRecords.push(d);
+       } else if (payload.eventType === 'UPDATE') {
+         const idx = installationRecords.findIndex(r => r.id === d.id);
+         if (idx !== -1) installationRecords[idx] = d;
+       } else if (payload.eventType === 'DELETE') {
+         installationRecords = installationRecords.filter(r => r.id !== payload.old.id);
        }
+       updateInstallationUI();
     })
     .subscribe();
 
@@ -10427,9 +9012,16 @@ function setupNotifListener() {
     .channel('public:installation_teams')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_teams' }, payload => {
        console.log("Installation Team change detected:", payload);
-       if (document.getElementById('page-installation').classList.contains('active')) {
-         loadInstData().then(() => renderInstPage());
+       const d = payload.new;
+       if (payload.eventType === 'INSERT') {
+         installationTeams.push(d);
+       } else if (payload.eventType === 'UPDATE') {
+         const idx = installationTeams.findIndex(t => t.id === d.id);
+         if (idx !== -1) installationTeams[idx] = d;
+       } else if (payload.eventType === 'DELETE') {
+         installationTeams = installationTeams.filter(t => t.id !== payload.old.id);
        }
+       updateInstallationUI();
     })
     .subscribe();
 
@@ -10438,9 +9030,13 @@ function setupNotifListener() {
     .channel('public:installation_photos')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'installation_photos' }, payload => {
        console.log("Installation Photo change detected:", payload);
-       if (document.getElementById('page-installation').classList.contains('active')) {
-         loadInstData().then(() => renderInstPage());
+       const d = payload.new;
+       if (payload.eventType === 'INSERT') {
+         installationPhotos.push(d);
+       } else if (payload.eventType === 'DELETE') {
+         installationPhotos = installationPhotos.filter(p => p.id !== payload.old.id);
        }
+       updateInstallationUI();
     })
     .subscribe();
 }
@@ -10481,12 +9077,6 @@ async function initInstallationModule() {
   await seedInstallationModule();
   await loadInstData();
   renderInstPage();
-  
-  // AI Button Visibility based on settings and role
-  const aiBtn = document.getElementById('ai-group-btn');
-  if (aiBtn) {
-    aiBtn.style.display = (currentAISettings.ai_enabled && (isAdmin || userRole === 'Supervisor')) ? 'flex' : 'none';
-  }
 }
 
 async function loadInstData() {
@@ -10665,50 +9255,30 @@ function renderOpsDashboard(container) {
 function renderUnassignedList() {
   const list = InstState.workOrders.filter(w => w.installation_status === 'Ready' && !w.assigned_team).slice(0, 10);
   if (list.length === 0) return '<div style="text-align:center; padding:20px; color:var(--muted)">No unassigned items</div>';
-  return list.map(w => {
-    const reminderList = reminders.filter(rem => String(rem.work_order_number) === String(w.work_order));
-    const activeReminders = reminderList.filter(rem => !['completed','cancelled'].includes(rem.status));
-    const totalPhotos = reminderList.reduce((sum, rem) => sum + (rem.photo_count || 0), 0);
-
-    return `
+  return list.map(w => `
     <div class="inst-list-item">
       <div style="overflow:hidden">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <div style="font-weight:700; color:#00bcd4; font-size:13px;">#${w.work_order}</div>
-          ${activeReminders.length > 0 ? `<span class="ctx-badge" style="font-size:9px; padding:0 4px;">📌 ${activeReminders.length}</span>` : ''}
-          ${totalPhotos > 0 ? `<span class="wo-photo-badge" style="font-size:9px; padding:0 4px;">📎 ${totalPhotos}</span>` : ''}
-        </div>
+        <div style="font-weight:700; color:#00bcd4; font-size:13px;">#${w.work_order}</div>
         <div style="font-size:11px; color:#8b949e; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${w.location || 'N/A'}</div>
       </div>
       <button class="inst-btn inst-btn-primary btn-xs" style="padding:4px 8px" onclick="quickAssignWO('${w.work_order}')">Assign</button>
     </div>
-    `;
-  }).join('');
+  `).join('');
 }
 
 function renderOverdueList() {
   const now = new Date();
   const list = InstState.workOrders.filter(w => w.installation_status !== 'Completed' && w.target_finish_date && new Date(w.target_finish_date) < now).slice(0, 10);
   if (list.length === 0) return '<div style="text-align:center; padding:20px; color:var(--muted)">No overdue items</div>';
-  return list.map(w => {
-    const reminderList = reminders.filter(rem => String(rem.work_order_number) === String(w.work_order));
-    const activeReminders = reminderList.filter(rem => !['completed','cancelled'].includes(rem.status));
-    const totalPhotos = reminderList.reduce((sum, rem) => sum + (rem.photo_count || 0), 0);
-
-    return `
+  return list.map(w => `
     <div class="inst-list-item" style="border-left: 3px solid var(--red)">
       <div style="overflow:hidden">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <div style="font-weight:700; color:#f44336; font-size:13px;">#${w.work_order}</div>
-          ${activeReminders.length > 0 ? `<span class="ctx-badge" style="font-size:9px; padding:0 4px;">📌 ${activeReminders.length}</span>` : ''}
-          ${totalPhotos > 0 ? `<span class="wo-photo-badge" style="font-size:9px; padding:0 4px;">📎 ${totalPhotos}</span>` : ''}
-        </div>
+        <div style="font-weight:700; color:#f44336; font-size:13px;">#${w.work_order}</div>
         <div style="font-size:11px; color:#8b949e;">Due: ${formatDate(w.target_finish_date)}</div>
       </div>
       <div style="font-size:10px; padding:2px 6px; background:rgba(244,67,54,0.1); color:#f44336; border-radius:4px;">${w.installation_status}</div>
     </div>
-    `;
-  }).join('');
+  `).join('');
 }
 
 function renderActivityFeed() {
@@ -10852,7 +9422,7 @@ function renderPlanningPage(container) {
           <div class="inst-card-body" style="padding: 12px; overflow-y: auto;">
             <div style="display:flex; gap:8px; margin-bottom:12px;">
               <input type="text" class="filter-input" placeholder="Search WO..." style="flex:1" oninput="filterPlanningQueue(this.value)">
-              <button class="inst-btn inst-btn-primary btn-xs" onclick="runAIGrouping()" title="AI Auto Group"><i data-lucide="brain"></i> AI Group</button>
+              <button class="inst-btn inst-btn-primary btn-xs" onclick="autoGroupSelected()" title="Auto Group"><i data-lucide="brain"></i> Group</button>
             </div>
             <div id="planning-queue" class="inst-list">
               ${renderPlanningQueue()}
@@ -10881,9 +9451,6 @@ function renderPlanningPage(container) {
         <div id="planning-map" style="width:100%; height:100%;"></div>
         
         <div style="position:absolute; top:20px; right:20px; z-index:100; display:flex; flex-direction:column; gap:8px;">
-            <button id="ai-group-btn" class="inst-icon-btn glass-panel" onclick="runAIGrouping()" title="AI Auto Group" style="display: none; background: rgba(0, 200, 180, 0.2); border-color: var(--accent-teal);">
-              <i data-lucide="brain"></i>
-            </button>
           <button class="inst-icon-btn glass-panel" onclick="optimizePlanningRoute()" title="Optimize Route">
             <i data-lucide="route"></i>
           </button>
@@ -10893,32 +9460,6 @@ function renderPlanningPage(container) {
           <button class="inst-icon-btn glass-panel" onclick="togglePlanningDrawer()" title="Calendar Scheduler">
             <i data-lucide="calendar"></i>
           </button>
-        </div>
-
-        <div id="ai-group-panel" class="planning-bottom-drawer" style="height: 350px;">
-          <div class="inst-card-header">
-            <div class="inst-card-title"><i data-lucide="brain"></i> AI Generated Installation Packages</div>
-            <div style="display:flex; gap:10px;">
-              <button class="inst-btn inst-btn-primary btn-xs" onclick="saveAIGroups()"><i data-lucide="save"></i> Save All Groups</button>
-              <button class="inst-btn inst-btn-ghost btn-xs" onclick="closeAIGroupPanel()"><i data-lucide="x"></i></button>
-            </div>
-          </div>
-          <div class="inst-card-body" style="padding:0; overflow:auto;">
-            <table class="main-table" style="width:100%">
-              <thead>
-                <tr>
-                  <th>Group Name</th>
-                  <th>Road / Direction</th>
-                  <th>Chainage</th>
-                  <th>WOs</th>
-                  <th>Duration</th>
-                  <th>Suggested Team</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="ai-group-body"></tbody>
-            </table>
-          </div>
         </div>
 
         <div id="planning-drawer" class="planning-bottom-drawer">
@@ -10984,9 +9525,6 @@ function initPlanningMap() {
   planMarkers = L.markerClusterGroup();
   
   InstState.workOrders.forEach(w => {
-    // Requirements: Completed WOs immediately disappear from the Planning Map
-    if (['Completed', 'COMP'].includes(w.installation_status)) return;
-    
     if (w.latitude && w.longitude) {
       let color = '#64748b';
       if (w.installation_status === 'Ready') color = '#00bcd4';
@@ -11060,362 +9598,23 @@ function filterPlanningQueue(q) {
   });
 }
 
-let aiGeneratedGroups = [];
-let aiGroupLayers = [];
-
-async function runAIGrouping() {
-  if (!currentAISettings.ai_enabled) return showToast("AI features are currently disabled in settings", "warning");
-  if (!isAdmin && userRole !== 'Supervisor') return showToast("Access Denied", "error");
-
+async function autoGroupSelected() {
   const selected = Array.from(document.querySelectorAll('.wo-checkbox:checked')).map(cb => cb.value);
-  let targetWOs = [];
+  if (selected.length < 2) return showToast("Select at least 2 WOs to cluster", "amber");
   
-  if (selected.length > 0) {
-    targetWOs = InstState.workOrders.filter(w => selected.includes(w.work_order));
-  } else {
-    targetWOs = InstState.workOrders.filter(w => !['Completed', 'COMP', 'Returned'].includes(w.installation_status));
-  }
-
-  if (targetWOs.length === 0) return showToast("No eligible work orders found for grouping", "warning");
-
-  showToast(`Initiating AI Grouping for ${targetWOs.length} items...`);
+  showToast("Clustering by GPS proximity...");
+  // Logic: Identify centroid, find closest team, assign.
+  const wos = InstState.workOrders.filter(w => selected.includes(w.work_order) && w.latitude);
+  const centroidLat = wos.reduce((sum, w) => sum + w.latitude, 0) / wos.length;
+  const centroidLng = wos.reduce((sum, w) => sum + w.longitude, 0) / wos.length;
   
-  try {
-    const payload = targetWOs.map(wo => ({
-      id: wo.work_order,
-      road_name: wo.road_name,
-      road_direction: wo.road_direction,
-      chainage: wo.chainage,
-      latitude: wo.latitude,
-      longitude: wo.longitude,
-      asset_type: wo.asset_type,
-      description: wo.asset_description || wo.description
-    }));
-
-    const teamsPayload = InstState.teams.map(t => {
-      const assignedCount = InstState.workOrders.filter(w => w.assigned_team_id === t.id && !['Completed', 'COMP'].includes(w.installation_status)).length;
-      return {
-        id: t.id,
-        name: t.team_name,
-        capacity: t.daily_capacity,
-        current_load: assignedCount,
-        remaining_capacity: Math.max(0, t.daily_capacity - assignedCount)
-      };
-    });
-
-    const prompt = `
-      ${currentAISettings.default_grouping_instructions}
-
-      Available installation teams: ${JSON.stringify(teamsPayload)}
-
-      Analyze the following work orders and group them into logical installation packages.
-
-      Grouping priority rules:
-      1. Road Name — group work orders on the same road together.
-      2. Road Direction — within the same road, separate by direction.
-      3. Chainage Sequence — within the same road+direction, order by chainage value ascending.
-      4. GPS Distance — if chainage is missing, use lat/lng proximity as fallback.
-
-      Additional rules:
-      - Each group should ideally not exceed the suggested team's daily_capacity.
-      - Suggest a team for each group based on current load and remaining capacity.
-      - Estimate installation duration per group assuming ${currentAISettings.minutes_per_sign} minutes per sign.
-
-      Work orders to group:
-      ${JSON.stringify(payload)}
-
-      Respond ONLY with a valid JSON array. No explanation, no markdown. Format:
-      [
-        {
-          "group_id": "G001",
-          "group_name": "Road Name — Direction — Chainage Range",
-          "road_name": "...",
-          "road_direction": "...",
-          "chainage_from": "...",
-          "chainage_to": "...",
-          "assigned_team_id": "<uuid from teams list>",
-          "work_order_ids": ["WO1", "WO2"],
-          "sign_count": 2,
-          "estimated_duration_hours": 1.5,
-          "color_hex": "#00c9b1"
-        }
-      ]
-    `;
-
-    const headers = { 'Content-Type': 'application/json' };
-    const isAnthropic = currentAISettings.provider_name.toLowerCase().includes('anthropic');
-    
-    if (isAnthropic) {
-      headers['x-api-key'] = currentAISettings.api_key;
-      headers['anthropic-version'] = '2023-06-01';
-    } else {
-      headers['Authorization'] = `Bearer ${currentAISettings.api_key}`;
-    }
-
-    const response = await fetch(`${currentAISettings.api_base_url}/chat/completions`, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({
-        model: currentAISettings.ai_model,
-        max_tokens: 4096,
-        messages: [
-          { role: 'system', content: 'You are an expert installation planning assistant for Qatar signage works. Return only valid JSON array.' },
-          { role: 'user', content: prompt }
-        ]
-      })
-    });
-
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    
-    const data = await response.json();
-    const raw = data.choices?.[0]?.message?.content || data.content?.[0]?.text || '';
-    aiGeneratedGroups = JSON.parse(raw.replace(/```json|```/g, '').trim());
-    
-    renderAIGroups();
-    showToast(`AI successfully created ${aiGeneratedGroups.length} packages`);
-    
-  } catch (e) {
-    console.error("AI Grouping Error:", e);
-    showToast(`Grouping failed: ${e.message}`, "error");
-  }
-}
-
-function renderAIGroups() {
-  const body = document.getElementById('ai-group-body');
-  if (!body) return;
+  const pkgId = `PKG-${new Date().getFullYear()}-${Math.floor(Math.random()*999).toString().padStart(3,'0')}`;
   
-  body.innerHTML = aiGeneratedGroups.map((g, idx) => {
-    const team = InstState.teams.find(t => t.id === g.assigned_team_id);
-    const teamOptions = InstState.teams.map(t => `<option value="${t.id}" ${t.id === g.assigned_team_id ? 'selected' : ''}>${t.team_name}</option>`).join('');
-    
-    return `
-      <tr>
-        <td><input type="text" class="filter-input" value="${g.group_name}" onchange="updateAIGroupField(${idx}, 'group_name', this.value)"></td>
-        <td>${g.road_name || '—'} / ${g.road_direction || '—'}</td>
-        <td>${g.chainage_from || '—'} to ${g.chainage_to || '—'}</td>
-        <td><span class="ctx-badge">${g.work_order_ids.length} WOs</span></td>
-        <td>${g.estimated_duration_hours}h</td>
-        <td>
-          <select class="filter-input" onchange="updateAIGroupField(${idx}, 'assigned_team_id', this.value)">
-            <option value="">— Unassigned —</option>
-            ${teamOptions}
-          </select>
-        </td>
-        <td>
-          <div style="display:flex; gap:5px;">
-            <button class="btn btn-ghost btn-icon" onclick="splitAIGroup(${idx})" title="Split Group"><i data-lucide="split"></i></button>
-            <button class="btn btn-ghost btn-icon" style="color:var(--red)" onclick="removeAIGroup(${idx})" title="Discard Group"><i data-lucide="trash"></i></button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  if (window.lucide) window.lucide.createIcons();
-  document.getElementById('ai-group-panel').classList.add('open');
-  visualizeGroupsOnMap();
-}
-
-function updateAIGroupField(idx, field, val) {
-  aiGeneratedGroups[idx][field] = val;
-  aiGeneratedGroups[idx].manually_modified = true;
-  visualizeGroupsOnMap();
-}
-
-function visualizeGroupsOnMap() {
-  if (!planMap) return;
-  
-  // Clear previous group layers
-  aiGroupLayers.forEach(l => planMap.removeLayer(l));
-  aiGroupLayers = [];
-
-  aiGeneratedGroups.forEach(g => {
-    const coords = [];
-    g.work_order_ids.forEach(woId => {
-      const wo = InstState.workOrders.find(w => w.work_order === woId);
-      if (wo && wo.latitude && wo.longitude) {
-        coords.push([wo.latitude, wo.longitude]);
-      }
-    });
-
-    if (coords.length >= 3) {
-      // Use Convex Hull if possible (simplifying to a polygon of all points for now if hull lib not ready)
-      // Standard Leaflet doesn't have convex hull. We'll use a simple polygon of points for visualization
-      // Or just a bounding box if that's easier.
-      // Requirements asked for Convex Hull.
-      try {
-        const hullPoints = getConvexHull(coords);
-        const hull = L.polygon(hullPoints, {
-          color: g.color_hex || '#00c9b1',
-          fillOpacity: 0.2,
-          weight: 2,
-          dashArray: '5, 5'
-        }).addTo(planMap);
-        
-        // Add label at centroid
-        const centroid = getCentroid(coords);
-        const label = L.marker(centroid, {
-          icon: L.divIcon({
-            className: 'group-label',
-            html: `<div style="background:${g.color_hex || '#00c9b1'}; color:#000; padding:2px 8px; border-radius:10px; font-size:9px; font-weight:800; white-space:nowrap; border:1px solid #fff;">${g.group_name}</div>`
-          })
-        }).addTo(planMap);
-
-        aiGroupLayers.push(hull, label);
-      } catch (e) { console.error("Hull calculation error:", e); }
-    } else if (coords.length > 0) {
-       // Just draw a line or markers for small groups
-       const poly = L.polyline(coords, { color: g.color_hex || '#00c9b1', weight: 4, opacity: 0.5 }).addTo(planMap);
-       aiGroupLayers.push(poly);
-    }
-  });
-}
-
-// Helper: Gift Wrap Algorithm for Convex Hull
-function getConvexHull(points) {
-  if (points.length < 3) return points;
-  
-  const hull = [];
-  let l = 0;
-  for (let i = 1; i < points.length; i++) {
-    if (points[i][1] < points[l][1]) l = i;
-  }
-  
-  let p = l, q;
-  do {
-    hull.push(points[p]);
-    q = (p + 1) % points.length;
-    for (let i = 0; i < points.length; i++) {
-      if (orientation(points[p], points[i], points[q]) === 2) q = i;
-    }
-    p = q;
-  } while (p !== l);
-  
-  return hull;
-}
-
-function orientation(p, q, r) {
-  const val = (q[0] - p[0]) * (r[1] - q[1]) - (q[1] - p[1]) * (r[0] - q[0]);
-  if (val === 0) return 0;
-  return (val > 0) ? 1 : 2;
-}
-
-function getCentroid(coords) {
-  let lat = 0, lng = 0;
-  coords.forEach(c => { lat += c[0]; lng += c[1]; });
-  return [lat / coords.length, lng / coords.length];
-}
-
-function closeAIGroupPanel() {
-  document.getElementById('ai-group-panel').classList.remove('open');
-  aiGroupLayers.forEach(l => planMap.removeLayer(l));
-  aiGroupLayers = [];
-}
-
-async function saveAIGroups() {
-  if (aiGeneratedGroups.length === 0) return;
-  if (!confirm(`Save all ${aiGeneratedGroups.length} installation packages to Supabase?`)) return;
-
-  showToast("Saving groups...");
-  
-  try {
-    for (const g of aiGeneratedGroups) {
-      // 1. Insert/Upsert the group
-      const groupData = {
-        group_name: g.group_name,
-        road_name: g.road_name,
-        road_direction: g.road_direction,
-        chainage_from: g.chainage_from,
-        chainage_to: g.chainage_to,
-        assigned_team_id: g.assigned_team_id || null,
-        color_hex: g.color_hex || '#00c9b1',
-        sign_count: g.sign_count || g.work_order_ids.length,
-        estimated_duration_hours: g.estimated_duration_hours,
-        ai_generated: !g.manually_modified,
-        manually_modified: g.manually_modified || false
-      };
-
-      const { data: savedGroup, error: groupErr } = await supabaseClient
-        .from('installation_groups')
-        .insert([groupData])
-        .select()
-        .single();
-      
-      if (groupErr) throw groupErr;
-
-      // 2. Insert members
-      const members = g.work_order_ids.map((woId, idx) => ({
-        group_id: savedGroup.id,
-        work_order_id: InstState.workOrders.find(w => w.work_order === woId)?.id || null, // Need UUID here if possible
-        sequence_order: idx
-      }));
-
-      // Find real UUIDs for work orders
-      // Note: If our InstState only has work_order string, we might need a quick fetch or join
-      const { data: realWOs } = await supabaseClient.from('work_orders').select('id, work_order').in('work_order', g.work_order_ids);
-      const uuidMembers = realWOs.map((wo, idx) => ({
-        group_id: savedGroup.id,
-        work_order_id: wo.id,
-        sequence_order: idx
-      }));
-
-      const { error: memberErr } = await supabaseClient.from('installation_group_members').insert(uuidMembers);
-      if (memberErr) throw memberErr;
-      
-      // 3. Optional: If user finalized, we would update work_orders table directly.
-      // Requirement says: "just store group membership and let user decide when to finalize assignments"
-      // So we don't update work_orders.assigned_team_id yet.
-    }
-
-    showToast("All groups saved successfully", "success");
-    closeAIGroupPanel();
+  if (supabaseClient) {
+    // Update WOs with package ID
+    await supabaseClient.from('work_orders').update({ installation_package_id: pkgId }).in('work_order', selected);
+    showToast(`Created package ${pkgId} for ${selected.length} items`);
     await refreshInstData();
-    
-  } catch (e) {
-    console.error("Save Groups Error:", e);
-    showToast(`Failed to save: ${e.message}`, "error");
-  }
-}
-
-function removeAIGroup(idx) {
-  aiGeneratedGroups.splice(idx, 1);
-  renderAIGroups();
-}
-
-async function splitAIGroup(idx) {
-  const group = aiGeneratedGroups[idx];
-  const { value: selectedWOs } = await Swal.fire({
-    title: 'Split Group',
-    text: 'Select work orders to move to a new group',
-    input: 'select',
-    inputOptions: group.work_order_ids.reduce((acc, id) => { acc[id] = id; return acc; }, {}),
-    inputPlaceholder: 'Select WO',
-    showCancelButton: true,
-    inputValidator: (value) => {
-      if (!value) return 'You need to choose a work order!';
-    }
-  });
-
-  if (selectedWOs) {
-    // Create new group with selected WO
-    const newGroup = {
-      ...group,
-      group_id: 'G' + Math.floor(Math.random()*1000),
-      group_name: group.group_name + ' (Split)',
-      work_order_ids: [selectedWOs],
-      manually_modified: true
-    };
-    
-    // Remove from original
-    group.work_order_ids = group.work_order_ids.filter(id => id !== selectedWOs);
-    group.manually_modified = true;
-    
-    if (group.work_order_ids.length === 0) {
-      aiGeneratedGroups.splice(idx, 1);
-    }
-    
-    aiGeneratedGroups.push(newGroup);
-    renderAIGroups();
   }
 }
 
@@ -11874,1471 +10073,55 @@ function saveInstConfig() {
 
 // ─── DATA SEEDING ───
 
-// ─── REMINDER MODULE LOGIC ───
-
-// REMINDER MODAL LOGIC
-function openReminderModal(reminderId = null, woId = null) {
-  // RBAC: Technician View Only
-  if (userRole === 'Technician') {
-    if (!reminderId) {
-      showToast("Access Denied: Technicians cannot create reminders", "error");
-      return;
-    }
-  }
-
-  currentOpenReminderId = reminderId;
-  resetReminderModal();
-  
-  if (woId) selectedWorkOrder = woId;
-  const wo = allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder));
-  
-  document.getElementById('rem-wo-num').textContent = `#${selectedWorkOrder || '00000000'}`;
-  document.getElementById('rem-wo-title').textContent = wo?.Description || 'Work Order Title';
-  document.getElementById('reminderModalTitle').textContent = reminderId ? 'Edit Reminder' : 'Set New Reminder';
-  
-  loadUsersForAssignment();
-  initPhotoDropzone();
-
-  const isTechnician = userRole === 'Technician';
-  const dropzone = document.getElementById('photoDropzone');
-  if (dropzone) dropzone.style.display = isTechnician ? 'none' : 'block';
-
-  if (reminderId) {
-    const rem = reminders.find(r => r.id === reminderId);
-    if (rem) {
-      // RBAC: Check if user can edit this reminder
-      const isOwner = rem.created_by === currentUser?.id;
-      const canEdit = hasPermission('admin') || 
-                      (userRole === 'Manager') || 
-                      ((userRole === 'Engineer' || userRole === 'Supervisor') && isOwner);
-
-      const btnSave = document.getElementById('btnReminderSave');
-      if (btnSave) {
-        btnSave.style.display = canEdit ? 'block' : 'none';
-        btnSave.textContent = reminderId ? 'Save Changes' : 'Save Reminder';
-      }
-
-      document.getElementById('rem-title').value = rem.title;
-      document.getElementById('rem-datetime').value = rem.reminder_datetime.substring(0, 16);
-      document.getElementById('rem-reason').value = rem.reason;
-      if (rem.reason === 'Other') {
-        document.getElementById('customReasonField').style.display = 'block';
-        document.getElementById('rem-custom-reason').value = rem.custom_reason || '';
-      }
-      setReminderPriority(rem.priority);
-      document.getElementById('rem-assigned-to').value = rem.assigned_to || '';
-      document.getElementById('rem-notes').value = rem.notes || '';
-      document.getElementById('rem-alarm').checked = rem.alarm_enabled;
-      document.getElementById('rem-calendar').checked = rem.calendar_enabled;
-      document.getElementById('rem-desktop').checked = rem.desktop_notif;
-      document.getElementById('rem-email').checked = rem.email_enabled;
-      
-      loadExistingPhotos(reminderId);
-    }
-  }
-
-  document.getElementById('reminderModalOverlay').style.display = 'flex';
-}
-
-function closeReminderModal() {
-  document.getElementById('reminderModalOverlay').style.display = 'none';
-  resetPhotoState();
-  window.pendingNoteToArchive = null; // Clear if cancelled
-}
-
-function resetReminderModal() {
-  document.getElementById('rem-title').value = '';
-  document.getElementById('rem-datetime').value = '';
-  document.getElementById('rem-reason').value = 'Follow-up';
-  document.getElementById('customReasonField').style.display = 'none';
-  document.getElementById('rem-custom-reason').value = '';
-  document.getElementById('rem-notes').value = '';
-  setReminderPriority('medium');
-  document.getElementById('rem-assigned-to').value = '';
-  document.getElementById('rem-alarm').checked = true;
-  document.getElementById('rem-calendar').checked = true;
-  document.getElementById('rem-desktop').checked = true;
-  document.getElementById('rem-email').checked = false;
-  resetPhotoState();
-}
-
-function toggleCustomReason() {
-  const isOther = document.getElementById('rem-reason').value === 'Other';
-  document.getElementById('customReasonField').style.display = isOther ? 'block' : 'none';
-}
-
-function setReminderPriority(p) {
-  document.querySelectorAll('.priority-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.priority === p);
-  });
-}
-
-async function loadUsersForAssignment() {
-  const select = document.getElementById('rem-assigned-to');
-  if (!supabaseClient || select.options.length > 1) return;
-  
-  try {
-    const { data } = await supabaseClient.from('profiles').select('id, full_name, email');
-    if (data) {
-      data.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = u.full_name || u.email;
-        select.appendChild(opt);
-      });
-    }
-  } catch (e) {}
-}
-
-// REMINDER PHOTOS LOGIC
-const PHOTO_BUCKET = 'reminder-photos';
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const MAX_PHOTOS = 20;
-const ALLOWED_TYPES = ['image/jpeg','image/png','image/webp','image/heic'];
-
-function initPhotoDropzone() {
-  const zone = document.getElementById('photoDropzone');
-  const input = document.getElementById('photoFileInput');
-  if (!zone || !input) return;
-
-  zone.onclick = () => input.click();
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault(); zone.classList.remove('drag-over');
-    handleReminderPhotoFiles([...e.dataTransfer.files]);
-  });
-  input.onchange = e => handleReminderPhotoFiles([...e.target.files]);
-}
-
-function handleReminderPhotoFiles(files) {
-  const totalAllowed = MAX_PHOTOS - pendingPhotos.length - existingPhotos.length;
-  if (totalAllowed <= 0) { showToast('Maximum 20 photos per reminder', 'warning'); return; }
-
-  files.slice(0, totalAllowed).forEach(file => {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      showToast(`${file.name}: unsupported format`, 'error'); return;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      showToast(`${file.name}: exceeds 10 MB limit`, 'error'); return;
-    }
-    const previewUrl = URL.createObjectURL(file);
-    pendingPhotos.push({ file, previewUrl, caption: '' });
-  });
-  renderPhotoThumbs();
-}
-
-function renderPhotoThumbs() {
-  const grid = document.getElementById('photoThumbGrid');
-  const badge = document.getElementById('photoCountBadge');
-  const total = pendingPhotos.length + existingPhotos.length;
-
-  if (badge) badge.textContent = `${total} photo${total !== 1 ? 's' : ''}`;
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  const canModifyPhotos = userRole !== 'Technician';
-
-  existingPhotos.forEach((photo, i) => {
-    grid.appendChild(buildThumbEl(photo.public_url, photo.caption, () => deleteExistingPhoto(photo.id), () => openLightbox('existing', i), canModifyPhotos));
-  });
-
-  pendingPhotos.forEach((p, i) => {
-    grid.appendChild(buildThumbEl(p.previewUrl, p.caption, () => removePendingPhoto(i), () => openLightbox('pending', i), canModifyPhotos));
-  });
-}
-
-function buildThumbEl(src, caption, onDelete, onOpen, canDelete = true) {
-  const wrap = document.createElement('div');
-  wrap.className = 'photo-thumb';
-  wrap.innerHTML = `
-    <img src="${src}" alt="attachment" loading="lazy" />
-    ${canDelete ? '<div class="photo-thumb-delete" title="Remove">✕</div>' : ''}
-  `;
-  const delBtn = wrap.querySelector('.photo-thumb-delete');
-  if (delBtn) delBtn.addEventListener('click', e => { e.stopPropagation(); onDelete(); });
-  wrap.addEventListener('click', onOpen);
-  return wrap;
-}
-
-function removePendingPhoto(index) {
-  URL.revokeObjectURL(pendingPhotos[index].previewUrl);
-  pendingPhotos.splice(index, 1);
-  renderPhotoThumbs();
-}
-
-async function deleteExistingPhoto(photoId) {
-  if (!confirm('Remove this photo?')) return;
-  const { data: photo } = await supabaseClient.from('reminder_photos').select('*').eq('id', photoId).single();
-  if (!photo) return;
-
-  await supabaseClient.storage.from(PHOTO_BUCKET).remove([photo.storage_path]);
-  await supabaseClient.from('reminder_photos').delete().eq('id', photoId);
-  logReminderActivity(photo.reminder_id, 'photo_deleted', { file_name: photo.file_name });
-
-  existingPhotos = existingPhotos.filter(p => p.id !== photoId);
-  renderPhotoThumbs();
-}
-
-async function loadExistingPhotos(reminderId) {
-  const { data } = await supabaseClient
-    .from('reminder_photos')
-    .select('*')
-    .eq('reminder_id', reminderId)
-    .order('sort_order', { ascending: true });
-  existingPhotos = data || [];
-  renderPhotoThumbs();
-}
-
-function resetPhotoState() {
-  pendingPhotos.forEach(p => URL.revokeObjectURL(p.previewUrl));
-  pendingPhotos = [];
-  existingPhotos = [];
-  renderPhotoThumbs();
-}
-
-function openLightbox(source, index) {
-  const allPhotos = [
-    ...existingPhotos.map(p => ({ url: p.public_url, caption: p.caption })),
-    ...pendingPhotos.map(p => ({ url: p.previewUrl, caption: p.caption }))
-  ];
-  lightboxIndex = (source === 'pending') ? existingPhotos.length + index : index;
-
-  const lb = document.createElement('div');
-  lb.className = 'photo-lightbox';
-  lb.id = 'photoLightbox';
-  lb.innerHTML = `
-    <button class="photo-lightbox-close" onclick="closeLightbox()">✕</button>
-    <div class="photo-lightbox-counter" id="lbCounter"></div>
-    <button class="photo-lightbox-nav photo-lightbox-prev" onclick="lightboxNav(-1)">‹</button>
-    <img class="photo-lightbox-img" id="lbImg" src="" alt="" />
-    <button class="photo-lightbox-nav photo-lightbox-next" onclick="lightboxNav(1)">›</button>
-    <div class="photo-lightbox-caption" id="lbCaption"></div>
-  `;
-  document.body.appendChild(lb);
-  lb.onclick = e => { if (e.target === lb) closeLightbox(); };
-  updateLightboxSlide(allPhotos);
-}
-
-function updateLightboxSlide(photos) {
-  const img = document.getElementById('lbImg');
-  const caption = document.getElementById('lbCaption');
-  const counter = document.getElementById('lbCounter');
-  if (!img) return;
-  img.src = photos[lightboxIndex].url;
-  caption.textContent = photos[lightboxIndex].caption || '';
-  counter.textContent = `${lightboxIndex + 1} / ${photos.length}`;
-}
-
-function lightboxNav(dir) {
-  const allPhotos = [
-    ...existingPhotos.map(p => ({ url: p.public_url, caption: p.caption })),
-    ...pendingPhotos.map(p => ({ url: p.previewUrl, caption: p.caption }))
-  ];
-  lightboxIndex = (lightboxIndex + dir + allPhotos.length) % allPhotos.length;
-  updateLightboxSlide(allPhotos);
-}
-
-function closeLightbox() {
-  document.getElementById('photoLightbox')?.remove();
-}
-
-// REMINDER DB CRUD
-async function fetchReminders() {
-  if (!supabaseClient) return;
-  try {
-    const { data, error } = await supabaseClient
-      .from('work_order_reminders')
-      .select('*')
-      .order('reminder_datetime', { ascending: true });
-    
-    if (error) throw error;
-    reminders = data || [];
-    updateRemindersUI();
-    if (document.getElementById('page-followup')?.classList.contains('active')) {
-      renderFollowUpCenter();
-    }
-  } catch (e) {
-    console.error("Fetch Reminders Error:", e);
-  }
-}
-
-async function fetchFollowUpNotes() {
-  if (!supabaseClient) return;
-  try {
-    const { data, error } = await supabaseClient
-      .from('followup_notes')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    followupNotes = data || [];
-    if (document.getElementById('page-followup')?.classList.contains('active')) {
-      renderFollowUpCenter();
-    }
-  } catch (e) {
-    console.error("Fetch Follow-Up Notes Error:", e);
-  }
-}
-
-function updateRemindersUI() {
-  updateReminderKPIs();
-  renderReminders();
-  initCalendar();
-  if (document.getElementById('pane-reminders').classList.contains('active')) {
-    renderDetailReminderList();
-  }
-  updateNavBadges();
-  
-  // Update badges on active tables
-  if (document.getElementById('page-workorders')?.classList.contains('active')) {
-    renderTable();
-  }
-  if (document.getElementById('page-manufacturing')?.classList.contains('active')) {
-    renderManufacturingTable();
-  }
-  if (document.getElementById('page-installation')?.classList.contains('active')) {
-    renderInstPage();
-  }
-}
-
-function updateReminderKPIs() {
-  const now = new Date();
-  const todayStr = dayjs().format('YYYY-MM-DD');
-  
-  const stats = {
-    total: reminders.length,
-    today: reminders.filter(r => r.status !== 'completed' && dayjs(r.reminder_datetime).format('YYYY-MM-DD') === todayStr).length,
-    overdue: reminders.filter(r => r.status !== 'completed' && new Date(r.reminder_datetime) < now).length,
-    upcoming: reminders.filter(r => r.status !== 'completed' && new Date(r.reminder_datetime) > now).length,
-    completed: reminders.filter(r => r.status === 'completed').length
-  };
-  
-  const elTotal = document.getElementById('rem-kpi-total');
-  const elToday = document.getElementById('rem-kpi-today');
-  const elOverdue = document.getElementById('rem-kpi-overdue');
-  const elUpcoming = document.getElementById('rem-kpi-upcoming');
-  const elCompleted = document.getElementById('rem-kpi-completed');
-  
-  if (elTotal) elTotal.textContent = stats.total;
-  if (elToday) elToday.textContent = stats.today;
-  if (elOverdue) elOverdue.textContent = stats.overdue;
-  if (elUpcoming) elUpcoming.textContent = stats.upcoming;
-  if (elCompleted) elCompleted.textContent = stats.completed;
-}
-
-function renderReminders() {
-  const container = document.getElementById('reminder-agenda-list');
-  if (!container) return;
-  
-  const filter = document.querySelector('.rem-filter-btn.active')?.dataset.filter || 'active';
-  let filtered = reminders;
-  
-  if (filter === 'active') {
-    filtered = reminders.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
-  }
-  
-  if (filtered.length === 0) {
-    container.innerHTML = '<div class="rem-empty-state">No reminders found</div>';
-    return;
-  }
-  
-  container.innerHTML = filtered.map(r => `
-    <div class="rem-card" style="border-left: 4px solid ${getPriorityColor(r.priority)};">
-      <div class="rem-card-header">
-        <div class="rem-card-title">${r.title}</div>
-        <div class="rem-card-priority" style="color: ${getPriorityColor(r.priority)}; background: ${getPriorityColor(r.priority)}15;">${r.priority.toUpperCase()}</div>
-      </div>
-      <div class="rem-card-meta">
-        <span><i class="fas fa-hashtag"></i> ${r.work_order_number}</span>
-        <span><i class="fas fa-calendar-alt"></i> ${dayjs(r.reminder_datetime).format('DD MMM YYYY, HH:mm')}</span>
-      </div>
-      <div class="rem-card-notes">${r.notes || 'No additional notes'}</div>
-      <div class="rem-card-footer">
-        <div class="rem-card-user"><i class="fas fa-user-circle"></i> ${r.assigned_to_name || 'Unassigned'}</div>
-        <div class="rem-card-actions">
-          <button class="btn btn-ghost btn-xs" onclick="openReminderModal('${r.id}')"><i class="fas fa-edit"></i></button>
-          ${r.status !== 'completed' ? `<button class="btn btn-green btn-xs" onclick="completeReminder('${r.id}')"><i class="fas fa-check"></i></button>` : ''}
-          <button class="btn btn-red btn-xs" onclick="deleteReminder('${r.id}')"><i class="fas fa-trash"></i></button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function getPriorityColor(p) {
-  switch(p) {
-    case 'critical': return '#ef4444';
-    case 'high': return '#f97316';
-    case 'medium': return '#eab308';
-    case 'low': return '#22c55e';
-    default: return '#64748b';
-  }
-}
-
-function initCalendar() {
-  const calendarEl = document.getElementById('reminder-calendar-main');
-  if (!calendarEl || !window.FullCalendar) return;
-  
-  if (reminderCalendar) {
-    reminderCalendar.destroy();
-  }
-  
-  reminderCalendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'dayGridMonth',
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay'
-    },
-    themeSystem: 'standard',
-    events: reminders.map(r => ({
-      id: r.id,
-      title: r.title,
-      start: r.reminder_datetime,
-      color: getPriorityColor(r.priority),
-      extendedProps: { ...r }
-    })),
-    eventClick: function(info) {
-      openReminderModal(info.event.id);
-    },
-    height: 'auto'
-  });
-  
-  reminderCalendar.render();
-}
-
-async function saveReminder() {
-  const title = document.getElementById('rem-title').value.trim();
-  const datetime = document.getElementById('rem-datetime').value;
-  const reason = document.getElementById('rem-reason').value;
-  const customReason = document.getElementById('rem-custom-reason').value.trim();
-  const notes = document.getElementById('rem-notes').value.trim();
-  const priority = document.querySelector('.priority-btn.active').dataset.priority;
-  const assignedTo = document.getElementById('rem-assigned-to').value;
-  
-  if (!title || !datetime) {
-    showToast("Please fill in required fields", "error");
-    return;
-  }
-
-  const reminderData = {
-    work_order_id: selectedWorkOrder,
-    work_order_number: selectedWorkOrder,
-    work_order_title: allData.find(d => String(d.WorkOrder) === String(selectedWorkOrder))?.Description || '',
-    title,
-    reminder_datetime: new Date(datetime).toISOString(),
-    reason,
-    custom_reason: reason === 'Other' ? customReason : null,
-    notes,
-    priority,
-    assigned_to: assignedTo || currentUser?.id,
-    assigned_to_name: assignedTo ? document.querySelector(`#rem-assigned-to option[value="${assignedTo}"]`)?.textContent : (currentUser?.user_metadata?.full_name || currentUser?.email),
-    alarm_enabled: document.getElementById('rem-alarm').checked,
-    calendar_enabled: document.getElementById('rem-calendar').checked,
-    desktop_notif: document.getElementById('rem-desktop').checked,
-    email_enabled: document.getElementById('rem-email').checked,
-    created_by: currentUser?.id,
-    created_by_name: currentUser?.user_metadata?.full_name || currentUser?.email,
-    updated_by: currentUser?.id,
-    is_pinned: currentOpenReminderId ? reminders.find(r => r.id === currentOpenReminderId)?.is_pinned || false : false
-  };
-
-  try {
-    let result;
-    if (currentOpenReminderId) {
-      result = await supabaseClient.from('work_order_reminders').update(reminderData).eq('id', currentOpenReminderId).select();
-    } else {
-      result = await supabaseClient.from('work_order_reminders').insert([reminderData]).select();
-    }
-
-    if (result.error) throw result.error;
-    
-    const reminderId = result.data[0].id;
-    await uploadPendingPhotos(reminderId);
-    
-    showToast(currentOpenReminderId ? "Reminder updated" : "Reminder created");
-    
-    // NOTE-TO-REMINDER CONVERSION LOGIC
-    if (window.pendingNoteToArchive) {
-      await supabaseClient.from('followup_notes').update({ is_archived: true }).eq('id', window.pendingNoteToArchive);
-      window.pendingNoteToArchive = null;
-      fetchFollowUpNotes();
-    }
-
-    if (typeof closeReminderModal === 'function') closeReminderModal();
-    fetchReminders();
-    
-    // Log activity
-    logReminderActivity(reminderId, currentOpenReminderId ? 'updated' : 'created', null, reminderData);
-    
-  } catch (e) {
-    console.error("Save Reminder Error:", e);
-    showToast(e.message || "Error saving reminder", "error");
-  }
-}
-
-async function deleteReminder(id) {
-  if (userRole === 'Technician') {
-    showToast("Access Denied: Technicians cannot delete reminders", "error");
-    return;
-  }
-  if (!hasPermission('admin')) {
-    const rem = reminders.find(r => r.id === id);
-    if (rem && rem.created_by !== currentUser?.id) {
-      showToast("Access Denied: Can only delete own reminders", "error");
-      return;
-    }
-  }
-
-  if (!confirm("Are you sure you want to delete this reminder?")) return;
-
-  try {
-    const { data: photos } = await getReminderPhotos(id);
-    if (photos?.length) {
-      const paths = photos.map(p => p.storage_path);
-      await supabaseClient.storage.from('reminder-photos').remove(paths);
-    }
-    
-    const { error } = await supabaseClient.from('work_order_reminders').delete().eq('id', id);
-    if (error) throw error;
-    
-    showToast("Reminder deleted");
-    fetchReminders();
-  } catch (e) {
-    console.error("Delete Reminder Error:", e);
-    showToast("Error deleting reminder", "error");
-  }
-}
-
-async function completeReminder(id) {
-  try {
-    const { error } = await supabaseClient
-      .from('work_order_reminders')
-      .update({ status: 'completed', completed_by: currentUser?.id, completed_at: new Date().toISOString() })
-      .eq('id', id);
-    
-    if (error) throw error;
-    showToast("Reminder completed");
-    fetchReminders();
-    logReminderActivity(id, 'completed');
-  } catch (e) {
-    console.error("Complete Reminder Error:", e);
-  }
-}
-
-async function logReminderActivity(reminderId, action, previousValue = null, newValue = null) {
-  if (!supabaseClient) return;
-  try {
-    await supabaseClient.from('reminder_activity_log').insert({
-      reminder_id: reminderId,
-      user_id: currentUser?.id,
-      username: currentUser?.user_metadata?.full_name || currentUser?.email,
-      action,
-      previous_value: previousValue,
-      new_value: newValue
-    });
-  } catch (e) { console.warn("Reminder Log failed", e); }
-}
-
-async function getReminderPhotos(reminderId) {
-  if (!supabaseClient) return { data: [] };
-  return await supabaseClient
-    .from('reminder_photos')
-    .select('*')
-    .eq('reminder_id', reminderId)
-    .order('sort_order', { ascending: true });
-}
-
-async function uploadPendingPhotos(reminderId) {
-  if (pendingPhotos.length === 0 || !supabaseClient) return;
-
-  const bar = document.getElementById('photoUploadBar');
-  const progress = document.getElementById('photoUploadProgress');
-  if (progress) progress.classList.add('active');
-  if (bar) bar.style.width = '0%';
-
-  for (let i = 0; i < pendingPhotos.length; i++) {
-    const { file, caption } = pendingPhotos[i];
-    const timestamp = Date.now();
-    const ext = file.name.split('.').pop();
-    const path = `${currentUser?.id}/${reminderId}/${timestamp}-${i}.${ext}`;
-
-    const { error: uploadErr } = await supabaseClient.storage
-      .from('reminder-photos')
-      .upload(path, file, { contentType: file.type, upsert: false });
-
-    if (uploadErr) { showToast(`Upload failed: ${file.name}`, 'error'); continue; }
-
-    const { data: urlData } = supabaseClient.storage.from('reminder-photos').getPublicUrl(path);
-
-    await supabaseClient.from('reminder_photos').insert([{
-      reminder_id: reminderId,
-      storage_path: path,
-      public_url: urlData.publicUrl,
-      file_name: file.name,
-      file_size: file.size,
-      mime_type: file.type,
-      caption: caption || null,
-      sort_order: (existingPhotos?.length || 0) + i,
-      uploaded_by: currentUser?.id
-    }]);
-
-    if (bar) bar.style.width = `${Math.round(((i + 1) / pendingPhotos.length) * 100)}%`;
-  }
-
-  pendingPhotos = [];
-  if (progress) progress.classList.remove('active');
-}
-
-// REALTIME SUBSCRIPTIONS
-function setupReminderSubscriptions() {
-  if (!supabaseClient) return;
-  
-  supabaseClient
-    .channel('public:work_order_reminders')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'work_order_reminders' }, payload => {
-      fetchReminders();
-    })
-    .subscribe();
-    
-  supabaseClient
-    .channel('public:reminder_photos')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'reminder_photos' }, payload => {
-       if (currentOpenReminderId === (payload.new?.reminder_id || payload.old?.reminder_id)) {
-         if (typeof loadExistingPhotos === 'function') loadExistingPhotos(currentOpenReminderId);
-       }
-    })
-    .subscribe();
-
-  supabaseClient
-    .channel('public:followup_notes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'followup_notes' }, payload => {
-      fetchFollowUpNotes();
-    })
-    .subscribe();
-
-  supabaseClient
-    .channel('public:followup_note_photos')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'followup_note_photos' }, payload => {
-      if (currentOpenNoteId === (payload.new?.note_id || payload.old?.note_id)) {
-        loadNotePhotos(currentOpenNoteId);
-      }
-    })
-    .subscribe();
-}
-
 async function seedInstallationModule() {
-  // Hardcoded seeding removed. Module now uses live Supabase data.
-}
-
-function playAlarmSound() {
-  if (!window.Tone) return;
-  try {
-    const synth = new Tone.Synth().toDestination();
-    const now = Tone.now();
-    // 3 ascending beeps
-    synth.triggerAttackRelease("C5", "8n", now);
-    synth.triggerAttackRelease("E5", "8n", now + 0.2);
-    synth.triggerAttackRelease("G5", "8n", now + 0.4);
-  } catch (e) {
-    console.error("Tone.js play failed:", e);
-  }
-}
-
-function showAlarmPopup(rem) {
-  activeAlarmReminder = rem;
-  document.getElementById('alarm-wo-info').textContent = `WO #${rem.work_order_number}`;
-  document.getElementById('alarm-rem-title').textContent = rem.title;
-  document.getElementById('alarm-rem-notes').textContent = rem.notes || 'No notes provided.';
-  
-  const photoRow = document.getElementById('alarmPhotoRow');
-  const photoCount = document.getElementById('alarmPhotoCount');
-  if (rem.photo_count > 0) {
-    photoRow.style.display = 'block';
-    photoCount.textContent = rem.photo_count;
-  } else {
-    photoRow.style.display = 'none';
-  }
-  
-  document.getElementById('alarmOverlay').style.display = 'flex';
-  playAlarmSound();
-  
-  // Log alarm trigger
-  logReminderActivity(rem.id, 'alarm_triggered');
-}
-
-function dismissAlarm() {
-  document.getElementById('alarmOverlay').style.display = 'none';
-  activeAlarmReminder = null;
-}
-
-async function snoozeAlarm() {
-  if (!activeAlarmReminder) return;
-  const snoozeTime = 5; // minutes
-  const snoozeUntil = dayjs().add(snoozeTime, 'minutes').toISOString();
-  
-  try {
-    const { error } = await supabaseClient
-      .from('work_order_reminders')
-      .update({ 
-        status: 'snoozed', 
-        snoozed_until: snoozeUntil,
-        snooze_count: (activeAlarmReminder.snooze_count || 0) + 1
-      })
-      .eq('id', activeAlarmReminder.id);
-      
-    if (error) throw error;
-    
-    // Log snooze history
-    await supabaseClient.from('reminder_snooze_history').insert({
-      reminder_id: activeAlarmReminder.id,
-      user_id: currentUser?.id,
-      snoozed_until: snoozeUntil,
-      duration_minutes: snoozeTime
-    });
-    
-    logReminderActivity(activeAlarmReminder.id, 'snoozed');
-    dismissAlarm();
-    fetchReminders();
-    showToast(`Snoozed for ${snoozeTime} minutes`);
-  } catch (e) {
-    console.error("Snooze Error:", e);
-    showToast("Error snoozing reminder", "error");
-  }
-}
-
-function viewReminderFromAlarm() {
-  const remId = activeAlarmReminder?.id;
-  dismissAlarm();
-  if (remId) {
-    openReminderModal(remId);
-  }
-}
-
-function checkAlarms() {
-  const now = dayjs();
-  reminders.forEach(rem => {
-    if (rem.status === 'completed' || rem.status === 'cancelled' || !rem.alarm_enabled) return;
-    
-    let dueTime = dayjs(rem.reminder_datetime);
-    if (rem.status === 'snoozed' && rem.snoozed_until) {
-      dueTime = dayjs(rem.snoozed_until);
-    }
-    
-    if (dueTime.isBefore(now) || dueTime.isSame(now, 'minute')) {
-      if (!triggeredAlarms.has(rem.id)) {
-        showAlarmPopup(rem);
-        triggeredAlarms.add(rem.id);
-      }
-    }
-  });
-}
-
-let fucFilter = 'all';
-let fucView = 'board';
-let currentQuickNoteColor = 'yellow';
-
-async function initFollowUpCenter() {
-  await Promise.all([fetchReminders(), fetchFollowUpNotes()]);
-  renderFollowUpCenter();
-  setupFUCListeners();
-}
-
-function renderFollowUpCenter() {
-  updateFUCKPIs();
-  renderFUCContent();
-  document.getElementById('fuc-last-refresh').textContent = dayjs().format('HH:mm');
-}
-
-function updateFUCKPIs() {
-  const now = new Date();
-  const pinnedCount = followupNotes.filter(n => n.is_pinned && !n.is_archived).length + 
-                    reminders.filter(r => r.is_pinned && r.status !== 'completed').length; // Assuming reminders might have is_pinned
-  
-  const overdueCount = reminders.filter(r => r.status !== 'completed' && new Date(r.reminder_datetime) < now).length;
-  
-  document.getElementById('fuc-kpi-total').textContent = followupNotes.filter(n => !n.is_archived).length + reminders.filter(r => r.status !== 'completed').length;
-  document.getElementById('fuc-kpi-reminders').textContent = reminders.filter(r => r.status !== 'completed').length;
-  document.getElementById('fuc-kpi-notes').textContent = followupNotes.filter(n => !n.is_archived).length;
-  document.getElementById('fuc-kpi-overdue').textContent = overdueCount;
-  document.getElementById('fuc-kpi-pinned').textContent = pinnedCount;
-}
-
-function setFUCFilter(filter) {
-  fucFilter = filter;
-  document.querySelectorAll('.fuc-filter-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.filter === filter);
-  });
-  renderFUCContent();
-}
-
-function filterFUC(type) {
-  const searchInput = document.getElementById('fuc-search');
-  if (type === 'all') {
-    setFUCFilter('all');
-    searchInput.value = '';
-  } else if (type === 'reminders') {
-    setFUCFilter('reminders_only');
-    searchInput.value = '';
-  } else if (type === 'notes') {
-    setFUCFilter('notes_only');
-    searchInput.value = '';
-  } else if (type === 'overdue') {
-    setFUCFilter('overdue_only');
-    searchInput.value = '';
-  } else if (type === 'pinned') {
-    setFUCFilter('pinned');
-    searchInput.value = '';
-  }
-}
-
-function applyFUCFilters() {
-  renderFUCContent();
-}
-
-function setFUCView(view) {
-  fucView = view;
-  document.getElementById('fuc-view-board').classList.toggle('active', view === 'board');
-  document.getElementById('fuc-view-list').classList.toggle('active', view === 'list');
-  document.getElementById('fuc-board-view').style.display = view === 'board' ? 'grid' : 'none';
-  document.getElementById('fuc-list-view').style.display = view === 'list' ? 'block' : 'none';
-  renderFUCContent();
-}
-
-function renderFUCContent() {
-  const searchTerm = document.getElementById('fuc-search').value.toLowerCase();
-  
-  let filteredNotes = followupNotes;
-  let filteredReminders = reminders;
-
-  // Filter by search
-  if (searchTerm) {
-    filteredNotes = filteredNotes.filter(n => 
-      (n.title?.toLowerCase().includes(searchTerm)) || 
-      (n.body?.toLowerCase().includes(searchTerm)) || 
-      (n.work_order_number?.toLowerCase().includes(searchTerm)) ||
-      (n.tags?.some(t => t.toLowerCase().includes(searchTerm)))
-    );
-    filteredReminders = filteredReminders.filter(r => 
-      (r.title?.toLowerCase().includes(searchTerm)) || 
-      (r.notes?.toLowerCase().includes(searchTerm)) || 
-      (r.work_order_number?.toLowerCase().includes(searchTerm))
-    );
-  }
-
-  // Filter by tab
-  if (fucFilter === 'pinned') {
-    filteredNotes = filteredNotes.filter(n => n.is_pinned && !n.is_archived);
-    filteredReminders = filteredReminders.filter(r => r.is_pinned && r.status !== 'completed');
-  } else if (fucFilter === 'archived') {
-    filteredNotes = filteredNotes.filter(n => n.is_archived);
-    filteredReminders = []; 
-  } else if (fucFilter === 'reminders_only') {
-    filteredNotes = [];
-    filteredReminders = filteredReminders.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
-  } else if (fucFilter === 'notes_only') {
-    filteredNotes = filteredNotes.filter(n => !n.is_archived);
-    filteredReminders = [];
-  } else if (fucFilter === 'overdue_only') {
-    const now = new Date();
-    filteredNotes = [];
-    filteredReminders = filteredReminders.filter(r => r.status !== 'completed' && new Date(r.reminder_datetime) < now);
-  } else if (fucFilter === 'all') {
-    filteredNotes = filteredNotes.filter(n => !n.is_archived);
-    filteredReminders = filteredReminders.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
-  }
-
-  if (fucView === 'board') {
-    renderFUCBoard(filteredNotes, filteredReminders);
-  } else {
-    renderFUCList(filteredNotes, filteredReminders);
-  }
-}
-
-function renderFUCBoard(notes, rems) {
-  // Pinned items must appear regardless of column filters, but should honor search if present
-  const searchTerm = document.getElementById('fuc-search').value.toLowerCase();
-  let allPinnedNotes = followupNotes.filter(n => n.is_pinned && !n.is_archived);
-  let allPinnedRems = reminders.filter(r => r.is_pinned && r.status !== 'completed' && r.status !== 'cancelled');
-
-  if (searchTerm) {
-    allPinnedNotes = allPinnedNotes.filter(n => (n.title?.toLowerCase().includes(searchTerm)) || (n.body?.toLowerCase().includes(searchTerm)) || (n.work_order_number?.toLowerCase().includes(searchTerm)));
-    allPinnedRems = allPinnedRems.filter(r => (r.title?.toLowerCase().includes(searchTerm)) || (r.notes?.toLowerCase().includes(searchTerm)) || (r.work_order_number?.toLowerCase().includes(searchTerm)));
-  }
-
-  const pinnedRow = document.getElementById('fuc-pinned-row');
-  if (allPinnedNotes.length > 0 || allPinnedRems.length > 0) {
-    pinnedRow.style.display = 'flex';
-    pinnedRow.innerHTML = '';
-    allPinnedRems.forEach(r => pinnedRow.appendChild(createReminderCard(r)));
-    allPinnedNotes.forEach(n => pinnedRow.appendChild(createStickyNote(n)));
-  } else {
-    pinnedRow.style.display = 'none';
-  }
-
-  const remCol = document.getElementById('fuc-reminders-col');
-  const noteCol = document.getElementById('fuc-notes-col');
-  
-  remCol.innerHTML = '';
-  noteCol.innerHTML = '';
-
-  const activeRems = rems.filter(r => !r.is_pinned || fucFilter === 'pinned');
-  const activeNotes = notes.filter(n => (!n.is_pinned || fucFilter === 'pinned') && !n.is_archived);
-
-  activeRems.forEach(r => remCol.appendChild(createReminderCard(r)));
-  activeNotes.forEach(n => noteCol.appendChild(createStickyNote(n)));
-
-  if (activeRems.length === 0) remCol.innerHTML = '<div class="empty-state">No active reminders</div>';
-  if (activeNotes.length === 0 && fucFilter !== 'archived') noteCol.innerHTML = '<div class="empty-state">No site notes</div>';
-  
-  if (fucFilter === 'archived') {
-    const archivedNotes = notes.filter(n => n.is_archived);
-    archivedNotes.forEach(n => noteCol.appendChild(createStickyNote(n)));
-  }
-}
-
-function createReminderCard(r) {
-  const card = document.createElement('div');
-  const isOverdue = new Date(r.reminder_datetime) < new Date() && r.status !== 'completed';
-  card.className = `fuc-reminder-card ${isOverdue ? 'overdue' : ''}`;
-  card.style.setProperty('--priority-color', getPriorityColor(r.priority));
-  
-  card.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-      <div class="card-wo-tag" onclick="event.stopPropagation(); navigateToWO('${r.work_order_number}')">${r.work_order_number}</div>
-      <button class="btn-reset" onclick="event.stopPropagation(); setReminderPinned('${r.id}', ${!r.is_pinned})" style="font-size:12px; color:${r.is_pinned ? 'var(--accent)' : 'var(--color-text-muted)'}"><i class="fas fa-thumbtack"></i></button>
-    </div>
-    <div class="card-title">${r.title}</div>
-    <div class="card-reason">${r.reason === 'Other' ? r.custom_reason : r.reason}</div>
-    <div class="card-footer">
-      <div class="card-datetime"><i class="far fa-clock"></i> ${dayjs(r.reminder_datetime).format('DD MMM, HH:mm')}</div>
-      ${r.photo_count > 0 ? `<div class="card-photo-chip"><i class="fas fa-image"></i> ${r.photo_count}</div>` : ''}
-    </div>
-  `;
-  
-  card.ondblclick = () => openReminderModal(r.id);
-  return card;
-}
-
-function createStickyNote(n) {
-  const note = document.createElement('div');
-  note.className = `fuc-sticky-note ${n.color || 'yellow'}`;
-  note.style.setProperty('--note-rotation', `${n.rotation_deg || 0}deg`);
-  
-  note.innerHTML = `
-    <div class="note-pin" onclick="event.stopPropagation(); setNotePinned('${n.id}', ${!n.is_pinned})" style="cursor:pointer; ${n.is_pinned ? '' : 'opacity:0.2; top:5px;'}">📌</div>
-    <div class="note-title" style="margin-top: ${n.is_pinned ? '0' : '10px'}">${n.title || 'Untitled'}</div>
-    <div class="note-body">${n.body}</div>
-    <div class="note-footer">
-      ${n.work_order_number ? `<div class="note-wo-link" onclick="navigateToWO('${n.work_order_number}')">${n.work_order_number}</div>` : `<div class="note-tag">${n.category || 'general'}</div>`}
-      ${n.photo_count > 0 ? `<div class="note-photo-strip" id="note-strip-${n.id}"></div>` : ''}
-    </div>
-  `;
-  
-  if (n.photo_count > 0) {
-    loadNoteStrip(n.id);
-  }
-
-  note.ondblclick = () => openNoteDetailModal(n.id);
-  return note;
-}
-
-async function loadNoteStrip(noteId) {
   if (!supabaseClient) return;
-  const { data } = await supabaseClient.from('followup_note_photos').select('public_url').eq('note_id', noteId).limit(3);
-  if (data) {
-    const strip = document.getElementById(`note-strip-${noteId}`);
-    if (strip) {
-      strip.innerHTML = data.map(p => `<img src="${p.public_url}" alt="note photo">`).join('');
-    }
-  }
-}
-
-function renderFUCList(notes, rems) {
-  const body = document.getElementById('fuc-list-body');
-  body.innerHTML = '';
-  
-  const allItems = [
-    ...rems.map(r => ({ ...r, fucType: 'Reminder' })),
-    ...notes.map(n => ({ ...n, fucType: 'Note' }))
-  ].sort((a, b) => new Date(b.created_at || b.reminder_datetime) - new Date(a.created_at || a.reminder_datetime));
-
-  allItems.forEach((item, idx) => {
-    const tr = document.createElement('tr');
-    tr.style.cursor = 'pointer';
-    tr.ondblclick = () => item.fucType === 'Reminder' ? openReminderModal(item.id) : openNoteDetailModal(item.id);
-    
-    const isOverdue = item.fucType === 'Reminder' && new Date(item.reminder_datetime) < new Date() && item.status !== 'completed';
-    
-    tr.innerHTML = `
-      <td>${idx + 1}</td>
-      <td><i class="${item.fucType === 'Reminder' ? 'fas fa-bell' : 'fas fa-sticky-note'}"></i> ${item.fucType}</td>
-      <td><div style="font-weight:600;">${item.title || 'Untitled'}</div><div style="font-size:10px; color:var(--muted);">${(item.body || item.notes || '').substring(0, 50)}...</div></td>
-      <td class="wo-num" onclick="navigateToWO('${item.work_order_number}')">${item.work_order_number || '—'}</td>
-      <td>${item.category || item.reason || '—'}</td>
-      <td><span class="status-badge" style="background:${item.fucType === 'Reminder' ? getPriorityColor(item.priority)+'15' : 'var(--note-'+(item.color || 'yellow')+'-bg)'}; color:${item.fucType === 'Reminder' ? getPriorityColor(item.priority) : 'var(--note-'+(item.color || 'yellow')+')'}">${(item.priority || item.color || 'yellow').toUpperCase()}</span></td>
-      <td style="font-family:var(--font-data);">${dayjs(item.reminder_datetime || item.created_at).format('YYYY-MM-DD HH:mm')}</td>
-      <td style="text-align:center;">${item.photo_count || 0}</td>
-      <td><span class="status-badge ${isOverdue ? 'badge-RTNENG' : ''}">${isOverdue ? 'OVERDUE' : (item.status || 'Active')}</span></td>
-      <td style="text-align:center;">
-        <button class="btn btn-ghost btn-icon" onclick="item.fucType === 'Reminder' ? openReminderModal('${item.id}') : openNoteDetailModal('${item.id}')"><i class="fas fa-edit"></i></button>
-      </td>
-    `;
-    body.appendChild(tr);
-  });
-}
-
-function navigateToWO(woId) {
-  if (!woId) return;
-  showPage('workorders');
-  // Highlight logic for WO table
-  setTimeout(() => {
-    const rows = document.querySelectorAll('#woBody tr');
-    rows.forEach(r => {
-      if (r.querySelector('.wo-num')?.textContent === woId) {
-        r.classList.add('selected');
-        r.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        r.classList.remove('selected');
-      }
-    });
-  }, 500);
-}
-
-function toggleQuickNotePopover() {
-  const popover = document.getElementById('quickNotePopover');
-  const isVisible = popover.style.display === 'block';
-  popover.style.display = isVisible ? 'none' : 'block';
-  if (!isVisible) {
-    currentQuickNoteColor = 'yellow';
-    document.querySelectorAll('.quick-note-swatch').forEach(s => s.classList.toggle('active', s.dataset.color === 'yellow'));
-    document.getElementById('quick-note-text').value = '';
-    document.getElementById('quick-note-text').focus();
-  }
-}
-
-function setQuickNoteColor(color, el) {
-  currentQuickNoteColor = color;
-  document.querySelectorAll('.quick-note-swatch').forEach(s => s.classList.remove('active'));
-  el.classList.add('active');
-}
-
-async function saveQuickNote() {
-  const body = document.getElementById('quick-note-text').value.trim();
-  if (!body) return;
-
-  const note = {
-    body,
-    color: currentQuickNoteColor,
-    created_by: currentUser?.id,
-    created_by_name: currentUser?.user_metadata?.full_name || currentUser?.email,
-    rotation_deg: getRandomRotationDeg()
-  };
-
-  try {
-    const { data, error } = await supabaseClient.from('followup_notes').insert([note]).select();
-    if (error) throw error;
-    showToast("Note saved");
-    toggleQuickNotePopover();
-    fetchFollowUpNotes();
-  } catch (e) {
-    showToast(e.message, "error");
-  }
-}
-
-function getRandomRotationDeg() {
-  const angles = [-1.8, -1.2, -0.6, 0, 0.6, 1.2, 1.8];
-  return angles[Math.floor(Math.random() * angles.length)];
-}
-
-function openNoteDetailModal(noteId) {
-  currentOpenNoteId = noteId;
-  const n = followupNotes.find(x => x.id === noteId);
-  if (!n) return;
-
-  document.getElementById('noteModalTitle').textContent = 'Edit Note';
-  document.getElementById('note-det-title').value = n.title || '';
-  document.getElementById('note-det-body').value = n.body || '';
-  document.getElementById('note-det-category').value = n.category || 'general';
-  document.getElementById('note-det-wo').value = n.work_order_number || '';
-  document.getElementById('note-det-tags').value = (n.tags || []).join(', ');
-  document.getElementById('note-pin-check').checked = n.is_pinned;
-  document.getElementById('note-pin-icon').style.color = n.is_pinned ? 'var(--accent)' : 'var(--color-text-muted)';
-  
-  setNoteDetailColor(n.color || 'yellow', document.querySelector(`.quick-note-swatch[onclick*="setNoteDetailColor('${n.color || 'yellow'}'"]`));
-  
-  loadNotePhotos(noteId);
-  initNotePhotoDropzone();
-
-  document.getElementById('noteDetailModalOverlay').style.display = 'flex';
-}
-
-function closeNoteDetailModal() {
-  document.getElementById('noteDetailModalOverlay').style.display = 'none';
-  currentOpenNoteId = null;
-  pendingPhotos = []; // Reuse this global but clear it
-}
-
-function setNoteDetailColor(color, el) {
-  document.getElementById('noteDetailModal').style.setProperty('--note-accent-color', `var(--note-${color})`);
-  document.querySelectorAll('.quick-note-swatch').forEach(s => s.classList.remove('active'));
-  if (el) el.classList.add('active');
-}
-
-function toggleNotePin() {
-  const chk = document.getElementById('note-pin-check');
-  chk.checked = !chk.checked;
-  document.getElementById('note-pin-icon').style.color = chk.checked ? 'var(--accent)' : 'var(--color-text-muted)';
-}
-
-async function saveNoteDetail() {
-  if (!currentOpenNoteId) return;
-  
-  const tagsRaw = document.getElementById('note-det-tags').value;
-  const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(t => t) : [];
-  
-  const activeSwatch = document.querySelector('#noteDetailModal .quick-note-swatch.active');
-  const color = activeSwatch ? activeSwatch.dataset.color : 'yellow';
-
-  const noteData = {
-    title: document.getElementById('note-det-title').value.trim(),
-    body: document.getElementById('note-det-body').value.trim(),
-    category: document.getElementById('note-det-category').value,
-    work_order_number: document.getElementById('note-det-wo').value.trim(),
-    tags,
-    color,
-    is_pinned: document.getElementById('note-pin-check').checked,
-    updated_by: currentUser?.id
-  };
-
-  try {
-    const { error } = await supabaseClient.from('followup_notes').update(noteData).eq('id', currentOpenNoteId);
-    if (error) throw error;
-    
-    await uploadNotePendingPhotos(currentOpenNoteId);
-    
-    showToast("Note updated");
-    closeNoteDetailModal();
-    fetchFollowUpNotes();
-  } catch (e) {
-    showToast(e.message, "error");
-  }
-}
-
-async function deleteNote() {
-  if (!currentOpenNoteId) return;
-  if (!confirm("Delete this note permanently?")) return;
   
   try {
-    const { error } = await supabaseClient.from('followup_notes').delete().eq('id', currentOpenNoteId);
-    if (error) throw error;
-    showToast("Note deleted");
-    closeNoteDetailModal();
-    fetchFollowUpNotes();
+    const { count: teamCount } = await supabaseClient.from('installation_teams').select('*', { count: 'exact', head: true });
+    if (teamCount > 0) return; // Already seeded
+
+    showToast("Seeding initial installation data...");
+
+    // 1. Teams
+    const teams = [
+      { team_name: 'Team Ahmed', supervisor: 'Ahmed Al-Mansoori', crew_size: 4, vehicle: 'Toyota Hilux 4x4', capacity_per_day: 12, status: 'Available', skills: ['Ground Signs', 'Post Work'], color: '#00bcd4' },
+      { team_name: 'Team Ali', supervisor: 'Ali Hassan', crew_size: 5, vehicle: 'Isuzu NPR Crane', capacity_per_day: 8, status: 'Available', skills: ['Gantries', 'Cantilevers', 'Heavy Lifting'], color: '#ff9800' },
+      { team_name: 'Team Hassan', supervisor: 'Hassan Mahmoud', crew_size: 3, vehicle: 'Ford F-150', capacity_per_day: 15, status: 'Available', skills: ['Road Safety', 'Small Signage'], color: '#4caf50' }
+    ];
+    await supabaseClient.from('installation_teams').insert(teams);
+
+    // 2. Sample Work Orders (Updates existing or creates if missing)
+    const sampleWOs = [
+      { work_order: 'INST-2025-001', description: 'Directional sign installation - Al Shamal Rd', status: 'APPR', latitude: 25.3548, longitude: 51.1839, pwa_engineer: 'Adnan Khdair', location: 'Al Shamal Road', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-002', description: 'Warning sign replacement - Corniche', status: 'APPR', latitude: 25.2867, longitude: 51.5333, pwa_engineer: 'Saeed Mubarak', location: 'Doha Corniche', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-003', description: 'Speed limit signs - Lusail Express', status: 'APPR', latitude: 25.3500, longitude: 51.5167, pwa_engineer: 'Mohammed Issa', location: 'Lusail Expressway', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-004', description: 'Regulatory signage - West Bay', status: 'APPR', latitude: 25.3200, longitude: 51.5300, pwa_engineer: 'Adnan Khdair', location: 'West Bay', installation_status: 'Pending', fabrication_status: 'Ongoing', ready_for_installation: false },
+      { work_order: 'INST-2025-005', description: 'Information boards - Education City', status: 'APPR', latitude: 25.3100, longitude: 51.4300, pwa_engineer: 'Saeed Mubarak', location: 'Education City', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-006', description: 'Pedestrian crossing signs - Hamad Port', status: 'APPR', latitude: 25.0100, longitude: 51.6100, pwa_engineer: 'Mohammed Issa', location: 'Hamad Port', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-007', description: 'No parking signs - Souq Waqif', status: 'APPR', latitude: 25.2867, longitude: 51.5267, pwa_engineer: 'Adnan Khdair', location: 'Souq Waqif', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-008', description: 'Street name plates - Al Sadd', status: 'APPR', latitude: 25.2800, longitude: 51.5000, pwa_engineer: 'Saeed Mubarak', location: 'Al Sadd', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-009', description: 'Variable message signs - Salwa Rd', status: 'APPR', latitude: 25.2500, longitude: 51.4500, pwa_engineer: 'Mohammed Issa', location: 'Salwa Road', installation_status: 'Pending', fabrication_status: 'Pending', ready_for_installation: false },
+      { work_order: 'INST-2025-010', description: 'Bridge height markers - F-Ring', status: 'APPR', latitude: 25.2200, longitude: 51.5500, pwa_engineer: 'Adnan Khdair', location: 'F-Ring Road', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-011', description: 'Cyclist route signage - Aspire', status: 'APPR', latitude: 25.2600, longitude: 51.4400, pwa_engineer: 'Saeed Mubarak', location: 'Aspire Zone', installation_status: 'Assigned', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Hassan' },
+      { work_order: 'INST-2025-012', description: 'Bus stop signage - Airport Rd', status: 'APPR', latitude: 25.2400, longitude: 51.5600, pwa_engineer: 'Mohammed Issa', location: 'Airport Road', installation_status: 'In Progress', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Ahmed' },
+      { work_order: 'INST-2025-013', description: 'Directional gantry - D-Ring', status: 'APPR', latitude: 25.2600, longitude: 51.5200, pwa_engineer: 'Adnan Khdair', location: 'D-Ring Road', installation_status: 'Completed', fabrication_status: 'Done', ready_for_installation: true, assigned_team: 'Team Ali' },
+      { work_order: 'INST-2025-014', description: 'Hospital wayfinding - HMC', status: 'APPR', latitude: 25.2900, longitude: 51.4900, pwa_engineer: 'Saeed Mubarak', location: 'Hamad Medical Corp', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true },
+      { work_order: 'INST-2025-015', description: 'Metro station signs - Msherieb', status: 'APPR', latitude: 25.2860, longitude: 51.5220, pwa_engineer: 'Mohammed Issa', location: 'Msherieb Downtown', installation_status: 'Ready', fabrication_status: 'Done', ready_for_installation: true }
+    ];
+    await supabaseClient.from('work_orders').upsert(sampleWOs, { onConflict: 'work_order' });
+
+    showToast("Sample installation data seeded.");
+    await loadInstData();
+    renderInstPage();
   } catch (e) {
-    showToast(e.message, "error");
+    console.error("Seeding failed:", e);
   }
-}
-
-async function archiveNote() {
-  if (!currentOpenNoteId) return;
-  try {
-    const { error } = await supabaseClient.from('followup_notes').update({ is_archived: true }).eq('id', currentOpenNoteId);
-    if (error) throw error;
-    showToast("Note archived");
-    closeNoteDetailModal();
-    fetchFollowUpNotes();
-  } catch (e) {
-    showToast(e.message, "error");
-  }
-}
-
-function initNotePhotoDropzone() {
-  const zone = document.getElementById('notePhotoDropzone');
-  const input = document.getElementById('notePhotoFileInput');
-  if (!zone || !input) return;
-
-  zone.onclick = () => input.click();
-  input.onchange = e => handleNotePhotoFiles([...e.target.files]);
-}
-
-function handleNotePhotoFiles(files) {
-  files.forEach(file => {
-    const previewUrl = URL.createObjectURL(file);
-    pendingPhotos.push({ file, previewUrl });
-  });
-  renderNotePhotoThumbs();
-}
-
-function renderNotePhotoThumbs() {
-  const grid = document.getElementById('notePhotoThumbGrid');
-  grid.innerHTML = '';
-
-  existingPhotos.forEach((photo, i) => {
-    grid.appendChild(buildThumbEl(photo.public_url, '', () => deleteNotePhoto(photo.id), () => {}));
-  });
-
-  pendingPhotos.forEach((p, i) => {
-    grid.appendChild(buildThumbEl(p.previewUrl, '', () => {
-      URL.revokeObjectURL(p.previewUrl);
-      pendingPhotos.splice(i, 1);
-      renderNotePhotoThumbs();
-    }, () => {}));
-  });
-}
-
-async function loadNotePhotos(noteId) {
-  const { data } = await supabaseClient.from('followup_note_photos').select('*').eq('note_id', noteId);
-  existingPhotos = data || [];
-  renderNotePhotoThumbs();
-}
-
-async function deleteNotePhoto(photoId) {
-  if (!confirm("Remove this photo?")) return;
-  const photo = existingPhotos.find(p => p.id === photoId);
-  if (!photo) return;
-  
-  await supabaseClient.storage.from('followup-note-photos').remove([photo.storage_path]);
-  await supabaseClient.from('followup_note_photos').delete().eq('id', photoId);
-  existingPhotos = existingPhotos.filter(p => p.id !== photoId);
-  renderNotePhotoThumbs();
-}
-
-function setNotePinned(noteId, isPinned) {
-  if (!supabaseClient) return;
-  supabaseClient.from('followup_notes').update({ is_pinned: isPinned }).eq('id', noteId)
-    .then(({error}) => {
-      if (error) showToast(error.message, 'error');
-      else fetchFollowUpNotes();
-    });
-}
-
-function setReminderPinned(remId, isPinned) {
-  if (!supabaseClient) return;
-  // This assumes work_order_reminders has an is_pinned column
-  supabaseClient.from('work_order_reminders').update({ is_pinned: isPinned }).eq('id', remId)
-    .then(({error}) => {
-      if (error) showToast(error.message, 'error');
-      else fetchReminders();
-    });
-}
-
-async function uploadNotePendingPhotos(noteId) {
-  if (pendingPhotos.length === 0) return;
-  for (const p of pendingPhotos) {
-    const path = `${currentUser.id}/${noteId}/${Date.now()}-${p.file.name}`;
-    await supabaseClient.storage.from('followup-note-photos').upload(path, p.file);
-    const { data: { publicUrl } } = supabaseClient.storage.from('followup-note-photos').getPublicUrl(path);
-    await supabaseClient.from('followup_note_photos').insert([{
-      note_id: noteId,
-      storage_path: path,
-      public_url: publicUrl,
-      file_name: p.file.name,
-      uploaded_by: currentUser.id
-    }]);
-  }
-  pendingPhotos = [];
-}
-
-function toggleFUCFabMenu() {
-  document.getElementById('fuc-fab-menu').classList.toggle('open');
-}
-
-function convertNoteToReminder() {
-  if (!currentOpenNoteId) return;
-  const n = followupNotes.find(x => x.id === currentOpenNoteId);
-  if (!n) return;
-
-  const woId = n.work_order_number;
-  closeNoteDetailModal();
-  
-  // Set global pending flag
-  window.pendingNoteToArchive = n.id;
-
-  // Open existing reminder modal with pre-filled data
-  openReminderModal(null, woId);
-  
-  // Wait for modal to render then pre-fill
-  setTimeout(() => {
-    document.getElementById('rem-title').value = n.title || 'Note Follow-up';
-    document.getElementById('rem-notes').value = n.body || '';
-    // Reason defaults to Follow-up
-  }, 100);
-}
-
-async function exportFUCPDF() {
-  const { jsPDF } = window.jspdf;
-  showToast("Generating Follow-Up Report...");
-
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const pdfWidth = 210;
-  const pdfHeight = 297;
-  const margin = 15;
-  const contentWidth = pdfWidth - (2 * margin);
-  let currentY = margin;
-
-  // 1. Header
-  pdf.setFillColor(11, 15, 26);
-  pdf.rect(0, 0, pdfWidth, 35, 'F');
-  
-  if (companyLogo) {
-    try { pdf.addImage(companyLogo, 'PNG', margin, 7, 20, 20); } catch(e) {}
-  }
-  
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(22);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text("QBC Operations Center", margin + (companyLogo ? 25 : 0), 18);
-  
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(148, 163, 184);
-  pdf.text("Follow-Up Center – Reminders & Site Notes Report", margin + (companyLogo ? 25 : 0), 25);
-  
-  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  pdf.setFontSize(9);
-  pdf.text(`Report Generated: ${today}`, pdfWidth - margin, 18, { align: 'right' });
-  pdf.text(`User: ${currentUser?.user_metadata?.full_name || currentUser?.email}`, pdfWidth - margin, 23, { align: 'right' });
-
-  currentY = 45;
-
-  // Render content
-  const searchTerm = document.getElementById('fuc-search').value.toLowerCase();
-  let filteredNotes = followupNotes.filter(n => !n.is_archived);
-  let filteredReminders = reminders.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
-
-  if (searchTerm) {
-    filteredNotes = filteredNotes.filter(n => (n.title?.toLowerCase().includes(searchTerm)) || (n.body?.toLowerCase().includes(searchTerm)) || (n.work_order_number?.toLowerCase().includes(searchTerm)));
-    filteredReminders = filteredReminders.filter(r => (r.title?.toLowerCase().includes(searchTerm)) || (r.notes?.toLowerCase().includes(searchTerm)) || (r.work_order_number?.toLowerCase().includes(searchTerm)));
-  }
-
-  // 2. Reminders Section
-  pdf.setTextColor(0, 200, 180);
-  pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text("ACTIVE REMINDERS", margin, currentY);
-  currentY += 8;
-
-  if (filteredReminders.length === 0) {
-    pdf.setTextColor(100, 116, 139);
-    pdf.setFontSize(10);
-    pdf.text("No active reminders found.", margin, currentY);
-    currentY += 10;
-  } else {
-    for (const r of filteredReminders) {
-      if (currentY > pdfHeight - 40) { pdf.addPage(); currentY = margin; }
-      
-      pdf.setDrawColor(226, 232, 240);
-      pdf.line(margin, currentY, pdfWidth - margin, currentY);
-      currentY += 5;
-      
-      pdf.setTextColor(30, 41, 59);
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(`${r.title} [${r.work_order_number || 'No WO'}]`, margin, currentY);
-      
-      pdf.setFontSize(9);
-      pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(100, 116, 139);
-      pdf.text(`Due: ${dayjs(r.reminder_datetime).format('DD MMM YYYY, HH:mm')} | Priority: ${r.priority.toUpperCase()}`, margin, currentY + 5);
-      
-      pdf.setTextColor(51, 65, 85);
-      const notesLines = pdf.splitTextToSize(r.notes || 'No notes', contentWidth - 10);
-      pdf.text(notesLines, margin, currentY + 12);
-      
-      currentY += 15 + (notesLines.length * 4);
-    }
-  }
-
-  currentY += 10;
-  if (currentY > pdfHeight - 40) { pdf.addPage(); currentY = margin; }
-
-  // 3. Notes Section
-  pdf.setTextColor(245, 158, 11);
-  pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text("SITE NOTES", margin, currentY);
-  currentY += 8;
-
-  if (filteredNotes.length === 0) {
-    pdf.setTextColor(100, 116, 139);
-    pdf.setFontSize(10);
-    pdf.text("No active site notes found.", margin, currentY);
-  } else {
-    for (const n of filteredNotes) {
-      if (currentY > pdfHeight - 40) { pdf.addPage(); currentY = margin; }
-      
-      pdf.setDrawColor(226, 232, 240);
-      pdf.line(margin, currentY, pdfWidth - margin, currentY);
-      currentY += 5;
-      
-      pdf.setTextColor(30, 41, 59);
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(`${n.title || 'Untitled Note'} [${n.work_order_number || 'Personal'}]`, margin, currentY);
-      
-      pdf.setFontSize(9);
-      pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(100, 116, 139);
-      pdf.text(`Created: ${dayjs(n.created_at).format('DD MMM YYYY')} | Category: ${n.category || 'general'}`, margin, currentY + 5);
-      
-      pdf.setTextColor(51, 65, 85);
-      const bodyLines = pdf.splitTextToSize(n.body, contentWidth - 10);
-      pdf.text(bodyLines, margin, currentY + 12);
-      
-      currentY += 15 + (bodyLines.length * 4);
-    }
-  }
-
-  pdf.save(`QBC_FollowUp_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-}
-
-function setupFUCListeners() {
-  window.addEventListener('keydown', e => {
-    if (document.getElementById('page-followup').classList.contains('active')) {
-      if (e.key === 'n' || e.key === 'N') {
-        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          toggleQuickNotePopover();
-        }
-      }
-      if (e.key === 'r' || e.key === 'R') {
-        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          openReminderModal(null);
-        }
-      }
-      if (e.key === 'f' || e.key === 'F') {
-        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          document.getElementById('fuc-search').focus();
-        }
-      }
-      if (e.key === 'p' || e.key === 'P') {
-        // Pin/unpin logic for "focused" card could be complex, 
-        // let's skip for now or implement if there's a clear 'focus'
-      }
-    }
-    if (e.key === 'Escape') {
-      closeNoteDetailModal();
-      document.getElementById('quickNotePopover').style.display = 'none';
-      document.getElementById('fuc-fab-menu').classList.remove('open');
-    }
-  });
 }
 
 async function refreshUI() {
   if (document.getElementById('page-installation').classList.contains('active')) {
     await loadInstData();
     renderInstPage();
-  }
-  if (document.getElementById('page-reminders').classList.contains('active')) {
-    await fetchReminders();
-  }
-  if (document.getElementById('page-followup').classList.contains('active')) {
-    await Promise.all([fetchReminders(), fetchFollowUpNotes()]);
-    renderFollowUpCenter();
   }
    applyFilters(false);
    applyManufacturingFilters();
@@ -13349,112 +10132,6 @@ async function refreshUI() {
 }
 
 </script>
-<!-- QUICK NOTE POPOVER -->
-<div id="quickNotePopover" class="quick-note-popover">
-  <div class="quick-note-color-row">
-    <div class="quick-note-swatch active" data-color="yellow" style="background: var(--note-yellow);" onclick="setQuickNoteColor('yellow', this)"></div>
-    <div class="quick-note-swatch" data-color="teal" style="background: var(--note-teal);" onclick="setQuickNoteColor('teal', this)"></div>
-    <div class="quick-note-swatch" data-color="purple" style="background: var(--note-purple);" onclick="setQuickNoteColor('purple', this)"></div>
-    <div class="quick-note-swatch" data-color="red" style="background: var(--note-red);" onclick="setQuickNoteColor('red', this)"></div>
-    <div class="quick-note-swatch" data-color="blue" style="background: var(--note-blue);" onclick="setQuickNoteColor('blue', this)"></div>
-    <div class="quick-note-swatch" data-color="green" style="background: var(--note-green);" onclick="setQuickNoteColor('green', this)"></div>
-  </div>
-  <textarea id="quick-note-text" class="quick-note-textarea" placeholder="Type your note here..."></textarea>
-  <button class="quick-note-save" onclick="saveQuickNote()">Save Note</button>
-</div>
-
-<!-- NOTE DETAIL MODAL -->
-<div class="modal-overlay" id="noteDetailModalOverlay">
-  <div class="modal note-detail-modal" id="noteDetailModal">
-    <button class="modal-close" onclick="closeNoteDetailModal()">×</button>
-    <div class="reminder-modal-header" style="border-bottom:none; padding-bottom:0;">
-      <div class="modal-icon" style="color:var(--note-accent-color)"><i class="fas fa-sticky-note"></i></div>
-      <h2 id="noteModalTitle">Note Details</h2>
-    </div>
-    
-    <div class="reminder-modal-body">
-      <div class="quick-note-color-row" style="margin-bottom: var(--space-5);">
-        <div class="quick-note-swatch" data-color="yellow" style="background: var(--note-yellow);" onclick="setNoteDetailColor('yellow', this)"></div>
-        <div class="quick-note-swatch" data-color="teal" style="background: var(--note-teal);" onclick="setNoteDetailColor('teal', this)"></div>
-        <div class="quick-note-swatch" data-color="purple" style="background: var(--note-purple);" onclick="setNoteDetailColor('purple', this)"></div>
-        <div class="quick-note-swatch" data-color="red" style="background: var(--note-red);" onclick="setNoteDetailColor('red', this)"></div>
-        <div class="quick-note-swatch" data-color="blue" style="background: var(--note-blue);" onclick="setNoteDetailColor('blue', this)"></div>
-        <div class="quick-note-swatch" data-color="green" style="background: var(--note-green);" onclick="setNoteDetailColor('green', this)"></div>
-        <div style="flex:1"></div>
-        <div class="reminder-toggle" onclick="toggleNotePin()">
-          <input type="checkbox" id="note-pin-check" style="display:none">
-          <i class="fas fa-thumbtack" id="note-pin-icon" style="color:var(--color-text-muted)"></i>
-          <span>Pin to top</span>
-        </div>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group" style="grid-column: 1/-1;">
-          <label>Title</label>
-          <input type="text" id="note-det-title" class="reminder-input" placeholder="Note Title (Optional)">
-        </div>
-        <div class="form-group">
-          <label>Category</label>
-          <select id="note-det-category" class="reminder-select">
-            <option value="general">General</option>
-            <option value="technical">Technical</option>
-            <option value="approval">Approval</option>
-            <option value="site">Site</option>
-            <option value="material">Material</option>
-            <option value="meeting">Meeting</option>
-            <option value="personal">Personal</option>
-            <option value="urgent">Urgent</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Linked Work Order</label>
-          <input type="text" id="note-det-wo" class="reminder-input" placeholder="Search WO# (e.g. 26800018)">
-        </div>
-        <div class="form-group" style="grid-column: 1/-1;">
-          <label>Content</label>
-          <textarea id="note-det-body" class="reminder-textarea" style="height: 150px;" placeholder="Write your note content..."></textarea>
-        </div>
-        <div class="form-group" style="grid-column: 1/-1;">
-          <label>Tags (Comma separated)</label>
-          <input type="text" id="note-det-tags" class="reminder-input" placeholder="e.g. ashghal, survey, urgent">
-        </div>
-      </div>
-
-      <div class="reminder-section-label" style="margin-top: var(--space-6);">Photo Attachments</div>
-      <div class="photo-dropzone" id="notePhotoDropzone">
-        <input type="file" id="notePhotoFileInput" multiple accept="image/*" style="display:none">
-        <div class="photo-dropzone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-        <div class="photo-dropzone-label">Drop photos here or click to upload</div>
-        <div class="photo-dropzone-hint">Max 10MB per image. Supports JPG, PNG, WebP</div>
-      </div>
-      <div id="notePhotoThumbGrid" class="photo-thumb-grid"></div>
-
-    </div>
-
-    <div class="reminder-modal-footer">
-      <button class="btn btn-ghost" onclick="convertNoteToReminder()" id="btn-convert-note"><i class="fas fa-bell"></i> Convert to Reminder</button>
-      <div style="flex:1"></div>
-      <button class="btn btn-red" onclick="deleteNote()" id="btn-delete-note"><i class="fas fa-trash"></i> Delete</button>
-      <button class="btn btn-ghost" onclick="archiveNote()" id="btn-archive-note"><i class="fas fa-archive"></i> Archive</button>
-      <button class="btn btn-primary" onclick="saveNoteDetail()" id="btn-save-note">Save Changes</button>
-    </div>
-  </div>
-</div>
-
-<!-- FUC FAB -->
-<button class="fuc-fab" id="fuc-fab" style="display:none;" onclick="toggleFUCFabMenu()" title="Add New">
-  <i class="fas fa-plus"></i>
-</button>
-<div class="fuc-fab-menu" id="fuc-fab-menu">
-  <div class="fuc-fab-option" onclick="toggleQuickNotePopover(); toggleFUCFabMenu();">
-    <i class="fas fa-sticky-note"></i> New Note
-  </div>
-  <div class="fuc-fab-option" onclick="openReminderModal(null); toggleFUCFabMenu();">
-    <i class="fas fa-bell"></i> New Reminder
-  </div>
-</div>
-
 </body>
 </html>
-
 
