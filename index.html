@@ -3679,6 +3679,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
+  </div>
+ </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Context Menu -->
@@ -3820,13 +3824,14 @@ window.addEventListener('load', async () => {
         isAdmin = false;
         isApproved = false;
         document.getElementById('auth-container').style.display = 'flex';
-        document.getElementById('main-nav').style.display = 'none';
+        document.getElementById('app-shell').style.display = 'none';
       }
     });
   } else {
     // Offline / Local Mode Fallback
     const authCont = document.getElementById('auth-container');
     if (authCont) authCont.style.display = 'flex';
+    document.getElementById('app-shell').style.display = 'flex';
   }
   
   const dateBadge = document.getElementById('dateBadge');
