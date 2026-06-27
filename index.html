@@ -8,8 +8,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
@@ -674,18 +675,19 @@ body::before {
 .auth-container { 
   position: fixed; 
   inset: 0; 
-  background: url(https://srdxtvchpuncdkfabiid.supabase.co/storage/v1/object/public/qbc-storage/background.jpg); 
-  background-size: cover;
-  background-position: center;
-  border: 1px solid transparent;
-  border-image: fill 0 linear-gradient(#0001, #000);
+  background-color: #1e1f26;
   z-index: 1000; 
   display: flex; 
   align-items: center; 
   justify-content: center; 
 }
+.auth-container .background {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  z-index: 0;
+}
 .auth-card { 
-  background: rgba(var(--surface-rgb), 0.7); 
+  background: rgba(17, 24, 39, 0.7); 
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1); 
@@ -695,11 +697,44 @@ body::before {
   max-width: 400px; 
   text-align: center; 
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 10;
 }
-.auth-logo { font-size: 32px; margin-bottom: 24px; color: var(--accent); }
+.auth-logo { 
+  font-family: "Josefin Sans", sans-serif;
+  font-size: 24px; 
+  margin: 0;
+  padding-bottom: 0.5rem;
+  letter-spacing: 0.05rem;
+  color: #137abf; 
+  transition: all 0.3s ease;
+  cursor: default;
+  white-space: nowrap;
+}
+.auth-logo:hover {
+  transform: translate3d(0, -5px, 20px);
+  text-shadow: 0 10px 20px rgba(19, 122, 191, 0.3);
+}
+#auth-title {
+  font-family: "Josefin Sans", sans-serif;
+  font-size: 24px;
+  color: #137abf;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+#auth-title:hover {
+  transform: translate3d(0, -3px, 10px);
+}
+.loader span {
+  transition: all 0.3s ease;
+}
+.loader span:hover {
+  color: #fff;
+  font-weight: 700;
+}
 .auth-input { 
   width: 100%; 
-  background: rgba(var(--border-rgb), 0.5); 
+  background: rgba(31, 45, 69, 0.5); 
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   border: 1px solid rgba(255, 255, 255, 0.1); 
@@ -712,13 +747,13 @@ body::before {
   transition: all 0.3s ease;
 }
 .auth-input:focus {
-  background: rgba(var(--border-rgb), 0.8);
-  border-color: var(--accent);
-  box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.3);
+  background: rgba(31, 45, 69, 0.8);
+  border-color: #137abf;
+  box-shadow: 0 0 15px rgba(19, 122, 191, 0.3);
 }
 .auth-btn { 
   width: 100%; 
-  background: rgba(var(--accent-rgb), 0.7); 
+  background: rgba(19, 122, 191, 0.7); 
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   color: #fff; 
@@ -732,12 +767,46 @@ body::before {
   letter-spacing: 1px;
 }
 .auth-btn:hover {
-  background: var(--accent);
+  background: #137abf;
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 10px 20px rgba(19, 122, 191, 0.4);
 }
 .auth-toggle { margin-top: 24px; font-size: 13px; color: var(--muted); cursor: pointer; }
-.auth-toggle span { color: var(--accent); }
+.auth-toggle span { color: #137abf; }
+
+.loader .m {
+  display: inline-block;
+  -webkit-animation: loading 2s ease-in-out infinite alternate;
+}
+
+@-webkit-keyframes loading {
+  to {
+    text-shadow: 0 0 20px #137abf;
+    color: #fff;
+  }
+}
+
+.loader .m:nth-child(2) { -webkit-animation-delay: 0.1s; }
+.loader .m:nth-child(3) { -webkit-animation-delay: 0.2s; }
+.loader .m:nth-child(4) { -webkit-animation-delay: 0.3s; }
+.loader .m:nth-child(5) { -webkit-animation-delay: 0.4s; }
+.loader .m:nth-child(6) { -webkit-animation-delay: 0.5s; }
+.loader .m:nth-child(7) { -webkit-animation-delay: 0.6s; }
+.loader .m:nth-child(8) { -webkit-animation-delay: 0.7s; }
+.loader .m:nth-child(9) { -webkit-animation-delay: 0.8s; }
+.loader .m:nth-child(10) { -webkit-animation-delay: 0.9s; }
+.loader .m:nth-child(11) { -webkit-animation-delay: 1s; }
+.loader .m:nth-child(12) { -webkit-animation-delay: 1.1s; }
+.loader .m:nth-child(13) { -webkit-animation-delay: 1.2s; }
+.loader .m:nth-child(14) { -webkit-animation-delay: 1.3s; }
+.loader .m:nth-child(15) { -webkit-animation-delay: 1.4s; }
+.loader .m:nth-child(16) { -webkit-animation-delay: 1.5s; }
+.loader .m:nth-child(17) { -webkit-animation-delay: 1.6s; }
+.loader .m:nth-child(18) { -webkit-animation-delay: 1.7s; }
+.loader .m:nth-child(19) { -webkit-animation-delay: 1.8s; }
+.loader .m:nth-child(20) { -webkit-animation-delay: 1.9s; }
+.loader .m:nth-child(21) { -webkit-animation-delay: 2s; }
+.loader .m:nth-child(22) { -webkit-animation-delay: 2.1s; }
 
 /* ─── NAV ─── */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;height:var(--header-h);}
@@ -1832,9 +1901,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <a href="#page-dashboard" class="skip-link">Skip to main content</a>
 
 <div id="auth-container" class="auth-container">
+  <canvas class="background"></canvas>
   <div class="auth-card">
-    <div class="auth-logo">QBC Operations Center</div>
-    <h2 id="auth-title">Welcome Back</h2>
+    <div class="auth-logo loader">
+      <span class="m">Q</span><span class="m">B</span><span class="m">C</span><span class="m">&nbsp;</span><span class="m">O</span><span class="m">p</span><span class="m">e</span><span class="m">r</span><span class="m">a</span><span class="m">t</span><span class="m">i</span><span class="m">o</span><span class="m">n</span><span class="m">s</span><span class="m">&nbsp;</span><span class="m">C</span><span class="m">e</span><span class="m">n</span><span class="m">t</span><span class="m">e</span><span class="m">r</span>
+    </div>
+    <h2 id="auth-title" class="loader">
+      <span class="m">W</span><span class="m">e</span><span class="m">l</span><span class="m">c</span><span class="m">o</span><span class="m">m</span><span class="m">e</span><span class="m">&nbsp;</span><span class="m">B</span><span class="m">a</span><span class="m">c</span><span class="m">k</span>
+    </h2>
     <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Signage Asset & GIS Management System</p>
     
     <div id="signup-fields" style="display: none;">
@@ -1847,7 +1921,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <input type="password" id="auth-password" class="auth-input" placeholder="Password">
     
     <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
-    <div style="margin-top: 16px; font-size: 11px; color: var(--accent); cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
+    <div style="margin-top: 16px; font-size: 11px; color: #137abf; cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
     <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
   </div>
 </div>
@@ -3652,6 +3726,22 @@ window.addEventListener('paste', async (e) => {
 });
 
 window.addEventListener('load', async () => {
+  if (typeof Particles !== 'undefined') {
+    Particles.init({
+      selector: '.background',
+      color: ['#137abf', '#ffffff', '#000000'],
+      connectParticles: true,
+      responsive: [
+        {
+          breakpoint: 768,
+          options: {
+            maxParticles: 43,
+            connectParticles: false
+          }
+        }
+      ]
+    });
+  }
   if (supabaseClient) {
     // Single source of truth for auth state
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
