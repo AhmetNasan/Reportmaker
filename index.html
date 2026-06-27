@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3926,8 +3927,10 @@ async function onAuthenticated() {
     return;
   }
 
-  document.getElementById('app-shell').style.display = 'flex';
-  updateTemplateUserInfo();
+  const mainNav = document.getElementById('main-nav');
+  if (mainNav) mainNav.style.display = 'flex';
+  const userInit = document.getElementById('nav-user-initial');
+  if (userInit) userInit.textContent = currentUser.email.charAt(0).toUpperCase();
   
   const ap = document.getElementById('admin-panel');
   const settingsTab = document.getElementById('nav-tab-settings');
@@ -4807,12 +4810,10 @@ function setTheme(theme) {
   currentTheme = theme;
   document.body.setAttribute('data-theme', theme);
   const icon = document.getElementById('theme-icon');
-  if (icon) {
-    if (theme === 'dark') {
-      icon.className = 'fas fa-moon';
-    } else {
-      icon.className = 'fas fa-sun';
-    }
+  if (theme === 'dark') {
+    icon.className = 'fas fa-moon';
+  } else {
+    icon.className = 'fas fa-sun';
   }
 }
 
@@ -13545,10 +13546,7 @@ async function refreshUI() {
   height: 100vh;
   font-size: 15px; 
   font-weight: 500; 
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 500;
+  position: relative; 
 } 
 .sidebar { 
   width: 220px; 
