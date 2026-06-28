@@ -3,53 +3,63 @@
 ## 1. Core Module
 
 ### `work_orders`
-Authoritative record for all project work orders.
-- `work_order` (PK): Standard identifier (e.g., '25289532').
-- `id`: Internal UUID for relationships.
-- `status`: Current lifecycle phase.
-- `latitude` / `longitude`: GIS coordinates for map rendering.
+Master record for all work orders. PK: `work_order`.
+- `id` (UUID): Internal unique identifier for relationship mapping.
+- `status`: Lifecycle phase.
+- `latitude` / `longitude`: GIS coordinates.
+- `ready_for_installation`: Flag for readiness.
 
 ### `manufacturing`
-Technical sign specifications and fabrication tracking.
-- `work_order_number`: Foreign key to `work_orders`.
-- `fab_status`: Current fabrication state.
+Technical sign specs and fab progress.
+- `work_order_number`: FK to `work_orders`.
+- `fab_status`: Progress status.
 
 ### `profiles`
-Extended user data and authorization.
-- `id`: References `auth.users`.
+User authorization and metadata.
+- `id`: PK, references `auth.users`.
 - `role`: Permission level.
+
+### `photos`
+Legacy and compatibility photo references.
 
 ## 2. Installation & Logistics
 
 ### `installation_teams`
-Teams assigned to field work.
-- `team_name`: Unique team identifier.
-- `created_by`: Ownership for RLS.
+Field crews.
+- `team_name`: Unique name.
+- `created_by`: RLS ownership.
 
 ### `installation_records`
-Audit trail of field completions and status updates.
-- `work_order`: References `work_orders`.
+Field audit trail.
+- `work_order`: Target WO.
+- `gps_coordinates`: Captured at completion.
+- `signature_url`: Signature image reference.
 
-### `installation_photos`
-Photo documentation (Before/During/After).
+### `installation_groups`, `installation_packages`, `installation_programs`, `installation_activities`
+Supporting logistics and planning structures.
 
 ## 3. Productivity & Communication
 
 ### `work_order_reminders`
-Scheduled alerts and tasks.
-- `reminder_datetime`: When the alert triggers.
-- `created_by`: Ownership for RLS.
+Time-based alerts.
+- `reminder_datetime`: Scheduled time.
 
 ### `followup_notes`
-Interactive sticky notes for quick follow-up.
+Digital sticky notes.
+
+### `reminder_photos`, `followup_note_photos`
+Bucket-linked photo metadata for reminders and notes.
 
 ## 4. System & Support
 
 ### `audit_logs`
-Centralized action logging for security and troubleshooting.
+Action logging for security.
+
+### `notifications`
+User and system notification system.
 
 ### `ai_settings`
-Global configuration for AI-assisted sign grouping and route optimization.
+Global AI grouping and routing configuration.
 
-### `project_boundaries`
-GeoJSON data defining the project area.
+### `exported_pdfs`, `work_order_attachments`, `work_order_comments`, `map_history`, `project_boundaries`
+Infrastructure and extension tables.
