@@ -347,6 +347,13 @@
   background: var(--color-accent-teal);
   color: var(--color-text-inverse);
 }
+.fuc-view-btn:focus-visible, .fuc-fab:focus-visible {
+  outline: 2px solid var(--color-accent-teal);
+  outline-offset: 2px;
+}
+.fuc-view-btn:active, .fuc-fab:active {
+  transform: scale(0.95);
+}
 
 .fuc-fab {
   position: fixed; bottom: 28px; right: 28px; z-index: 8000;
@@ -2970,8 +2977,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <button class="btn btn-ghost btn-sm" onclick="exportFUCPDF()"><i class="fas fa-file-pdf"></i> Export</button>
         
         <div class="fuc-view-toggle">
-          <button class="fuc-view-btn active" id="fuc-view-board" onclick="setFUCView('board')" title="Board View"><i class="fas fa-columns"></i></button>
-          <button class="fuc-view-btn" id="fuc-view-list" onclick="setFUCView('list')" title="List View"><i class="fas fa-list"></i></button>
+          <button class="fuc-view-btn active" id="fuc-view-board" onclick="setFUCView('board')" title="Board View" aria-label="Switch to Board View"><i class="fas fa-columns"></i></button>
+          <button class="fuc-view-btn" id="fuc-view-list" onclick="setFUCView('list')" title="List View" aria-label="Switch to List View"><i class="fas fa-list"></i></button>
         </div>
       </div>
 
@@ -13325,6 +13332,12 @@ function setupFUCListeners() {
       document.getElementById('quickNotePopover').style.display = 'none';
       document.getElementById('fuc-fab-menu').classList.remove('open');
     }
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (document.activeElement.classList.contains('quick-note-swatch')) {
+        e.preventDefault();
+        document.activeElement.click();
+      }
+    }
   });
 }
 
@@ -13352,12 +13365,12 @@ async function refreshUI() {
 <!-- QUICK NOTE POPOVER -->
 <div id="quickNotePopover" class="quick-note-popover">
   <div class="quick-note-color-row">
-    <div class="quick-note-swatch active" data-color="yellow" style="background: var(--note-yellow);" onclick="setQuickNoteColor('yellow', this)"></div>
-    <div class="quick-note-swatch" data-color="teal" style="background: var(--note-teal);" onclick="setQuickNoteColor('teal', this)"></div>
-    <div class="quick-note-swatch" data-color="purple" style="background: var(--note-purple);" onclick="setQuickNoteColor('purple', this)"></div>
-    <div class="quick-note-swatch" data-color="red" style="background: var(--note-red);" onclick="setQuickNoteColor('red', this)"></div>
-    <div class="quick-note-swatch" data-color="blue" style="background: var(--note-blue);" onclick="setQuickNoteColor('blue', this)"></div>
-    <div class="quick-note-swatch" data-color="green" style="background: var(--note-green);" onclick="setQuickNoteColor('green', this)"></div>
+    <div class="quick-note-swatch active" data-color="yellow" role="button" tabindex="0" aria-label="Select yellow color" style="background: var(--note-yellow);" onclick="setQuickNoteColor('yellow', this)"></div>
+    <div class="quick-note-swatch" data-color="teal" role="button" tabindex="0" aria-label="Select teal color" style="background: var(--note-teal);" onclick="setQuickNoteColor('teal', this)"></div>
+    <div class="quick-note-swatch" data-color="purple" role="button" tabindex="0" aria-label="Select purple color" style="background: var(--note-purple);" onclick="setQuickNoteColor('purple', this)"></div>
+    <div class="quick-note-swatch" data-color="red" role="button" tabindex="0" aria-label="Select red color" style="background: var(--note-red);" onclick="setQuickNoteColor('red', this)"></div>
+    <div class="quick-note-swatch" data-color="blue" role="button" tabindex="0" aria-label="Select blue color" style="background: var(--note-blue);" onclick="setQuickNoteColor('blue', this)"></div>
+    <div class="quick-note-swatch" data-color="green" role="button" tabindex="0" aria-label="Select green color" style="background: var(--note-green);" onclick="setQuickNoteColor('green', this)"></div>
   </div>
   <textarea id="quick-note-text" class="quick-note-textarea" placeholder="Type your note here..."></textarea>
   <button class="quick-note-save" onclick="saveQuickNote()">Save Note</button>
@@ -13374,12 +13387,12 @@ async function refreshUI() {
     
     <div class="reminder-modal-body">
       <div class="quick-note-color-row" style="margin-bottom: var(--space-5);">
-        <div class="quick-note-swatch" data-color="yellow" style="background: var(--note-yellow);" onclick="setNoteDetailColor('yellow', this)"></div>
-        <div class="quick-note-swatch" data-color="teal" style="background: var(--note-teal);" onclick="setNoteDetailColor('teal', this)"></div>
-        <div class="quick-note-swatch" data-color="purple" style="background: var(--note-purple);" onclick="setNoteDetailColor('purple', this)"></div>
-        <div class="quick-note-swatch" data-color="red" style="background: var(--note-red);" onclick="setNoteDetailColor('red', this)"></div>
-        <div class="quick-note-swatch" data-color="blue" style="background: var(--note-blue);" onclick="setNoteDetailColor('blue', this)"></div>
-        <div class="quick-note-swatch" data-color="green" style="background: var(--note-green);" onclick="setNoteDetailColor('green', this)"></div>
+        <div class="quick-note-swatch" data-color="yellow" role="button" tabindex="0" aria-label="Select yellow color" style="background: var(--note-yellow);" onclick="setNoteDetailColor('yellow', this)"></div>
+        <div class="quick-note-swatch" data-color="teal" role="button" tabindex="0" aria-label="Select teal color" style="background: var(--note-teal);" onclick="setNoteDetailColor('teal', this)"></div>
+        <div class="quick-note-swatch" data-color="purple" role="button" tabindex="0" aria-label="Select purple color" style="background: var(--note-purple);" onclick="setNoteDetailColor('purple', this)"></div>
+        <div class="quick-note-swatch" data-color="red" role="button" tabindex="0" aria-label="Select red color" style="background: var(--note-red);" onclick="setNoteDetailColor('red', this)"></div>
+        <div class="quick-note-swatch" data-color="blue" role="button" tabindex="0" aria-label="Select blue color" style="background: var(--note-blue);" onclick="setNoteDetailColor('blue', this)"></div>
+        <div class="quick-note-swatch" data-color="green" role="button" tabindex="0" aria-label="Select green color" style="background: var(--note-green);" onclick="setNoteDetailColor('green', this)"></div>
         <div style="flex:1"></div>
         <div class="reminder-toggle" onclick="toggleNotePin()">
           <input type="checkbox" id="note-pin-check" style="display:none">
@@ -13442,7 +13455,7 @@ async function refreshUI() {
 </div>
 
 <!-- FUC FAB -->
-<button class="fuc-fab" id="fuc-fab" style="display:none;" onclick="toggleFUCFabMenu()" title="Add New">
+<button class="fuc-fab" id="fuc-fab" style="display:none;" onclick="toggleFUCFabMenu()" title="Add New" aria-label="Open New Note or Reminder Menu">
   <i class="fas fa-plus"></i>
 </button>
 <div class="fuc-fab-menu" id="fuc-fab-menu">
