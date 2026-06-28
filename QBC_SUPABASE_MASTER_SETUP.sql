@@ -1,13 +1,21 @@
 -- QBC SUPABASE MASTER SETUP
--- Description: Complete production-ready database migration (Fixed & Improved)
--- Version: 1.1.0
+-- Description: Complete production-ready database migration (FINAL MASTER VERSION)
+-- Version: 1.6.0
 -- Date: 2024-05-24
 
 -- ==========================================
--- 1. EXTENSIONS & ENUMS
+-- 1. EXTENSIONS & GLOBAL FUNCTIONS
 -- ==========================================
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
 
 -- ==========================================
 -- 2. CORE TABLES (ENSURING EXISTENCE AND SCHEMA)
@@ -15,62 +23,59 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- work_orders
 CREATE TABLE IF NOT EXISTS public.work_orders (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    work_order text UNIQUE NOT NULL,
+    work_order text PRIMARY KEY,
+    id uuid UNIQUE DEFAULT gen_random_uuid(),
     description text,
     status text,
     pwa_engineer text,
     target_start_date timestamptz,
     target_finish_date timestamptz,
     location text,
+    latitude float8,
+    longitude float8,
+    is_sent_to_fab boolean DEFAULT false,
+    fab_history jsonb DEFAULT '[]'::jsonb,
+    style_settings jsonb DEFAULT '{}'::jsonb,
+    reported_by text,
+    reported_date timestamptz,
+    status_update_date timestamptz,
+    qbc_comments text,
+    ro text,
+    tdp text,
+    application_date timestamptz,
+    tdp_status text,
+    tdp_expiry_date timestamptz,
+    media_announcement text,
+    last_modified_at timestamptz DEFAULT now(),
+    priority text DEFAULT 'Normal',
+    month text,
+    completion_status text,
+    ready_for_installation boolean DEFAULT false,
+    installation_status text DEFAULT 'Pending',
+    assigned_team text,
+    assigned_date timestamptz,
+    planned_installation_date date,
+    actual_installation_date date,
+    dispatch_time timestamptz,
+    dispatch_user text,
+    sequence_order integer,
     created_at timestamptz DEFAULT now()
 );
 
--- Ensure all required columns exist in work_orders (Idempotent updates)
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS latitude float8;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS longitude float8;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS is_sent_to_fab boolean DEFAULT false;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS fab_history jsonb DEFAULT '[]'::jsonb;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS style_settings jsonb DEFAULT '{}'::jsonb;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS reported_by text;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS reported_date timestamptz;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS status_update_date timestamptz;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS qbc_comments text;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS ro text;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS tdp text;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS application_date timestamptz;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS tdp_status text;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS tdp_expiry_date timestamptz;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS media_announcement text;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS last_modified_at timestamptz DEFAULT now();
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS priority text DEFAULT 'Normal';
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS month text;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS completion_status text;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS ready_for_installation boolean DEFAULT false;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS installation_status text DEFAULT 'Pending';
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS assigned_team text;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS assigned_date timestamptz;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS planned_installation_date date;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS actual_installation_date date;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS dispatch_time timestamptz;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS dispatch_user text;
-ALTER TABLE public.work_orders ADD COLUMN IF NOT EXISTS sequence_order integer;
-
--- profiles
+-- Profiles
 CREATE TABLE IF NOT EXISTS public.profiles (
     id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email text UNIQUE NOT NULL,
+    full_name text,
+    mobile text,
+    position text,
     is_approved boolean DEFAULT false,
     is_admin boolean DEFAULT false,
+    role text DEFAULT 'User',
     created_at timestamptz DEFAULT now()
 );
 
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS full_name text;
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS mobile text;
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS position text;
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role text DEFAULT 'User';
-
--- manufacturing
+-- Manufacturing
 CREATE TABLE IF NOT EXISTS public.manufacturing (
     id bigint PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
     work_order_number text REFERENCES public.work_orders(work_order) ON DELETE CASCADE,
@@ -94,11 +99,25 @@ CREATE TABLE IF NOT EXISTS public.manufacturing (
     updated_at timestamptz DEFAULT now()
 );
 
+-- AI Settings
+CREATE TABLE IF NOT EXISTS public.ai_settings (
+    id integer PRIMARY KEY DEFAULT 1,
+    ai_enabled boolean DEFAULT true,
+    provider_name text,
+    ai_model text,
+    api_base_url text,
+    api_key text,
+    minutes_per_sign integer DEFAULT 45,
+    default_grouping_instructions text,
+    updated_at timestamptz DEFAULT now(),
+    updated_by uuid REFERENCES auth.users(id)
+);
+
 -- ==========================================
--- 3. NEW TABLES & DATA MIGRATION
+-- 3. NEW MODULES
 -- ==========================================
 
--- audit_logs
+-- Audit Logs
 CREATE TABLE IF NOT EXISTS public.audit_logs (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES auth.users(id),
@@ -110,19 +129,10 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
     created_at timestamptz DEFAULT now()
 );
 
-DO $$ BEGIN
-    IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'user_audit_log') THEN
-        INSERT INTO public.audit_logs (created_at, action, details)
-        SELECT created_at, action, details FROM public.user_audit_log
-        ON CONFLICT DO NOTHING;
-    END IF;
-END $$;
-
--- work_order_reminders
+-- Work Order Reminders
 CREATE TABLE IF NOT EXISTS public.work_order_reminders (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    work_order_id text,
-    work_order_number text,
+    work_order_number text REFERENCES public.work_orders(work_order) ON DELETE CASCADE,
     work_order_title text,
     title text NOT NULL,
     reminder_datetime timestamptz NOT NULL,
@@ -143,48 +153,11 @@ CREATE TABLE IF NOT EXISTS public.work_order_reminders (
     photo_count integer DEFAULT 0,
     created_by uuid REFERENCES public.profiles(id),
     created_by_name text,
-    updated_by uuid REFERENCES public.profiles(id),
     updated_at timestamptz DEFAULT now(),
-    completed_at timestamptz,
-    completed_by uuid REFERENCES public.profiles(id),
     created_at timestamptz DEFAULT now()
 );
 
--- Robust migration for reminders
-DO $$ BEGIN
-    IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'reminders') THEN
-        INSERT INTO public.work_order_reminders (
-            id, work_order_number, work_order_title, title, reminder_datetime,
-            reason, custom_reason, notes, priority, status, assigned_to, assigned_to_name,
-            alarm_enabled, calendar_enabled, desktop_notif, email_enabled,
-            snoozed_until, snooze_count, created_at, created_by, created_by_name,
-            updated_at, updated_by, completed_at, completed_by, photo_count
-        )
-        SELECT
-            id, work_order_number, work_order_title, title, reminder_datetime,
-            reason, custom_reason, notes, priority, status, assigned_to, assigned_to_name,
-            alarm_enabled, calendar_enabled, desktop_notif, email_enabled,
-            snoozed_until, snooze_count, created_at, created_by, created_by_name,
-            updated_at, updated_by, completed_at, completed_by, photo_count
-        FROM public.reminders
-        ON CONFLICT (id) DO NOTHING;
-    END IF;
-END $$;
-
--- installation_teams
-CREATE TABLE IF NOT EXISTS public.installation_teams (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_name text UNIQUE NOT NULL,
-    supervisor text,
-    crew_size integer,
-    capacity_per_day integer,
-    vehicle_plate text,
-    vehicle text,
-    status text DEFAULT 'Active',
-    created_at timestamptz DEFAULT now()
-);
-
--- followup_notes
+-- Followup Notes
 CREATE TABLE IF NOT EXISTS public.followup_notes (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     body text NOT NULL,
@@ -194,13 +167,43 @@ CREATE TABLE IF NOT EXISTS public.followup_notes (
     created_by_name text,
     is_archived boolean DEFAULT false,
     work_order_number text,
-    tags text[],
-    category text,
     created_at timestamptz DEFAULT now(),
     updated_at timestamptz DEFAULT now()
 );
 
--- Remaining Support Tables
+-- Installation Teams
+CREATE TABLE IF NOT EXISTS public.installation_teams (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    team_name text UNIQUE NOT NULL,
+    supervisor text,
+    crew_size integer,
+    capacity_per_day integer,
+    vehicle text,
+    status text DEFAULT 'Active',
+    created_at timestamptz DEFAULT now()
+);
+
+-- Installation Records
+CREATE TABLE IF NOT EXISTS public.installation_records (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    work_order text NOT NULL,
+    team_name text,
+    status text,
+    completion_date timestamptz,
+    recorded_by text,
+    created_at timestamptz DEFAULT now()
+);
+
+-- Installation Photos
+CREATE TABLE IF NOT EXISTS public.installation_photos (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    work_order text NOT NULL,
+    category text NOT NULL,
+    url text NOT NULL,
+    created_at timestamptz DEFAULT now()
+);
+
+-- Notifications
 CREATE TABLE IF NOT EXISTS public.notifications (
     id bigint PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
     user_id uuid REFERENCES auth.users(id),
@@ -212,67 +215,45 @@ CREATE TABLE IF NOT EXISTS public.notifications (
     created_at timestamptz DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.reminder_notifications (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    reminder_id uuid REFERENCES public.work_order_reminders(id) ON DELETE CASCADE,
-    user_id uuid REFERENCES auth.users(id),
-    title text,
-    message text,
-    read boolean DEFAULT false,
-    created_at timestamptz DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS public.installation_records (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    work_order text NOT NULL,
-    team_name text,
-    status text,
-    completion_date timestamptz,
-    gps_coordinates text,
-    notes text,
-    signature_url text,
-    recorded_by text,
-    created_at timestamptz DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS public.installation_activities (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    work_order text,
-    action text NOT NULL,
-    user_name text,
-    timestamp timestamptz DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS public.installation_photos (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    work_order text NOT NULL,
-    category text NOT NULL,
-    url text NOT NULL,
-    created_at timestamptz DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS public.work_order_comments (
-    id bigint PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
-    work_order text REFERENCES public.work_orders(work_order) ON DELETE CASCADE,
-    content text NOT NULL,
-    author_id uuid REFERENCES auth.users(id),
-    author_name text,
-    created_at timestamptz DEFAULT now()
-);
-
 -- ==========================================
--- 4. CONSTRAINTS & INDEXES
+-- 4. CONSTRAINTS, INDEXES & TRIGGERS
 -- ==========================================
-CREATE INDEX IF NOT EXISTS idx_wo_number ON public.work_orders (work_order);
-CREATE INDEX IF NOT EXISTS idx_mfg_wo ON public.manufacturing (work_order_number);
+CREATE INDEX IF NOT EXISTS idx_wo_status ON public.work_orders (status);
 CREATE INDEX IF NOT EXISTS idx_rem_datetime ON public.work_order_reminders (reminder_datetime);
 CREATE INDEX IF NOT EXISTS idx_audit_created ON public.audit_logs (created_at);
 
--- ==========================================
--- 5. STORAGE BUCKETS & POLICIES
--- ==========================================
+CREATE TRIGGER set_updated_at_manufacturing BEFORE UPDATE ON public.manufacturing
+FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
--- Idempotent Bucket Creation
+-- ==========================================
+-- 5. RLS POLICIES
+-- ==========================================
+ALTER TABLE public.work_orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.manufacturing ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.work_order_reminders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.followup_notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+-- Work Orders: Public Manage (matching legacy)
+CREATE POLICY "Public Manage Work Orders" ON public.work_orders FOR ALL USING (true) WITH CHECK (true);
+
+-- Profiles: Authenticated manage own, Public read
+CREATE POLICY "Public Read Profiles" ON public.profiles FOR SELECT USING (true);
+CREATE POLICY "Manage Own Profile" ON public.profiles FOR ALL USING (auth.uid() = id);
+
+-- Reminders & Notes: Owner based
+CREATE POLICY "Manage Own Reminders" ON public.work_order_reminders FOR ALL USING (auth.uid() = created_by OR auth.uid() = assigned_to);
+CREATE POLICY "Manage Own Notes" ON public.followup_notes FOR ALL USING (auth.uid() = created_by);
+
+-- Manufacturing & Audit: Authenticated
+CREATE POLICY "Auth Manage Manufacturing" ON public.manufacturing FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Auth Manage Audit" ON public.audit_logs FOR ALL USING (auth.role() = 'authenticated');
+
+-- ==========================================
+-- 6. STORAGE
+-- ==========================================
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('installation-photos', 'installation-photos', true),
        ('followup-note-photos', 'followup-note-photos', true),
@@ -280,58 +261,43 @@ VALUES ('installation-photos', 'installation-photos', true),
        ('qbc-storage', 'qbc-storage', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Storage RLS Policies
-DROP POLICY IF EXISTS "Public Storage Access" ON storage.objects;
-CREATE POLICY "Public Storage Access" ON storage.objects FOR SELECT
-USING (bucket_id IN ('installation-photos', 'followup-note-photos', 'reminder-photos', 'qbc-storage'));
-
-DROP POLICY IF EXISTS "Authenticated Upload" ON storage.objects;
-CREATE POLICY "Authenticated Upload" ON storage.objects FOR INSERT
-WITH CHECK (auth.role() = 'authenticated' AND bucket_id IN ('installation-photos', 'followup-note-photos', 'reminder-photos', 'qbc-storage'));
+CREATE POLICY "Public Storage Access" ON storage.objects FOR SELECT USING (true);
+CREATE POLICY "Auth Upload" ON storage.objects FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 -- ==========================================
--- 6. RLS TABLES
+-- 7. DATA MIGRATION
 -- ==========================================
-ALTER TABLE public.work_orders ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.work_order_reminders ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+    IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'user_audit_log') THEN
+        INSERT INTO public.audit_logs (user_id, action, details, created_at)
+        SELECT null, action, details, created_at FROM public.user_audit_log
+        ON CONFLICT DO NOTHING;
+    END IF;
 
-DROP POLICY IF EXISTS "Global Access" ON public.work_orders;
-CREATE POLICY "Global Access" ON public.work_orders FOR ALL USING (auth.role() = 'authenticated');
-
-DROP POLICY IF EXISTS "Global Access" ON public.work_order_reminders;
-CREATE POLICY "Global Access" ON public.work_order_reminders FOR ALL USING (auth.role() = 'authenticated');
+    IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'reminders') THEN
+        INSERT INTO public.work_order_reminders (id, title, reminder_datetime, notes, priority, status, created_at)
+        SELECT id, title, reminder_datetime, notes, priority, status, created_at FROM public.reminders
+        ON CONFLICT (id) DO NOTHING;
+    END IF;
+END $$;
 
 -- ==========================================
--- 7. PHASE 5 - VALIDATION
+-- 8. SEED DATA
 -- ==========================================
-CREATE OR REPLACE VIEW public.schema_verification AS
+INSERT INTO public.ai_settings (id, ai_enabled, provider_name, ai_model, api_base_url, api_key)
+VALUES (1, true, 'BadTheory', 'gw_engineer', 'https://api.badtheorylabs.com/v1', 'redacted')
+ON CONFLICT (id) DO NOTHING;
+
+-- ==========================================
+-- 9. VALIDATION & CONSISTENCY (PHASE 5 & 6)
+-- ==========================================
+CREATE OR REPLACE VIEW public.verification_report AS
 SELECT
-    t.table_name,
-    (SELECT count(*) FROM information_schema.columns c WHERE c.table_name = t.table_name) as column_count,
-    EXISTS (SELECT 1 FROM pg_indexes i WHERE i.tablename = t.table_name) as has_indexes,
-    EXISTS (SELECT 1 FROM pg_policy p WHERE p.tablename = t.table_name) as has_rls_policies
+    table_name,
+    (SELECT count(*) FROM information_schema.columns WHERE table_name = t.table_name) as cols,
+    EXISTS (SELECT 1 FROM pg_policy WHERE tablename = t.table_name) as has_rls
 FROM information_schema.tables t
-WHERE t.table_schema = 'public'
-AND t.table_name IN ('work_orders', 'profiles', 'manufacturing', 'audit_logs', 'work_order_reminders');
+WHERE table_schema = 'public' AND table_name IN ('work_orders', 'profiles', 'manufacturing', 'audit_logs', 'work_order_reminders');
 
--- ==========================================
--- 8. PHASE 6 - CONSISTENCY CHECKS
--- ==========================================
--- Check for Orphaned Manufacturing Records
 CREATE OR REPLACE VIEW public.consistency_orphans AS
-SELECT 'manufacturing' as source_table, m.work_order_number as ref_id
-FROM public.manufacturing m
-LEFT JOIN public.work_orders w ON m.work_order_number = w.work_order
-WHERE w.work_order IS NULL
-UNION ALL
-SELECT 'reminders' as source_table, r.work_order_number as ref_id
-FROM public.work_order_reminders r
-LEFT JOIN public.work_orders w ON r.work_order_number = w.work_order
-WHERE w.work_order IS NULL AND r.work_order_number IS NOT NULL;
-
--- Check for NULLs in prohibited columns
-CREATE OR REPLACE VIEW public.consistency_nulls AS
-SELECT 'work_orders' as table_name, count(*) as null_wo_count
-FROM public.work_orders WHERE work_order IS NULL;
+SELECT 'manufacturing' as src, m.work_order_number FROM public.manufacturing m LEFT JOIN public.work_orders w ON m.work_order_number = w.work_order WHERE w.work_order IS NULL;
