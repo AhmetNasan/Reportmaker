@@ -5758,7 +5758,8 @@ async function handleInstPhotoUpload(e) {
     await supabaseClient.from('installation_photos').insert({
       work_order: selectedWorkOrder,
       category: currentUploadCategory,
-      url: publicUrl
+      url: publicUrl,
+      uploaded_by: currentUser?.id
     });
 
     showToast("Photo uploaded successfully");
@@ -7339,7 +7340,8 @@ async function saveCompletion() {
        gps_coordinates: gps,
        notes: notes,
        signature_url: signatureBase64, // In a real app, upload this to storage first
-       recorded_by: currentUser ? currentUser.email : 'System'
+       recorded_by: currentUser ? currentUser.email : 'System',
+       created_by: currentUser?.id
     };
     
     if (supabaseClient) {
@@ -10804,7 +10806,8 @@ async function saveTeam() {
     crew_size: parseInt(document.getElementById('tm-size').value),
     vehicle: document.getElementById('tm-vehicle').value,
     capacity_per_day: parseInt(document.getElementById('tm-capacity').value),
-    status: document.getElementById('tm-status').value
+    status: document.getElementById('tm-status').value,
+    created_by: currentUser?.id
   };
 
   if (supabaseClient) {
