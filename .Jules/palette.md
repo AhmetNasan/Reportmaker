@@ -1,0 +1,3 @@
+## 2025-01-24 - [Accessibility Enhancement for Custom Color Swatches]
+**Learning:** In a legacy application where interactive elements are built using `div` tags, retrofitting accessibility requires a three-pronged approach: semantic ARIA roles (`role="button"`), keyboard focusability (`tabindex="0"`), and explicit keyboard event listeners (handling `Enter`/`Space`) in a global listener if individual listeners aren't feasible.
+**Action:** Always check custom UI components like color pickers or status dots for keyboard navigability and apply `role="button"` with corresponding keyboard handlers.
