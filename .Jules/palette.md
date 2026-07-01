@@ -1,0 +1,3 @@
+## 2025-05-14 - [Login Page Accessibility & Ergonomics]
+**Learning:** Many interactive elements in the legacy authentication UI were implemented using `div` tags with `onclick` handlers, making them inaccessible to keyboard users and screen readers. Additionally, standard keyboard ergonomics like submitting a form with the 'Enter' key were missing.
+**Action:** Always prefer semantic `<button>` elements for interactive components. For custom "link-like" buttons, use a CSS reset class like `.btn-reset` to maintain visual design while providing native accessibility. Always implement 'Enter' key submission for authentication and recovery forms.
