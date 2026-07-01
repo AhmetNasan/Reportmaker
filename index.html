@@ -1912,17 +1912,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Signage Asset & GIS Management System</p>
     
     <div id="signup-fields" style="display: none;">
-      <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name">
-      <input type="text" id="auth-mobile" class="auth-input" placeholder="Mobile Number">
-      <input type="text" id="auth-position" class="auth-input" placeholder="Position / Job Title">
+      <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name" aria-label="Full Name" onkeydown="if(event.key==='Enter')handleAuth()">
+      <input type="text" id="auth-mobile" class="auth-input" placeholder="Mobile Number" aria-label="Mobile Number" onkeydown="if(event.key==='Enter')handleAuth()">
+      <input type="text" id="auth-position" class="auth-input" placeholder="Position / Job Title" aria-label="Position or Job Title" onkeydown="if(event.key==='Enter')handleAuth()">
     </div>
 
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address">
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password">
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" aria-label="Email Address" onkeydown="if(event.key==='Enter')handleAuth()">
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password" aria-label="Password" onkeydown="if(event.key==='Enter')handleAuth()">
     
     <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
-    <div style="margin-top: 16px; font-size: 11px; color: #137abf; cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
-    <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
+    <button class="btn-reset" style="margin-top: 16px; font-size: 11px; color: #137abf;" onclick="openModal('recoveryModal')">Forgot Password?</button>
+    <button class="btn-reset auth-toggle" style="margin-top: 24px; display: block; width: 100%;" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></button>
   </div>
 </div>
 
@@ -2263,7 +2263,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Please enter your email address. We will send you a link to reset your password.</p>
     <div class="form-group">
       <label>Email Address</label>
-      <input type="email" id="recovery-email" class="auth-input" placeholder="Enter your email">
+      <input type="email" id="recovery-email" class="auth-input" placeholder="Enter your email" aria-label="Recovery Email Address" onkeydown="if(event.key==='Enter')submitRecovery()">
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('recoveryModal')">Cancel</button>
