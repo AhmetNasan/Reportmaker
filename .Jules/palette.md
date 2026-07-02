@@ -1,0 +1,3 @@
+## 2025-05-15 - [Keyboard Accessibility for Custom Components]
+**Learning:** In a legacy or non-semantic codebase where `div` elements are used as buttons, adding `role="button"`, `tabindex="0"`, and `aria-label` is necessary but not sufficient. A global keyboard listener must be implemented to handle `Enter` and `Space` keys to trigger the `click()` event, as `div` elements do not natively support these for interaction.
+**Action:** Always implement a global `keydown` listener when retrofitting accessibility to non-semantic interactive elements. Use targeted selectors (like `DIV[role="button"]`) to avoid global side effects.
