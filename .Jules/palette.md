@@ -1,0 +1,3 @@
+## 2025-05-14 - [Authentication Accessibility Enhancements]
+**Learning:** Authentication inputs without visible labels (using placeholders only) are inaccessible to screen readers. Converting interactive `div` elements to semantic `<button>` elements improves keyboard navigation and ARIA role recognition. However, explicit `aria-label` attributes should be avoided when a semantic `<label for="...">` or clear visible text already exists to prevent redundant announcements.
+**Action:** Use `aria-label` for placeholder-only inputs and semantic `<button>` elements for all interactive controls. Ensure `<label>` elements are correctly associated with their inputs using `id`/`for` attributes.
