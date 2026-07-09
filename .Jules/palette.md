@@ -1,0 +1,3 @@
+## 2025-05-15 - [Color Swatch Keyboard Accessibility]
+**Learning:** Custom interactive elements implemented with `div` tags require explicit ARIA roles (`role="button"`) and focus management (`tabindex="0"`) to be accessible. Furthermore, browser `click` event listeners on `div` elements do not automatically trigger for 'Enter' or 'Space' keys, necessitating a custom global keydown listener to bridge this gap for keyboard-only users.
+**Action:** Always include `role="button"`, `tabindex="0"`, and a keyboard event listener (handling 'Enter' and 'Space') when refactoring non-semantic elements into interactive components.
