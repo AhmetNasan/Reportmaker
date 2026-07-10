@@ -1921,8 +1921,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <input type="password" id="auth-password" class="auth-input" placeholder="Password">
     
     <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
-    <div style="margin-top: 16px; font-size: 11px; color: #137abf; cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
-    <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
+    <button type="button" class="btn-reset" style="display: block; width: 100%; margin-top: 16px; font-size: 11px; color: #137abf; text-align: center;" onclick="openModal('recoveryModal')">Forgot Password?</button>
+    <button type="button" class="btn-reset auth-toggle" style="display: block; width: 100%; text-align: center;" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></button>
   </div>
 </div>
 
