@@ -1,0 +1,3 @@
+## 2025-05-14 - [Custom Component Accessibility Standard]
+**Learning:** Interactive `div`-based components (like color swatches) lack native accessibility. They require `role="button"`, `tabindex="0"`, and explicit `aria-label` attributes to be recognized by screen readers and reachable via keyboard. Manual event handling for `Enter` and `Space` keys is necessary to trigger actions on these elements.
+**Action:** When using non-semantic interactive elements, always implement the "ARIA button pattern" (role, tabindex, labels, and keyboard listeners) and provide visual feedback with `:focus-visible`.
