@@ -3081,7 +3081,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
                    <i class="fas fa-upload"></i> Change Logo
                    <input type="file" id="logo-upload" style="display:none" accept="image/*" onchange="handleLogoUpload(event)">
                 </label>
-                <button class="btn btn-red btn-sm" id="btn-remove-logo" style="display:none;" onclick="removeLogo()"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-red btn-sm" id="btn-remove-logo" style="display:none;" onclick="removeLogo()" aria-label="Remove Logo"><i class="fas fa-trash"></i></button>
              </div>
           </div>
         </div>
@@ -5296,7 +5296,7 @@ function drillDown(type, val = null) {
         <td>${r.Location}</td>
         <td style="color:var(--muted);">${r.PWA_ENG || '--'}</td>
         <td>${formatDate(r.TargetFinish)}</td>
-        <td><button class="btn btn-ghost btn-sm" onclick="openDetail('${r.WorkOrder}')"><i class="fas fa-external-link-alt"></i></button></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openDetail('${r.WorkOrder}')" aria-label="Open Work Order Details"><i class="fas fa-external-link-alt"></i></button></td>
       </tr>
     `).join('');
   };
@@ -7223,7 +7223,7 @@ function openInstSidePanel(woId) {
       <div style="display: flex; gap: 10px; margin-top: 10px;">
          <button class="btn btn-primary flex-1" id="inst-panel-save" onclick="saveInstAssignment('${wo.WorkOrder}')">Save Assignment</button>
          <button class="btn btn-blue" onclick="openCompletionModal('${wo.WorkOrder}')" title="Complete Installation"><i class="fas fa-check-circle"></i></button>
-         <button class="btn btn-ghost" onclick="openDetail('${wo.WorkOrder}')"><i class="fas fa-external-link-alt"></i></button>
+         <button class="btn btn-ghost" onclick="openDetail('${wo.WorkOrder}')" aria-label="Open Work Order Details"><i class="fas fa-external-link-alt"></i></button>
       </div>
       
       <div id="inst-panel-history" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 16px;">
@@ -8653,7 +8653,7 @@ function openGisDetails(woId) {
 
       <div style="display: flex; gap: 10px; margin-top: 10px; padding-top: 20px; border-top: 1px solid var(--border);">
         <button class="btn btn-primary flex-1" onclick="openDetail('${wo.WorkOrder}')"><i class="fas fa-external-link-alt"></i> Full View</button>
-        <button class="btn btn-ghost" onclick="copyCoords(${wo.Lat}, ${wo.Lng})"><i class="fas fa-copy"></i></button>
+        <button class="btn btn-ghost" onclick="copyCoords(${wo.Lat}, ${wo.Lng})" aria-label="Copy Coordinates"><i class="fas fa-copy"></i></button>
       </div>
     </div>
   `;
@@ -10903,7 +10903,7 @@ function renderPlanningPage(container) {
             <div class="inst-card-title"><i data-lucide="brain"></i> AI Generated Installation Packages</div>
             <div style="display:flex; gap:10px;">
               <button class="inst-btn inst-btn-primary btn-xs" onclick="saveAIGroups()"><i data-lucide="save"></i> Save All Groups</button>
-              <button class="inst-btn inst-btn-ghost btn-xs" onclick="closeAIGroupPanel()"><i data-lucide="x"></i></button>
+              <button class="inst-btn inst-btn-ghost btn-xs" onclick="closeAIGroupPanel()" aria-label="Close AI Grouping Panel"><i data-lucide="x"></i></button>
             </div>
           </div>
           <div class="inst-card-body" style="padding:0; overflow:auto;">
@@ -10927,7 +10927,7 @@ function renderPlanningPage(container) {
         <div id="planning-drawer" class="planning-bottom-drawer">
           <div class="inst-card-header">
             <div class="inst-card-title"><i data-lucide="calendar"></i> Daily Scheduler (Week View)</div>
-            <button class="btn-reset" onclick="togglePlanningDrawer()"><i data-lucide="x"></i></button>
+            <button class="btn-reset" onclick="togglePlanningDrawer()" aria-label="Close Planning Drawer"><i data-lucide="x"></i></button>
           </div>
           <div class="inst-card-body" id="planning-calendar-content" style="padding:0">
             <div style="display:flex; height:100%;">
@@ -11540,7 +11540,7 @@ function renderKanbanColumn(label, status) {
           <div class="inst-card" style="padding:12px; background:#0d1117; cursor:grab;" draggable="true" ondragstart="handlePlanningDragStart(event, '${w.work_order}')">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
               <span style="font-weight:700; color:#00bcd4; font-size:12px;">#${w.work_order}</span>
-              <button class="inst-icon-btn" style="padding:0" onclick="openDetail('${w.work_order}')"><i data-lucide="external-link" style="width:12px"></i></button>
+              <button class="inst-icon-btn" style="padding:0" onclick="openDetail('${w.work_order}')" aria-label="Open Work Order Details"><i data-lucide="external-link" style="width:12px"></i></button>
             </div>
             <div style="font-size:11px; color:#c9d1d9; margin-bottom:8px;">${w.description || 'No description'}</div>
             <div style="display:flex; align-items:center; gap:8px; font-size:10px; color:#8b949e;">
@@ -12260,9 +12260,9 @@ function renderReminders() {
       <div class="rem-card-footer">
         <div class="rem-card-user"><i class="fas fa-user-circle"></i> ${r.assigned_to_name || 'Unassigned'}</div>
         <div class="rem-card-actions">
-          <button class="btn btn-ghost btn-xs" onclick="openReminderModal('${r.id}')"><i class="fas fa-edit"></i></button>
-          ${r.status !== 'completed' ? `<button class="btn btn-green btn-xs" onclick="completeReminder('${r.id}')"><i class="fas fa-check"></i></button>` : ''}
-          <button class="btn btn-red btn-xs" onclick="deleteReminder('${r.id}')"><i class="fas fa-trash"></i></button>
+          <button class="btn btn-ghost btn-xs" onclick="openReminderModal('${r.id}')" aria-label="Edit Reminder"><i class="fas fa-edit"></i></button>
+          ${r.status !== 'completed' ? `<button class="btn btn-green btn-xs" onclick="completeReminder('${r.id}')" aria-label="Mark Reminder as Completed"><i class="fas fa-check"></i></button>` : ''}
+          <button class="btn btn-red btn-xs" onclick="deleteReminder('${r.id}')" aria-label="Delete Reminder"><i class="fas fa-trash"></i></button>
         </div>
       </div>
     </div>
@@ -12810,7 +12810,7 @@ function createReminderCard(r) {
   card.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
       <div class="card-wo-tag" onclick="event.stopPropagation(); navigateToWO('${r.work_order_number}')">${r.work_order_number}</div>
-      <button class="btn-reset" onclick="event.stopPropagation(); setReminderPinned('${r.id}', ${!r.is_pinned})" style="font-size:12px; color:${r.is_pinned ? 'var(--accent)' : 'var(--color-text-muted)'}"><i class="fas fa-thumbtack"></i></button>
+      <button class="btn-reset" onclick="event.stopPropagation(); setReminderPinned('${r.id}', ${!r.is_pinned})" style="font-size:12px; color:${r.is_pinned ? 'var(--accent)' : 'var(--color-text-muted)'}" aria-label="Toggle Pin Reminder"><i class="fas fa-thumbtack"></i></button>
     </div>
     <div class="card-title">${r.title}</div>
     <div class="card-reason">${r.reason === 'Other' ? r.custom_reason : r.reason}</div>
@@ -12885,7 +12885,7 @@ function renderFUCList(notes, rems) {
       <td style="text-align:center;">${item.photo_count || 0}</td>
       <td><span class="status-badge ${isOverdue ? 'badge-RTNENG' : ''}">${isOverdue ? 'OVERDUE' : (item.status || 'Active')}</span></td>
       <td style="text-align:center;">
-        <button class="btn btn-ghost btn-icon" onclick="item.fucType === 'Reminder' ? openReminderModal('${item.id}') : openNoteDetailModal('${item.id}')"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-ghost btn-icon" onclick="item.fucType === 'Reminder' ? openReminderModal('${item.id}') : openNoteDetailModal('${item.id}')" aria-label="Edit Item"><i class="fas fa-edit"></i></button>
       </td>
     `;
     body.appendChild(tr);
