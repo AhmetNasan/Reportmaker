@@ -1798,31 +1798,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
 <body data-theme="light">
 <a href="#page-dashboard" class="skip-link">Skip to main content</a>
 
-<div id="auth-container" class="auth-container">
-  <canvas class="background"></canvas>
-  <div class="auth-card">
-    <div class="auth-logo loader">
-      <span class="m">Q</span><span class="m">B</span><span class="m">C</span><span class="m">&nbsp;</span><span class="m">O</span><span class="m">p</span><span class="m">e</span><span class="m">r</span><span class="m">a</span><span class="m">t</span><span class="m">i</span><span class="m">o</span><span class="m">n</span><span class="m">s</span><span class="m">&nbsp;</span><span class="m">C</span><span class="m">e</span><span class="m">n</span><span class="m">t</span><span class="m">e</span><span class="m">r</span>
-    </div>
-    <h2 id="auth-title" class="loader">
-      <span class="m">W</span><span class="m">e</span><span class="m">l</span><span class="m">c</span><span class="m">o</span><span class="m">m</span><span class="m">e</span><span class="m">&nbsp;</span><span class="m">B</span><span class="m">a</span><span class="m">c</span><span class="m">k</span>
-    </h2>
-    <p id="auth-subtitle" style="font-size: 12px; color: var(--muted); margin-bottom: 24px;">Signage Asset & GIS Management System</p>
-    
-    <div id="signup-fields" style="display: none;">
-      <input type="text" id="auth-fullname" class="auth-input" placeholder="Full Name">
-      <input type="text" id="auth-mobile" class="auth-input" placeholder="Mobile Number">
-      <input type="text" id="auth-position" class="auth-input" placeholder="Position / Job Title">
-    </div>
-
-    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address">
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password">
-    
-    <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
-    <div style="margin-top: 16px; font-size: 11px; color: #137abf; cursor: pointer;" onclick="openModal('recoveryModal')">Forgot Password?</div>
-    <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? <span id="toggle-text">Sign Up</span></div>
-  </div>
-</div>
 
 <nav id="main-nav" style="display: none;">
   <button class="hamburger" id="gis-sidebar-toggle" style="display:none" onclick="toggleGisSidebar()" aria-label="Toggle GIS Sidebar"><i class="fas fa-layer-group"></i></button>
@@ -1855,7 +1830,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
         <button class="dropdown-item" onclick="showProfile()" role="menuitem"><i class="fas fa-user-circle"></i> Profile</button>
         <button class="dropdown-item" onclick="showPage('settings')" role="menuitem"><i class="fas fa-sliders-h"></i> Settings</button>
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 4px 0;">
-        <button class="dropdown-item" onclick="handleLogout()" role="menuitem"><i class="fas fa-sign-out-alt"></i> Logout</button>
       </div>
     </div>
   </div>
@@ -1894,7 +1868,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <button class="mobile-nav-item" onclick="showPage('filemanager'); toggleMobileMenu();"><i class="fas fa-folder-open"></i> File Manager</button>
     <button class="mobile-nav-item" id="mobile-nav-settings" onclick="showPage('settings'); toggleMobileMenu();" style="display: none;"><i class="fas fa-cog"></i> Settings <span id="mobile-pending-badge" class="status-badge badge-RTNENG" style="display: none; padding: 1px 5px; font-size: 9px; margin-left: 5px;">0</span></button>
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0;">
-    <button class="mobile-nav-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
 </div>
 
 
@@ -2103,7 +2076,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
     <div class="form-group mb-3">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <label>Current Password <span style="color:var(--red); font-size:10px;">(Required)</span></label>
-        <button class="btn-reset" style="font-size:10px; color:var(--accent);" onclick="handleProfileForgotPwd()">Forgot?</button>
       </div>
       <input type="password" id="prof-pwd-current" class="filter-input w-100" placeholder="Enter current password">
     </div>
@@ -2118,21 +2090,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);ba
   </div>
 </div>
 
-<div class="modal-overlay" id="recoveryModal">
-  <div class="modal" style="max-width:360px;">
-    <button class="modal-close" aria-label="Close modal" onclick="closeModal('recoveryModal')">×</button>
-    <div class="modal-title">Password Recovery</div>
-    <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Please enter your email address. We will send you a link to reset your password.</p>
-    <div class="form-group">
-      <label>Email Address</label>
-      <input type="email" id="recovery-email" class="auth-input" placeholder="Enter your email">
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="closeModal('recoveryModal')">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="submitRecovery()">Submit Request</button>
-    </div>
-  </div>
-</div>
 
 <div class="page" id="page-workorders">
   <div class="wrapper">
@@ -3144,6 +3101,7 @@ try {
   console.error("Supabase init error:", e);
 }
 
+const LOCAL_USER_ID = '00000000-0000-0000-0000-000000000000';
 const PRIMARY_ADMIN_EMAIL = 'ahmetnasan1993@gmail.com';
 let currentUser = null;
 let isAdmin = false;
@@ -3227,35 +3185,12 @@ window.addEventListener('load', async () => {
       ]
     });
   }
-  if (supabaseClient) {
-    // Single source of truth for auth state
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth State Changed:", event, session ? "Session present" : "No session");
-      
-      if (session) {
-        // Prevent redundant calls during the same auth transition
-        if (currentUser && currentUser.id === session.user.id) return;
-        
-        currentUser = session.user;
-        if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
-          isAdmin = true;
-          isApproved = true;
-        }
-        await onAuthenticated();
-      } else {
-        currentUser = null;
-        isAdmin = false;
-        isApproved = false;
-        document.getElementById('auth-container').style.display = 'flex';
-        document.getElementById('main-nav').style.display = 'none';
-      }
-    });
-  } else {
-    // Offline / Local Mode Fallback
-    const authCont = document.getElementById('auth-container');
-    if (authCont) authCont.style.display = 'flex';
-  }
-  
+  // No login screen: the app opens directly.
+  currentUser = { id: LOCAL_USER_ID, email: PRIMARY_ADMIN_EMAIL, user_metadata: { full_name: 'Admin' } };
+  isAdmin = true;
+  isApproved = true;
+  await onAuthenticated();
+
   const dateBadge = document.getElementById('dateBadge');
   if (dateBadge) dateBadge.textContent = formatDate(new Date());
 
@@ -3267,7 +3202,6 @@ window.addEventListener('load', async () => {
 });
 
 async function onAuthenticated() {
-  document.getElementById('auth-container').style.display = 'none';
   
   // Check for Admin Rights
   if (currentUser.email === PRIMARY_ADMIN_EMAIL) {
@@ -5293,72 +5227,6 @@ window.addEventListener('click', (e) => {
 });
 
 // MODIFIED AUTH HANDLER
-async function handleAuth() {
-  const email = document.getElementById('auth-email').value;
-  const password = document.getElementById('auth-password').value;
-  const isSignUp = document.getElementById('toggle-text').textContent === 'Sign In';
-
-  const btn = document.getElementById('auth-submit-btn');
-  btn.disabled = true;
-  const originalText = btn.innerHTML;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Please wait...';
-
-  try {
-    if (!email || !password) throw new Error('Please fill all fields');
-
-    if (isSignUp) {
-      const fullName = document.getElementById('auth-fullname').value;
-      const mobile = document.getElementById('auth-mobile').value;
-      const position = document.getElementById('auth-position').value;
-
-      if (!fullName || !mobile || !position) throw new Error('Please fill all mandatory fields');
-
-      console.log("Attempting Sign Up for:", email);
-      const { data, error } = await supabaseClient.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            mobile: mobile,
-            position: position
-          }
-        }
-      });
-      if (error) throw error;
-      
-      // Auto-profile on signup with extra data
-      if (data.user) {
-        await supabaseClient.from('profiles').upsert({ 
-          id: data.user.id, 
-          email: data.user.email,
-          full_name: fullName,
-          mobile: mobile,
-          position: position,
-          is_approved: false,
-          role: 'User'
-        });
-      }
-      
-      showToast('Registration successful. Awaiting administrator approval.');
-      toggleAuthMode(); // Switch back to sign in
-    } else {
-      console.log("Attempting Sign In for:", email);
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      currentUser = data.user;
-      console.log("Sign In successful:", currentUser.email);
-      await onAuthenticated();
-    }
-  } catch (error) {
-    console.error("Authentication error:", error);
-    showToast(error.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalText;
-  }
-}
-
 async function showProfile() {
   if (!currentUser) return;
   
@@ -5481,78 +5349,6 @@ async function saveProfile() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalText;
-  }
-}
-
-async function submitRecovery() {
-  const email = document.getElementById('recovery-email').value;
-  if (!email) return showToast("Email is required", "error");
-
-  const btn = document.querySelector('#recoveryModal .btn-primary');
-  const originalText = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-  if (supabaseClient) {
-    try {
-      // Logic for recovery request: use auth reset
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + window.location.pathname,
-      });
-      if (error) throw error;
-      showToast("Recovery email sent. Check your inbox.", "green");
-      closeModal('recoveryModal');
-    } catch (error) {
-      console.error("Recovery error:", error);
-      showToast(error.message, "error");
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = originalText;
-    }
-  } else {
-    showToast("Feature unavailable in local mode", "error");
-    btn.disabled = false;
-    btn.innerHTML = originalText;
-  }
-}
-
-function toggleAuthMode() {
-  const title = document.getElementById('auth-title');
-  const subtitle = document.getElementById('auth-subtitle');
-  const btn = document.querySelector('.auth-btn');
-  const toggleText = document.getElementById('toggle-text');
-  const helperText = document.querySelector('.auth-toggle').childNodes[0];
-  const signupFields = document.getElementById('signup-fields');
-  
-  if (!title || !btn || !toggleText) return;
-  
-  if (btn.textContent === 'Sign In') {
-    title.textContent = 'Create Account';
-    if (subtitle) subtitle.textContent = 'Signage Asset & GIS Management System';
-    btn.textContent = 'Sign Up';
-    toggleText.textContent = 'Sign In';
-    if (helperText) helperText.textContent = 'Already have an account? ';
-    if (signupFields) signupFields.style.display = 'block';
-  } else {
-    title.textContent = 'Welcome Back';
-    if (subtitle) subtitle.textContent = 'Signage Asset & GIS Management System';
-    btn.textContent = 'Sign In';
-    toggleText.textContent = 'Sign Up';
-    if (helperText) helperText.textContent = "Don't have an account? ";
-    if (signupFields) signupFields.style.display = 'none';
-  }
-}
-
-async function handleLogout() {
-  if(supabaseClient) await supabaseClient.auth.signOut();
-  location.reload();
-}
-
-function handleProfileForgotPwd() {
-  closeModal('profileModal');
-  openModal('recoveryModal');
-  if (currentUser && currentUser.email) {
-    document.getElementById('recovery-email').value = currentUser.email;
   }
 }
 
