@@ -10,7 +10,6 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
@@ -3301,27 +3300,13 @@ window.addEventListener('paste', async (e) => {
 });
 
 window.addEventListener('load', async () => {
-  if (typeof Particles !== 'undefined') {
-    Particles.init({
-      selector: '.background',
-      color: ['#137abf', '#ffffff', '#000000'],
-      connectParticles: true,
-      responsive: [
-        {
-          breakpoint: 768,
-          options: {
-            maxParticles: 43,
-            connectParticles: false
-          }
-        }
-      ]
-    });
-  }
   // No login screen: the app opens directly.
   currentUser = { id: LOCAL_USER_ID, email: PRIMARY_ADMIN_EMAIL, user_metadata: { full_name: 'Admin' } };
   isAdmin = true;
   isApproved = true;
-  await onAuthenticated();
+  try { await onAuthenticated(); } catch (e) { console.error('Startup error:', e); }
+  const mainNavEl = document.getElementById('main-nav'); if (mainNavEl) mainNavEl.style.display = 'flex';
+  if (!document.querySelector('.page.active')) showPage('dashboard');
 
   const dateBadge = document.getElementById('dateBadge');
   if (dateBadge) dateBadge.textContent = formatDate(new Date());
@@ -3394,7 +3379,7 @@ async function onAuthenticated() {
   }
 
   let profileData = null;
-  if (supabaseClient) {
+  if (supabaseClient && currentUser.id !== LOCAL_USER_ID) {
     const { data } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
     profileData = data;
   }
