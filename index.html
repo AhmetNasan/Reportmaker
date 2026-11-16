@@ -1936,6 +1936,19 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
 .mfb-chip.off { opacity:.45; text-decoration:line-through; }
 .mfb-count { font-size:12px; font-weight:600; color:var(--muted); padding:0 4px; white-space:nowrap; }
 @media (max-width:700px) { .map-filterbar { bottom:40px; } .map-filterbar #mfb-search { width:100%; } }
+
+/* Map – light, low-noise look */
+.gis-container:not(.gis-theme-dark) { background:var(--bg); color:var(--text); }
+.gis-container:not(.gis-theme-dark) .glass-panel { background:rgba(255,255,255,.96); border:1px solid var(--border); color:var(--text); box-shadow:var(--shadow); backdrop-filter:blur(6px); }
+.gis-container:not(.gis-theme-dark) .gis-top-bar { background:var(--surface); border-bottom:1px solid var(--border); box-shadow:none; }
+.gis-container:not(.gis-theme-dark) .gis-sidebar { background:var(--surface); border-right:1px solid var(--border); }
+.gis-container:not(.gis-theme-dark) .gis-tab.active { background:var(--color-accent-teal-bg); color:var(--accent); border-bottom-color:var(--accent); }
+.gis-container:not(.gis-theme-dark) .gis-tool-btn { color:var(--text); }
+.gis-container:not(.gis-theme-dark) .gis-tool-btn:hover, .gis-container:not(.gis-theme-dark) .gis-tool-btn.active { background:var(--color-accent-teal-bg); color:var(--accent); }
+.gis-sidebar-header { padding-bottom:8px; }
+.gis-panel-section { margin-bottom:18px; }
+.gis-panel-section-title { font-size:11px; font-weight:700; letter-spacing:.02em; color:var(--muted); text-transform:none; }
+.gis-status-bar { font-size:11px; }
 </style>
 </head>
 <body data-theme="light">
@@ -2281,13 +2294,12 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
 </div>
 
 <div class="page" id="page-map">
-  <div class="gis-container gis-theme-dark" id="gis-main-container">
+  <div class="gis-container" id="gis-main-container">
     <header class="gis-top-bar">
       <button class="btn btn-ghost btn-sm" onclick="toggleGisSidebar()" title="Toggle Sidebar"><i class="fas fa-bars"></i></button>
       <div class="gis-search-wrap" style="flex: 1; max-width: 500px; display: flex; align-items: center; background: var(--surface2); border-radius: 20px; padding: 0 16px; border: 1px solid var(--border);">
         <i class="fas fa-search" style="color:var(--muted)"></i>
-        <input type="text" id="map-search-input" class="gis-search-input" placeholder="Search Asset ID, Work Order, Coordinates, or Location" onkeydown="if(event.key==='Enter')searchCoordinates()" style="background: transparent; border: none; color: var(--text); flex: 1; padding: 10px; outline: none; font-size: 13px;">
-        <span style="font-size: 10px; color: var(--muted); background: var(--border); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">ENTER</span>
+        <input type="text" id="map-search-input" class="gis-search-input" placeholder="Find a work order or enter coordinates (lat, lng)" onkeydown="if(event.key==='Enter')searchCoordinates()" style="background: transparent; border: none; color: var(--text); flex: 1; padding: 10px; outline: none; font-size: 13px;">
       </div>
       
       <div style="flex: 1; display: flex; justify-content: center;">
@@ -2303,30 +2315,6 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
         <button class="btn btn-ghost btn-sm" onclick="toggleGisTheme()" title="Toggle GIS Theme" aria-label="Toggle GIS Theme"><i class="fas fa-circle-half-stroke"></i></button>
       </div>
     </header>
-
-    <div class="gis-floating-kpis">
-      <div class="gis-kpi-card glass-panel">
-        <div class="gis-kpi-label">Total Work Orders</div>
-        <div class="gis-kpi-value" id="gis-kpi-total">0</div>
-        <div class="gis-kpi-indicator" style="background: var(--blue);"></div>
-      </div>
-      <div class="gis-kpi-card glass-panel">
-        <div class="gis-kpi-label">Completed</div>
-        <div class="gis-kpi-value" id="gis-kpi-completed">0</div>
-        <div class="gis-kpi-indicator" style="background: var(--green);"></div>
-      </div>
-      <div class="gis-kpi-card glass-panel">
-        <div class="gis-kpi-label">In Progress</div>
-        <div class="gis-kpi-value" id="gis-kpi-progress">0</div>
-        <div class="gis-kpi-indicator" style="background: var(--amber);"></div>
-      </div>
-      <div class="gis-kpi-card glass-panel">
-        <div class="gis-kpi-label">Overdue</div>
-        <div class="gis-kpi-value" id="gis-kpi-overdue">0</div>
-        <div class="gis-kpi-indicator" style="background: var(--red);"></div>
-      </div>
-    </div>
-
 
     <div class="gis-details-panel glass-panel" id="gis-details-panel">
       <div class="gis-details-header">
@@ -2372,17 +2360,12 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
       <aside class="gis-sidebar" id="gis-sidebar">
         <div class="gis-sidebar-header">
           <div class="gis-sidebar-title">Layers Panel</div>
-          <div class="gis-search-input-wrap glass-panel" style="margin-top: 12px; padding: 4px 12px; border-radius: 8px;">
-            <i class="fas fa-search" style="font-size: 12px; color: var(--muted);"></i>
-            <input type="text" id="layer-search" class="gis-search-input" style="font-size: 12px;" placeholder="Search layers..." oninput="filterGisLayers()">
-          </div>
         </div>
 
         <div class="gis-tabs">
           <button class="gis-tab active" onclick="switchGisTab('layers')" title="Layers"><i class="fas fa-layer-group"></i><span>Layers</span></button>
           <button class="gis-tab" onclick="switchGisTab('assets')" title="Asset Info"><i class="fas fa-info-circle"></i><span>Assets</span></button>
           <button class="gis-tab" onclick="switchGisTab('measure')" title="Measure"><i class="fas fa-ruler-combined"></i><span>Measure</span></button>
-          <button class="gis-tab" onclick="switchGisTab('workorders')" title="Work Orders"><i class="fas fa-clipboard-list"></i><span>Work</span></button>
           <button class="gis-tab" onclick="switchGisTab('results')" title="Operational Results"><i class="fas fa-list-ul"></i><span>Results</span></button>
         </div>
 
@@ -2402,20 +2385,6 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
             </div>
 
             <div class="gis-panel-section">
-              <div class="gis-panel-section-title">Status Layers</div>
-              <div class="gis-layer-item">
-                <input type="checkbox" checked onchange="filterMapByStatus('COMP', this.checked)">
-                <div class="gis-layer-info"><span class="gis-layer-name">Completed</span></div>
-                <span class="dot green"></span>
-              </div>
-              <div class="gis-layer-item">
-                <input type="checkbox" checked onchange="filterMapByStatus('INPRG', this.checked)">
-                <div class="gis-layer-info"><span class="gis-layer-name">In Progress</span></div>
-                <span class="dot amber"></span>
-              </div>
-            </div>
-
-            <div class="gis-panel-section">
               <div class="gis-panel-section-title">User Layers</div>
               <div id="gis-user-layers">
                  <p style="font-size:10px; color:var(--muted); text-align:center;">No custom layers imported</p>
@@ -2425,7 +2394,7 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
             <div class="gis-panel-section">
               <div class="gis-panel-section-title">Basemap Selection</div>
               <div class="basemap-grid">
-                <div class="basemap-opt" onclick="setMapView('standard')" id="base-std">
+                <div class="basemap-opt active" onclick="setMapView('standard')" id="base-std">
                   <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/4/8/5" alt="Street">
                   <span>Street</span>
                 </div>
@@ -2433,7 +2402,7 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
                   <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/8/5" alt="Satellite">
                   <span>Satellite</span>
                 </div>
-                <div class="basemap-opt active" onclick="setMapView('hybrid')" id="base-hyb">
+                <div class="basemap-opt" onclick="setMapView('hybrid')" id="base-hyb">
                   <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/8/5" alt="Hybrid">
                   <span>Hybrid</span>
                 </div>
@@ -2488,17 +2457,6 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
             </div>
           </div>
 
-          <!-- WORK ORDERS PANEL -->
-          <div class="gis-tab-panel" id="gis-panel-workorders">
-             <div class="gis-panel-section">
-                <div class="gis-panel-section-title">Work Order Management</div>
-                <div class="gis-search-input-wrap glass-panel" style="margin-bottom:12px;">
-                  <input type="text" id="gis-wo-search" class="gis-search-input" placeholder="Search Work Orders..." oninput="updateGisWoList()">
-                </div>
-                <div id="gis-wo-list" style="display:flex; flex-direction:column; gap:8px;"></div>
-             </div>
-          </div>
-
           <!-- RESULTS PANEL -->
           <div class="gis-tab-panel" id="gis-panel-results">
              <div class="gis-panel-section">
@@ -2536,10 +2494,8 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
       
       <div style="height:1px; background:var(--border); margin:4px 0;"></div>
       
-      <button class="gis-tool-btn" onclick="toggleGisSidebar()" title="Layers" aria-label="Layers"><i class="fas fa-layer-group"></i></button>
       <button class="gis-tool-btn" id="tool-measure" onclick="toggleMeasure()" title="Measure" aria-label="Measure"><i class="fas fa-ruler-combined"></i></button>
       <button class="gis-tool-btn" id="tool-poly" onclick="toggleDrawMode('Polygon')" title="Draw" aria-label="Draw"><i class="fas fa-pencil-alt"></i></button>
-      <button class="gis-tool-btn" onclick="switchGisTab('assets')" title="Filter" aria-label="Filter"><i class="fas fa-filter"></i></button>
       <button class="gis-tool-btn" onclick="window.print()" title="Print" aria-label="Print"><i class="fas fa-print"></i></button>
       <button class="gis-tool-btn" onclick="map.toggleFullscreen()" title="Full Screen" aria-label="Full Screen"><i class="fas fa-expand"></i></button>
     </div>
@@ -2552,7 +2508,6 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
       <div style="border-right: 1px solid var(--border); height: 16px;"></div>
       <div id="map-scale-display">Scale: --</div>
       <div style="flex: 1;"></div>
-      <div id="active-layer-display">Layer: Work Orders</div>
     </footer>
 
     <input type="file" id="kml-upload" style="display:none" accept=".kml,.kmz,.gpx,.csv" onchange="handleKMLUpload(event)">
@@ -5993,8 +5948,8 @@ async function initMap() {
   baseLayers.hybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 22, attribution: 'Google' });
   baseLayers.terrain = L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', { maxZoom: 22, attribution: 'Google' });
   
-  baseLayers.hybrid.addTo(map);
-  currentBasemap = 'hybrid';
+  baseLayers.standard.addTo(map);          // clean street map by default (matches the light theme)
+  currentBasemap = 'standard';
   
   // Custom Fullscreen handler
   map.toggleFullscreen = function() {
@@ -6030,19 +5985,6 @@ async function initMap() {
   }
 
 
-  // Locate Me
-  const LocateControl = L.Control.extend({
-    options: { position: 'bottomright' },
-    onAdd: function() {
-      const btn = L.DomUtil.create('button', 'btn btn-primary btn-sm');
-      btn.innerHTML = '<i class="fas fa-location-crosshairs"></i>';
-      btn.style.width = '34px'; btn.style.height = '34px'; btn.style.padding = '0';
-      btn.title = 'My Location';
-      btn.onclick = () => map.locate({setView: true, maxZoom: 16});
-      return btn;
-    }
-  });
-  new LocateControl().addTo(map);
 
   // Geoman (Editing)
   if (map.pm) {
@@ -6083,6 +6025,7 @@ async function initMap() {
   }
 
   markersLayer = L.layerGroup().addTo(map);
+  try { if (localStorage.getItem('qbc_gis_theme') === 'dark') document.getElementById('gis-main-container').classList.add('gis-theme-dark'); } catch (e) {}
   map.on('moveend', debounce(() => {
     try { localStorage.setItem('qbc_map_view', JSON.stringify({ center: map.getCenter(), zoom: map.getZoom(), basemap: currentBasemap })); } catch (e) {}
   }, 600));
@@ -6100,7 +6043,7 @@ async function initMap() {
   // Minimap
   if (L.Control.MiniMap) {
       const miniMapLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-      new L.Control.MiniMap(miniMapLayer, { toggleDisplay: true, position: 'bottomleft' }).addTo(map);
+      new L.Control.MiniMap(miniMapLayer, { toggleDisplay: true, minimized: true, position: 'bottomleft' }).addTo(map);
   }
   
   loadMarkers();
@@ -6155,7 +6098,14 @@ async function saveMapPresets() {
 }
 
 function searchCoordinates() {
-  const input = document.getElementById('map-search-input').value;
+  const input = document.getElementById('map-search-input').value.trim();
+  if (!input) return;
+
+  // 1) a work-order number?
+  const wo = allData.find(d => String(d.WorkOrder) === input);
+  if (wo) { showOnMap(wo.Lat, wo.Lng, wo.WorkOrder); return; }
+
+  // 2) "lat, lng"
   const parts = input.split(/[\s,]+/);
   if (parts.length >= 2) {
     const lat = parseFloat(parts[0]);
@@ -6172,14 +6122,15 @@ function searchCoordinates() {
       }).addTo(map);
       map.setView([lat, lng], 15);
       showPointInfo(lat, lng);
-    } else {
-      showToast("Invalid coordinates", "error");
+      return;
     }
-  } else {
-    showToast("Please enter Lat, Lng", "error");
   }
+  // 3) partial match on location / description
+  const q = input.toLowerCase();
+  const hit = allData.find(d => d.Lat && d.Lng && (`${d.Location || ''} ${d.Description || ''}`.toLowerCase().includes(q)));
+  if (hit) showOnMap(hit.Lat, hit.Lng, hit.WorkOrder);
+  else showToast("No work order or coordinates matched", "error");
 }
-
 async function exportMapKML() {
   let kml = `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
@@ -6963,22 +6914,6 @@ function updateAssetList() {
   `).join('');
 }
 
-function updateGisWoList() {
-  const q = document.getElementById('gis-wo-search').value.toLowerCase();
-  const list = allData.filter(r => String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q));
-  const container = document.getElementById('gis-wo-list');
-  
-  container.innerHTML = list.slice(0, 15).map(r => `
-    <div class="notif-item" style="border:1px solid var(--border);" onclick="showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-weight:800; color:var(--accent);">#${r.WorkOrder}</span>
-        <span class="status-badge badge-${r.Status}">${r.Status}</span>
-      </div>
-      <div style="font-size:11px; margin-top:4px; color:var(--muted);">${r.Location}</div>
-    </div>
-  `).join('');
-}
-
 function filterMapByStatus() {
   loadMarkers();   // reads the sidebar status checkboxes
 }
@@ -7088,22 +7023,9 @@ function renderGisDashboard() {
 
 function toggleGisTheme() {
   const container = document.getElementById('gis-main-container');
-  container.classList.toggle('gis-theme-dark');
+  const dark = container.classList.toggle('gis-theme-dark');
+  try { localStorage.setItem('qbc_gis_theme', dark ? 'dark' : 'light'); } catch (e) {}
 }
-
-function filterGisLayers() {
-  const q = document.getElementById('layer-search').value.toLowerCase();
-  document.querySelectorAll('.gis-layer-item').forEach(item => {
-    const name = item.querySelector('.gis-layer-name').textContent.toLowerCase();
-    item.style.display = name.includes(q) ? 'flex' : 'none';
-  });
-  
-  document.querySelectorAll('.gis-panel-section').forEach(section => {
-    const visibleItems = Array.from(section.querySelectorAll('.gis-layer-item')).filter(i => i.style.display !== 'none');
-    section.style.display = visibleItems.length > 0 || section.querySelector('.basemap-grid') ? 'block' : 'none';
-  });
-}
-
 function openGisDetails(woId) {
   const wo = allData.find(r => String(r.WorkOrder) === String(woId));
   if (!wo) return;
@@ -7186,8 +7108,12 @@ function closeGisDetails() {
 }
 
 function exportGisResults(format) {
-  const q = document.getElementById('gis-wo-search').value.toLowerCase();
-  const list = allData.filter(r => String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q));
+  const boxes = Array.from(document.querySelectorAll('input[onchange*="filterMapByStatus"]'));
+  const offStatuses = new Set(boxes.filter(i => !i.checked).map(i => i.getAttribute('onchange').match(/'([^']+)'/)[1]));
+  const list = allData.filter(r => r.Lat && r.Lng && !offStatuses.has(r.Status)
+    && (!mapFilterEng || r.PWA_ENG === mapFilterEng)
+    && (!mapFilterText || `${r.WorkOrder} ${r.Location || ''} ${r.Description || ''}`.toLowerCase().includes(mapFilterText))
+    && !mapCatOff.has(getStatusCat(r)));
   if (list.length === 0) return showToast("No data to export", "error");
 
   if (format === 'csv') {
