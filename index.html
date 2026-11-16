@@ -1924,6 +1924,18 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
   #page-workorders .table-wrap { max-height:none; }
 }
 @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+
+/* Map filter bar */
+.map-filterbar { position:absolute; left:50%; bottom:46px; transform:translateX(-50%); z-index:900; display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; padding:8px 10px; max-width:calc(100% - 24px); border-radius:12px; background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow); }
+.map-filterbar .filter-input { height:30px; font-size:12px; min-width:0; }
+.map-filterbar #mfb-search { width:210px; }
+.mfb-chips { display:flex; gap:6px; flex-wrap:wrap; }
+.mfb-chip { display:inline-flex; align-items:center; gap:6px; height:30px; padding:0 10px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--text); font:600 12px inherit; font-family:inherit; cursor:pointer; }
+.mfb-chip i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+.mfb-chip b { font-weight:700; color:var(--muted); }
+.mfb-chip.off { opacity:.45; text-decoration:line-through; }
+.mfb-count { font-size:12px; font-weight:600; color:var(--muted); padding:0 4px; white-space:nowrap; }
+@media (max-width:700px) { .map-filterbar { bottom:40px; } .map-filterbar #mfb-search { width:100%; } }
 </style>
 </head>
 <body data-theme="light">
@@ -2504,6 +2516,19 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
 
       <div class="gis-map-canvas">
         <div id="map"></div>
+        <div class="map-filterbar glass-panel" id="map-filterbar">
+          <div class="mfb-chips">
+            <button class="mfb-chip" data-cat="green" onclick="toggleMapCat('green')" title="Completed within target"><i style="background:var(--green)"></i>On time <b id="mfb-n-green">0</b></button>
+            <button class="mfb-chip" data-cat="amber" onclick="toggleMapCat('amber')" title="Completed after the target date"><i style="background:var(--amber)"></i>Completed late <b id="mfb-n-amber">0</b></button>
+            <button class="mfb-chip" data-cat="red" onclick="toggleMapCat('red')" title="Not completed and past target date"><i style="background:var(--red)"></i>Overdue <b id="mfb-n-red">0</b></button>
+            <button class="mfb-chip" data-cat="blue" onclick="toggleMapCat('blue')" title="Pending, within target"><i style="background:var(--blue)"></i>Pending <b id="mfb-n-blue">0</b></button>
+          </div>
+          <select id="mfb-eng" class="filter-input" onchange="applyMapFilters()" aria-label="Filter by engineer"><option value="">All engineers</option></select>
+          <input id="mfb-search" class="filter-input" type="search" placeholder="Filter: WO, location, description" oninput="applyMapFiltersDebounced()" aria-label="Filter work orders">
+          <button class="btn btn-ghost btn-sm" onclick="fitMapToVisible()" title="Zoom to the visible work orders"><i class="fas fa-expand"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="resetMapFilters()" title="Clear filters"><i class="fas fa-rotate-left"></i></button>
+          <span class="mfb-count" id="mfb-count">0 / 0</span>
+        </div>
         <div class="gis-toolbar glass-panel">
       <button class="gis-tool-btn" onclick="map.zoomIn()" title="Zoom In" aria-label="Zoom In"><i class="fas fa-plus"></i></button>
       <button class="gis-tool-btn" onclick="map.zoomOut()" title="Zoom Out" aria-label="Zoom Out"><i class="fas fa-minus"></i></button>
@@ -6058,6 +6083,9 @@ async function initMap() {
   }
 
   markersLayer = L.layerGroup().addTo(map);
+  map.on('moveend', debounce(() => {
+    try { localStorage.setItem('qbc_map_view', JSON.stringify({ center: map.getCenter(), zoom: map.getZoom(), basemap: currentBasemap })); } catch (e) {}
+  }, 600));
   
   map.on('click', onMapClick);
   map.on('mousemove', (e) => {
@@ -6089,6 +6117,10 @@ async function initMap() {
 
 
 async function loadMapPresets() {
+  try {
+    const v = JSON.parse(localStorage.getItem('qbc_map_view') || 'null');
+    if (v && v.center && v.zoom) { map.setView(v.center, v.zoom); if (v.basemap) setMapView(v.basemap); return; }
+  } catch (e) {}
   if (!supabaseClient) return;
   try {
     const { data } = await supabaseClient.from('project_boundaries').select('style_settings').eq('id', 0).maybeSingle();
@@ -6113,7 +6145,10 @@ async function saveMapPresets() {
     zoom: map.getZoom()
   };
   try {
-    await supabaseClient.from('project_boundaries').upsert({ id: 0, name: 'MAP_PRESETS', style_settings: presets });
+    // project_boundaries row 0 also stores contract start date / last CSV upload – merge instead of overwriting
+    const { data: cur } = await supabaseClient.from('project_boundaries').select('style_settings').eq('id', 0).maybeSingle();
+    await supabaseClient.from('project_boundaries').upsert({ id: 0, name: 'MAP_PRESETS', style_settings: { ...(cur?.style_settings || {}), ...presets } });
+    try { localStorage.removeItem('qbc_map_view'); } catch (e) {}
     logAudit("Saved Map Presets", JSON.stringify(presets));
     showToast("Map presets saved as default");
   } catch(e) { showToast("Failed to save presets", "error"); }
@@ -6188,103 +6223,152 @@ function exportMapCSV() {
   exportTableCSV();
 }
 
-function loadMarkers(statusFilter = null, isVisible = true) {
-  if (!markersLayer) return;
-  markersLayer.clearLayers();
-  
-  if (window.markerClusterGroup) {
-    map.removeLayer(window.markerClusterGroup);
-  }
-  
-  window.markerClusterGroup = L.markerClusterGroup({
-    showCoverageOnHover: false,
-    maxClusterRadius: 50
-  });
+const MAP_CAT_COLOR = { green: 'var(--green)', amber: 'var(--amber)', red: 'var(--red)', blue: 'var(--blue)' };
+let mapCatOff = new Set();
+let mapFilterEng = '';
+let mapFilterText = '';
+try {
+  const saved = JSON.parse(localStorage.getItem('qbc_map_filters') || '{}');
+  mapCatOff = new Set(saved.catOff || []);
+  mapFilterEng = saved.eng || '';
+  mapFilterText = saved.text || '';
+} catch (e) {}
 
-  const statusCheckboxes = Array.from(document.querySelectorAll('input[onchange*="filterMapByStatus"]'));
-  const disabledStatuses = statusCheckboxes.length > 0 ? statusCheckboxes.filter(i => !i.checked).map(i => i.getAttribute('onchange').match(/'([^']+)'/)[1]) : [];
-
-  allData.forEach(r => {
-    if (r.Lat && r.Lng) {
-      if (disabledStatuses.includes(r.Status)) return;
-      const cat = getStatusCat(r);
-      const defaultColor = cat === 'green' ? 'var(--green)' : (cat === 'amber' ? 'var(--amber)' : (cat === 'red' ? 'var(--red)' : 'var(--blue)'));
-      const style = r.style_settings || {};
-      const color = style.color || defaultColor;
-      const size = style.size || 12;
-      const icon = style.icon || 'circle';
-
-      let iconHtml = '';
-      if (icon === 'circle') {
-        iconHtml = `<div style='background-color:${color}; width:${size}px; height:${size}px; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.3)'></div>`;
-      } else {
-        iconHtml = `<div style="color:${color}; font-size:${size}px; display:flex; align-items:center; justify-content:center; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5))">
-                      <i class="fas fa-${icon}"></i>
-                    </div>`;
-      }
-      
-      const m = L.marker([r.Lat, r.Lng], {
-        icon: L.divIcon({
-          className: 'custom-div-icon',
-          html: iconHtml,
-          iconSize: [size, size],
-          iconAnchor: [size/2, size/2]
-        }),
-        draggable: true,
-        workOrder: r.WorkOrder
-      });
-
-      m.on('click', (e) => {
-        L.DomEvent.stopPropagation(e);
-        showPointInfo(r.Lat, r.Lng, r);
-      });
-      
-      const popupHtml = `
-        <div class="map-card" style="width:280px; padding:0; border:none; background:none;">
-          <div style="background:var(--surface2); padding:12px; border-radius:12px 12px 0 0; border-bottom:1px solid var(--border);">
-            <div style="font-weight:800; color:var(--accent); display:flex; justify-content:space-between;">
-              <span>WO #${r.WorkOrder}</span>
-              <span class="status-badge badge-${r.Status}" style="font-size:9px;">${r.Status}</span>
-            </div>
-            <div style="font-size:10px; color:var(--muted); margin-top:4px;">${r.Location}</div>
-          </div>
-          <div style="padding:12px; background:var(--surface); border-radius:0 0 12px 12px;">
-            ${photos[r.WorkOrder] ? `<img src="${photos[r.WorkOrder]}" style="width:100%; height:120px; object-fit:cover; border-radius:8px; margin-bottom:10px;">` : ''}
-            <div style="font-size:11px; margin-bottom:12px; line-height:1.4;">${(r.Description||'').substring(0,60)}...</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-              <button class="btn btn-primary btn-sm" style="font-size:10px;" onclick="openDetail('${r.WorkOrder}')">Detailed View</button>
-              <button class="btn btn-ghost btn-sm" style="font-size:10px;" onclick="copyCoords(${r.Lat}, ${r.Lng})">Copy Coords</button>
-            </div>
-          </div>
-        </div>
-      `;
-      m.bindPopup(popupHtml, { maxWidth: 300, className: 'custom-map-popup' });
-
-      m.on('dragend', async (e) => {
-        const newPos = e.target.getLatLng();
-        r.Lat = newPos.lat;
-        r.Lng = newPos.lng;
-        if (supabaseClient) {
-          await supabaseClient.from('work_orders').update({ latitude: newPos.lat, longitude: newPos.lng }).eq('work_order', r.WorkOrder);
-        }
-        showToast(`Marker moved to ${newPos.lat.toFixed(4)}, ${newPos.lng.toFixed(4)}`);
-        saveMapHistory('move', { type: 'wo', id: r.WorkOrder, latlng: newPos });
-      });
-
-      window.markerClusterGroup.addLayer(m);
-    }
-  });
-  
-  map.addLayer(window.markerClusterGroup);
-  const countEl = document.getElementById('gis-count-wo');
-  if (countEl) countEl.textContent = `${allData.length} items`;
+function saveMapFilters() {
+  try { localStorage.setItem('qbc_map_filters', JSON.stringify({ catOff: [...mapCatOff], eng: mapFilterEng, text: mapFilterText })); } catch (e) {}
 }
 
+function syncMapFilterBar() {
+  document.querySelectorAll('.mfb-chip').forEach(c => c.classList.toggle('off', mapCatOff.has(c.dataset.cat)));
+  const eng = document.getElementById('mfb-eng');
+  if (eng) {
+    if (eng.options.length <= 1 || eng.dataset.n !== String(allData.length)) {
+      const engs = [...new Set(allData.map(r => r.PWA_ENG).filter(Boolean))].sort();
+      eng.innerHTML = '<option value="">All engineers</option>' + engs.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+      eng.dataset.n = String(allData.length);
+    }
+    eng.value = mapFilterEng;
+  }
+  const s = document.getElementById('mfb-search');
+  if (s && s.value !== mapFilterText) s.value = mapFilterText;
+}
 
+function toggleMapCat(cat) {
+  if (mapCatOff.has(cat)) mapCatOff.delete(cat); else mapCatOff.add(cat);
+  saveMapFilters();
+  loadMarkers();
+}
+function applyMapFilters() {
+  mapFilterEng = document.getElementById('mfb-eng')?.value || '';
+  mapFilterText = (document.getElementById('mfb-search')?.value || '').trim().toLowerCase();
+  saveMapFilters();
+  loadMarkers();
+}
+const applyMapFiltersDebounced = debounce(applyMapFilters, 250);
+function resetMapFilters() {
+  mapCatOff = new Set(); mapFilterEng = ''; mapFilterText = '';
+  document.querySelectorAll('input[onchange*="filterMapByStatus"]').forEach(i => { i.checked = true; });
+  saveMapFilters();
+  loadMarkers();
+}
+function fitMapToVisible() {
+  if (!map || !window.markerClusterGroup) return;
+  const b = window.markerClusterGroup.getBounds();
+  if (b && b.isValid()) map.fitBounds(b.pad(0.1), { maxZoom: 17 });
+  else showToast('No work orders match the current filters', 'error');
+}
 
+function buildMapPopup(r) {
+  const photo = photos[r.WorkOrder];
+  return `
+    <div class="map-card" style="width:280px; padding:0; border:none; background:none;">
+      <div style="background:var(--surface2); padding:12px; border-radius:12px 12px 0 0; border-bottom:1px solid var(--border);">
+        <div style="font-weight:800; color:var(--accent); display:flex; justify-content:space-between;">
+          <span>WO #${escapeHtml(r.WorkOrder)}</span>
+          <span class="status-badge badge-${escapeHtml(r.Status)}" style="font-size:9px;">${escapeHtml(r.Status)}</span>
+        </div>
+        <div style="font-size:10px; color:var(--muted); margin-top:4px;">${escapeHtml(r.Location)}</div>
+      </div>
+      <div style="padding:12px; background:var(--surface); border-radius:0 0 12px 12px;">
+        ${photo ? `<img src="${escapeHtml(photo)}" loading="lazy" style="width:100%; height:120px; object-fit:cover; border-radius:8px; margin-bottom:10px;">` : ''}
+        <div style="font-size:11px; margin-bottom:12px; line-height:1.4;">${escapeHtml((r.Description || '').substring(0, 60))}${(r.Description || '').length > 60 ? '…' : ''}</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button class="btn btn-primary btn-sm" onclick="openDetail('${escapeHtml(r.WorkOrder)}')">Detailed View</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyCoords(${r.Lat}, ${r.Lng})">Copy Coords</button>
+          <button class="btn btn-ghost btn-sm" onclick="openReminderModal(null, '${escapeHtml(r.WorkOrder)}')"><i class="fas fa-bell"></i> Remind</button>
+          <button class="btn btn-ghost btn-sm" onclick="window.open('https://www.google.com/maps?q=${r.Lat},${r.Lng}','_blank')"><i class="fas fa-route"></i> Google Maps</button>
+        </div>
+      </div>
+    </div>`;
+}
 
+function loadMarkers() {
+  if (!markersLayer || !map) return;
+  syncMapFilterBar();
+  if (window.markerClusterGroup) map.removeLayer(window.markerClusterGroup);
+  window.markerClusterGroup = L.markerClusterGroup({
+    showCoverageOnHover: false,
+    maxClusterRadius: 50,
+    chunkedLoading: true,                 // keeps the UI responsive while thousands of markers are added
+    removeOutsideVisibleBounds: true,
+    disableClusteringAtZoom: 19
+  });
 
+  const statusBoxes = Array.from(document.querySelectorAll('input[onchange*="filterMapByStatus"]'));
+  const disabledStatuses = new Set(statusBoxes.filter(i => !i.checked).map(i => i.getAttribute('onchange').match(/'([^']+)'/)[1]));
+  const counts = { green: 0, amber: 0, red: 0, blue: 0 };
+  const layers = [];
+  let withCoords = 0;
+  const editable = !!(isGlobalEditMode && isAdmin);
 
+  for (const r of allData) {
+    if (!r.Lat || !r.Lng) continue;
+    withCoords++;
+    if (disabledStatuses.has(r.Status)) continue;
+    if (mapFilterEng && r.PWA_ENG !== mapFilterEng) continue;
+    if (mapFilterText && !(`${r.WorkOrder} ${r.Location || ''} ${r.Description || ''}`.toLowerCase().includes(mapFilterText))) continue;
+
+    const cat = getStatusCat(r);
+    counts[cat]++;
+    if (mapCatOff.has(cat)) continue;
+
+    const style = r.style_settings || {};
+    const color = style.color || MAP_CAT_COLOR[cat];
+    const size = style.size || 12;
+    const icon = style.icon || 'circle';
+    const iconHtml = icon === 'circle'
+      ? `<div style="background-color:${color}; width:${size}px; height:${size}px; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.3)"></div>`
+      : `<div style="color:${color}; font-size:${size}px; display:flex; align-items:center; justify-content:center; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5))"><i class="fas fa-${icon}"></i></div>`;
+
+    const m = L.marker([r.Lat, r.Lng], {
+      icon: L.divIcon({ className: 'custom-div-icon', html: iconHtml, iconSize: [size, size], iconAnchor: [size / 2, size / 2] }),
+      draggable: editable,                // markers can only be moved while the Edit tool is on (admin)
+      workOrder: r.WorkOrder
+    });
+    m.on('click', e => { L.DomEvent.stopPropagation(e); showPointInfo(r.Lat, r.Lng, r); });
+    m.bindPopup(() => buildMapPopup(r), { maxWidth: 300, className: 'custom-map-popup' });   // popup built only when opened
+    m.on('dragend', async e => {
+      const oldLat = r.Lat, oldLng = r.Lng;
+      const p = e.target.getLatLng();
+      r.Lat = p.lat; r.Lng = p.lng;
+      if (supabaseClient) {
+        const { error } = await supabaseClient.from('work_orders').update({ latitude: p.lat, longitude: p.lng }).eq('work_order', r.WorkOrder);
+        if (error) { r.Lat = oldLat; r.Lng = oldLng; e.target.setLatLng([oldLat, oldLng]); showToast('Could not save the new position', 'error'); return; }
+      }
+      showToast(`Marker moved to ${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`);
+      saveMapHistory('move', { type: 'wo', id: r.WorkOrder, latlng: p });
+    });
+    layers.push(m);
+  }
+  window.markerClusterGroup.addLayers(layers);
+  map.addLayer(window.markerClusterGroup);
+
+  Object.keys(counts).forEach(k => { const el = document.getElementById('mfb-n-' + k); if (el) el.textContent = counts[k]; });
+  const countEl = document.getElementById('gis-count-wo');
+  if (countEl) countEl.textContent = `${layers.length} of ${allData.length} items`;
+  const mc = document.getElementById('mfb-count');
+  if (mc) mc.textContent = `${layers.length} / ${withCoords} on map`;
+}
 function getHaversineDist(lat1, lon1, lat2, lon2) {
   const R = 6371; // km
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -6479,12 +6563,12 @@ function resetMapView() {
 }
 
 function toggleLayer(layerId, visible) {
-  if (layerId === 'workorders') {
-    if (visible) markersLayer.addTo(map);
-    else map.removeLayer(markersLayer);
+  if (layerId === 'workorders' && map) {
+    // markers live in the cluster group (the old code toggled an empty layer, so the switch did nothing)
+    const g = window.markerClusterGroup;
+    if (g) { if (visible) map.addLayer(g); else map.removeLayer(g); }
   }
 }
-
 async function handleKMLUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -6601,6 +6685,7 @@ let isGlobalEditMode = false;
 function toggleGlobalEdit() {
   if (!isAdmin) { showToast("Admin access required", "error"); return; }
   isGlobalEditMode = !isGlobalEditMode;
+  setTimeout(loadMarkers, 0);   // markers are draggable only while editing
   const btn = document.getElementById('tool-edit');
   
   if (isGlobalEditMode) {
@@ -6610,7 +6695,7 @@ function toggleGlobalEdit() {
         if (layer.pm) layer.pm.enable();
       });
     }
-    showToast("Edit mode enabled. Drag handles to reshape objects.");
+    showToast("Edit mode enabled. Drag handles to reshape objects, or drag a work-order marker to move it.");
   } else {
     btn.classList.remove('active');
     if (boundaryLayer) {
@@ -6627,7 +6712,9 @@ function exitGisModes() {
     map.pm.disableDraw();
     map.pm.disableGlobalEditMode();
   }
+  const wasEditing = isGlobalEditMode;
   isGlobalEditMode = false;
+  if (wasEditing) setTimeout(loadMarkers, 0);
   const editBtn = document.getElementById('tool-edit');
   if (editBtn) editBtn.classList.remove('active');
   document.querySelectorAll('.gis-tool-btn').forEach(b => b.classList.remove('active'));
@@ -6859,7 +6946,7 @@ function clearMapMeasurements() {
 
 function updateAssetList() {
   const q = document.getElementById('asset-search').value.toLowerCase();
-  const list = allData.filter(r => r.WorkOrder.includes(q) || (r.Location||'').toLowerCase().includes(q));
+  const list = allData.filter(r => String(r.WorkOrder).includes(q) || (r.Location||'').toLowerCase().includes(q));
   const container = document.getElementById('asset-info-content');
   
   if (q.length < 2) {
@@ -6878,7 +6965,7 @@ function updateAssetList() {
 
 function updateGisWoList() {
   const q = document.getElementById('gis-wo-search').value.toLowerCase();
-  const list = allData.filter(r => r.WorkOrder.includes(q) || (r.Description||'').toLowerCase().includes(q));
+  const list = allData.filter(r => String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q));
   const container = document.getElementById('gis-wo-list');
   
   container.innerHTML = list.slice(0, 15).map(r => `
@@ -6892,12 +6979,9 @@ function updateGisWoList() {
   `).join('');
 }
 
-function filterMapByStatus(status, visible) {
-  // Logic to hide/show markers of specific status
-  // For simplicity, we refresh markers but with a filter
-  loadMarkers(status, visible);
+function filterMapByStatus() {
+  loadMarkers();   // reads the sidebar status checkboxes
 }
-
 function switchGisView(view) {
   const mapBtn = document.getElementById('gis-view-map-btn');
   const dashBtn = document.getElementById('gis-view-dash-btn');
@@ -7103,7 +7187,7 @@ function closeGisDetails() {
 
 function exportGisResults(format) {
   const q = document.getElementById('gis-wo-search').value.toLowerCase();
-  const list = allData.filter(r => r.WorkOrder.includes(q) || (r.Description||'').toLowerCase().includes(q));
+  const list = allData.filter(r => String(r.WorkOrder).includes(q) || (r.Description||'').toLowerCase().includes(q));
   if (list.length === 0) return showToast("No data to export", "error");
 
   if (format === 'csv') {
@@ -7459,6 +7543,7 @@ async function deletePhoto(wo) {
 
 let highlightMarker = null;
 function showOnMap(lat, lng, wo) {
+  if (lat == null || lng == null || isNaN(parseFloat(lat)) || isNaN(parseFloat(lng))) { showToast('This work order has no coordinates', 'error'); return; }
   showPage('map');
   setTimeout(() => {
     if (map) {
