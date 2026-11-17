@@ -1970,6 +1970,88 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
 .wo-col-menu.show { display:block; }
 .wo-col-menu label { display:flex; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; font-size:12.5px; cursor:pointer; }
 .wo-col-menu label:hover { background:var(--surface2); }
+
+/* Month dashboard */
+.md-head { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+.md-head h1 { font-size:24px; font-weight:800; letter-spacing:-.01em; }
+.md-head p { font-size:12.5px; color:var(--muted); margin-top:2px; }
+.md-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.md-month-nav { display:flex; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.md-month-nav button { border:none; background:none; color:var(--text); width:34px; height:34px; cursor:pointer; }
+.md-month-nav button:hover { background:var(--surface2); }
+.md-month-nav select { border:none; border-left:1px solid var(--border); border-right:1px solid var(--border); background:var(--surface); color:var(--text); height:34px; padding:0 12px; font:700 13px inherit; font-family:inherit; min-width:170px; text-align:center; cursor:pointer; }
+.md-updated { font-size:11px; color:var(--muted); display:inline-flex; gap:5px; align-items:center; }
+.md-kpis { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; margin-bottom:12px; }
+.md-kpi { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow); cursor:pointer; position:relative; overflow:hidden; transition:border-color .15s; }
+.md-kpi:hover { border-color:var(--accent); }
+.md-kpi::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent); }
+.md-kpi.green::before { background:var(--green); } .md-kpi.amber::before { background:var(--amber); }
+.md-kpi.red::before { background:var(--red); } .md-kpi.blue::before { background:var(--blue); }
+.md-kpi label { display:block; font-size:11.5px; font-weight:600; color:var(--muted); }
+.md-kpi label small { font-weight:700; color:var(--text); margin-left:4px; }
+.md-kpi .v { font-size:32px; font-weight:800; line-height:1.15; margin-top:2px; }
+.md-kpi.green .v { color:var(--green); } .md-kpi.amber .v { color:var(--amber); } .md-kpi.red .v { color:var(--red); } .md-kpi.blue .v { color:var(--blue); }
+.md-kpi .p { font-size:12px; color:var(--muted); font-weight:600; }
+.md-delta { display:inline-block; margin-top:6px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:999px; }
+.md-delta.good { background:rgba(21,128,61,.12); color:var(--green); } .md-delta.bad { background:rgba(220,38,38,.12); color:var(--red); } .md-delta.flat { background:var(--surface2); color:var(--muted); }
+.md-strip { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); margin-bottom:12px; }
+.md-strip > div { padding:12px 16px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:2px; }
+.md-strip > div:last-child { border-right:none; }
+.md-strip label { font-size:11px; color:var(--muted); font-weight:600; }
+.md-strip b { font-size:20px; font-weight:800; }
+.md-strip .clickable { cursor:pointer; } .md-strip .clickable:hover { background:var(--surface2); }
+.md-strip span .md-delta { margin-top:2px; }
+.md-grid { display:grid; gap:12px; margin-bottom:12px; }
+.md-grid.two { grid-template-columns:minmax(0,3fr) minmax(0,2fr); } .md-grid.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.md-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; box-shadow:var(--shadow); min-width:0; }
+.md-card h3 { font-size:13.5px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.md-card h3 small { font-weight:500; color:var(--muted); font-size:11.5px; }
+.md-chart { position:relative; height:250px; } .md-chart.tall { height:300px; }
+.md-hidden { display:none; }
+.md-grid.two:has(.md-hidden) { grid-template-columns:minmax(0,1fr); }
+.md-table-wrap { max-height:300px; overflow:auto; }
+.md-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+.md-table th { text-align:left; font-size:11px; color:var(--muted); font-weight:700; padding:8px 8px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); }
+.md-table td { padding:8px; border-bottom:1px solid var(--border); }
+.md-table tbody tr { cursor:pointer; } .md-table tbody tr:hover, .md-table tbody tr.sel { background:var(--color-accent-teal-bg); }
+.md-mini-bar { display:inline-block; width:46px; height:6px; background:var(--border); border-radius:3px; margin-right:6px; vertical-align:middle; overflow:hidden; }
+.md-mini-bar i { display:block; height:100%; background:var(--accent); }
+.md-bar-row { display:grid; grid-template-columns:minmax(80px,1.2fr) 1.6fr auto; gap:10px; align-items:center; padding:6px 0; font-size:12.5px; }
+.md-bar-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.md-bar-track { background:var(--surface2); border-radius:6px; height:10px; overflow:hidden; }
+.md-bar-fill { height:100%; border-radius:6px; opacity:.45; position:relative; } .md-bar-fill i { position:absolute; left:0; top:0; bottom:0; background:inherit; opacity:1; filter:brightness(.8); border-radius:6px; }
+.md-bar-n { font-weight:700; text-align:right; min-width:56px; } .md-bar-n small { display:block; font-weight:500; color:var(--muted); font-size:10.5px; }
+.md-chip-row { display:flex; gap:6px; align-items:baseline; padding:6px 0; border-bottom:1px dashed var(--border); font-size:12.5px; } .md-chip-row span { flex:1; color:var(--muted); } .md-chip-row small { color:var(--muted); margin-right:8px; }
+.md-att { display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; padding:9px 10px; border:1px solid var(--border); border-left:3px solid var(--red); border-radius:8px; margin-bottom:8px; cursor:pointer; font-size:12.5px; }
+.md-att:hover { background:var(--surface2); } .md-att span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); } .md-att em { font-style:normal; color:var(--red); font-weight:700; font-size:11.5px; }
+.md-count { background:rgba(220,38,38,.12); color:var(--red); border-radius:999px; font-size:11px; padding:1px 8px; }
+.md-empty { color:var(--muted); font-size:12.5px; padding:14px 0; text-align:center; }
+@media (max-width:1100px) { .md-kpis, .md-strip { grid-template-columns:repeat(2,minmax(0,1fr)); } .md-grid.two, .md-grid.three { grid-template-columns:minmax(0,1fr); } }
+
+/* Work Orders – long text is shown in full (wraps, rows grow) */
+#woTable td { vertical-align:top; padding-top:10px; padding-bottom:10px; }
+#woTable td .cell-text { display:block; white-space:pre-wrap; word-break:break-word; overflow:visible; text-overflow:clip; line-height:1.45; }
+#woTable td[data-k="Remarks"], #woTable td[data-k="EmailSubject"], #woTable td[data-k="TeamsVehicles"], #woTable td[data-k="IssueCategory"] { white-space:normal; overflow:visible; text-overflow:clip; }
+
+/* View Details – all sections on one screen */
+.detail-tabs { display:none !important; }
+.detail-body { max-width:none; padding:10px 14px; gap:10px; }
+.detail-top-info { padding:10px 16px; margin-bottom:0; }
+.detail-panes { column-count:3; column-gap:10px; }
+.detail-pane, .detail-pane.active { display:block !important; break-inside:avoid; page-break-inside:avoid; margin-bottom:10px; animation:none; }
+.detail-pane .detail-section { margin-bottom:0; padding:10px 14px; }
+.detail-pane .detail-section-title { font-size:11.5px; margin-bottom:8px; }
+.detail-pane .detail-info-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 14px; }
+.detail-pane .info-item label { font-size:9.5px; margin-bottom:2px; }
+.detail-pane .info-item span { font-size:12.5px; min-height:16px; word-break:break-word; }
+.detail-pane .detail-grid { grid-template-columns:1fr; gap:10px; }
+#detail-map, .detail-pane .static-map { height:150px !important; }
+#comment-list { max-height:90px !important; margin-bottom:8px !important; }
+#new-comment { height:48px !important; }
+.detail-pane .attachment-gallery { margin-top:6px; }
+@media (min-width:1900px) { .detail-panes { column-count:4; } }
+@media (max-width:1150px) { .detail-panes { column-count:2; } }
+@media (max-width:760px) { .detail-panes { column-count:1; } }
 </style>
 </head>
 <body data-theme="light">
@@ -2050,127 +2132,71 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
 
 <div class="page" id="page-dashboard" tabindex="-1">
   <div class="wrapper">
-    <header class="dash-header">
-      <div class="header-left">
-        <div class="tag">▸ QBC Operations Center</div>
-        <h1 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.1;color:var(--text);">Operations <span style="color:var(--accent)">Center</span></h1>
-        <p style="font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500; letter-spacing: 0.02em;">Signage Asset & GIS Management System</p>
+    <header class="md-head">
+      <div>
+        <h1>Operations Dashboard</h1>
+        <p>Month view &middot; a work order belongs to the month of its Target Start Date</p>
       </div>
-      <div class="header-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
-        <div style="font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px;">
-          <i class="fas fa-sync-alt"></i> Last updated: <span id="dash-last-refresh">--:--</span>
+      <div class="md-controls">
+        <div class="md-month-nav">
+          <button onclick="dashShiftMonth(-1)" title="Previous month" aria-label="Previous month"><i class="fas fa-chevron-left"></i></button>
+          <select id="dashMonthSelect" onchange="dashSetMonth(this.value)" aria-label="Select month"></select>
+          <button onclick="dashShiftMonth(1)" title="Next month" aria-label="Next month"><i class="fas fa-chevron-right"></i></button>
         </div>
+        <button class="btn btn-ghost btn-sm" onclick="dashSetMonth('all')">All months</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportDashboardPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+        <span class="md-updated" title="Last data upload"><i class="fas fa-sync-alt"></i> <span id="dash-last-refresh">--:--</span></span>
       </div>
     </header>
 
-    <div class="dash-layout">
-      <!-- ROW 1: KPI Cards -->
-      <div class="kpi-grid">
-        <div class="kpi-card total cursor-pointer" onclick="drillDown('total')">
-          <div class="kpi-label">Total Work Orders</div>
-          <div class="kpi-value" id="kpiTotal">0</div>
-          <div class="kpi-pct" id="kpiTotalLabel">System Records</div>
-          <i class="fa-solid fa-clipboard-list kpi-icon"></i>
-        </div>
-        <div class="kpi-card on-time cursor-pointer" onclick="drillDown('on-time')">
-          <div class="kpi-label">On-Time</div>
-          <div class="kpi-value" id="kpiGreen">0</div>
-          <div class="kpi-pct" id="kpiGreenPct">0%</div>
-          <i class="fa-solid fa-circle-check kpi-icon"></i>
-        </div>
-        <div class="kpi-card breached cursor-pointer" onclick="drillDown('breached-comp')">
-          <div class="kpi-label">Completed (Breached)</div>
-          <div class="kpi-value" id="kpiAmber">0</div>
-          <div class="kpi-pct" id="kpiAmberPct">0%</div>
-          <i class="fa-solid fa-triangle-exclamation kpi-icon"></i>
-        </div>
-        <div class="kpi-card failed cursor-pointer" onclick="drillDown('breached-pending')">
-          <div class="kpi-label">Not Completed (Breached)</div>
-          <div class="kpi-value" id="kpiRed">0</div>
-          <div class="kpi-pct" id="kpiRedPct">0%</div>
-          <i class="fa-solid fa-circle-xmark kpi-icon"></i>
-        </div>
-        <div class="kpi-card pending cursor-pointer" onclick="drillDown('pending')">
-          <div class="kpi-label">Pending within Target Date</div>
-          <div class="kpi-value" id="kpiBlue">0</div>
-          <div class="kpi-pct" id="kpiBluePct">0%</div>
-          <i class="fa-solid fa-clock kpi-icon"></i>
-        </div>
-      </div>
+    <section class="md-kpis">
+      <div class="md-kpi total" onclick="drillDown('total')"><label>Total CMs <small id="kpiTotalLabel"></small></label><div class="v" id="kpiTotal">0</div><div id="mdDeltaTotal"></div></div>
+      <div class="md-kpi green" onclick="drillDown('on-time')"><label>Completed on time</label><div class="v" id="kpiGreen">0</div><div class="p" id="kpiGreenPct">0%</div><div id="mdDeltaGreen"></div></div>
+      <div class="md-kpi amber" onclick="drillDown('breached-comp')"><label>Completed late</label><div class="v" id="kpiAmber">0</div><div class="p" id="kpiAmberPct">0%</div><div id="mdDeltaAmber"></div></div>
+      <div class="md-kpi red" onclick="drillDown('breached-pending')"><label>Overdue (not completed)</label><div class="v" id="kpiRed">0</div><div class="p" id="kpiRedPct">0%</div><div id="mdDeltaRed"></div></div>
+      <div class="md-kpi blue" onclick="drillDown('pending')"><label>Pending within target</label><div class="v" id="kpiBlue">0</div><div class="p" id="kpiBluePct">0%</div><div id="mdDeltaBlue"></div></div>
+    </section>
 
-      <!-- ROW 2: Volume, Map + Locations, Status Dist -->
-      <div class="dash-row dash-row-2">
-        <div class="dash-card">
-          <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-chart-column"></i> Monthly Volume</div>
-          </div>
-          <div class="dash-card-body" id="monthlyVolumeChartContainer">
-            <canvas id="monthlyVolumeCanvas"></canvas>
-          </div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-map-location-dot"></i> Project Boundary</div>
-          </div>
-          <div class="dash-card-body" style="padding:0; position:relative;">
-            <div id="dashMap" style="width:100%; height:100%;"></div>
-          </div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-file-invoice"></i> Work Orders Waiting Permits</div>
-          </div>
-          <div class="dash-card-body" id="waitingPermitsCardBody">
-            <div style="text-align: center; padding: 10px 0;">
-              <div id="waitingPermitsCount" style="font-size: 32px; font-weight: 800; color: var(--accent);">0</div>
-              <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">Total Waiting</div>
-            </div>
-            <div id="waitingPermitsList" style="flex: 1; overflow-y: auto; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
-              <div class="empty-state">No work orders waiting for permits</div>
-            </div>
-            <button class="btn btn-ghost btn-sm w-100 mt-3" onclick="openWaitingPermitsModal()"><i class="fas fa-list-ul"></i> View All Details</button>
-          </div>
-        </div>
-      </div>
+    <section class="md-strip">
+      <div><label>Completion rate</label><b id="mdRate">—</b><span id="mdRateDelta"></span></div>
+      <div><label>On-time rate (of completed)</label><b id="mdOnTime">—</b><span id="mdOnTimeDelta"></span></div>
+      <div><label>Avg. time to complete</label><b id="mdAvg">—</b></div>
+      <div><label>Dispatched</label><b id="mdDispatched">0</b></div>
+      <div class="clickable" onclick="openWaitingPermitsModal()"><label>Waiting permits</label><b id="waitingPermitsCount">0</b></div>
+    </section>
 
-      <!-- ROW 3: Summary & Due/Overdue -->
-      <div class="dash-row dash-row-3">
-        <div class="dash-card" id="monthlySummaryCard">
-          <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-table-list"></i> Monthly Summary Table</div>
-          </div>
-          <div class="dash-card-body" style="padding:0; overflow:auto;">
-            <table class="dash-table">
-              <thead id="monthlyHead"></thead>
-              <tbody id="monthlyBody"></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="dash-card" id="dueSoonCard">
-          <div class="dash-card-header">
-            <div class="dash-card-title"><i class="fa-solid fa-bell"></i> Due / Overdue</div>
-        <button class="btn btn-sm btn-ghost" onclick="exportDueSoonCSV()" title="Export Due/Overdue" aria-label="Export Due or Overdue work orders to CSV"><i class="fas fa-file-csv"></i></button>
-          </div>
-          <div class="dash-card-body" id="dueOverdueContainer" style="overflow-y: auto;">
-            <div class="empty-state">No pending items</div>
-          </div>
-        </div>
+    <section class="md-grid two">
+      <div class="md-card" id="mdDailyCard">
+        <h3>Daily activity <small>started vs completed</small></h3>
+        <div class="md-chart"><canvas id="dashDailyCanvas"></canvas></div>
       </div>
+      <div class="md-card">
+        <h3>Status mix</h3>
+        <div class="md-chart"><canvas id="dashDonutCanvas"></canvas></div>
+      </div>
+    </section>
 
-      <!-- Quick Actions (Optional, moving to bottom or context menu as per requirement?) -->
-      <!-- The prompt said Spans entire bottom width for Recent Activity. I'll keep Quick Actions if it doesn't conflict, but prompt implies Recent Activity is Row 4. -->
-      <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: -12px; margin-bottom: 24px;">
-        <button class="btn btn-primary" onclick="showAddModal()">
-          <i class="fa-solid fa-plus"></i> New Work Order
-        </button>
-        <button class="btn btn-ghost" onclick="exportTableCSV()">
-          <i class="fa-solid fa-download"></i> Export Data
-        </button>
-        <button class="btn btn-ghost" onclick="exportDashboardPDF()">
-          <i class="fa-solid fa-file-pdf"></i> Export Dashboard (A4)
-        </button>
+    <section class="md-grid two">
+      <div class="md-card">
+        <h3>Month by month <small>click a bar to open that month</small></h3>
+        <div class="md-chart tall" id="monthlyVolumeChartContainer"><canvas id="monthlyVolumeCanvas"></canvas></div>
       </div>
-    </div>
+      <div class="md-card" id="monthlySummaryCard">
+        <h3>Monthly summary</h3>
+        <div class="md-table-wrap">
+          <table class="md-table">
+            <thead><tr><th>Month</th><th>Total</th><th>On time</th><th>Late</th><th>Overdue</th><th>Pending</th><th>Completion</th></tr></thead>
+            <tbody id="dashMonthBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="md-grid three">
+      <div class="md-card"><h3>By issue category</h3><div id="mdCatList"></div></div>
+      <div class="md-card"><h3>By reporter</h3><div id="mdByList"></div><h3 style="margin-top:18px">Closure &amp; permits</h3><div id="mdClosure"></div></div>
+      <div class="md-card"><h3>Needs attention <span class="md-count" id="mdAttentionCount">0</span></h3><div id="mdAttention"></div></div>
+    </section>
   </div>
 </div>
 
@@ -2213,12 +2239,12 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
       <table class="main-table">
         <thead>
           <tr>
-            <th>WO #</th>
-            <th>Description</th>
+            <th>CM #</th>
+            <th>Email Subject</th>
             <th>Status</th>
-            <th>Location</th>
-            <th>Engineer</th>
-            <th>Finish Date</th>
+            <th>Issue Category</th>
+            <th>Reported by</th>
+            <th>Target Finish</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -3015,26 +3041,7 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
       </div>
     </div>
 
-    <!-- Sticky Tabs -->
-    <div class="detail-tabs">
-      <button class="detail-tab active" onclick="switchDetailTab('general')"><i class="fas fa-info-circle"></i> General</button>
-      <button class="detail-tab" onclick="switchDetailTab('location')"><i class="fas fa-map-marker-alt"></i> Location</button>
-      <button class="detail-tab" onclick="switchDetailTab('sign')"><i class="fas fa-traffic-light"></i> Sign Details</button>
-      <button class="detail-tab" onclick="switchDetailTab('scheduling')"><i class="fas fa-calendar-alt"></i> Dates</button>
-      <button class="detail-tab" onclick="switchDetailTab('permits')"><i class="fas fa-file-contract"></i> Closure & Teams</button>
-      <button class="detail-tab" onclick="switchDetailTab('photos')"><i class="fas fa-images"></i> Photos</button>
-      <button class="detail-tab" onclick="switchDetailTab('manufacturing')"><i class="fas fa-industry"></i> Fabrication</button>
-      <button class="detail-tab" onclick="switchDetailTab('history')"><i class="fas fa-history"></i> History</button>
-      <button class="detail-tab" onclick="switchDetailTab('comments')"><i class="fas fa-comments"></i> Comments</button>
-      <button class="detail-tab" onclick="switchDetailTab('reminders')"><i class="fas fa-bell"></i> Reminders</button>
-    </div>
-
-    <!-- Toolbar -->
-    <div class="detail-toolbar" style="display:none;">
-      <!-- Hidden as per requirement to use context menu, but kept in DOM if needed for logic -->
-    </div>
-
-    <!-- Tab Panes -->
+    <div class="detail-panes">
     <div class="detail-pane active" id="pane-general">
       <div class="detail-section">
         <div class="detail-section-title">General Information</div>
@@ -3174,6 +3181,7 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
         </div>
       </div>
     </div>
+    </div><!-- /detail-panes -->
   </div>
 </div>
 
@@ -3688,7 +3696,7 @@ function showContextMenu(e, context, woId = null) {
   } else if (context === 'row-wo') {
     items = [
       { label: 'View Details', icon: 'fa-eye', action: () => openDetail(woId) },
-      { label: 'Copy WO Number', icon: 'fa-copy', action: () => { navigator.clipboard.writeText(woId); showToast("Copied to clipboard"); } },
+      { label: 'Copy WO Details', icon: 'fa-copy', action: () => copyWODetails(woId) },
       { divider: true },
       { label: 'Show on Map', icon: 'fa-map-marker-alt', action: () => { 
         const r = allData.find(d => d.WorkOrder === woId);
@@ -4200,7 +4208,7 @@ function showPage(id) {
         document.querySelectorAll('.bar-seg').forEach(el => {
           el.style.width = el.getAttribute('data-w') + '%';
         });
-        initDashMap();
+        renderMonthDashboard();
      }, 100);
   }
 }
@@ -4270,69 +4278,6 @@ let dashFilteredRecords = [];
 
 let charts = {};
 
-function updateDashboard() {
-  dashFilteredRecords = allData;
-
-  let stats = { total: dashFilteredRecords.length, green: 0, amber: 0, red: 0, blue: 0 };
-  let monthsObj = {};
-  
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-  dashFilteredRecords.forEach(r => {
-    const cat = getStatusCat(r);
-    stats[cat]++;
-    
-    // Monthly
-    let mKey = null;
-    let mDisplay = null;
-    let sortKey = 9999999999999;
-    if (r.TargetStart && r.TargetStart !== '0' && r.TargetStart !== 0) {
-       const d = new Date(r.TargetStart);
-       if(!isNaN(d.getTime())) {
-         mKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-         mDisplay = d.getFullYear() + ' - ' + monthNames[d.getMonth()];
-         sortKey = d.getFullYear() * 100 + d.getMonth();
-       }
-    }
-    
-    if (mKey) {
-      if (!monthsObj[mKey]) monthsObj[mKey] = { key: mKey, month: mDisplay, total: 0, green: 0, amber: 0, red: 0, blue: 0, sortKey: sortKey };
-      monthsObj[mKey].total++;
-      monthsObj[mKey][cat]++;
-    }
-
-  });
-
-  // KPI UI
-  document.getElementById('kpiTotal').textContent = stats.total.toLocaleString();
-  document.getElementById('kpiGreen').textContent = stats.green.toLocaleString();
-  document.getElementById('kpiAmber').textContent = stats.amber.toLocaleString();
-  document.getElementById('kpiRed').textContent = stats.red.toLocaleString();
-  document.getElementById('kpiBlue').textContent = stats.blue.toLocaleString();
-
-  const getPct = (v) => stats.total ? ((v / stats.total) * 100).toFixed(1) + '%' : '0%';
-  document.getElementById('kpiGreenPct').textContent = getPct(stats.green);
-  document.getElementById('kpiAmberPct').textContent = getPct(stats.amber);
-  document.getElementById('kpiRedPct').textContent = getPct(stats.red);
-  document.getElementById('kpiBluePct').textContent = getPct(stats.blue);
-
-  let mArr = Object.values(monthsObj).sort((a, b) => a.sortKey - b.sortKey);
-  renderMonthly(mArr);
-  renderWaitingPermitsCard();
-  renderVolumeChart(mArr);
-  renderOperationalItems();
-  
-  if (dashMap) {
-    dashMap.invalidateSize();
-  } else {
-    initDashMap();
-  }
-
-  updateGisKpis(stats);
-
-  document.getElementById('dash-last-refresh').textContent = formatLastUpdated(lastCsvUpload);
-}
-
 function updateGisKpis(stats) {
   const total = document.getElementById('gis-kpi-total');
   const comp = document.getElementById('gis-kpi-completed');
@@ -4343,77 +4288,6 @@ function updateGisKpis(stats) {
   if (comp) comp.textContent = (stats.green + stats.amber).toLocaleString();
   if (prog) prog.textContent = stats.blue.toLocaleString();
   if (over) over.textContent = stats.red.toLocaleString();
-}
-
-function renderMonthly(mArr) {
-  const tbody = document.getElementById('monthlyBody');
-  const thead = document.getElementById('monthlyHead');
-  
-  thead.innerHTML = `
-    <tr>
-      <th>Month</th>
-      <th>Total</th>
-      <th style="white-space: nowrap;"><i class="fa-solid fa-circle-check" style="color:var(--green); margin-right:5px;"></i>On-Time</th>
-      <th style="white-space: nowrap;"><i class="fa-solid fa-triangle-exclamation" style="color:var(--amber); margin-right:5px;"></i>Comp (B)</th>
-      <th style="white-space: nowrap;"><i class="fa-solid fa-circle-xmark" style="color:var(--red); margin-right:5px;"></i>Not Comp (B)</th>
-      <th style="white-space: nowrap;"><i class="fa-solid fa-clock" style="color:var(--indigo); margin-right:5px;"></i>Pending</th>
-    </tr>
-  `;
-  
-  tbody.innerHTML = ''; 
-  if (mArr.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--muted);">No data for selected period</td></tr>';
-    return;
-  }
-  
-  let totals = { total: 0, green: 0, amber: 0, red: 0, blue: 0 };
-
-  mArr.forEach(d => {
-    totals.total += d.total; totals.green += d.green; totals.amber += d.amber; totals.red += d.red; totals.blue += d.blue;
-    tbody.innerHTML += `<tr class="cursor-pointer" onclick="drillDown('month', '${d.key}')">
-      <td><span class="month-name">${d.month}</span></td>
-      <td><span class="total-num">${d.total}</span></td>
-      <td class="num-green">${d.green}</td>
-      <td class="num-amber">${d.amber}</td>
-      <td class="num-red">${d.red}</td>
-      <td class="num-blue">${d.blue}</td>
-    </tr>`;
-  });
-
-  if (mArr.length > 0) {
-    tbody.innerHTML += `<tr style="border-top:2px solid var(--border); background:var(--surface2);">
-      <td><strong style="color:var(--text)">TOTAL</strong></td>
-      <td><strong style="color:var(--text)">${totals.total}</strong></td>
-      <td class="num-green"><strong>${totals.green}</strong></td>
-      <td class="num-amber"><strong>${totals.amber}</strong></td>
-      <td class="num-red"><strong>${totals.red}</strong></td>
-      <td class="num-blue"><strong>${totals.blue}</strong></td>
-    </tr>`;
-  }
-}
-
-function renderWaitingPermitsCard() {
-  const waitingList = allData.filter(r => r.Status === 'WPERM');
-  const countEl = document.getElementById('waitingPermitsCount');
-  const listEl = document.getElementById('waitingPermitsList');
-  
-  if (countEl) countEl.textContent = waitingList.length;
-  
-  if (listEl) {
-    if (waitingList.length === 0) {
-      listEl.innerHTML = '<div class="empty-state">No work orders waiting for permits</div>';
-    } else {
-      listEl.innerHTML = waitingList.slice(0, 10).map(r => `
-        <div class="overdue-item soon" onclick="openDetail('${r.WorkOrder}')" style="cursor:pointer; margin-bottom: 8px;">
-          <div class="overdue-head">
-            <span>#${r.WorkOrder}</span>
-            <span style="color:var(--accent); font-weight:700;">${r.TDPStatus || 'WPERM'}</span>
-          </div>
-          <div class="overdue-loc">${r.Location || 'No location'}</div>
-        </div>
-      `).join('') + (waitingList.length > 10 ? `<div style="font-size:10px; color:var(--muted); text-align:center; padding-top:5px;">+ ${waitingList.length - 10} more...</div>` : '');
-    }
-  }
 }
 
 function openWaitingPermitsModal() {
@@ -4440,72 +4314,6 @@ function openWaitingPermitsModal() {
   
   openModal('waitingPermitsModal');
 }
-
-function renderVolumeChart(mArr) {
-  const container = document.getElementById('monthlyVolumeChartContainer');
-  if (!container) return;
-  
-  container.innerHTML = '<canvas id="monthlyVolumeCanvas"></canvas>';
-  const canvas = document.getElementById('monthlyVolumeCanvas');
-  
-  if (charts.bar) charts.bar.destroy();
-  
-  charts.bar = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: mArr.map(d => d.month.split(' - ')[1]),
-      datasets: [
-        { label: 'Work Orders', data: mArr.map(d => d.total), backgroundColor: '#007fff', borderRadius: 4 }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#94a3b8' } },
-        y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.1)' }, ticks: { font: { size: 10 }, color: '#94a3b8' } }
-      }
-    }
-  });
-}
-
-
-
-function renderOperationalItems() {
-  const container = document.getElementById('dueOverdueContainer');
-  if (!container) return;
-
-  const today = new Date();
-  const weekFromNow = new Date();
-  weekFromNow.setDate(today.getDate() + 7);
-
-  const items = dashFilteredRecords.filter(r => r.Status !== 'COMP' && r.TargetFinish).map(r => {
-    const target = new Date(r.TargetFinish);
-    let type = null;
-    if (target < today) type = 'overdue';
-    else if (target < weekFromNow) type = 'due-soon';
-    
-    return { ...r, type, target };
-  }).filter(r => r.type).sort((a, b) => a.target - b.target);
-
-  if (items.length === 0) {
-    container.innerHTML = '<div class="empty-state">No pending items</div>';
-    return;
-  }
-
-  container.innerHTML = `<div class="overdue-list">` + items.map(r => `
-    <div class="overdue-item cursor-pointer ${r.type === 'due-soon' ? 'soon' : ''}" onclick="openDetail('${r.WorkOrder}')">
-      <div class="overdue-wo">
-        <span>#${r.WorkOrder} - ${r.type.replace('-', ' ').toUpperCase()}</span>
-      </div>
-      <div class="overdue-loc">${r.Location || 'Unknown Location'}</div>
-    </div>
-  `).join('') + `</div>`;
-}
-
 
 // Global search handling
 if (document.getElementById('dash-global-search')) {
@@ -4539,6 +4347,253 @@ document.getElementById('dash-global-search').oninput = function(e) {
 };
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   MONTH-BASED DASHBOARD  (month = Target Start Date)
+   ═══════════════════════════════════════════════════════════════ */
+let dashMonth = null;
+let dashCharts = {};
+const dashMonthLabel = k => { const [y, m] = k.split('-'); return new Date(+y, +m - 1, 1).toLocaleString('en', { month: 'long', year: 'numeric' }); };
+const dashMonthShort = k => { const [y, m] = k.split('-'); return new Date(+y, +m - 1, 1).toLocaleString('en', { month: 'short' }); };
+function dashMonthKey(r) {
+  const s = dateOnly(r.TargetStart || r.TargetStartDT);
+  return (s && /^\d{4}-\d{2}/.test(s)) ? s.slice(0, 7) : null;
+}
+const parseLocalDT = s => { if (!s) return null; const d = new Date(String(s).replace(' ', 'T')); return isNaN(d) ? null : d; };
+const dashCompletionDate = r => parseLocalDT(r.CompDate) || parseLocalDT(r.InstallationDate) || parseLocalDT(r.StatusDT || r.StatusUpdateDate);
+
+function buildDashModel() {
+  const items = allData.map(r => ({ r, cat: getStatusCat(r), mk: dashMonthKey(r) }));
+  const months = {};
+  items.forEach(it => {
+    if (!it.mk) return;
+    const m = months[it.mk] || (months[it.mk] = { key: it.mk, total: 0, green: 0, amber: 0, red: 0, blue: 0 });
+    m.total++; m[it.cat]++;
+  });
+  return { items, months, keys: Object.keys(months).sort() };
+}
+
+function dashSetMonth(v) {
+  dashMonth = v;
+  try { localStorage.setItem('qbc_dash_month', v); } catch (e) {}
+  renderMonthDashboard();
+}
+function dashShiftMonth(step) {
+  const keys = buildDashModel().keys;
+  if (!keys.length) return;
+  let i = dashMonth === 'all' ? keys.length : keys.indexOf(dashMonth);
+  i = Math.min(keys.length - 1, Math.max(0, i + step));
+  dashSetMonth(keys[i]);
+}
+
+function dashChart(id, cfg) {
+  if (typeof Chart === 'undefined') return;
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (dashCharts[id]) dashCharts[id].destroy();
+  dashCharts[id] = new Chart(canvas, cfg);
+}
+const cssVar = n => getComputedStyle(document.body).getPropertyValue(n).trim();
+
+function dashDelta(cur, prev, prevLabel, goodWhenUp = true, suffix = '') {
+  if (prev == null) return '';
+  const d = cur - prev;
+  if (d === 0) return `<span class="md-delta flat">= same as ${prevLabel}</span>`;
+  const up = d > 0, good = up === goodWhenUp;
+  return `<span class="md-delta ${good ? 'good' : 'bad'}">${up ? '▲' : '▼'} ${Math.abs(Number.isInteger(d) ? d : d.toFixed(1))}${suffix} vs ${prevLabel}</span>`;
+}
+
+function dashBarList(id, entries, color) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!entries.length) { el.innerHTML = '<div class="md-empty">No data</div>'; return; }
+  const max = Math.max(...entries.map(e => e.n));
+  el.innerHTML = entries.map(e => `
+    <div class="md-bar-row" title="${escapeHtml(e.label)}: ${e.n} (${e.done} completed)">
+      <div class="md-bar-label">${escapeHtml(e.label)}</div>
+      <div class="md-bar-track"><div class="md-bar-fill" style="width:${Math.max(4, (e.n / max) * 100)}%; background:${color};"><i style="width:${e.n ? (e.done / e.n) * 100 : 0}%"></i></div></div>
+      <div class="md-bar-n">${e.n}<small>${e.done} done</small></div>
+    </div>`).join('');
+}
+function dashGroup(sel, keyFn) {
+  const g = {};
+  sel.forEach(it => {
+    const k = (keyFn(it.r) || '').toString().trim() || 'Not specified';
+    const e = g[k] || (g[k] = { label: k, n: 0, done: 0 });
+    e.n++; if (it.cat === 'green' || it.cat === 'amber') e.done++;
+  });
+  return Object.values(g).sort((a, b) => b.n - a.n);
+}
+
+function renderMonthDashboard() {
+  const select = document.getElementById('dashMonthSelect');
+  if (!select) return;
+  const model = buildDashModel();
+
+  if (!dashMonth) {
+    let saved = null;
+    try { saved = localStorage.getItem('qbc_dash_month'); } catch (e) {}
+    const now = new Date(); const curKey = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}`;
+    dashMonth = (saved && (saved === 'all' || model.months[saved])) ? saved : (model.months[curKey] ? curKey : (model.keys[model.keys.length - 1] || 'all'));
+  }
+  if (dashMonth !== 'all' && !model.months[dashMonth]) dashMonth = model.keys[model.keys.length - 1] || 'all';
+
+  select.innerHTML = '<option value="all">All months</option>' + [...model.keys].reverse().map(k => `<option value="${k}">${dashMonthLabel(k)}</option>`).join('');
+  select.value = dashMonth;
+
+  const isAll = dashMonth === 'all';
+  const sel = model.items.filter(it => isAll || it.mk === dashMonth);
+  dashFilteredRecords = sel.map(i => i.r);          // used by the KPI drill-down lists
+  const c = { green: 0, amber: 0, red: 0, blue: 0 };
+  sel.forEach(i => c[i.cat]++);
+  const total = sel.length;
+  const done = c.green + c.amber;
+  const pct = v => total ? (v / total * 100).toFixed(1) + '%' : '0%';
+  const scopeLabel = isAll ? 'All months' : dashMonthLabel(dashMonth);
+
+  const prevKey = isAll ? null : model.keys[model.keys.indexOf(dashMonth) - 1];
+  const prev = prevKey ? model.months[prevKey] : null;
+  const prevLabel = prevKey ? dashMonthShort(prevKey) : '';
+  const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  const setH = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
+
+  setT('kpiTotal', total.toLocaleString()); setT('kpiTotalLabel', scopeLabel);
+  setT('kpiGreen', c.green.toLocaleString()); setT('kpiGreenPct', pct(c.green));
+  setT('kpiAmber', c.amber.toLocaleString()); setT('kpiAmberPct', pct(c.amber));
+  setT('kpiRed', c.red.toLocaleString()); setT('kpiRedPct', pct(c.red));
+  setT('kpiBlue', c.blue.toLocaleString()); setT('kpiBluePct', pct(c.blue));
+  setH('mdDeltaTotal', dashDelta(total, prev ? prev.total : null, prevLabel, true));
+  setH('mdDeltaGreen', dashDelta(c.green, prev ? prev.green : null, prevLabel, true));
+  setH('mdDeltaAmber', dashDelta(c.amber, prev ? prev.amber : null, prevLabel, false));
+  setH('mdDeltaRed', dashDelta(c.red, prev ? prev.red : null, prevLabel, false));
+  setH('mdDeltaBlue', dashDelta(c.blue, prev ? prev.blue : null, prevLabel, true));
+
+  // performance strip
+  const rate = total ? done / total * 100 : 0;
+  const onTime = done ? c.green / done * 100 : 0;
+  setT('mdRate', total ? rate.toFixed(1) + '%' : '—');
+  setT('mdOnTime', done ? onTime.toFixed(1) + '%' : '—');
+  const prevRate = prev && prev.total ? (prev.green + prev.amber) / prev.total * 100 : null;
+  setH('mdRateDelta', dashDelta(rate, prevRate, prevLabel, true, ' pts'));
+  const prevOn = prev && (prev.green + prev.amber) ? prev.green / (prev.green + prev.amber) * 100 : null;
+  setH('mdOnTimeDelta', dashDelta(onTime, prevOn, prevLabel, true, ' pts'));
+  const hrs = sel.filter(i => i.cat === 'green' || i.cat === 'amber').map(i => {
+    const s = parseLocalDT(i.r.TargetStartDT || i.r.TargetStart), e = dashCompletionDate(i.r);
+    return (s && e && e >= s) ? (e - s) / 3600000 : null;
+  }).filter(v => v != null);
+  const avg = hrs.length ? hrs.reduce((a, b) => a + b, 0) / hrs.length : null;
+  setT('mdAvg', avg == null ? '—' : (avg < 48 ? avg.toFixed(1) + ' h' : (avg / 24).toFixed(1) + ' d'));
+  setT('waitingPermitsCount', sel.filter(i => i.r.Status === 'WPERM').length);
+  const dispatched = sel.filter(i => i.r.Status === 'DISPATCH').length;
+  setT('mdDispatched', dispatched);
+
+  // daily activity (selected month only)
+  const dailyCard = document.getElementById('mdDailyCard');
+  if (dailyCard) dailyCard.classList.toggle('md-hidden', isAll);
+  if (!isAll) {
+    const [y, m] = dashMonth.split('-').map(Number);
+    const days = new Date(y, m, 0).getDate();
+    const started = Array(days).fill(0), completed = Array(days).fill(0);
+    sel.forEach(i => {
+      const sd = parseLocalDT(i.r.TargetStartDT || i.r.TargetStart);
+      if (sd && sd.getFullYear() === y && sd.getMonth() + 1 === m) started[sd.getDate() - 1]++;
+      if (i.cat === 'green' || i.cat === 'amber') {
+        const cd = dashCompletionDate(i.r);
+        if (cd && cd.getFullYear() === y && cd.getMonth() + 1 === m) completed[cd.getDate() - 1]++;
+      }
+    });
+    const tick = cssVar('--muted'), grid = cssVar('--border');
+    dashChart('dashDailyCanvas', {
+      type: 'bar',
+      data: { labels: Array.from({ length: days }, (_, i) => i + 1), datasets: [
+        { label: 'Started (target start)', data: started, backgroundColor: cssVar('--blue'), borderRadius: 3 },
+        { label: 'Completed', data: completed, backgroundColor: cssVar('--green'), borderRadius: 3 }
+      ] },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { labels: { color: tick, boxWidth: 10 } } },
+        scales: { x: { ticks: { color: tick }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: tick, precision: 0 }, grid: { color: grid } } } }
+    });
+  }
+
+  // status mix donut
+  dashChart('dashDonutCanvas', {
+    type: 'doughnut',
+    data: { labels: ['Completed on time', 'Completed late', 'Overdue', 'Pending'], datasets: [{ data: [c.green, c.amber, c.red, c.blue], backgroundColor: [cssVar('--green'), cssVar('--amber'), cssVar('--red'), cssVar('--blue')], borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { color: cssVar('--muted'), boxWidth: 10 } } } }
+  });
+
+  // month by month
+  const labels = model.keys.map(k => dashMonthShort(k) + ' ' + k.slice(2, 4));
+  const tickC = cssVar('--muted'), gridC = cssVar('--border');
+  dashChart('monthlyVolumeCanvas', {
+    data: { labels, datasets: [
+      { type: 'bar', label: 'On time', data: model.keys.map(k => model.months[k].green), backgroundColor: cssVar('--green'), stack: 's', borderRadius: 2 },
+      { type: 'bar', label: 'Completed late', data: model.keys.map(k => model.months[k].amber), backgroundColor: cssVar('--amber'), stack: 's' },
+      { type: 'bar', label: 'Overdue', data: model.keys.map(k => model.months[k].red), backgroundColor: cssVar('--red'), stack: 's' },
+      { type: 'bar', label: 'Pending', data: model.keys.map(k => model.months[k].blue), backgroundColor: cssVar('--blue'), stack: 's' },
+      { type: 'line', label: 'Completion %', data: model.keys.map(k => { const m = model.months[k]; return m.total ? +((m.green + m.amber) / m.total * 100).toFixed(1) : 0; }),
+        yAxisID: 'y1', borderColor: cssVar('--text'), backgroundColor: cssVar('--text'), pointRadius: 3, tension: .3, borderWidth: 2 }
+    ] },
+    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      onClick: (e, els) => { const b = els.find(x => x.datasetIndex < 4) || els[0]; if (b) dashSetMonth(model.keys[b.index]); },
+      plugins: { legend: { labels: { color: tickC, boxWidth: 10 } } },
+      scales: {
+        x: { stacked: true, ticks: { color: tickC }, grid: { display: false } },
+        y: { stacked: true, beginAtZero: true, ticks: { color: tickC, precision: 0 }, grid: { color: gridC } },
+        y1: { position: 'right', min: 0, max: 100, ticks: { color: tickC, callback: v => v + '%' }, grid: { display: false } }
+      } }
+  });
+
+  // month table
+  const tb = document.getElementById('dashMonthBody');
+  if (tb) {
+    tb.innerHTML = [...model.keys].reverse().map(k => {
+      const m = model.months[k], dn = m.green + m.amber;
+      return `<tr class="${k === dashMonth ? 'sel' : ''}" onclick="dashSetMonth('${k}')">
+        <td><b>${dashMonthLabel(k)}</b></td><td>${m.total}</td>
+        <td style="color:var(--green)">${m.green}</td><td style="color:var(--amber)">${m.amber}</td><td style="color:var(--red)">${m.red}</td><td style="color:var(--blue)">${m.blue}</td>
+        <td><div class="md-mini-bar"><i style="width:${m.total ? dn / m.total * 100 : 0}%"></i></div>${m.total ? (dn / m.total * 100).toFixed(0) : 0}%</td></tr>`;
+    }).join('') || '<tr><td colspan="7" class="md-empty">No data</td></tr>';
+  }
+
+  // breakdowns
+  dashBarList('mdCatList', dashGroup(sel, r => r.IssueCategory), cssVar('--accent'));
+  dashBarList('mdByList', dashGroup(sel, r => r.ReportedBy), cssVar('--indigo'));
+  const cnt = fn => sel.filter(i => fn(i.r)).length;
+  setH('mdClosure', `
+    <div class="md-chip-row"><span>Closure required</span><b>${cnt(r => r.ClosureRequired === 'Yes')}</b><small>Yes</small><b>${cnt(r => r.ClosureRequired === 'No')}</b><small>No</small></div>
+    <div class="md-chip-row"><span>Responsible</span><b>${cnt(r => r.ClosureBy === 'Egis')}</b><small>Egis</small><b>${cnt(r => r.ClosureBy === 'QBC')}</b><small>QBC</small></div>
+    <div class="md-chip-row"><span>RO / TDP / NCP</span><b>${cnt(r => r.ROTDP === 'Received')}</b><small>Received</small><b>${cnt(r => r.ROTDP === 'Not Received')}</b><small>Not received</small></div>
+    <div class="md-chip-row"><span>With team / vehicles</span><b>${cnt(r => r.TeamsVehicles)}</b><small>CMs</small></div>`);
+
+  // needs attention
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const late = sel.filter(i => i.cat === 'red').map(i => {
+    const tf = parseLocalDT(i.r.TargetFinishDT || i.r.TargetFinish);
+    return { r: i.r, days: tf ? Math.max(0, Math.floor((today - tf) / 86400000)) : 0 };
+  }).sort((a, b) => b.days - a.days);
+  setT('mdAttentionCount', late.length);
+  const attEl = document.getElementById('mdAttention');
+  if (attEl) {
+    attEl.innerHTML = late.slice(0, 8).map(x => `
+      <div class="md-att" onclick="openDetail('${escapeHtml(x.r.WorkOrder)}')">
+        <b>#${escapeHtml(x.r.WorkOrder)}</b>
+        <span>${escapeHtml(x.r.IssueCategory || x.r.EmailSubject || x.r.Status)}</span>
+        <em>${x.days ? x.days + ' d late' : 'due today'}</em>
+      </div>`).join('') + (late.length > 8 ? `<button class="btn btn-ghost btn-sm w-100" onclick="drillDown('breached-pending')">View all ${late.length}</button>` : '')
+      || '<div class="md-empty">Nothing overdue 🎉</div>';
+  }
+}
+
+function updateDashboard() {
+  const stats = { total: allData.length, green: 0, amber: 0, red: 0, blue: 0 };
+  allData.forEach(r => { stats[getStatusCat(r)]++; });
+  updateGisKpis(stats);                // the GIS "Dashboard View" keeps showing system-wide numbers
+  renderMonthDashboard();
+  const el = document.getElementById('dash-last-refresh');
+  if (el) el.textContent = formatLastUpdated(lastCsvUpload);
+}
+
+
 function drillDown(type, val = null) {
   let list = [...dashFilteredRecords];
   let title = "Work Orders";
@@ -4565,11 +4620,11 @@ function drillDown(type, val = null) {
     tbody.innerHTML = data.map(r => `
       <tr>
         <td><span class="wo-num">${r.WorkOrder}</span></td>
-        <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.Description}</td>
+        <td style="max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(r.EmailSubject || r.Description || '')}">${escapeHtml(r.EmailSubject || r.Description || '—')}</td>
         <td><span class="status-badge badge-${r.Status}">${r.Status}</span></td>
-        <td>${r.Location}</td>
-        <td style="color:var(--muted);">${r.PWA_ENG || '--'}</td>
-        <td>${formatDate(r.TargetFinish)}</td>
+        <td>${escapeHtml(r.IssueCategory || '—')}</td>
+        <td style="color:var(--muted);">${escapeHtml(r.ReportedBy || '--')}</td>
+        <td>${fmtDT(r.TargetFinishDT || r.TargetFinish)}</td>
         <td><button class="btn btn-ghost btn-sm" onclick="openDetail('${r.WorkOrder}')"><i class="fas fa-external-link-alt"></i></button></td>
       </tr>
     `).join('');
@@ -4579,7 +4634,7 @@ function drillDown(type, val = null) {
   
   document.getElementById('drill-search').oninput = (e) => {
     const q = e.target.value.toLowerCase();
-    renderDrill(list.filter(r => r.WorkOrder.includes(q) || (r.Description||'').toLowerCase().includes(q)));
+    renderDrill(list.filter(r => String(r.WorkOrder).includes(q) || (r.EmailSubject || r.Description || '').toLowerCase().includes(q)));
   };
 
   openModal('drillDownModal');
@@ -4808,6 +4863,7 @@ async function openDetail(woId) {
 
   renderDetailAttachments(woId);
   loadComments(woId);
+  renderDetailReminderList();
   
   // Update UI mode
   document.getElementById('detail-edit-btn').style.display = 'block';
@@ -4820,17 +4876,12 @@ async function openDetail(woId) {
 
 
 function switchDetailTab(tabId) {
-  document.querySelectorAll('.detail-tab').forEach(t => {
-    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${tabId}'`));
-  });
-  document.querySelectorAll('.detail-pane').forEach(p => {
-    p.classList.toggle('active', p.id === `pane-${tabId}`);
-  });
-  if (tabId === 'reminders') {
-    renderDetailReminderList();
-  }
+  // The details view shows every section at once; a tab id now just brings that section into view.
+  if (tabId === 'reminders') renderDetailReminderList();
+  if (tabId === 'general') return;
+  const pane = document.getElementById(`pane-${tabId}`);
+  if (pane) pane.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
-
 function renderDetailReminderList() {
   const container = document.getElementById('pane-reminders-list');
   if (!container) return;
@@ -7120,6 +7171,50 @@ function showOnMap(lat, lng, wo) {
   }, 300);
 }
 
+async function copyWODetails(woId) {
+  const r = allData.find(d => String(d.WorkOrder) === String(woId));
+  if (!r) return;
+  const tfRaw = String(r.TargetFinishDT || r.TargetFinish || '').replace('T', ' ');
+  const m = tfRaw.match(/^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}):(\d{2}))?/);
+  const tf = m ? `${m[3]}/${m[2]}/${m[1].slice(2)}${m[4] ? ` ${m[4]}:${m[5]}` : ''}` : (tfRaw || '—');
+  const loc = (r.Lat && r.Lng) ? `https://www.google.com/maps?q=${r.Lat},${r.Lng}` : 'Not available';
+  const photoUrl = photos[r.WorkOrder];
+
+  const lines = ['Work Order Details:', '', `* CM: ${r.WorkOrder}`, '', `* Target Finish Date: ${tf}`, '', `* Location: ${loc}`, '', `* Site Photo:${photoUrl ? '' : ' Not available'}`];
+  const text = lines.join('\n');
+  const htmlHead = `<div style="font-family:Calibri,Arial,sans-serif;font-size:14px"><b>Work Order Details:</b><br><br>* CM: ${escapeHtml(r.WorkOrder)}<br><br>* Target Finish Date: ${escapeHtml(tf)}<br><br>* Location: ${(r.Lat && r.Lng) ? `<a href="${loc}">${loc}</a>` : 'Not available'}<br><br>* Site Photo:`;
+
+  // photo → PNG (clipboard only accepts PNG images)
+  let pngBlob = null;
+  if (photoUrl) {
+    try {
+      const resp = await fetch(photoUrl, { mode: 'cors' });
+      const bmp = await createImageBitmap(await resp.blob());
+      const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(bmp.width * scale); cv.height = Math.round(bmp.height * scale);
+      cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+      pngBlob = await new Promise(res => cv.toBlob(res, 'image/png'));
+    } catch (e) { console.warn('Photo could not be read for the clipboard:', e); }
+  }
+
+  try {
+    const items = { 'text/plain': new Blob([text + (pngBlob ? ' (photo copied)' : '')], { type: 'text/plain' }) };
+    if (pngBlob) {
+      const dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(pngBlob); });
+      items['text/html'] = new Blob([`${htmlHead}<br><img src="${dataUrl}" style="max-width:480px"></div>`], { type: 'text/html' });
+      items['image/png'] = pngBlob;
+    } else {
+      items['text/html'] = new Blob([`${htmlHead}${photoUrl ? '' : ' Not available'}</div>`], { type: 'text/html' });
+    }
+    await navigator.clipboard.write([new ClipboardItem(items)]);
+    showToast(pngBlob ? 'Work order details and photo copied' : (photoUrl ? 'Details copied (photo could not be copied)' : 'Work order details copied'), photoUrl && !pngBlob ? 'warning' : undefined);
+  } catch (e) {
+    try { await navigator.clipboard.writeText(text); showToast('Work order details copied (text only)'); }
+    catch (e2) { showToast('Copy failed – allow clipboard access for this site', 'error'); }
+  }
+}
+
 function copyCoords(lat, lng) {
   const str = `${lat}, ${lng}`;
   navigator.clipboard.writeText(str).then(() => {
@@ -7138,90 +7233,69 @@ function openFabModal(wo) {
   const today = formatDate(new Date());
 
   // Strict A4 proportions (Width: 794px, Height: 1123px)
+  const tf = fmtDT(r.TargetFinishDT || r.TargetFinish);
+  const th = 'padding:7px 4px;border:1px solid #cbd5e1;';
+  const td = 'padding:10px 4px;border:1px solid #cbd5e1;word-break:break-word;';
+  const qty = 'font-size:13px;font-weight:800;color:#0f766e;';
   document.getElementById('pdfPreview').innerHTML = `
-  <div id="fabDoc" style="background:#fff;color:#000;width:794px;height:1123px;padding:40px;font-family:'Inter', 'Noto Sans Arabic', sans-serif;box-sizing:border-box;display:flex;flex-direction:column;margin:0 auto;position:relative;">
-    
-    <div style="flex-shrink:0; border-bottom:3px solid var(--accent);padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;">
-      <div style="display: flex; align-items: center; gap: 15px;">
-        ${companyLogo ? `<img src="${companyLogo}" style="max-height: 50px; width: auto;">` : ''}
-        <div>
-          <div style="font-size:24px;font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:1px;">Fabrication</div>
-          <div style="font-size:12px;color:#64748b;margin-top:4px;">QBC Operations Center – Signage Asset & GIS Management System</div>
-        </div>
-      </div>
+  <div id="fabDoc" style="background:#fff;color:#0f172a;width:794px;height:1123px;padding:36px 40px;box-sizing:border-box;display:flex;flex-direction:column;gap:18px;margin:0 auto;font-family:'Inter','Noto Sans Arabic',sans-serif;overflow:hidden;">
+
+    <div style="flex-shrink:0;border-bottom:3px solid #0f766e;padding-bottom:12px;display:flex;justify-content:space-between;align-items:flex-end;min-height:60px;">
+      <div style="display:flex;align-items:center;">${companyLogo ? `<img src="${companyLogo}" style="max-height:56px;width:auto;">` : ''}</div>
       <div style="text-align:right;">
-        <div style="font-size:22px;font-weight:800;color:#000;">WO: ${r.WorkOrder}</div>
+        <div style="font-size:26px;font-weight:800;color:#000;line-height:1.1;">CM: ${escapeHtml(r.WorkOrder)}</div>
         <div style="font-size:12px;color:#64748b;margin-top:4px;">Date: ${today}</div>
       </div>
     </div>
 
-    <div style="flex:1; width:100%; min-height:0; background:#f8fafc; display:flex; align-items:center; justify-content:center; margin-bottom:24px; border:1px solid #cbd5e1; border-radius:8px; overflow:hidden;">
-      ${photo ? `<img src="${photo}" style="max-width:100%;max-height:100%;object-fit:contain;">` : `<div style="color:#94a3b8;font-size:16px;letter-spacing:0.1em;">NO PHOTO AVAILABLE</div>`}
+    <div style="flex-shrink:0;display:flex;justify-content:space-between;align-items:center;background:#f1f5f9;padding:14px 22px;border-radius:8px;border:1px solid #e2e8f0;">
+      <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:700;">Target Finish</div>
+      <div style="font-size:24px;font-weight:800;color:#dc2626;">${tf}</div>
     </div>
 
-    <div style="flex-shrink:0; display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;background:#f1f5f9;padding:16px 20px;border-radius:8px;border:1px solid #e2e8f0;">
-      <div style="flex:1;padding-right:20px;">
-        <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Work Order Description</div>
-        <div style="font-size:15px;font-weight:700;color:#0f172a;line-height:1.4;">${r.Description || '—'}</div>
-        <div style="font-size:12px;color:#475569;margin-top:6px;">Location: <strong>${r.Location || '—'}</strong> &nbsp;|&nbsp; Eng: <strong>${r.PWA_ENG || '—'}</strong></div>
-      </div>
-      <div style="text-align:right;border-left:2px solid #cbd5e1;padding-left:24px;min-width:140px;">
-        <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Target Finish</div>
-        <div style="font-size:20px;font-weight:800;color:#ef4444;">${r.TargetFinish || '—'}</div>
-      </div>
+    <div style="flex:1;min-height:0;background:#f8fafc;display:flex;align-items:center;justify-content:center;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;">
+      ${photo ? `<img src="${photo}" crossorigin="anonymous" style="max-width:100%;max-height:100%;object-fit:contain;">` : `<div style="color:#94a3b8;font-size:16px;letter-spacing:.1em;">NO PHOTO AVAILABLE</div>`}
     </div>
 
     <div style="flex-shrink:0;">
-      <div style="font-size:11px;font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-        Fabrication Specifications <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-      </div>
-      <table style="width:100%;border-collapse:collapse;font-size:11px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;display:flex;align-items:center;gap:8px;">Fabrication Specifications <div style="flex:1;height:1px;background:#e2e8f0;"></div></div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;text-align:center;table-layout:fixed;">
         <tr style="background:#1e293b;color:#fff;">
-          <th style="padding:10px;border:1px solid #334155;" colspan="7">SIGN FACE</th>
-          <th style="padding:10px;border:1px solid #334155;" colspan="3">POST</th>
-          <th style="padding:10px;border:1px solid #334155;" colspan="2">FOUNDATION</th>
+          <th style="padding:8px;border:1px solid #334155;" colspan="7">SIGN FACE</th>
+          <th style="padding:8px;border:1px solid #334155;" colspan="3">POST</th>
+          <th style="padding:8px;border:1px solid #334155;" colspan="2">FOUNDATION</th>
         </tr>
         <tr style="background:#f8fafc;font-weight:700;color:#334155;">
-          <th style="padding:6px;border:1px solid #cbd5e1;">Road Catg.</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Type</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Ref</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Shape</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Size (mm)</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Material</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Qty</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Type</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Height</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Qty</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Size</th>
-          <th style="padding:6px;border:1px solid #cbd5e1;">Qty</th>
+          <th style="${th}">Road Catg.</th><th style="${th}">Type</th><th style="${th}">Ref</th><th style="${th}">Shape</th><th style="${th}">Size (mm)</th><th style="${th}">Material</th><th style="${th}">Qty</th>
+          <th style="${th}">Type</th><th style="${th}">Height</th><th style="${th}">Qty</th>
+          <th style="${th}">Size</th><th style="${th}">Qty</th>
         </tr>
         <tr>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.RoadCatg || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;font-weight:600;color:#0f172a;">${r.SignType || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.SignRef || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.SignShape || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.SignSize || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.SignMaterial || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;font-size:13px;font-weight:800;color:var(--accent2);">${r.SignQty || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.PostType || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.PostHeight || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;font-size:13px;font-weight:800;color:var(--accent2);">${r.PostQty || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;">${r.FoundSize || '—'}</td>
-          <td style="padding:10px 4px;border:1px solid #cbd5e1;font-size:13px;font-weight:800;color:var(--accent2);">${r.FoundQty || '—'}</td>
+          <td style="${td}">${escapeHtml(r.RoadCatg || '—')}</td>
+          <td style="${td}font-weight:600;">${escapeHtml(r.SignType || '—')}</td>
+          <td style="${td}">${escapeHtml(r.SignRef || '—')}</td>
+          <td style="${td}">${escapeHtml(r.SignShape || '—')}</td>
+          <td style="${td}">${escapeHtml(r.SignSize || '—')}</td>
+          <td style="${td}">${escapeHtml(r.SignMaterial || '—')}</td>
+          <td style="${td}${qty}">${escapeHtml(r.SignQty || '—')}</td>
+          <td style="${td}">${escapeHtml(r.PostType || '—')}</td>
+          <td style="${td}">${escapeHtml(r.PostHeight || '—')}</td>
+          <td style="${td}${qty}">${escapeHtml(r.PostQty || '—')}</td>
+          <td style="${td}">${escapeHtml(r.FoundSize || '—')}</td>
+          <td style="${td}${qty}">${escapeHtml(r.FoundQty || '—')}</td>
         </tr>
       </table>
     </div>
-    
-    <div id="fab-qr" style="position:absolute; bottom:40px; right:40px;"></div>
 
+    <div style="flex-shrink:0;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e2e8f0;padding-top:12px;">
+      <div style="font-size:11px;color:#64748b;line-height:1.6;">Scan the QR code to open this work order in the system.<br>Generated on ${today}</div>
+      <div id="fab-qr" style="width:84px;height:84px;flex-shrink:0;"></div>
+    </div>
   </div>`;
-  
+
   setTimeout(() => {
-    new QRCode(document.getElementById("fab-qr"), {
-      text: window.location.href + "?wo=" + r.WorkOrder,
-      width: 80,
-      height: 80
-    });
+    const q = document.getElementById('fab-qr');
+    if (q && typeof QRCode !== 'undefined') new QRCode(q, { text: window.location.href.split('?')[0] + '?wo=' + r.WorkOrder, width: 84, height: 84 });
   }, 100);
 
   openModal('fabModal');
@@ -7514,11 +7588,11 @@ const WO_COLS = [
   { k: 'ReportedDate',     label: 'Date Reported',                          w: 104, def: false, nodrop: true },
   { k: 'ReportedBy',       label: 'Reported by',                            w: 104, def: true },
   { k: 'EmailSubject',     label: 'Email Subject',                          w: 240, def: false, nodrop: true },
-  { k: 'IssueCategory',    label: 'Issue Category',                         w: 160, def: true },
+  { k: 'IssueCategory',    label: 'Issue Category',                         w: 150, def: true },
   { k: 'ClosureRequired',  label: 'Closure Required?',                      w: 96,  def: false },
   { k: 'ClosureBy',        label: 'The responsible for the closure',        w: 130, def: false },
   { k: 'TeamsVehicles',    label: 'Teams and Vehicles (If Provided By QBC)', w: 220, def: false },
-  { k: 'Remarks',          label: 'Remarks',                                w: 220, def: true,  nodrop: true }
+  { k: 'Remarks',          label: 'Remarks',                                w: 280, def: true,  nodrop: true }
 ];
 
 /* ── date helpers (all values are naive local wall-clock times, no timezone shifting) ── */
@@ -7635,7 +7709,7 @@ function renderWoHeader() {
 }
 
 function woCellHTML(c, r, ctx) {
-  const txt = v => { const s = String(v ?? '').trim(); return s ? `<span title="${escapeHtml(s)}">${escapeHtml(s)}</span>` : '<span class="cell-empty">—</span>'; };
+  const txt = v => { const s = String(v ?? '').trim(); return s ? `<span class="cell-text">${escapeHtml(s)}</span>` : '<span class="cell-empty">—</span>'; };
   switch (c.k) {
     case 'WorkOrder':
       return `<div style="display:flex; align-items:center; gap:6px;">
