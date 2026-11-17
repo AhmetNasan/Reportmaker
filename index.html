@@ -1949,6 +1949,27 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
 .gis-panel-section { margin-bottom:18px; }
 .gis-panel-section-title { font-size:11px; font-weight:700; letter-spacing:.02em; color:var(--muted); text-transform:none; }
 .gis-status-bar { font-size:11px; }
+
+/* Work Orders table – new template */
+#woTable { table-layout:fixed; width:100%; }
+#woTable thead th { white-space:normal; vertical-align:bottom; line-height:1.25; }
+#woTable td { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#woTable td span[title] { display:block; overflow:hidden; text-overflow:ellipsis; }
+#woTable th:first-child, #woTable td:first-child { position:sticky; left:0; z-index:2; background:var(--surface); box-shadow:1px 0 0 var(--border); }
+#woTable thead th:first-child { z-index:4; background:var(--surface2); }
+#woTable tbody tr:hover td:first-child, #woTable tbody tr.selected td:first-child { background:var(--color-accent-teal-bg); }
+#woTable th .th-filter-wrap { margin-top:4px; }
+#woTable th[data-nodrop] .th-filter-dropdown-btn { display:none; }
+.cell-empty { color:var(--color-text-muted); }
+.wo-thumb { width:48px; height:32px; object-fit:cover; border-radius:5px; border:1px solid var(--border); cursor:pointer; display:block; }
+.wo-pin { background:none; border:none; color:var(--accent); cursor:pointer; padding:2px; font-size:12px; }
+.chip { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600; }
+.chip-ok { background:var(--color-accent-teal-bg); color:var(--accent); }
+.chip-warn { background:rgba(245,158,11,.14); color:var(--amber); }
+.wo-col-menu { display:none; position:absolute; right:0; top:38px; z-index:60; background:var(--surface); border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow-modal, 0 12px 32px rgba(0,0,0,.25)); padding:8px; min-width:280px; max-height:70vh; overflow:auto; }
+.wo-col-menu.show { display:block; }
+.wo-col-menu label { display:flex; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; font-size:12.5px; cursor:pointer; }
+.wo-col-menu label:hover { background:var(--surface2); }
 </style>
 </head>
 <body data-theme="light">
@@ -2253,39 +2274,16 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
       <h2 style="font-family:'Inter', 'Noto Sans Arabic', sans-serif;font-size:18px;font-weight:700;">Work Orders <span id="woCountLabel" style="font-size:13px;color:var(--muted)"></span></h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
         <button class="btn btn-primary btn-sm" onclick="openAddModal()" id="addWoBtn" style="display:none"><i class="fas fa-plus"></i> Add WO</button>
+        <div class="wo-col-wrap" style="position:relative;"><button class="btn btn-ghost btn-sm" onclick="toggleWoColMenu(event)" title="Show / hide columns"><i class="fas fa-table-columns"></i> Columns</button><div class="wo-col-menu" id="wo-col-menu"></div></div>
         <button class="btn btn-ghost btn-sm" id="wo-more-actions" onclick="showContextMenu(event, 'page-workorders')"><i class="fas fa-ellipsis-v"></i> More Actions</button>
       </div>
     </div>
 
     <div class="table-wrap">
       <table class="main-table" id="woTable">
-        <thead>
-          <tr>
-            <th data-col="WorkOrder">Work Order</th>
-            <th data-col="Description">Description</th>
-            <th data-col="Status">Status</th>
-            <th data-col="Lat">Latitude</th>
-            <th data-col="Lng">Longitude</th>
-            <th data-col="ReportedBy">Reported By</th>
-            <th data-col="ReportedDate">Reported Date</th>
-            <th data-col="PWA_ENG">PWA Engineer</th>
-            <th data-col="Location">Location</th>
-            <th data-col="TargetStart">Target Start Date</th>
-            <th data-col="Month">Month</th>
-            <th data-col="TargetFinish">Target Finish Date</th>
-            <th data-col="StatusUpdateDate">Status Update Date</th>
-            <th data-col="CompletionStatus">Completion Status</th>
-            <th data-col="QBCComments">QBC Comments</th>
-            <th data-col="RO">RO</th>
-            <th data-col="TDP">TDP</th>
-            <th data-col="ApplicationDate">Application Date</th>
-            <th data-col="TDP_Status">TDP Status</th>
-            <th data-col="ExpiryDate">TDP Expiry Date</th>
-            <th data-col="MediaAnnouncement">Media Announcement</th>
-          </tr>
-        </thead>
+        <thead><tr><th data-col="WorkOrder">CM #</th></tr></thead>
         <tbody id="woBody">
-          <tr class="loading-row"><td colspan="22">Loading data...</td></tr>
+          <tr class="loading-row"><td colspan="10">Loading data...</td></tr>
         </tbody>
       </table>
     </div>
@@ -2694,11 +2692,11 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
     <div class="upload-grid">
       <div class="upload-card">
         <h3>📊 Data Management</h3>
-        <p>Update Work Orders from CSV. Use the template for best results.</p>
+        <p>Update Work Orders from the <b>Project Issues Register</b> Excel template (.xlsx). Pictures placed in the Photo column are imported too.</p>
         <div class="drop-zone" id="excelDrop">
-          <input type="file" id="excelFile" accept=".csv" onchange="handleExcelUpload(event)">
+          <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" onchange="handleExcelUpload(event)">
           <div class="drop-icon">📄</div>
-          <p>Drag & drop CSV file here<br>or click to browse</p>
+          <p>Drag & drop the Excel file here<br>or click to browse</p>
           <div class="file-name" id="excelFileName"></div>
         </div>
         <div style="display:flex; gap:8px; margin-top:16px;">
@@ -2708,7 +2706,7 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
 
         <div class="upload-progress-container" id="upload-progress-container">
           <div class="upload-progress-text">
-            <span id="upload-status-label">Uploading CSV file...</span>
+            <span id="upload-status-label">Uploading file...</span>
             <span id="upload-pct">0%</span>
           </div>
           <div class="upload-progress-bar">
@@ -3022,8 +3020,8 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
       <button class="detail-tab active" onclick="switchDetailTab('general')"><i class="fas fa-info-circle"></i> General</button>
       <button class="detail-tab" onclick="switchDetailTab('location')"><i class="fas fa-map-marker-alt"></i> Location</button>
       <button class="detail-tab" onclick="switchDetailTab('sign')"><i class="fas fa-traffic-light"></i> Sign Details</button>
-      <button class="detail-tab" onclick="switchDetailTab('scheduling')"><i class="fas fa-calendar-alt"></i> Scheduling</button>
-      <button class="detail-tab" onclick="switchDetailTab('permits')"><i class="fas fa-file-contract"></i> Permits</button>
+      <button class="detail-tab" onclick="switchDetailTab('scheduling')"><i class="fas fa-calendar-alt"></i> Dates</button>
+      <button class="detail-tab" onclick="switchDetailTab('permits')"><i class="fas fa-file-contract"></i> Closure & Teams</button>
       <button class="detail-tab" onclick="switchDetailTab('photos')"><i class="fas fa-images"></i> Photos</button>
       <button class="detail-tab" onclick="switchDetailTab('manufacturing')"><i class="fas fa-industry"></i> Fabrication</button>
       <button class="detail-tab" onclick="switchDetailTab('history')"><i class="fas fa-history"></i> History</button>
@@ -3041,23 +3039,15 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
       <div class="detail-section">
         <div class="detail-section-title">General Information</div>
         <div class="detail-info-grid">
-          <div class="info-item"><label>Work Order Number</label><span id="val-wo">--</span><input type="text" id="det-wo" readonly></div>
-          <div class="info-item"><label>Status</label><span id="val-status">--</span>
-            <select id="det-status">
-              <option value="COMP">COMP</option><option value="INPRG">INPRG</option>
-              <option value="DISPATCH">DISPATCH</option><option value="WPERM">WPERM</option>
-              <option value="RTNENG">RTNENG</option><option value="APPR">APPR</option>
-            </select>
-          </div>
-          <div class="info-item"><label>Priority</label><span id="val-priority">Normal</span>
-            <select id="det-priority">
-              <option>High</option><option selected>Normal</option><option>Low</option>
-            </select>
-          </div>
-          <div class="info-item"><label>Reported By</label><span id="val-reported-by">--</span><input type="text" id="det-reported-by"></div>
-          <div class="info-item"><label>Reported Date</label><span id="val-created">--</span><input type="date" id="det-created"></div>
-          <div class="info-item"><label>PWA Engineer</label><span id="val-team">--</span><input type="text" id="det-team"></div>
-          <div class="info-item" style="grid-column: span 2;"><label>Description</label><span id="val-desc">--</span><textarea id="det-desc" rows="3"></textarea></div>
+          <div class="info-item"><label>CM #</label><span id="val-wo">--</span><input type="text" id="det-wo" readonly></div>
+          <div class="info-item"><label>Status</label><span id="val-status">--</span><select id="det-status"><option value="COMP">COMP</option><option value="INPRG">INPRG</option><option value="DISPATCH">DISPATCH</option><option value="WPERM">WPERM</option><option value="RTNENG">RTNENG</option><option value="APPR">APPR</option></select></div>
+          <div class="info-item"><label>Priority</label><span id="val-priority">Normal</span><select id="det-priority"><option>High</option><option selected>Normal</option><option>Low</option></select></div>
+          <div class="info-item"><label>Reported by</label><span id="val-reported-by">--</span><input type="text" id="det-reported-by" list="eng-list"></div>
+          <div class="info-item"><label>Date Reported</label><span id="val-created">--</span><input type="date" id="det-created"></div>
+          <div class="info-item"><label>Issue Category</label><span id="val-cat">--</span><select id="det-cat"><option value="">—</option><option value="Traffic Permit Request (TDP / RO / Night Closure / ERO)">Traffic Permit Request (TDP / RO / Night Closure / ERO)</option><option value="Maximo Information Issues / Scope Clarification">Maximo Information Issues / Scope Clarification</option><option value="Maximo System Issues">Maximo System Issues</option><option value="Site Issues">Site Issues</option><option value="Duplicate CM">Duplicate CM</option></select></div>
+          <div class="info-item" style="grid-column: span 2;"><label>Email Subject</label><span id="val-subject">--</span><textarea id="det-subject" rows="2"></textarea></div>
+          <div class="info-item" style="grid-column: span 2;"><label>Remarks</label><span id="val-remarks" style="white-space:pre-wrap;">--</span><textarea id="det-remarks" rows="5"></textarea></div>
+          <datalist id="eng-list"><option value="Eng. Ahmed"><option value="Eng. Nour"><option value="Eng. Ashwin"></datalist>
         </div>
       </div>
     </div>
@@ -3073,7 +3063,6 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
         <div class="detail-section">
           <div class="detail-section-title">Location Details</div>
           <div class="detail-info-grid" style="grid-template-columns: 1fr;">
-            <div class="info-item"><label>Location / Highway</label><span id="val-location">--</span><input type="text" id="det-location"></div>
             <div class="info-item"><label>Latitude</label><span id="val-lat">--</span><input type="text" id="det-lat"></div>
             <div class="info-item"><label>Longitude</label><span id="val-lng">--</span><input type="text" id="det-lng"></div>
             <button class="btn btn-ghost btn-sm w-100" onclick="openInGoogleMaps()"><i class="fab fa-google"></i> Open in Google Maps</button>
@@ -3098,27 +3087,26 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
 
     <div class="detail-pane" id="pane-scheduling">
       <div class="detail-section">
-        <div class="detail-section-title">Project Scheduling</div>
+        <div class="detail-section-title">Dates</div>
         <div class="detail-info-grid">
-          <div class="info-item"><label>Target Start Date</label><span id="val-start">--</span><input type="date" id="det-start"></div>
-          <div class="info-item"><label>Target Finish</label><span id="val-target">--</span><input type="date" id="det-target" disabled></div>
+          <div class="info-item"><label>Status Date</label><span id="val-status-dt">--</span><input type="datetime-local" id="det-status-dt"></div>
+          <div class="info-item"><label>Target Start Date</label><span id="val-start">--</span><input type="datetime-local" id="det-start"></div>
+          <div class="info-item"><label>Dispatched Date</label><span id="val-dispatched">--</span><input type="datetime-local" id="det-dispatched"></div>
+          <div class="info-item"><label>Target Finish Date</label><span id="val-target">--</span><input type="datetime-local" id="det-target"></div>
+          <div class="info-item"><label>Comp Date</label><span id="val-comp">--</span><input type="datetime-local" id="det-comp"></div>
           <div class="info-item"><label>Installation Date</label><span id="val-install">--</span><input type="date" id="det-install"></div>
-          <div class="info-item"><label>Status Update Date</label><span id="val-update-date">--</span><input type="date" id="det-update-date" readonly></div>
-          <div class="info-item" style="grid-column: span 2;"><label>QBC Comments</label><span id="val-qbc-comments">--</span><textarea id="det-qbc-comments" rows="3"></textarea></div>
         </div>
       </div>
     </div>
 
     <div class="detail-pane" id="pane-permits">
       <div class="detail-section">
-        <div class="detail-section-title">Permits & Approvals</div>
+        <div class="detail-section-title">Permits, Closure & Teams</div>
         <div class="detail-info-grid">
-          <div class="info-item"><label>RO</label><span id="val-ro">--</span><input type="text" id="det-ro"></div>
-          <div class="info-item"><label>TDP</label><span id="val-tdp">--</span><input type="text" id="det-tdp"></div>
-          <div class="info-item"><label>Application Date</label><span id="val-app-date">--</span><input type="date" id="det-app-date"></div>
-          <div class="info-item"><label>TDP Status</label><span id="val-tdp-status">--</span><input type="text" id="det-tdp-status"></div>
-          <div class="info-item"><label>TDP Expiry Date</label><span id="val-expiry">--</span><input type="date" id="det-expiry"></div>
-          <div class="info-item"><label>Media Announcement</label><span id="val-media">--</span><input type="text" id="det-media"></div>
+          <div class="info-item"><label>RO & TDP & NCP (If Req.)</label><span id="val-ro-tdp">--</span><select id="det-ro-tdp"><option value="">—</option><option>Received</option><option>Not Received</option></select></div>
+          <div class="info-item"><label>Closure Required?</label><span id="val-closure-req">--</span><select id="det-closure-req"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+          <div class="info-item"><label>The responsible for the closure</label><span id="val-closure-by">--</span><select id="det-closure-by"><option value="">—</option><option>Egis</option><option>QBC</option></select></div>
+          <div class="info-item" style="grid-column: span 2;"><label>Teams and Veihcles (If Provided By QBC)</label><span id="val-teams">--</span><select id="det-teams"><option value="">—</option><option value="Safety Team, Support Veihcle and 1 TMA">Safety Team, Support Veihcle and 1 TMA</option><option value="Safety Team, Support Veihcle and 2 TMA's">Safety Team, Support Veihcle and 2 TMA's</option><option value="Safety Team, Support Veihcle and 3 TMA's">Safety Team, Support Veihcle and 3 TMA's</option><option value="2 Days Works. 2 Safety Teams, 2 Support Veihcles and 2 TMA's">2 Days Works. 2 Safety Teams, 2 Support Veihcles and 2 TMA's</option><option value="2 Days Works. 2 Safety Teams, 2 Support Veihcles and 4 TMA's">2 Days Works. 2 Safety Teams, 2 Support Veihcles and 4 TMA's</option><option value="TTM Conducted with another works. No Extra Charges">TTM Conducted with another works. No Extra Charges</option></select></div>
         </div>
       </div>
     </div>
@@ -3574,7 +3562,7 @@ function buildColumnFilters(tableId, data) {
   const headers = table.querySelectorAll('thead th[data-col]');
   headers.forEach(th => {
     const col = th.getAttribute('data-col');
-    if (!col) return;
+    if (!col || th.hasAttribute('data-nofilter')) return;
 
     let wrap = th.querySelector('.th-filter-wrap');
     let searchInput;
@@ -3622,7 +3610,7 @@ function buildColumnFilters(tableId, data) {
 
     // Re-build dropdown items
     const dropContent = wrap.querySelector('.th-filter-dropdown-content');
-    const values = [...new Set(data.map(r => r[col] || ''))].sort();
+    const values = th.hasAttribute('data-nodrop') ? [] : [...new Set(data.map(r => r[col] || ''))].sort();
     
     dropContent.innerHTML = '';
     
@@ -3852,7 +3840,7 @@ async function fetchData() {
     // Map Supabase fields to app fields
     allData = combinedData.map(r => ({
       WorkOrder: r.work_order,
-      Description: r.description,
+      Description: r.description || r.email_subject || '',
       Status: r.status,
       PWA_ENG: r.pwa_engineer,
       TargetStart: r.target_start_date,
@@ -3894,7 +3882,8 @@ async function fetchData() {
       MediaAnnouncement: r.media_announcement,
       created_at: r.created_at,
       last_modified_at: r.last_modified_at,
-      Priority: r.priority || 'Normal'
+      Priority: r.priority || 'Normal',
+      ...woCoreFromRow(r)
     }));
 
     if (photoRes.error) throw photoRes.error;
@@ -3957,6 +3946,7 @@ async function saveWorkOrderToSupabase(wo) {
     if (!isNaN(d.getTime())) monthVal = monthNames[d.getMonth()];
   }
 
+  syncDerivedDates(wo);
   const woPayload = {
     work_order: wo.WorkOrder,
     description: wo.Description,
@@ -3964,7 +3954,6 @@ async function saveWorkOrderToSupabase(wo) {
     pwa_engineer: wo.PWA_ENG,
     target_start_date: wo.TargetStart || null,
     target_finish_date: wo.TargetFinish || null,
-    location: wo.Location,
     latitude: parseFloat(wo.Lat) || null,
     longitude: parseFloat(wo.Lng) || null,
     is_sent_to_fab: wo.isSentToFab || false,
@@ -3973,18 +3962,23 @@ async function saveWorkOrderToSupabase(wo) {
     reported_by: wo.ReportedBy,
     reported_date: wo.ReportedDate || null,
     status_update_date: wo.StatusUpdateDate || null,
-    qbc_comments: wo.QBCComments,
-    ro: wo.RO,
-    tdp: wo.TDP,
-    application_date: wo.ApplicationDate || null,
-    tdp_status: wo.TDPStatus,
-    tdp_expiry_date: wo.ExpiryDate || null,
-    media_announcement: wo.MediaAnnouncement,
     created_at: wo.created_at || new Date().toISOString(),
     last_modified_at: new Date().toISOString(),
     priority: wo.Priority || 'Normal',
     month: monthVal,
-    completion_status: getCompletionStatusLabel(wo)
+    completion_status: getCompletionStatusLabel(wo),
+    email_subject: wo.EmailSubject || null,
+    issue_category: wo.IssueCategory || null,
+    closure_required: wo.ClosureRequired || null,
+    closure_responsible: wo.ClosureBy || null,
+    teams_vehicles: wo.TeamsVehicles || null,
+    remarks: wo.Remarks || null,
+    ro_tdp_ncp: wo.ROTDP || null,
+    status_date_time: wo.StatusDT || null,
+    target_start_time: wo.TargetStartDT || null,
+    target_finish_time: wo.TargetFinishDT || null,
+    dispatched_date: wo.DispatchedDate || null,
+    comp_date: wo.CompDate || null
   };
 
   const mfgPayload = {
@@ -4741,10 +4735,10 @@ async function openDetail(woId) {
     'status': wo.Status || 'COMP',
     'priority': wo.Priority || 'Normal',
     'reported-by': wo.ReportedBy || '',
-    'created': wo.ReportedDate || '',
-    'team': wo.PWA_ENG || '',
-    'desc': wo.Description || '',
-    'location': wo.Location || '',
+    'created': dateOnly(wo.ReportedDate) || '',
+    'cat': wo.IssueCategory || '',
+    'subject': wo.EmailSubject || wo.Description || '',
+    'remarks': wo.Remarks || '',
     'lat': wo.Lat || '',
     'lng': wo.Lng || '',
     'signtype': wo.SignType || '',
@@ -4753,17 +4747,11 @@ async function openDetail(woId) {
     'signsize': wo.SignSize || '',
     'signmaterial': wo.SignMaterial || '',
     'signqty': wo.SignQty || '',
-    'start': wo.TargetStart || '',
-    'target': wo.TargetFinish || '',
-    'install': wo.InstallationDate || '',
-    'update-date': wo.StatusUpdateDate || '',
-    'qbc-comments': wo.QBCComments || '',
-    'ro': wo.RO || '',
-    'tdp': wo.TDP || '',
-    'app-date': wo.ApplicationDate || '',
-    'tdp-status': wo.TDPStatus || '',
-    'expiry': wo.ExpiryDate || '',
-    'media': wo.MediaAnnouncement || '',
+    'install': dateOnly(wo.InstallationDate) || '',
+    'ro-tdp': wo.ROTDP || '',
+    'closure-req': wo.ClosureRequired || '',
+    'closure-by': wo.ClosureBy || '',
+    'teams': wo.TeamsVehicles || '',
     'roadcat': wo.RoadCatg || '',
     'fab': wo.FabStatus || 'Pending',
     'posttype': wo.PostType || '',
@@ -4778,11 +4766,18 @@ async function openDetail(woId) {
     const input = document.getElementById(`det-${id}`);
     if (span) span.textContent = val || '--';
     if (input) {
+      if (input.tagName === 'SELECT' && val && ![...input.options].some(o => o.value === val)) input.add(new Option(val, val));   // legacy values
       input.value = val;
       input.parentElement.classList.remove('modified');
-      // Add change listener to highlight modification
       input.onchange = () => input.parentElement.classList.add('modified');
     }
+  }
+  const dts = { 'status-dt': wo.StatusDT, 'start': wo.TargetStartDT, 'dispatched': wo.DispatchedDate, 'target': wo.TargetFinishDT, 'comp': wo.CompDate };
+  for (const [id, val] of Object.entries(dts)) {
+    const span = document.getElementById(`val-${id}`);
+    const input = document.getElementById(`det-${id}`);
+    if (span) span.textContent = val ? fmtDT(val) : '--';
+    if (input) { input.value = naiveToInput(val); input.parentElement.classList.remove('modified'); input.onchange = () => input.parentElement.classList.add('modified'); }
   }
 
   // Audit
@@ -4913,42 +4908,51 @@ async function saveDetailChanges() {
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
+  const g = id => document.getElementById(id).value;
+  const newStatus = g('det-status');
+  const nowNaive = inputToNaive(new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16));
   const updatedData = {
     ...wo,
-    Status: document.getElementById('det-status').value,
-    Priority: document.getElementById('det-priority').value,
-    ReportedBy: document.getElementById('det-reported-by').value,
-    ReportedDate: document.getElementById('det-created').value,
-    PWA_ENG: document.getElementById('det-team').value,
-    Description: document.getElementById('det-desc').value,
-    Location: document.getElementById('det-location').value,
-    Lat: parseFloat(document.getElementById('det-lat').value) || null,
-    Lng: parseFloat(document.getElementById('det-lng').value) || null,
-    SignType: document.getElementById('det-signtype').value,
-    SignRef: document.getElementById('det-signref').value,
-    SignShape: document.getElementById('det-signshape').value,
-    SignSize: document.getElementById('det-signsize').value,
-    SignMaterial: document.getElementById('det-signmaterial').value,
-    SignQty: document.getElementById('det-signqty').value,
-    TargetStart: document.getElementById('det-start').value,
-    TargetFinish: document.getElementById('det-target').value,
-    InstallationDate: document.getElementById('det-install').value,
-    StatusUpdateDate: new Date().toISOString().split('T')[0],
-    QBCComments: document.getElementById('det-qbc-comments').value,
-    RO: document.getElementById('det-ro').value,
-    TDP: document.getElementById('det-tdp').value,
-    ApplicationDate: document.getElementById('det-app-date').value,
-    TDPStatus: document.getElementById('det-tdp-status').value,
-    ExpiryDate: document.getElementById('det-expiry').value,
-    MediaAnnouncement: document.getElementById('det-media').value,
-    RoadCatg: document.getElementById('det-roadcat').value,
-    FabStatus: document.getElementById('det-fab').value,
-    PostType: document.getElementById('det-posttype').value,
-    PostHeight: document.getElementById('det-postheight').value,
-    FoundSize: document.getElementById('det-foundsize').value,
-    ScrapRemoval: document.getElementById('det-scrap').value,
-    FabDetails: document.getElementById('det-fabdetails').value
+    Status: newStatus,
+    Priority: g('det-priority'),
+    ReportedBy: g('det-reported-by'),
+    ReportedDate: g('det-created'),
+    IssueCategory: g('det-cat'),
+    EmailSubject: g('det-subject'),
+    Remarks: g('det-remarks'),
+    Lat: parseFloat(g('det-lat')) || null,
+    Lng: parseFloat(g('det-lng')) || null,
+    SignType: g('det-signtype'),
+    SignRef: g('det-signref'),
+    SignShape: g('det-signshape'),
+    SignSize: g('det-signsize'),
+    SignMaterial: g('det-signmaterial'),
+    SignQty: g('det-signqty'),
+    StatusDT: inputToNaive(g('det-status-dt')),
+    TargetStartDT: inputToNaive(g('det-start')),
+    DispatchedDate: inputToNaive(g('det-dispatched')),
+    TargetFinishDT: inputToNaive(g('det-target')),
+    CompDate: inputToNaive(g('det-comp')),
+    InstallationDate: g('det-install'),
+    ROTDP: g('det-ro-tdp'),
+    ClosureRequired: g('det-closure-req'),
+    ClosureBy: g('det-closure-by'),
+    TeamsVehicles: g('det-teams'),
+    RoadCatg: g('det-roadcat'),
+    FabStatus: g('det-fab'),
+    PostType: g('det-posttype'),
+    PostHeight: g('det-postheight'),
+    FoundSize: g('det-foundsize'),
+    ScrapRemoval: g('det-scrap'),
+    FabDetails: g('det-fabdetails')
   };
+  // a status change stamps the Status Date; completing sets the Comp Date
+  if (newStatus !== wo.Status && updatedData.StatusDT === (wo.StatusDT ? inputToNaive(naiveToInput(wo.StatusDT)) : '')) {
+    updatedData.StatusDT = nowNaive;
+    if (newStatus === 'COMP' && !updatedData.CompDate) updatedData.CompDate = nowNaive;
+    if (newStatus !== 'COMP') updatedData.CompDate = '';          // Comp Date only exists for completed items
+  }
+  syncDerivedDates(updatedData);
 
   try {
     await saveWorkOrderToSupabase(updatedData);
@@ -5190,96 +5194,6 @@ async function addComment() {
   }
 }
 
-function renderTable() {
-  const tbody = document.getElementById('woBody');
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const slice = filteredData.slice(start, start + PAGE_SIZE);
-  if (slice.length === 0) {
-    tbody.innerHTML = '<tr class="loading-row"><td colspan="22">No records found</td></tr>';
-    renderPagination(); return;
-  }
-  const remsByWO = new Map();
-  reminders.forEach(rem => {
-    const k = String(rem.work_order_number);
-    if (!remsByWO.has(k)) remsByWO.set(k, []);
-    remsByWO.get(k).push(rem);
-  });
-  tbody.innerHTML = slice.map((r, i) => {
-    const stBadge = `<span class="status-badge badge-${r.Status||'COMP'}">${r.Status||'–'}</span>`;
-    const isSelected = selectedWorkOrder === r.WorkOrder;
-
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    let monthLabel = "—";
-    if (r.TargetStart) {
-      const d = new Date(r.TargetStart);
-      if (!isNaN(d.getTime())) monthLabel = monthNames[d.getMonth()];
-    }
-
-    const completionStatus = getCompletionStatusLabel(r);
-
-    const mapActions = (r.Lat && r.Lng) ? `
-      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showOnMap(${r.Lat}, ${r.Lng}, '${r.WorkOrder}')" title="Show on Map"><i class="fas fa-map-marker-alt"></i></button>
-    ` : '';
-
-    const photo = photos[r.WorkOrder];
-    let photoCell = '';
-    if (photo) {
-      photoCell = `
-        <div style="display:flex; flex-direction:column; align-items:center;">
-          <img src="${photo}" style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border);" onclick="viewPhoto('${r.WorkOrder}')">
-        </div>
-      `;
-    } else {
-      photoCell = `
-        <div style="display:flex; flex-direction:column; align-items:center;">
-          <button class="btn btn-ghost btn-sm" onclick="uploadPhotoFor('${r.WorkOrder}')"><i class="fas fa-camera"></i> Attach</button>
-        </div>
-        <input type="file" id="file_${r.WorkOrder}" style="display:none" accept="image/*" onchange="handlePhotoUpload(event, '${r.WorkOrder}')">
-      `;
-    }
-
-    const reminderList = remsByWO.get(String(r.WorkOrder)) || [];
-    const activeReminders = reminderList.filter(rem => !['completed','cancelled'].includes(rem.status));
-    const totalPhotos = reminderList.reduce((sum, rem) => sum + (rem.photo_count || 0), 0);
-
-    return `<tr class="${isSelected ? 'selected' : ''}" data-wo="${r.WorkOrder}" 
-      onclick="selectWorkOrderRow('${r.WorkOrder}')" 
-      ondblclick="openDetail('${r.WorkOrder}')"
-      oncontextmenu="showContextMenu(event, 'row-wo', '${r.WorkOrder}')">
-      <td>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="wo-num">${r.WorkOrder}</span>
-          ${activeReminders.length > 0 ? `<span class="ctx-badge" title="${activeReminders.length} active reminders" onclick="event.stopPropagation(); showPage('followup');">📌 ${activeReminders.length}</span>` : ''}
-          ${totalPhotos > 0 ? `<span class="wo-photo-badge" title="${totalPhotos} photos in reminders" onclick="event.stopPropagation(); showPage('followup');">📎 ${totalPhotos}</span>` : ''}
-        </div>
-      </td>
-      <td class="desc-cell" title="${(r.Description||'').replace(/"/g,"'")}"><span>${(r.Description||'').substring(0,40)}</span></td>
-      <td>${stBadge}</td>
-      <td style="font-size:11px">${r.Lat||'—'}</td>
-      <td style="font-size:11px">${r.Lng||'—'}</td>
-      <td style="font-size:11px">${r.ReportedBy||'—'}</td>
-      <td style="font-size:11px">${formatDate(r.ReportedDate)}</td>
-      <td style="font-size:11px;color:var(--muted)">${r.PWA_ENG||'—'}</td>
-      <td style="font-size:11px">${r.Location||'—'}</td>
-      <td style="font-size:11px">${formatDate(r.TargetStart)}</td>
-      <td style="font-size:11px">${monthLabel}</td>
-      <td style="font-size:11px">${formatDate(r.TargetFinish)}</td>
-      <td style="font-size:11px">${formatDate(r.StatusUpdateDate)}</td>
-      <td style="font-size:11px">${completionStatus}</td>
-      <td>
-        <div style="font-size:11px; color:var(--muted); max-width:120px; overflow:hidden; text-overflow:ellipsis;">${r.QBCComments||'—'}</div>
-      </td>
-      <td style="font-size:11px">${r.RO||'—'}</td>
-      <td style="font-size:11px">${r.TDP||'—'}</td>
-      <td style="font-size:11px">${formatDate(r.ApplicationDate)}</td>
-      <td style="font-size:11px">${r.TDPStatus||'—'}</td>
-      <td style="font-size:11px">${formatDate(r.ExpiryDate)}</td>
-      <td style="font-size:11px">${r.MediaAnnouncement||'—'}</td>
-    </tr>`;
-  }).join('');
-  renderPagination();
-}
-
 function renderPagination() {
   const total = Math.ceil(filteredData.length / PAGE_SIZE);
   const pg = document.getElementById('pagination');
@@ -5450,292 +5364,6 @@ async function saveProfile() {
 }
 
 let pendingExcelFile = null;
-function handleExcelUpload(evt) {
-  pendingExcelFile = evt.target.files[0];
-  const el = document.getElementById('excelFileName');
-  if (pendingExcelFile && el) el.textContent = pendingExcelFile.name;
-}
-
-async function processExcelUpload() {
-  if (!pendingExcelFile) { showToast('No file selected','error'); return; }
-  if (!isAdmin) { 
-    showToast('Admin mode required','error'); 
-    openModal('adminModal');
-    return; 
-  }
-  
-  const uploadBtn = document.getElementById('csv-upload-btn');
-  const templateBtn = document.getElementById('csv-template-btn');
-  const progressContainer = document.getElementById('upload-progress-container');
-  const progressFill = document.getElementById('upload-progress-fill');
-  const progressPct = document.getElementById('upload-pct');
-  const statusLabel = document.getElementById('upload-status-label');
-  const statusMsg = document.getElementById('upload-status-msg');
-
-  uploadBtn.disabled = true;
-  templateBtn.disabled = true;
-  progressContainer.style.display = 'flex';
-  progressFill.style.width = '0%';
-  progressPct.textContent = '0%';
-  statusLabel.textContent = 'Processing CSV file...';
-  statusMsg.textContent = '';
-  statusMsg.className = 'upload-status-msg';
-  uploadErrors = [];
-  document.getElementById('upload-error-actions').style.display = 'none';
-
-  const reader = new FileReader();
-  reader.onload = async e => {
-    try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, {type: 'array'});
-      const firstSheet = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[firstSheet];
-      const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
-
-      if (rows.length < 2) { showToast('File is empty or invalid', 'error'); return; }
-
-      const rawHeaders = rows[0];
-      const headers = rawHeaders.map(h => String(h || '').toLowerCase().trim());
-      const dataRows = rows.slice(1);
-      const MAP = { 
-        'work order': 'WorkOrder', 'description': 'Description', 'status': 'Status', 'latitude': 'Lat', 'longitude': 'Lng',
-        'reported by': 'ReportedBy', 'reported date': 'ReportedDate', 'pwa engineer': 'PWA_ENG', 'location': 'Location',
-        'target start date': 'TargetStart', 'target finish date': 'TargetFinish', 'status update date': 'StatusUpdateDate',
-        'qbc comments': 'QBCComments', 'ro': 'RO', 'tdp': 'TDP', 'application date': 'ApplicationDate',
-        'tdp status': 'TDPStatus', 'tdp expiry date': 'ExpiryDate', 'media announcement': 'MediaAnnouncement',
-        // Backward compatibility
-        'work order #': 'WorkOrder', 'pwa eng': 'PWA_ENG', 'expiry date': 'ExpiryDate'
-      };
-
-      const woIdx = headers.findIndex(h => MAP[h] === 'WorkOrder');
-      
-      if (woIdx < 0) { 
-        console.error("CSV Headers found:", headers);
-        showToast('Column "Work Order" not found in CSV', 'error'); 
-        return; 
-      }
-
-      const upsertData = [];
-      const DATE_KEYS = ['TargetStart', 'TargetFinish', 'InstallationDate', 'ReportedDate', 'StatusUpdateDate', 'ApplicationDate', 'ExpiryDate'];
-      const VALID_STATUSES = ['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR','APPROVED','COMPLETED','IN PROGRESS'];
-      const STATUS_MAP = {
-        'COMPLETED': 'COMP',
-        'IN PROGRESS': 'INPRG',
-        'APPROVED': 'APPR'
-      };
-
-      const totalRows = dataRows.length;
-      for (let rowIndex = 0; rowIndex < totalRows; rowIndex++) {
-        const row = dataRows[rowIndex];
-        const wo = String(row[woIdx] || '').trim(); 
-        if (!wo) continue;
-        
-        const r = { WorkOrder: wo };
-        let rowHasError = false;
-        let errors = [];
-
-        headers.forEach((h, i) => {
-          const k = MAP[h];
-          if (k) {
-            let val = row[i];
-            if (val === undefined || val === null || String(val).trim() === '') {
-              r[k] = null;
-              return;
-            }
-
-            if (k === 'Lat' || k === 'Lng') {
-              const num = parseFloat(val);
-              if (isNaN(num)) {
-                 r[k] = null;
-              } else {
-                 if (k === 'Lat' && (num < -90 || num > 90)) { rowHasError = true; errors.push("Invalid Latitude"); }
-                 if (k === 'Lng' && (num < -180 || num > 180)) { rowHasError = true; errors.push("Invalid Longitude"); }
-                 r[k] = num;
-              }
-            } else if (DATE_KEYS.includes(k)) {
-              const parsed = parseCSVDate(val);
-              if (parsed === 'INVALID') {
-                rowHasError = true;
-                errors.push(`Invalid Date in ${h}`);
-              } else {
-                r[k] = parsed;
-              }
-            } else if (k === 'Status') {
-              let st = String(val).trim().toUpperCase();
-              if (STATUS_MAP[st]) st = STATUS_MAP[st];
-              if (!VALID_STATUSES.includes(st)) {
-                rowHasError = true;
-                errors.push(`Invalid Status: ${val}`);
-              } else {
-                r[k] = st;
-              }
-            } else {
-              r[k] = String(val).trim();
-            }
-          }
-        });
-
-        if (rowHasError) {
-          uploadErrors.push({ headers: [...rawHeaders, "Error Reason"], row: [...row, errors.join('; ')] });
-        } else {
-          upsertData.push(r);
-        }
-
-        if (rowIndex % 500 === 0 || rowIndex === totalRows - 1) {
-          const pct = Math.round(((rowIndex + 1) / totalRows) * 5); // Use first 5% for validation
-          statusLabel.textContent = `Validating data (${rowIndex + 1}/${totalRows})...`;
-          progressFill.style.width = `${pct}%`;
-          progressPct.textContent = `${pct}%`;
-          await new Promise(res => setTimeout(res, 0));
-        }
-      }
-
-      if (upsertData.length === 0 && uploadErrors.length > 0) {
-        statusLabel.textContent = 'Validation Failed';
-        statusMsg.textContent = `All ${uploadErrors.length} rows failed validation. No data imported.`;
-        statusMsg.className = 'upload-status-msg error';
-        document.getElementById('upload-error-actions').style.display = 'block';
-        uploadBtn.disabled = false;
-        templateBtn.disabled = false;
-        return;
-      }
-
-      if (upsertData.length === 0) {
-        showToast('No valid data rows found', 'error');
-        uploadBtn.disabled = false;
-        templateBtn.disabled = false;
-        return;
-      }
-
-      // Deduplicate upsertData by WorkOrder to avoid "ON CONFLICT" errors
-      const uniqueData = Array.from(new Map(upsertData.map(item => [item.WorkOrder, item])).values());
-
-      if (supabaseClient) {
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const woData = uniqueData.map(wo => {
-          let monthVal = null;
-          if (wo.TargetStart) {
-            const d = new Date(wo.TargetStart);
-            if (!isNaN(d.getTime())) monthVal = monthNames[d.getMonth()];
-          }
-          return {
-            work_order: wo.WorkOrder,
-            description: wo.Description,
-            status: wo.Status,
-            pwa_engineer: wo.PWA_ENG,
-            target_start_date: wo.TargetStart || null,
-            target_finish_date: wo.TargetFinish || null,
-            location: wo.Location,
-            latitude: wo.Lat,
-            longitude: wo.Lng,
-            reported_by: wo.ReportedBy,
-            reported_date: wo.ReportedDate || null,
-            status_update_date: wo.StatusUpdateDate || null,
-            qbc_comments: wo.QBCComments,
-            ro: wo.RO,
-            tdp: wo.TDP,
-            application_date: wo.ApplicationDate || null,
-            tdp_status: wo.TDPStatus,
-            tdp_expiry_date: wo.ExpiryDate || null,
-            media_announcement: wo.MediaAnnouncement,
-            month: monthVal,
-            completion_status: getCompletionStatusLabel(wo)
-          };
-        });
-
-        const mfgData = uniqueData.map(wo => ({
-          work_order_number: wo.WorkOrder,
-          road_catg: wo.RoadCatg,
-          sign_type: wo.SignType,
-          sign_ref: wo.SignRef,
-          sign_shape: wo.SignShape,
-          sign_size: wo.SignSize,
-          sign_material: wo.SignMaterial,
-          sign_qty: wo.SignQty || null,
-          post_type: wo.PostType,
-          post_height: wo.PostHeight,
-          post_qty: wo.PostQty || null,
-          found_size: wo.FoundSize,
-          found_qty: wo.FoundQty || null,
-          fab_status: wo.FabStatus,
-          installation_date: wo.InstallationDate || null,
-          scrap_removal: wo.ScrapRemoval,
-          fab_details: wo.FabDetails
-        }));
-
-        // Process in chunks
-        const chunkSize = 100;
-        const totalChunks = Math.ceil(woData.length / chunkSize) + Math.ceil(mfgData.length / chunkSize);
-        let processedChunks = 0;
-
-        statusLabel.textContent = 'Uploading to database...';
-
-        const updateProgress = () => {
-          processedChunks++;
-          const pct = 5 + Math.round((processedChunks / totalChunks) * 95);
-          progressFill.style.width = `${pct}%`;
-          progressPct.textContent = `${pct}%`;
-        };
-
-        for (let i = 0; i < woData.length; i += chunkSize) {
-          const { error } = await supabaseClient.from('work_orders').upsert(woData.slice(i, i + chunkSize), { onConflict: 'work_order' });
-          if (error) throw error;
-          updateProgress();
-        }
-        for (let i = 0; i < mfgData.length; i += chunkSize) {
-          const { error } = await supabaseClient.from('manufacturing').upsert(mfgData.slice(i, i + chunkSize), { onConflict: 'work_order_number' });
-          if (error) throw error;
-          updateProgress();
-        }
-      } else {
-         localStorage.setItem('qbc_data', JSON.stringify(uniqueData));
-      }
-      
-      statusLabel.textContent = 'Complete';
-      statusMsg.textContent = `Upload finished. ${uniqueData.length} rows imported successfully.`;
-
-      // Update last upload timestamp
-      lastCsvUpload = new Date().toISOString();
-      if (supabaseClient) {
-        try {
-          const { data: settingsData } = await supabaseClient.from('project_boundaries').select('style_settings').eq('id', 0).maybeSingle();
-          const currentSettings = (settingsData && settingsData.style_settings) ? settingsData.style_settings : {};
-          currentSettings.last_csv_upload = lastCsvUpload;
-          await supabaseClient.from('project_boundaries').upsert({ id: 0, name: 'MAP_PRESETS', style_settings: currentSettings });
-          const dashRefreshEl = document.getElementById('dash-last-refresh');
-          if (dashRefreshEl) dashRefreshEl.textContent = formatLastUpdated(lastCsvUpload);
-        } catch (e) { console.error("Failed to save last upload timestamp:", e); }
-      }
-
-      if (uploadErrors.length > 0) {
-        statusMsg.textContent += ` ${uploadErrors.length} rows skipped due to validation errors.`;
-        document.getElementById('upload-error-actions').style.display = 'block';
-      }
-      statusMsg.classList.add('success');
-      showToast(`Finished processing ${uniqueData.length + uploadErrors.length} records`);
-      logAudit("Imported CSV Data", `Successfully imported ${uniqueData.length} records. skipped ${uploadErrors.length} rows.`);
-      addNotification(`Imported ${uniqueData.length} records from CSV`, null, 'system');
-      fetchData();
-      
-      setTimeout(() => {
-        progressContainer.style.display = 'none';
-        uploadBtn.disabled = false;
-        templateBtn.disabled = false;
-      }, 3000);
-
-    } catch(err) { 
-      console.error(err);
-      statusLabel.textContent = 'Error';
-      statusMsg.textContent = 'Upload failed. Please try again.';
-      statusMsg.classList.add('error');
-      showToast('Error: ' + (err.message || 'Excel processing failed'), 'error'); 
-      uploadBtn.disabled = false;
-      templateBtn.disabled = false;
-    }
-  };
-  reader.readAsArrayBuffer(pendingExcelFile);
-}
-
 // ADMIN LOCK
 function toggleAdmin() {
   if (isAdmin) { isAdmin = false; updateAdminUI(); return; }
@@ -7796,27 +7424,6 @@ function exportUploadErrors() {
   document.body.removeChild(link);
 }
 
-function downloadCSVTemplate() {
-  const headers = [
-    "Work Order", "Description", "Status", "Latitude", "Longitude", "Reported By", "Reported Date",
-    "PWA Engineer", "Location", "Target Start Date", "Target Finish Date", "Status Update Date",
-    "QBC Comments", "RO", "TDP", "Application Date", "TDP Status", "TDP Expiry Date", "Media Announcement"
-  ];
-  const sample = [
-    "26800018", "Road Safety,Warning Sign,Signface,loss of reflectivity", "INPRG", "26.07897", "51.29768", "HPRASADB", "46189.61362",
-    "Adnan Khdair", "Al Shamal Road", "46189.61319", "46193.61319", "46191.32933", "-", "56656", "6564564", "46191.32933", "Approved", "46189.61319", "Not Required"
-  ];
-  const csvContent = headers.map(h => `"${h}"`).join(",") + "\n" + sample.map(v => `"${v}"`).join(",");
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", "qbc_work_order_template.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
 function exportDueSoonCSV() {
     const today = new Date();
     const weekFromNow = new Date();
@@ -7846,32 +7453,6 @@ function exportDueSoonCSV() {
     link.click();
 }
 
-function exportTableCSV() {
-    const data = filteredData;
-    if (data.length === 0) return showToast('No data to export', 'error');
-    const headers = [
-      "Work Order", "Description", "Status", "Latitude", "Longitude", "Reported By", "Reported Date",
-      "PWA Engineer", "Location", "Target Start Date", "Target Finish Date", "Status Update Date",
-      "QBC Comments", "RO", "TDP", "Application Date", "TDP Status", "TDP Expiry Date", "Media Announcement"
-    ];
-    const esc = v => `"${(v == null ? '' : v).toString().replace(/"/g, '""')}"`;
-    const rows = data.map(r => [
-      r.WorkOrder, r.Description, r.Status, r.Lat, r.Lng, r.ReportedBy, formatDate(r.ReportedDate),
-      r.PWA_ENG, r.Location, formatDate(r.TargetStart), formatDate(r.TargetFinish), formatDate(r.StatusUpdateDate),
-      r.QBCComments, r.RO, r.TDP, formatDate(r.ApplicationDate), r.TDPStatus, formatDate(r.ExpiryDate), r.MediaAnnouncement
-    ].map(esc).join(','));
-    const csvContent = headers.join(",") + "\n" + rows.join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", 'work_orders_export.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
 // PERMISSIONS & ROLES
 function hasPermission(permissionType) {
   const isFullAdmin = userRole === 'Administrator';
@@ -7889,26 +7470,657 @@ function hasPermission(permissionType) {
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-const MAIN_FIELDS = [ 
-  {k:'WorkOrder',l:'Work Order'}, 
-  {k:'Description',l:'Description',full:true}, 
-  {k:'Status',l:'Status',type:'select',opts:['COMP','INPRG','DISPATCH','WPERM','RTNENG','APPR']}, 
-  {k:'Lat',l:'Latitude'}, 
+/* ═══════════════════════════════════════════════════════════════
+   WORK ORDERS — "Project Issues Register" template
+   ═══════════════════════════════════════════════════════════════ */
+const STATUS_OPTIONS = ['COMP', 'INPRG', 'DISPATCH', 'WPERM', 'RTNENG', 'APPR'];
+const ISSUE_CATEGORIES = [
+  'Traffic Permit Request (TDP / RO / Night Closure / ERO)',
+  'Maximo Information Issues / Scope Clarification',
+  'Maximo System Issues',
+  'Site Issues',
+  'Duplicate CM'
+];
+const TEAM_OPTIONS = [
+  'Safety Team, Support Veihcle and 1 TMA',
+  "Safety Team, Support Veihcle and 2 TMA's",
+  "Safety Team, Support Veihcle and 3 TMA's",
+  "2 Days Works. 2 Safety Teams, 2 Support Veihcles and 2 TMA's",
+  "2 Days Works. 2 Safety Teams, 2 Support Veihcles and 4 TMA's",
+  'TTM Conducted with another works. No Extra Charges'
+];
+const ENGINEER_OPTIONS = ['Eng. Ahmed', 'Eng. Nour', 'Eng. Ashwin'];
+
+// Template headers – identical to the Excel file (order matters)
+const WO_TEMPLATE_HEADERS = [
+  'CM #', 'Photo', 'Coordinates', 'Status', 'Status Date', 'Target Start Date', 'Dispatched Date', 'Target Finish Date',
+  'RO & TDP & NCP (If Req.)', 'Comp Date', 'Installation Date', 'Date Reported', 'Reported by', 'Email Subject',
+  'Issue Category', 'Closure Required?', 'The responsible for the closure', 'Teams and Veihcles\n(If Provided By QBC)', 'Remarks'
+];
+
+// Table columns. "def" = visible by default (the default set fits one screen without horizontal scrolling)
+const WO_COLS = [
+  { k: 'WorkOrder',        label: 'CM #',                                   w: 96,  def: true },
+  { k: 'Photo',            label: 'Photo',                                  w: 72,  def: true,  nofilter: true },
+  { k: 'Coordinates',      label: 'Coordinates',                            w: 160, def: false, nofilter: true },
+  { k: 'Status',           label: 'Status',                                 w: 96,  def: true },
+  { k: 'StatusDT',         label: 'Status Date',                            w: 132, def: true,  nodrop: true },
+  { k: 'TargetStartDT',    label: 'Target Start Date',                      w: 132, def: true,  nodrop: true },
+  { k: 'DispatchedDate',   label: 'Dispatched Date',                        w: 132, def: false, nodrop: true },
+  { k: 'TargetFinishDT',   label: 'Target Finish Date',                     w: 132, def: true,  nodrop: true },
+  { k: 'ROTDP',            label: 'RO & TDP & NCP (If Req.)',               w: 124, def: false },
+  { k: 'CompDate',         label: 'Comp Date',                              w: 132, def: false, nodrop: true },
+  { k: 'InstallationDate', label: 'Installation Date',                      w: 108, def: true,  nodrop: true },
+  { k: 'ReportedDate',     label: 'Date Reported',                          w: 104, def: false, nodrop: true },
+  { k: 'ReportedBy',       label: 'Reported by',                            w: 104, def: true },
+  { k: 'EmailSubject',     label: 'Email Subject',                          w: 240, def: false, nodrop: true },
+  { k: 'IssueCategory',    label: 'Issue Category',                         w: 160, def: true },
+  { k: 'ClosureRequired',  label: 'Closure Required?',                      w: 96,  def: false },
+  { k: 'ClosureBy',        label: 'The responsible for the closure',        w: 130, def: false },
+  { k: 'TeamsVehicles',    label: 'Teams and Vehicles (If Provided By QBC)', w: 220, def: false },
+  { k: 'Remarks',          label: 'Remarks',                                w: 220, def: true,  nodrop: true }
+];
+
+/* ── date helpers (all values are naive local wall-clock times, no timezone shifting) ── */
+const pad2 = n => String(n).padStart(2, '0');
+function excelSerialToNaive(serial) {
+  const d = new Date(Date.UTC(1899, 11, 30) + Math.round(serial * 86400) * 1000);
+  return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())} ${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}:${pad2(d.getUTCSeconds())}`;
+}
+// → 'YYYY-MM-DD HH:mm:ss' | null (empty / "Not Yet" / "-") | 'INVALID'
+function parseNaiveDT(val) {
+  if (val === undefined || val === null) return null;
+  if (val instanceof Date) return isNaN(val) ? 'INVALID' : `${val.getFullYear()}-${pad2(val.getMonth() + 1)}-${pad2(val.getDate())} ${pad2(val.getHours())}:${pad2(val.getMinutes())}:${pad2(val.getSeconds())}`;
+  if (typeof val === 'number') return (val > 20000 && val < 90000) ? excelSerialToNaive(val) : 'INVALID';
+  const s = String(val).trim();
+  if (!s || /^(-|not yet|n\/a|na|null|not found|0)$/i.test(s)) return null;
+  if (/^\d+(\.\d+)?$/.test(s)) { const n = Number(s); return (n > 20000 && n < 90000) ? excelSerialToNaive(n) : 'INVALID'; }
+  let m = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})(?:[T\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m) return `${m[1]}-${pad2(m[2])}-${pad2(m[3])} ${pad2(m[4] || 0)}:${m[5] || '00'}:${m[6] || '00'}`;
+  m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[T\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m) return `${m[3]}-${pad2(m[2])}-${pad2(m[1])} ${pad2(m[4] || 0)}:${m[5] || '00'}:${m[6] || '00'}`;
+  return 'INVALID';
+}
+const dateOnly = v => (v && v !== 'INVALID') ? String(v).replace('T', ' ').slice(0, 10) : null;
+function fmtDT(v) {
+  if (!v) return '—';
+  const s = String(v).replace('T', ' ');
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})(?: (\d{2}:\d{2}))?/);
+  if (!m) return s;
+  return (m[2] && m[2] !== '00:00') ? `${m[1]} ${m[2]}` : m[1];
+}
+const naiveToInput = v => { if (!v) return ''; const s = String(v).replace(' ', 'T'); return s.length === 10 ? s + 'T00:00' : s.slice(0, 16); };
+const inputToNaive = v => v ? String(v).replace('T', ' ').padEnd(16, '0').slice(0, 16) + ':00' : '';
+
+// DB row → the new template properties
+function woCoreFromRow(r) {
+  const hasXY = r.latitude != null && r.longitude != null && r.latitude !== '' && r.longitude !== '';
+  return {
+    Coordinates: hasXY ? `${r.latitude}, ${r.longitude}` : '',
+    StatusDT: r.status_date_time || r.status_update_date || '',
+    TargetStartDT: r.target_start_time || r.target_start_date || '',
+    DispatchedDate: r.dispatched_date || '',
+    TargetFinishDT: r.target_finish_time || r.target_finish_date || '',
+    ROTDP: r.ro_tdp_ncp || '',
+    CompDate: r.comp_date || '',
+    EmailSubject: r.email_subject || r.description || '',
+    IssueCategory: (r.issue_category || '').trim(),
+    ClosureRequired: r.closure_required || '',
+    ClosureBy: r.closure_responsible || '',
+    TeamsVehicles: r.teams_vehicles || '',
+    Remarks: r.remarks || ''
+  };
+}
+// keep the legacy fields (used by the dashboard) in sync with the new ones
+function syncDerivedDates(r) {
+  if (r.TargetStartDT) r.TargetStart = dateOnly(r.TargetStartDT);
+  if (r.TargetFinishDT) r.TargetFinish = dateOnly(r.TargetFinishDT);
+  if (r.StatusDT) r.StatusUpdateDate = dateOnly(r.StatusDT);
+  if (r.ReportedBy) r.PWA_ENG = r.ReportedBy;
+  if (r.EmailSubject) r.Description = r.EmailSubject;
+  r.Coordinates = (r.Lat && r.Lng) ? `${r.Lat}, ${r.Lng}` : '';
+  return r;
+}
+
+/* ── column chooser ── */
+let woVisibleCols = null;
+let woHeaderSig = '';
+function getWoVisibleCols() {
+  if (!woVisibleCols) {
+    try {
+      const s = JSON.parse(localStorage.getItem('qbc_wo_cols') || 'null');
+      if (Array.isArray(s)) woVisibleCols = new Set(s.filter(k => WO_COLS.some(c => c.k === k)));
+    } catch (e) {}
+    if (!woVisibleCols || !woVisibleCols.size) woVisibleCols = new Set(WO_COLS.filter(c => c.def).map(c => c.k));
+    woVisibleCols.add('WorkOrder');
+  }
+  return woVisibleCols;
+}
+const activeWoCols = () => WO_COLS.filter(c => getWoVisibleCols().has(c.k));
+
+function renderWoColMenu() {
+  const menu = document.getElementById('wo-col-menu');
+  if (!menu) return;
+  const vis = getWoVisibleCols();
+  menu.innerHTML = `<div style="font-size:11px;color:var(--muted);padding:2px 8px 6px;">Choose the columns to show</div>` +
+    WO_COLS.map(c => `<label><input type="checkbox" ${vis.has(c.k) ? 'checked' : ''} ${c.k === 'WorkOrder' ? 'disabled' : ''} onchange="toggleWoCol('${c.k}', this.checked)"> ${escapeHtml(c.label)}</label>`).join('') +
+    `<div style="display:flex;gap:6px;padding:8px 8px 2px;"><button class="btn btn-ghost btn-sm" style="flex:1" onclick="resetWoCols()">Default</button><button class="btn btn-ghost btn-sm" style="flex:1" onclick="showAllWoCols()">All columns</button></div>`;
+}
+function toggleWoColMenu(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('wo-col-menu');
+  renderWoColMenu();
+  menu.classList.toggle('show');
+}
+function saveWoCols() {
+  try { localStorage.setItem('qbc_wo_cols', JSON.stringify([...getWoVisibleCols()])); } catch (e) {}
+  renderTable();
+  renderWoColMenu();
+}
+function toggleWoCol(k, on) { const v = getWoVisibleCols(); if (on) v.add(k); else v.delete(k); saveWoCols(); }
+function resetWoCols() { woVisibleCols = new Set(WO_COLS.filter(c => c.def).map(c => c.k)); saveWoCols(); }
+function showAllWoCols() { woVisibleCols = new Set(WO_COLS.map(c => c.k)); saveWoCols(); }
+document.addEventListener('click', e => {
+  const menu = document.getElementById('wo-col-menu');
+  if (menu && !e.target.closest('.wo-col-wrap')) menu.classList.remove('show');
+});
+
+function renderWoHeader() {
+  const table = document.getElementById('woTable');
+  const cols = activeWoCols();
+  table.style.minWidth = cols.reduce((s, c) => s + c.w, 0) + 'px';
+  table.querySelector('thead').innerHTML = '<tr>' + cols.map(c =>
+    `<th data-col="${c.k}" ${c.nofilter ? 'data-nofilter' : ''} ${c.nodrop ? 'data-nodrop' : ''} style="width:${c.w}px" title="${escapeHtml(c.label)}">${escapeHtml(c.label)}</th>`).join('') + '</tr>';
+  buildColumnFilters('woTable', allData);
+}
+
+function woCellHTML(c, r, ctx) {
+  const txt = v => { const s = String(v ?? '').trim(); return s ? `<span title="${escapeHtml(s)}">${escapeHtml(s)}</span>` : '<span class="cell-empty">—</span>'; };
+  switch (c.k) {
+    case 'WorkOrder':
+      return `<div style="display:flex; align-items:center; gap:6px;">
+        <span class="wo-num">${escapeHtml(r.WorkOrder)}</span>
+        ${(r.Lat && r.Lng) ? `<button class="wo-pin" title="Show on map" onclick="event.stopPropagation(); showOnMap(${r.Lat}, ${r.Lng}, '${escapeHtml(r.WorkOrder)}')"><i class="fas fa-map-marker-alt"></i></button>` : ''}
+        ${ctx.active > 0 ? `<span class="ctx-badge" title="${ctx.active} active reminders" onclick="event.stopPropagation(); showPage('followup');">📌 ${ctx.active}</span>` : ''}
+      </div>`;
+    case 'Photo': {
+      const photo = photos[r.WorkOrder];
+      return photo
+        ? `<img class="wo-thumb" src="${escapeHtml(photo)}" loading="lazy" onclick="event.stopPropagation(); viewPhoto('${escapeHtml(r.WorkOrder)}')">`
+        : `<button class="btn btn-ghost btn-xs" title="Attach photo" onclick="event.stopPropagation(); uploadPhotoFor('${escapeHtml(r.WorkOrder)}')"><i class="fas fa-camera"></i></button>
+           <input type="file" id="file_${escapeHtml(r.WorkOrder)}" style="display:none" accept="image/*" onchange="handlePhotoUpload(event, '${escapeHtml(r.WorkOrder)}')">`;
+    }
+    case 'Status': return `<span class="status-badge badge-${escapeHtml(r.Status || 'COMP')}">${escapeHtml(r.Status || '–')}</span>`;
+    case 'StatusDT': case 'TargetStartDT': case 'DispatchedDate': case 'TargetFinishDT': case 'CompDate':
+      return `<span>${fmtDT(r[c.k])}</span>`;
+    case 'InstallationDate': case 'ReportedDate': return `<span>${r[c.k] ? fmtDT(r[c.k]) : '—'}</span>`;
+    case 'ROTDP': {
+      const v = r.ROTDP;
+      return v ? `<span class="chip ${v === 'Received' ? 'chip-ok' : 'chip-warn'}">${escapeHtml(v)}</span>` : '<span class="cell-empty">—</span>';
+    }
+    case 'ClosureRequired': return txt(r.ClosureRequired);
+    default: return txt(r[c.k]);
+  }
+}
+
+function renderTable() {
+  const tbody = document.getElementById('woBody');
+  const cols = activeWoCols();
+  const sig = cols.map(c => c.k).join();
+  if (sig !== woHeaderSig) { woHeaderSig = sig; renderWoHeader(); }
+
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const slice = filteredData.slice(start, start + PAGE_SIZE);
+  if (slice.length === 0) {
+    tbody.innerHTML = `<tr class="loading-row"><td colspan="${cols.length}">No records found</td></tr>`;
+    renderPagination(); return;
+  }
+  const remsByWO = new Map();
+  reminders.forEach(rem => {
+    if (['completed', 'cancelled'].includes(rem.status)) return;
+    const k = String(rem.work_order_number);
+    remsByWO.set(k, (remsByWO.get(k) || 0) + 1);
+  });
+  tbody.innerHTML = slice.map(r => {
+    const ctx = { active: remsByWO.get(String(r.WorkOrder)) || 0 };
+    const wo = escapeHtml(r.WorkOrder);
+    return `<tr class="${selectedWorkOrder === r.WorkOrder ? 'selected' : ''}" data-wo="${wo}"
+      onclick="selectWorkOrderRow('${wo}')" ondblclick="openDetail('${wo}')"
+      oncontextmenu="showContextMenu(event, 'row-wo', '${wo}')">${cols.map(c => `<td data-k="${c.k}">${woCellHTML(c, r, ctx)}</td>`).join('')}</tr>`;
+  }).join('');
+  renderPagination();
+}
+
+/* ── template download (xlsx) ── */
+function downloadCSVTemplate() {
+  if (typeof XLSX === 'undefined') { showToast('Excel library is still loading – try again in a moment', 'error'); return; }
+  const wb = XLSX.utils.book_new();
+  const example = [
+    27700001, '', '25.093410, 51.520555', 'INPRG', new Date(2026, 7, 6, 12, 15, 10), new Date(2026, 7, 6, 12, 15, 10), new Date(2026, 7, 6, 13, 34, 0),
+    new Date(2026, 7, 10, 12, 15, 10), 'Received', 'Not Yet', 'Not Yet', new Date(2026, 7, 6), 'Eng. Ahmed',
+    'CM 27700001 - Example subject (delete this row)', ISSUE_CATEGORIES[3], 'No', 'QBC', TEAM_OPTIONS[0], 'Example remark'
+  ];
+  const ws = XLSX.utils.aoa_to_sheet([WO_TEMPLATE_HEADERS, example], { cellDates: true });
+  const dtCols = [4, 5, 6, 7];
+  dtCols.forEach(ci => { const a = XLSX.utils.encode_cell({ r: 1, c: ci }); if (ws[a]) ws[a].z = 'yyyy-mm-dd hh:mm:ss'; });
+  const a11 = XLSX.utils.encode_cell({ r: 1, c: 11 }); if (ws[a11]) ws[a11].z = 'yyyy-mm-dd';
+  ws['!cols'] = [12, 12, 28, 12, 20, 20, 20, 20, 22, 20, 16, 14, 16, 60, 48, 14, 24, 52, 60].map(w => ({ wch: w }));
+  ws['!freeze'] = { xSplit: 1, ySplit: 1 };
+  XLSX.utils.book_append_sheet(wb, ws, 'Project Issues Register');
+
+  const rows = Math.max(ISSUE_CATEGORIES.length, TEAM_OPTIONS.length, ENGINEER_OPTIONS.length);
+  const setup = [['Issue Category', 'Reported by', 'Teams and Veihcles (If Provided By QBC)', 'Status', 'RO & TDP & NCP', 'Closure Required? / Responsible']];
+  const extra = [['COMP', 'Received', 'Yes / No'], ['INPRG', 'Not Received', 'Egis / QBC'], ['DISPATCH'], ['WPERM']];
+  for (let i = 0; i < rows; i++) setup.push([ISSUE_CATEGORIES[i] || '', ENGINEER_OPTIONS[i] || '', TEAM_OPTIONS[i] || '', ...(extra[i] || ['', '', ''])]);
+  const ws2 = XLSX.utils.aoa_to_sheet(setup);
+  ws2['!cols'] = [56, 16, 56, 12, 18, 30].map(w => ({ wch: w }));
+  XLSX.utils.book_append_sheet(wb, ws2, 'Setup');
+
+  const notes = [
+    ['How to fill the template'],
+    ['1. Keep the header row of "Project Issues Register" unchanged. Delete the example row before uploading.'],
+    ['2. CM # is the unique key – an existing CM # is updated, a new one is added.'],
+    ['3. Coordinates: "latitude, longitude" in one cell, e.g. 25.093410, 51.520555.'],
+    ['4. Dates: yyyy-mm-dd hh:mm:ss (Excel date/time cells are fine). Use "Not Yet" for a pending Comp Date / Installation Date.'],
+    ['5. Photo: insert the picture into the Photo cell (Insert > Pictures > Place in Cell). One picture per CM #.'],
+    ['6. Status: COMP, INPRG, DISPATCH, WPERM (RTNENG / APPR are also accepted).'],
+    ['7. Lists for the other columns are on the "Setup" sheet.']
+  ];
+  const ws3 = XLSX.utils.aoa_to_sheet(notes);
+  ws3['!cols'] = [{ wch: 120 }];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Instructions');
+  XLSX.writeFile(wb, 'qbc_work_orders_template.xlsx', { cellDates: true });
+}
+
+/* ── export (same layout as the template, so it can be re-uploaded) ── */
+function exportTableCSV() {
+  const data = filteredData;
+  if (data.length === 0) return showToast('No data to export', 'error');
+  const esc = v => `"${(v == null ? '' : String(v)).replace(/"/g, '""')}"`;
+  const full = v => { if (!v) return ''; const s = String(v).replace('T', ' '); return s.length === 10 ? s : s.slice(0, 19); };
+  const headers = WO_TEMPLATE_HEADERS.map(h => h.replace('\n', ' '));
+  const rows = data.map(r => [
+    r.WorkOrder, photos[r.WorkOrder] || '', r.Coordinates, r.Status, full(r.StatusDT), full(r.TargetStartDT), full(r.DispatchedDate), full(r.TargetFinishDT),
+    r.ROTDP, full(r.CompDate), full(r.InstallationDate), full(r.ReportedDate), r.ReportedBy, r.EmailSubject,
+    r.IssueCategory, r.ClosureRequired, r.ClosureBy, r.TeamsVehicles, r.Remarks
+  ].map(esc).join(','));
+  const csvContent = '\uFEFF' + headers.map(esc).join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url; link.download = 'work_orders_export.csv';
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ── pictures inside the workbook ── */
+/* Extract pictures embedded in worksheet cells (Excel "Place in cell" = rich values) and floating pictures */
+async function extractXlsxImages(arrayBuffer, photoColLetter) {
+  const out = new Map();   // sheet row number (1-based) -> { bytes:Uint8Array, mime:string }
+  if (typeof JSZip === 'undefined') return out;
+  const zip = await JSZip.loadAsync(arrayBuffer);
+  const dp = new DOMParser();
+  const readXml = async path => { const f = zip.file(path); return f ? dp.parseFromString(await f.async('string'), 'application/xml') : null; };
+  const norm = (base, target) => {                       // resolve a relationship target to a zip path
+    if (target.startsWith('/')) return target.slice(1);
+    const parts = base.split('/'); parts.pop();
+    target.split('/').forEach(seg => { if (seg === '..') parts.pop(); else if (seg !== '.') parts.push(seg); });
+    return parts.join('/');
+  };
+  const mimeOf = p => /\.jpe?g$/i.test(p) ? 'image/jpeg' : /\.gif$/i.test(p) ? 'image/gif' : /\.webp$/i.test(p) ? 'image/webp' : 'image/png';
+  const addImage = async (row, mediaPath) => {
+    if (out.has(row)) return;
+    const f = zip.file(mediaPath);
+    if (f) out.set(row, { bytes: await f.async('uint8array'), mime: mimeOf(mediaPath) });
+  };
+
+  // first worksheet path
+  const wb = await readXml('xl/workbook.xml');
+  const wbRels = await readXml('xl/_rels/workbook.xml.rels');
+  if (!wb || !wbRels) return out;
+  const firstSheet = wb.getElementsByTagName('sheet')[0];
+  const rid = firstSheet && (firstSheet.getAttribute('r:id') || firstSheet.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id'));
+  let sheetPath = 'xl/worksheets/sheet1.xml';
+  for (const rel of wbRels.getElementsByTagName('Relationship')) {
+    if (rel.getAttribute('Id') === rid) sheetPath = norm('xl/workbook.xml', rel.getAttribute('Target'));
+  }
+  const sheetFile = zip.file(sheetPath);
+  if (!sheetFile) return out;
+  const sheetXml = await sheetFile.async('string');
+
+  // ── A) pictures placed IN cells (rich values) ──
+  const cellVm = [];
+  const re = /<c r="([A-Z]+)(\d+)"[^>]*?\bvm="(\d+)"/g;
+  let m;
+  while ((m = re.exec(sheetXml))) {
+    if (!photoColLetter || m[1] === photoColLetter) cellVm.push({ row: +m[2], vm: +m[3] });
+  }
+  if (cellVm.length) {
+    const meta = await readXml('xl/metadata.xml');
+    const rv = await readXml('xl/richData/rdrichvalue.xml');
+    const relList = await readXml('xl/richData/richValueRel.xml');
+    const relRels = await readXml('xl/richData/_rels/richValueRel.xml.rels');
+    if (meta && rv && relList && relRels) {
+      const relTarget = {};
+      for (const r of relRels.getElementsByTagName('Relationship')) relTarget[r.getAttribute('Id')] = norm('xl/richData/richValueRel.xml', r.getAttribute('Target'));
+      const relIds = [...relList.getElementsByTagName('rel')].map(e => e.getAttribute('r:id') || e.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id'));
+      const future = [...meta.getElementsByTagName('futureMetadata')].find(f => f.getAttribute('name') === 'XLRICHVALUE');
+      const futureIdx = future ? [...future.getElementsByTagName('bk')].map(bk => { const e = bk.getElementsByTagName('xlrd:rvb')[0] || bk.getElementsByTagName('rvb')[0]; return e ? +e.getAttribute('i') : -1; }) : [];
+      const valueMeta = meta.getElementsByTagName('valueMetadata')[0];
+      const vmList = valueMeta ? [...valueMeta.getElementsByTagName('bk')].map(bk => { const rc = bk.getElementsByTagName('rc')[0]; return rc ? +rc.getAttribute('v') : -1; }) : [];
+      const rvs = [...rv.getElementsByTagName('rv')];
+      for (const c of cellVm) {
+        const fIdx = vmList[c.vm - 1];                 // vm is 1-based
+        const rvIdx = futureIdx[fIdx];
+        const rvEl = rvs[rvIdx];
+        if (!rvEl) continue;
+        const relIndex = +rvEl.getElementsByTagName('v')[0].textContent;   // _rvRel:LocalImageIdentifier
+        const media = relTarget[relIds[relIndex]];
+        if (media) await addImage(c.row, media);
+      }
+    }
+  }
+
+  // ── B) floating pictures (drawing anchored to a cell) ──
+  const sheetRelsPath = sheetPath.replace('worksheets/', 'worksheets/_rels/') + '.rels';
+  const sRels = await readXml(sheetRelsPath);
+  if (sRels) {
+    for (const rel of sRels.getElementsByTagName('Relationship')) {
+      if (!/\/drawing$/.test(rel.getAttribute('Type'))) continue;
+      const dPath = norm(sheetPath, rel.getAttribute('Target'));
+      const dXml = await readXml(dPath);
+      const dRels = await readXml(dPath.replace('drawings/', 'drawings/_rels/') + '.rels');
+      if (!dXml || !dRels) continue;
+      const dTarget = {};
+      for (const r of dRels.getElementsByTagName('Relationship')) dTarget[r.getAttribute('Id')] = norm(dPath, r.getAttribute('Target'));
+      for (const anchor of [...dXml.getElementsByTagName('xdr:twoCellAnchor'), ...dXml.getElementsByTagName('xdr:oneCellAnchor')]) {
+        const blip = anchor.getElementsByTagName('a:blip')[0];
+        const rowEl = anchor.getElementsByTagName('xdr:row')[0];
+        if (!blip || !rowEl) continue;
+        const embed = blip.getAttribute('r:embed');
+        if (embed && dTarget[embed]) await addImage(+rowEl.textContent + 1, dTarget[embed]);
+      }
+    }
+  }
+  return out;
+}
+
+
+async function compressImageToJpeg(bytes, mime, maxDim = 1280, quality = 0.82) {
+  const bmp = await createImageBitmap(new Blob([bytes], { type: mime }));
+  const scale = Math.min(1, maxDim / Math.max(bmp.width, bmp.height));
+  const w = Math.max(1, Math.round(bmp.width * scale)), h = Math.max(1, Math.round(bmp.height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(bmp, 0, 0, w, h);
+  if (bmp.close) bmp.close();
+  return await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+}
+
+/* ── import ── */
+const HEADER_RULES = [
+  [/^(cm|cmno|workorder|wo)$/, 'WorkOrder', 'text'],
+  [/^photo/, 'Photo', 'skip'],
+  [/^coordinates?/, 'Coordinates', 'coord'],
+  [/^status$/, 'Status', 'status'],
+  [/^statusdate/, 'StatusDT', 'dt'],
+  [/^targetstart/, 'TargetStartDT', 'dt'],
+  [/^dispatched/, 'DispatchedDate', 'dt'],
+  [/^targetfinish/, 'TargetFinishDT', 'dt'],
+  [/^rotdp/, 'ROTDP', 'text'],
+  [/^(compdate|completiondate)/, 'CompDate', 'dt'],
+  [/^installationdate/, 'InstallationDate', 'dt'],
+  [/^(datereported|reporteddate)/, 'ReportedDate', 'dt'],
+  [/^reportedby/, 'ReportedBy', 'text'],
+  [/^emailsubject/, 'EmailSubject', 'text'],
+  [/^issuecategory/, 'IssueCategory', 'text'],
+  [/^closurerequired/, 'ClosureRequired', 'yesno'],
+  [/^(theresponsible|responsible)/, 'ClosureBy', 'text'],
+  [/^teamsand/, 'TeamsVehicles', 'text'],
+  [/^remarks?/, 'Remarks', 'text']
+];
+const IMPORT_NULLS = /^(-|—|•|n\/a|na|null|not found)$/i;
+
+async function processExcelUpload() {
+  if (!pendingExcelFile) { showToast('No file selected', 'error'); return; }
+  if (!isAdmin) { showToast('Admin mode required', 'error'); openModal('adminModal'); return; }
+  if (typeof XLSX === 'undefined') { showToast('Excel library is still loading – try again in a moment', 'error'); return; }
+
+  const uploadBtn = document.getElementById('csv-upload-btn');
+  const templateBtn = document.getElementById('csv-template-btn');
+  const progressContainer = document.getElementById('upload-progress-container');
+  const progressFill = document.getElementById('upload-progress-fill');
+  const progressPct = document.getElementById('upload-pct');
+  const statusLabel = document.getElementById('upload-status-label');
+  const statusMsg = document.getElementById('upload-status-msg');
+  const setProgress = (pct, label) => {
+    progressFill.style.width = pct + '%'; progressPct.textContent = pct + '%';
+    if (label) statusLabel.textContent = label;
+  };
+  const finish = () => { uploadBtn.disabled = false; templateBtn.disabled = false; };
+
+  uploadBtn.disabled = true; templateBtn.disabled = true;
+  progressContainer.style.display = 'flex';
+  setProgress(0, 'Reading file...');
+  statusMsg.textContent = ''; statusMsg.className = 'upload-status-msg';
+  uploadErrors = [];
+  document.getElementById('upload-error-actions').style.display = 'none';
+
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const buf = e.target.result;
+      const isCsv = /\.csv$/i.test(pendingExcelFile.name);
+      const workbook = XLSX.read(new Uint8Array(buf), { type: 'array' });
+      const sheetName = workbook.SheetNames.find(n => /project issues register/i.test(n)) || workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: true });
+      const range = sheet['!ref'] ? XLSX.utils.decode_range(sheet['!ref']) : { s: { r: 0, c: 0 } };
+      const firstRow = range.s.r + 1;                         // sheet row number of rows[0]
+
+      // header row = first row (of the first 10) that contains "CM #"
+      const normH = h => String(h ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      let headerIdx = rows.slice(0, 10).findIndex(r => r.some(h => /^(cm|cmno|workorder|wo)$/.test(normH(h))));
+      if (headerIdx < 0) { showToast('Column "CM #" not found – please use the new template', 'error'); finish(); return; }
+      const rawHeaders = rows[headerIdx];
+      const colMap = rawHeaders.map(h => { const n = normH(h); const rule = HEADER_RULES.find(x => x[0].test(n)); return rule ? { key: rule[1], type: rule[2] } : null; });
+      const woIdx = colMap.findIndex(c => c && c.key === 'WorkOrder');
+      const dataRows = rows.slice(headerIdx + 1);
+      const dataFirstRow = firstRow + headerIdx + 1;           // sheet row number of dataRows[0]
+
+      const upsertData = [];
+      const VALID = new Set(STATUS_OPTIONS);
+      const STATUS_MAP = { COMPLETED: 'COMP', 'IN PROGRESS': 'INPRG', APPROVED: 'APPR', DISPATCHED: 'DISPATCH' };
+      const woRowNumber = new Map();                           // WO → sheet row (for pictures)
+
+      for (let i = 0; i < dataRows.length; i++) {
+        const row = dataRows[i];
+        let woRaw = row[woIdx];
+        if (typeof woRaw === 'number') woRaw = Number.isInteger(woRaw) ? String(woRaw) : String(Math.round(woRaw));
+        const wo = String(woRaw ?? '').trim();
+        if (!wo || IMPORT_NULLS.test(wo)) continue;   // empty / formula placeholder rows
+        const r = { WorkOrder: wo };
+        const errors = [];
+
+        colMap.forEach((m, ci) => {
+          if (!m || m.key === 'WorkOrder' || m.type === 'skip') return;
+          let v = row[ci];
+          const isBlank = v === undefined || v === null || String(v).trim() === '' || (typeof v === 'string' && IMPORT_NULLS.test(v.trim()));
+          if (m.type === 'dt') {
+            const p = parseNaiveDT(v);
+            if (p === 'INVALID') errors.push(`Invalid date in ${m.key}`); else r[m.key] = p;
+          } else if (isBlank) {
+            r[m.key] = null;
+          } else if (m.type === 'coord') {
+            const mm = String(v).match(/(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)/);
+            if (mm && Math.abs(+mm[1]) <= 90 && Math.abs(+mm[2]) <= 180) { r.Lat = +mm[1]; r.Lng = +mm[2]; }
+            else { r.Lat = null; r.Lng = null; }
+          } else if (m.type === 'status') {
+            let st = String(v).trim().toUpperCase();
+            if (STATUS_MAP[st]) st = STATUS_MAP[st];
+            if (!VALID.has(st)) errors.push(`Invalid Status: ${v}`); else r.Status = st;
+          } else if (m.type === 'yesno') {
+            const s = String(v).trim().toLowerCase();
+            r[m.key] = s === 'yes' ? 'Yes' : s === 'no' ? 'No' : null;
+          } else {
+            r[m.key] = String(v).trim().replace(/\s+$/, '');
+          }
+        });
+        if (!r.Status) errors.push('Missing Status');
+
+        if (errors.length) uploadErrors.push({ headers: [...rawHeaders, 'Error Reason'], row: [...row, errors.join('; ')] });
+        else { upsertData.push(r); woRowNumber.set(wo, dataFirstRow + i); }
+
+        if (i % 500 === 0) { setProgress(Math.round((i / dataRows.length) * 5), `Validating data (${i + 1}/${dataRows.length})...`); await new Promise(res => setTimeout(res, 0)); }
+      }
+
+      if (upsertData.length === 0) {
+        statusLabel.textContent = 'Validation Failed';
+        statusMsg.textContent = uploadErrors.length ? `All ${uploadErrors.length} rows failed validation. No data imported.` : 'No valid data rows found.';
+        statusMsg.className = 'upload-status-msg error';
+        if (uploadErrors.length) document.getElementById('upload-error-actions').style.display = 'block';
+        finish(); return;
+      }
+
+      const uniqueData = Array.from(new Map(upsertData.map(x => [x.WorkOrder, x])).values());
+
+      if (supabaseClient) {
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const woData = uniqueData.map(w => {
+          const tStart = dateOnly(w.TargetStartDT), tFinish = dateOnly(w.TargetFinishDT), sDate = dateOnly(w.StatusDT), inst = dateOnly(w.InstallationDate);
+          let month = null;
+          if (tStart) month = monthNames[parseInt(tStart.slice(5, 7), 10) - 1];
+          return {
+            work_order: w.WorkOrder,
+            status: w.Status,
+            latitude: w.Lat ?? null, longitude: w.Lng ?? null,
+            status_date_time: w.StatusDT || null, status_update_date: sDate,
+            target_start_time: w.TargetStartDT || null, target_start_date: tStart,
+            dispatched_date: w.DispatchedDate || null,
+            target_finish_time: w.TargetFinishDT || null, target_finish_date: tFinish,
+            comp_date: w.CompDate || null,
+            ro_tdp_ncp: w.ROTDP ?? null,
+            reported_date: dateOnly(w.ReportedDate), reported_by: w.ReportedBy ?? null,
+            pwa_engineer: w.ReportedBy ?? null,                // dashboard "engineer" breakdown
+            email_subject: w.EmailSubject ?? null, description: w.EmailSubject ?? null,
+            issue_category: w.IssueCategory ?? null, closure_required: w.ClosureRequired ?? null,
+            closure_responsible: w.ClosureBy ?? null, teams_vehicles: w.TeamsVehicles ?? null, remarks: w.Remarks ?? null,
+            month,
+            completion_status: getCompletionStatusLabel({ Status: w.Status, TargetFinish: tFinish, InstallationDate: inst, StatusUpdateDate: sDate })
+          };
+        });
+        const mfgData = uniqueData.map(w => ({ work_order_number: w.WorkOrder, installation_date: dateOnly(w.InstallationDate) }));
+
+        const chunkSize = 100;
+        const totalChunks = Math.ceil(woData.length / chunkSize) + Math.ceil(mfgData.length / chunkSize);
+        let done = 0;
+        const bump = () => { done++; setProgress(5 + Math.round((done / totalChunks) * 70), 'Uploading to database...'); };
+        for (let i = 0; i < woData.length; i += chunkSize) {
+          const { error } = await supabaseClient.from('work_orders').upsert(woData.slice(i, i + chunkSize), { onConflict: 'work_order' });
+          if (error) throw error; bump();
+        }
+        for (let i = 0; i < mfgData.length; i += chunkSize) {
+          const { error } = await supabaseClient.from('manufacturing').upsert(mfgData.slice(i, i + chunkSize), { onConflict: 'work_order_number' });
+          if (error) throw error; bump();
+        }
+
+        // pictures placed in the "Photo" column
+        let photoCount = 0, photoFail = 0;
+        if (!isCsv) {
+          setProgress(76, 'Reading pictures...');
+          const photoIdx = colMap.findIndex(c => c && c.key === 'Photo');
+          const letter = photoIdx >= 0 ? XLSX.utils.encode_col(range.s.c + photoIdx) : 'B';
+          let imgs = new Map();
+          try { imgs = await extractXlsxImages(buf, letter); } catch (err) { console.warn('Picture extraction failed:', err); }
+          const rowToWO = new Map([...woRowNumber.entries()].map(([w, n]) => [n, w]));
+          const jobs = [...imgs.entries()].filter(([n]) => rowToWO.has(n)).map(([n, img]) => ({ wo: rowToWO.get(n), img }));
+          let idx = 0, finished = 0;
+          const worker = async () => {
+            while (idx < jobs.length) {
+              const job = jobs[idx++];
+              try {
+                const blob = await compressImageToJpeg(job.img.bytes, job.img.mime);
+                const path = `photos/${job.wo}_${Date.now()}.jpg`;
+                const { error: upErr } = await supabaseClient.storage.from('qbc-storage').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+                if (upErr) throw upErr;
+                const { data: { publicUrl } } = supabaseClient.storage.from('qbc-storage').getPublicUrl(path);
+                const { error: dbErr } = await supabaseClient.from('photos').upsert({ work_order: job.wo, url: publicUrl }, { onConflict: 'work_order' });
+                if (dbErr) throw dbErr;
+                photoCount++;
+              } catch (err) { photoFail++; console.warn('Photo upload failed for', job.wo, err); }
+              finished++;
+              setProgress(76 + Math.round((finished / jobs.length) * 22), `Uploading pictures (${finished}/${jobs.length})...`);
+            }
+          };
+          await Promise.all([worker(), worker(), worker()]);
+        }
+
+        statusLabel.textContent = 'Complete';
+        statusMsg.textContent = `Upload finished. ${uniqueData.length} rows imported` + (photoCount ? `, ${photoCount} pictures saved` : '') + (photoFail ? `, ${photoFail} pictures failed` : '') + '.';
+      } else {
+        localStorage.setItem('qbc_data', JSON.stringify(uniqueData));
+        statusLabel.textContent = 'Complete';
+        statusMsg.textContent = `Upload finished (offline mode). ${uniqueData.length} rows.`;
+      }
+      setProgress(100);
+
+      lastCsvUpload = new Date().toISOString();
+      if (supabaseClient) {
+        try {
+          const { data: settingsData } = await supabaseClient.from('project_boundaries').select('style_settings').eq('id', 0).maybeSingle();
+          const currentSettings = (settingsData && settingsData.style_settings) ? settingsData.style_settings : {};
+          currentSettings.last_csv_upload = lastCsvUpload;
+          await supabaseClient.from('project_boundaries').upsert({ id: 0, name: 'MAP_PRESETS', style_settings: currentSettings });
+          const dashRefreshEl = document.getElementById('dash-last-refresh');
+          if (dashRefreshEl) dashRefreshEl.textContent = formatLastUpdated(lastCsvUpload);
+        } catch (err) { console.error('Failed to save last upload timestamp:', err); }
+      }
+
+      if (uploadErrors.length > 0) {
+        statusMsg.textContent += ` ${uploadErrors.length} rows skipped due to validation errors.`;
+        document.getElementById('upload-error-actions').style.display = 'block';
+      }
+      statusMsg.classList.add('success');
+      showToast(`Finished processing ${uniqueData.length + uploadErrors.length} records`);
+      logAudit('Imported Excel Data', `Imported ${uniqueData.length} records, skipped ${uploadErrors.length} rows.`);
+      addNotification(`Imported ${uniqueData.length} records from Excel`, null, 'system');
+      fetchData();
+      setTimeout(() => { progressContainer.style.display = 'none'; finish(); }, 3000);
+    } catch (err) {
+      console.error(err);
+      statusLabel.textContent = 'Error';
+      statusMsg.textContent = 'Upload failed. ' + (err.message || '');
+      statusMsg.classList.add('error');
+      showToast('Error: ' + (err.message || 'Excel processing failed'), 'error');
+      finish();
+    }
+  };
+  reader.readAsArrayBuffer(pendingExcelFile);
+}
+
+
+const MAIN_FIELDS = [
+  {k:'WorkOrder',l:'CM #'},
+  {k:'Status',l:'Status',type:'select',opts:STATUS_OPTIONS},
+  {k:'Lat',l:'Latitude'},
   {k:'Lng',l:'Longitude'},
-  {k:'ReportedBy',l:'Reported By'},
-  {k:'ReportedDate',l:'Reported Date',type:'date'},
-  {k:'PWA_ENG',l:'PWA Engineer'}, 
-  {k:'Location',l:'Location'}, 
-  {k:'TargetStart',l:'Target Start',type:'date'}, 
-  {k:'TargetFinish',l:'Target Finish',type:'date'}, 
-  {k:'StatusUpdateDate',l:'Status Update Date',type:'date',readonly:true},
-  {k:'QBCComments',l:'QBC Comments',full:true},
-  {k:'RO',l:'RO'},
-  {k:'TDP',l:'TDP'},
-  {k:'ApplicationDate',l:'Application Date',type:'date'},
-  {k:'TDPStatus',l:'TDP Status'},
-  {k:'ExpiryDate',l:'Expiry Date',type:'date'},
-  {k:'MediaAnnouncement',l:'Media Announcement'}
+  {k:'StatusDT',l:'Status Date',type:'datetime'},
+  {k:'TargetStartDT',l:'Target Start Date',type:'datetime'},
+  {k:'DispatchedDate',l:'Dispatched Date',type:'datetime'},
+  {k:'TargetFinishDT',l:'Target Finish Date',type:'datetime'},
+  {k:'ROTDP',l:'RO & TDP & NCP (If Req.)',type:'select',opts:['Received','Not Received']},
+  {k:'CompDate',l:'Comp Date',type:'datetime'},
+  {k:'InstallationDate',l:'Installation Date',type:'date'},
+  {k:'ReportedDate',l:'Date Reported',type:'date'},
+  {k:'ReportedBy',l:'Reported by',type:'select',opts:ENGINEER_OPTIONS},
+  {k:'IssueCategory',l:'Issue Category',type:'select',opts:ISSUE_CATEGORIES,full:true},
+  {k:'ClosureRequired',l:'Closure Required?',type:'select',opts:['Yes','No']},
+  {k:'ClosureBy',l:'The responsible for the closure',type:'select',opts:['Egis','QBC']},
+  {k:'TeamsVehicles',l:'Teams and Veihcles (If Provided By QBC)',type:'select',opts:TEAM_OPTIONS,full:true},
+  {k:'EmailSubject',l:'Email Subject',full:true,textarea:true},
+  {k:'Remarks',l:'Remarks',full:true,textarea:true}
 ];
 
 const FAB_FIELDS = [ 
@@ -8060,8 +8272,13 @@ async function saveEdit() {
   const r = editingWO !== null ? { ...allData.find(x => x.WorkOrder === editingWO) } : {};
   [...MAIN_FIELDS, ...FAB_FIELDS].forEach(f => {
     const el = document.getElementById('ef_'+f.k);
-    if (el) r[f.k] = el.value;
+    if (!el) return;
+    if (f.type === 'datetime') r[f.k] = inputToNaive(el.value);
+    else if (f.k === 'Lat' || f.k === 'Lng') r[f.k] = el.value === '' ? null : parseFloat(el.value);
+    else r[f.k] = el.value;
   });
+  r.WorkOrder = String(r.WorkOrder || '').trim();
+  syncDerivedDates(r);
 
   if (!r.WorkOrder) { showToast('Work Order is required','error'); return; }
 
@@ -8120,19 +8337,16 @@ function openAddModal() {
 
 function fieldHTML(f, val, extra='') {
   const id = 'ef_'+f.k;
+  const v = val == null ? '' : val;
   if (f.type === 'select') {
-    const opts = f.opts.map(o => `<option${o===val?' selected':''}>${o}</option>`).join('');
-    return `<div class="form-group" style="${extra}"><label>${f.l}</label><select id="${id}"><option value="">—</option>${opts}</select></div>`;
+    const opts = (v && !f.opts.includes(v)) ? [v, ...f.opts] : f.opts;     // keep unknown legacy values selectable
+    return `<div class="form-group" style="${extra}"><label>${f.l}</label><select id="${id}"><option value="">—</option>${opts.map(o => `<option value="${escapeHtml(o)}"${o===v?' selected':''}>${escapeHtml(o)}</option>`).join('')}</select></div>`;
   }
-  const readonlyAttr = f.readonly ? 'readonly style="background:var(--surface2); cursor:not-allowed;"' : '';
-  if (f.type === 'select') {
-    const disabledAttr = f.readonly ? 'disabled' : '';
-    const opts = f.opts.map(o => `<option${o===val?' selected':''}>${o}</option>`).join('');
-    return `<div class="form-group" style="${extra}"><label>${f.l}</label><select id="${id}" ${disabledAttr}><option value="">—</option>${opts}</select></div>`;
-  }
-  if (f.type === 'date') return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="date" id="${id}" value="${val}" ${readonlyAttr}></div>`;
-  if (f.k === 'FabDetails' || f.k === 'QBCComments') return `<div class="form-group" style="${extra}; grid-column: 1/-1;"><label>${f.l}</label><textarea id="${id}" style="height:60px;" ${readonlyAttr}>${val||''}</textarea></div>`;
-  return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="text" id="${id}" value="${val||''}" ${readonlyAttr}></div>`;
+  const ro = f.readonly ? 'readonly style="background:var(--surface2); cursor:not-allowed;"' : '';
+  if (f.type === 'datetime') return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="datetime-local" id="${id}" value="${naiveToInput(v)}" ${ro}></div>`;
+  if (f.type === 'date') return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="date" id="${id}" value="${escapeHtml(String(v).slice(0,10))}" ${ro}></div>`;
+  if (f.textarea || f.k === 'FabDetails') return `<div class="form-group" style="${extra}; grid-column: 1/-1;"><label>${f.l}</label><textarea id="${id}" style="height:60px;" ${ro}>${escapeHtml(v)}</textarea></div>`;
+  return `<div class="form-group" style="${extra}"><label>${f.l}</label><input type="text" id="${id}" value="${escapeHtml(v)}" ${ro}></div>`;
 }
 function formatCSVDate(d) {
   if (isNaN(d.getTime())) return 'INVALID';
@@ -8493,6 +8707,7 @@ function setupNotifListener() {
          if (idx !== -1) {
             allData[idx] = {
                ...allData[idx],
+               ...woCoreFromRow(d),
                Description: d.description,
                Status: d.status,
                PWA_ENG: d.pwa_engineer,
@@ -10054,5 +10269,3 @@ const refreshUI = debounce(refreshUIImmediate, 400);
 
 </body>
 </html>
-
-
