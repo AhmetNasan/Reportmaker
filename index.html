@@ -2052,6 +2052,83 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
 @media (min-width:1900px) { .detail-panes { column-count:4; } }
 @media (max-width:1150px) { .detail-panes { column-count:2; } }
 @media (max-width:760px) { .detail-panes { column-count:1; } }
+
+/* Dashboard (simple) */
+.md-h { font-size:15px; font-weight:800; margin:6px 0 10px; }
+.act-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:22px; }
+.act { text-align:left; border:1px solid var(--border); background:var(--surface); border-radius:14px; padding:16px 18px; cursor:pointer; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:2px; border-left:5px solid var(--accent); font-family:inherit; color:var(--text); }
+.act b { font-size:38px; font-weight:800; line-height:1.1; } .act span { font-size:14px; font-weight:700; } .act small { color:var(--muted); font-size:12px; }
+.act.red { border-left-color:var(--red); } .act.red b { color:var(--red); } .act.amber { border-left-color:var(--amber); } .act.amber b { color:var(--amber); }
+.act.purple { border-left-color:var(--purple); } .act.purple b { color:var(--purple); } .act.blue { border-left-color:var(--blue); } .act.blue b { color:var(--blue); }
+.act:hover { border-color:var(--accent); }
+.md-monthbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin:6px 0 10px; }
+.md-progress-head { display:flex; justify-content:space-between; font-size:15px; margin-bottom:8px; } .md-progress-head span { font-weight:800; color:var(--accent); }
+.md-progress { height:12px; background:var(--surface2); border-radius:8px; overflow:hidden; margin-bottom:16px; } .md-progress i { display:block; height:100%; width:0; background:var(--green); border-radius:8px; transition:width .4s; }
+.md-tiles { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+.tile { background:var(--surface2); border-radius:10px; padding:12px; cursor:pointer; text-align:center; } .tile:hover { outline:2px solid var(--accent); }
+.tile b { display:block; font-size:26px; font-weight:800; } .tile span { font-size:12px; color:var(--muted); font-weight:600; }
+.tile.green b { color:var(--green); } .tile.amber b { color:var(--amber); } .tile.red b { color:var(--red); } .tile.blue b { color:var(--blue); }
+.md-att { grid-template-columns:auto 1fr auto auto; } .md-att-actions { display:flex; gap:4px; } .md-att-actions button { border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px; width:32px; height:32px; cursor:pointer; }
+.md-att-actions button:hover { background:var(--color-accent-teal-bg); color:var(--accent); }
+details.md-card summary { list-style:none; } details.md-card summary::-webkit-details-marker { display:none; }
+
+/* Work Orders: quick views, selection, actions */
+.wo-chips { display:flex; gap:8px; overflow-x:auto; padding:2px 0 12px; scrollbar-width:thin; }
+.wo-chip { flex:0 0 auto; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:7px 14px; font:600 13px inherit; font-family:inherit; cursor:pointer; white-space:nowrap; }
+.wo-chip b { margin-left:4px; color:var(--muted); } .wo-chip.active { background:var(--accent); color:var(--color-text-inverse); border-color:var(--accent); } .wo-chip.active b { color:inherit; opacity:.85; }
+.wo-chip.red:not(.active) b { color:var(--red); } .wo-chip.amber:not(.active) b { color:var(--amber); }
+.wo-selbar { position:sticky; top:calc(var(--header-h) + 6px); z-index:30; display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--accent); border-radius:12px; padding:8px 12px; margin-bottom:10px; box-shadow:var(--shadow-modal, 0 8px 24px rgba(0,0,0,.2)); }
+.wo-sel { width:18px; height:18px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
+.row-actions { display:flex; gap:4px; } .row-actions button { border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px; width:28px; height:28px; cursor:pointer; font-size:12px; padding:0; }
+.row-actions button:hover { background:var(--color-accent-teal-bg); color:var(--accent); border-color:var(--accent); }
+.row-actions .fa-whatsapp { color:#16a34a; }
+.wo-cards { display:none; }
+.wo-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; margin-bottom:12px; box-shadow:var(--shadow); } .wo-card.sel { border-color:var(--accent); background:var(--color-accent-teal-bg); }
+.wc-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px; } .wc-cm { font-size:18px; color:var(--accent); }
+.wc-due { font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; } .wc-due.red { background:rgba(220,38,38,.12); color:var(--red); } .wc-due.amber { background:rgba(245,158,11,.15); color:var(--amber); }
+.wc-body { display:flex; gap:10px; } .wc-photo { width:84px; height:84px; object-fit:cover; border-radius:10px; border:1px solid var(--border); flex-shrink:0; }
+.wc-info { min-width:0; flex:1; display:flex; flex-direction:column; gap:4px; font-size:13px; } .wc-line i { width:16px; color:var(--muted); } .wc-remarks { white-space:pre-wrap; word-break:break-word; color:var(--text); background:var(--surface2); border-radius:8px; padding:6px 8px; font-size:12.5px; }
+.wc-actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(58px,1fr)); gap:6px; margin-top:10px; }
+.wc-actions button { display:flex; flex-direction:column; align-items:center; gap:2px; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 2px; font:600 10.5px inherit; font-family:inherit; cursor:pointer; min-height:48px; } .wc-actions i { font-size:16px; } .wc-actions .fa-whatsapp { color:#16a34a; }
+
+/* Plan & dispatch modal */
+.plan-modal { max-width:640px; width:95%; max-height:92vh; overflow:auto; }
+.plan-fields { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0; } .plan-fields label { font-size:12px; font-weight:600; color:var(--muted); display:flex; flex-direction:column; gap:4px; }
+.plan-list { max-height:240px; overflow:auto; border:1px solid var(--border); border-radius:10px; margin-bottom:12px; }
+.plan-row { display:flex; gap:10px; align-items:center; padding:8px 10px; border-bottom:1px solid var(--border); } .plan-row:last-child { border-bottom:none; }
+.plan-n { width:22px; height:22px; border-radius:50%; background:var(--surface2); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; } .plan-main { flex:1; min-width:0; font-size:13px; } .plan-sub { font-size:11.5px; color:var(--muted); }
+.plan-actions { display:flex; flex-direction:column; gap:10px; } .plan-group { display:flex; gap:6px; flex-wrap:wrap; align-items:center; } .plan-group > span { font-size:11.5px; font-weight:700; color:var(--muted); min-width:84px; }
+.detail-share { padding:0 10px; }
+
+/* ═════ PHONE LAYOUT ═════ */
+@media (max-width: 768px) {
+  html, body { overflow-x:hidden; }
+  input, select, textarea, .filter-input, .reminder-input, .reminder-select, .reminder-textarea { font-size:16px !important; }   /* stops iOS zoom-on-focus */
+  .btn { min-height:40px; } .btn-sm { min-height:38px; } .btn-xs { min-height:32px; }
+  nav { padding-right:6px; } .nav-brand { padding:0 8px; font-size:13px; border-right:none; } .nav-brand span { display:none; }
+  .nav-right { gap:4px; } #conn-status { display:none !important; }
+  .wrapper { padding:12px 10px 90px; }
+  .md-head h1 { font-size:20px; } .md-head p { display:none; }
+  .act-grid { grid-template-columns:1fr 1fr; gap:10px; } .act { padding:12px 14px; } .act b { font-size:30px; } .act span { font-size:13px; }
+  .md-tiles { grid-template-columns:repeat(3,minmax(0,1fr)); } .md-grid.two { grid-template-columns:minmax(0,1fr); }
+  .md-month-nav { width:100%; } .md-month-nav select { flex:1; min-width:0; }
+  .md-chart, .md-chart.tall { height:230px; }
+  .md-att { grid-template-columns:auto 1fr auto; } .md-att-actions { grid-column:1/-1; justify-content:flex-end; }
+  #page-workorders .table-wrap, #page-workorders #pagination + * { }
+  #page-workorders .table-wrap { display:none; }
+  .wo-cards { display:block; }
+  #page-workorders .wrapper > div:first-child { margin-bottom:10px; }
+  .wo-selbar { position:fixed; left:8px; right:8px; bottom:8px; top:auto; z-index:900; }
+  .detail-panes { column-count:1; } .detail-header { padding:0 8px; gap:4px; flex-wrap:wrap; height:auto; min-height:var(--header-h); } .detail-share { display:inline-flex; }
+  .detail-top-info { flex-wrap:wrap; gap:10px; } .detail-body { padding:8px; }
+  .modal { width:96%; max-height:94vh; overflow:auto; padding:16px; } .plan-fields { grid-template-columns:1fr; }
+  .reminder-modal { width:96%; max-height:94vh; }
+  .pdf-modal { width:100%; padding:8px; } #pdfPreview { overflow:auto; max-width:100%; } #fabDoc { transform-origin:top left; }
+  .map-filterbar { bottom:52px; }
+  .fuc-board { grid-template-columns:1fr; }
+}
+@media (max-width: 480px) { .act-grid { grid-template-columns:1fr 1fr; } .md-tiles { grid-template-columns:1fr 1fr; } .tile b { font-size:22px; } }
+@media (min-width: 769px) { .wo-cards { display:none !important; } }
 </style>
 </head>
 <body data-theme="light">
@@ -2133,69 +2210,54 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
 <div class="page" id="page-dashboard" tabindex="-1">
   <div class="wrapper">
     <header class="md-head">
-      <div>
-        <h1>Operations Dashboard</h1>
-        <p>Month view &middot; a work order belongs to the month of its Target Start Date</p>
-      </div>
+      <div><h1>Dashboard</h1><p>What needs your attention now, and how the month is going</p></div>
       <div class="md-controls">
-        <div class="md-month-nav">
-          <button onclick="dashShiftMonth(-1)" title="Previous month" aria-label="Previous month"><i class="fas fa-chevron-left"></i></button>
-          <select id="dashMonthSelect" onchange="dashSetMonth(this.value)" aria-label="Select month"></select>
-          <button onclick="dashShiftMonth(1)" title="Next month" aria-label="Next month"><i class="fas fa-chevron-right"></i></button>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="dashSetMonth('all')">All months</button>
-        <button class="btn btn-ghost btn-sm" onclick="exportDashboardPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportDashboardPDF()"><i class="fas fa-file-pdf"></i> PDF report</button>
         <span class="md-updated" title="Last data upload"><i class="fas fa-sync-alt"></i> <span id="dash-last-refresh">--:--</span></span>
       </div>
     </header>
 
-    <section class="md-kpis">
-      <div class="md-kpi total" onclick="drillDown('total')"><label>Total CMs <small id="kpiTotalLabel"></small></label><div class="v" id="kpiTotal">0</div><div id="mdDeltaTotal"></div></div>
-      <div class="md-kpi green" onclick="drillDown('on-time')"><label>Completed on time</label><div class="v" id="kpiGreen">0</div><div class="p" id="kpiGreenPct">0%</div><div id="mdDeltaGreen"></div></div>
-      <div class="md-kpi amber" onclick="drillDown('breached-comp')"><label>Completed late</label><div class="v" id="kpiAmber">0</div><div class="p" id="kpiAmberPct">0%</div><div id="mdDeltaAmber"></div></div>
-      <div class="md-kpi red" onclick="drillDown('breached-pending')"><label>Overdue (not completed)</label><div class="v" id="kpiRed">0</div><div class="p" id="kpiRedPct">0%</div><div id="mdDeltaRed"></div></div>
-      <div class="md-kpi blue" onclick="drillDown('pending')"><label>Pending within target</label><div class="v" id="kpiBlue">0</div><div class="p" id="kpiBluePct">0%</div><div id="mdDeltaBlue"></div></div>
+    <h2 class="md-h">Needs action now</h2>
+    <section class="act-grid">
+      <button class="act red" onclick="goWo('overdue')"><b id="actOverdue">0</b><span>Overdue</span><small>past target finish</small></button>
+      <button class="act amber" onclick="goWo('due48')"><b id="actDue">0</b><span>Due in 48 hours</span><small>finish soon</small></button>
+      <button class="act purple" onclick="goWo('wperm')"><b id="actPermit">0</b><span>Waiting permits</span><small>cannot start yet</small></button>
+      <button class="act blue" onclick="goWo('inprg')"><b id="actActive">0</b><span>Open &amp; on track</span><small>within target</small></button>
     </section>
 
-    <section class="md-strip">
-      <div><label>Completion rate</label><b id="mdRate">—</b><span id="mdRateDelta"></span></div>
-      <div><label>On-time rate (of completed)</label><b id="mdOnTime">—</b><span id="mdOnTimeDelta"></span></div>
-      <div><label>Avg. time to complete</label><b id="mdAvg">—</b></div>
-      <div><label>Dispatched</label><b id="mdDispatched">0</b></div>
-      <div class="clickable" onclick="openWaitingPermitsModal()"><label>Waiting permits</label><b id="waitingPermitsCount">0</b></div>
+    <div class="md-monthbar">
+      <h2 class="md-h" style="margin:0">Month overview: <span id="mdMonthTitle"></span></h2>
+      <div class="md-month-nav">
+        <button onclick="dashShiftMonth(-1)" title="Previous month" aria-label="Previous month"><i class="fas fa-chevron-left"></i></button>
+        <select id="dashMonthSelect" onchange="dashSetMonth(this.value)" aria-label="Select month"></select>
+        <button onclick="dashShiftMonth(1)" title="Next month" aria-label="Next month"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <section class="md-card">
+      <div class="md-progress-head"><b id="mdProgressText">0 of 0 completed</b><span id="mdProgressPct">0%</span></div>
+      <div class="md-progress"><i id="mdProgressBar"></i></div>
+      <div class="md-tiles">
+        <div class="tile" onclick="drillDown('total')"><b id="kpiTotal">0</b><span>Total</span></div>
+        <div class="tile green" onclick="drillDown('on-time')"><b id="kpiGreen">0</b><span>Done on time</span></div>
+        <div class="tile amber" onclick="drillDown('breached-comp')"><b id="kpiAmber">0</b><span>Done late</span></div>
+        <div class="tile blue" onclick="drillDown('pending')"><b id="kpiBlue">0</b><span>In progress</span></div>
+        <div class="tile red" onclick="drillDown('breached-pending')"><b id="kpiRed">0</b><span>Overdue</span></div>
+      </div>
+      <span style="display:none"><i id="kpiTotalLabel"></i><i id="kpiGreenPct"></i><i id="kpiAmberPct"></i><i id="kpiRedPct"></i><i id="kpiBluePct"></i><i id="waitingPermitsCount"></i></span>
     </section>
 
     <section class="md-grid two">
-      <div class="md-card" id="mdDailyCard">
-        <h3>Daily activity <small>started vs completed</small></h3>
-        <div class="md-chart"><canvas id="dashDailyCanvas"></canvas></div>
-      </div>
-      <div class="md-card">
-        <h3>Status mix</h3>
-        <div class="md-chart"><canvas id="dashDonutCanvas"></canvas></div>
-      </div>
+      <div class="md-card"><h3>Month by month <small>tap a bar to open that month</small></h3><div class="md-chart tall" id="monthlyVolumeChartContainer"><canvas id="monthlyVolumeCanvas"></canvas></div></div>
+      <div class="md-card"><h3>Overdue work orders <span class="md-count" id="mdAttentionCount">0</span></h3><div id="mdAttention"></div></div>
     </section>
 
     <section class="md-grid two">
-      <div class="md-card">
-        <h3>Month by month <small>click a bar to open that month</small></h3>
-        <div class="md-chart tall" id="monthlyVolumeChartContainer"><canvas id="monthlyVolumeCanvas"></canvas></div>
-      </div>
-      <div class="md-card" id="monthlySummaryCard">
-        <h3>Monthly summary</h3>
-        <div class="md-table-wrap">
-          <table class="md-table">
-            <thead><tr><th>Month</th><th>Total</th><th>On time</th><th>Late</th><th>Overdue</th><th>Pending</th><th>Completion</th></tr></thead>
-            <tbody id="dashMonthBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section class="md-grid three">
-      <div class="md-card"><h3>By issue category</h3><div id="mdCatList"></div></div>
-      <div class="md-card"><h3>By reporter</h3><div id="mdByList"></div><h3 style="margin-top:18px">Closure &amp; permits</h3><div id="mdClosure"></div></div>
-      <div class="md-card"><h3>Needs attention <span class="md-count" id="mdAttentionCount">0</span></h3><div id="mdAttention"></div></div>
+      <div class="md-card"><h3>Issue categories <small>this month</small></h3><div id="mdCatList"></div></div>
+      <details class="md-card" id="monthlySummaryCard">
+        <summary style="cursor:pointer;font-weight:700;font-size:13.5px">Monthly table</summary>
+        <div class="md-table-wrap" style="margin-top:10px"><table class="md-table"><thead><tr><th>Month</th><th>Total</th><th>Completed</th><th>In progress</th><th>Overdue</th><th>Done %</th></tr></thead><tbody id="dashMonthBody"></tbody></table></div>
+      </details>
     </section>
   </div>
 </div>
@@ -2305,6 +2367,14 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
       </div>
     </div>
 
+    <div class="wo-chips" id="woChips"></div>
+    <div class="wo-selbar" id="woSelBar" style="display:none">
+      <span><b id="woSelCount">0</b> selected</span>
+      <button class="btn btn-primary btn-sm" onclick="openPlanModal()"><i class="fas fa-truck"></i> Plan &amp; Dispatch</button>
+      <button class="btn btn-ghost btn-sm" onclick="selectWoPage()">Select page</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearWoSelection()">Clear</button>
+    </div>
+    <div id="woCards" class="wo-cards"></div>
     <div class="table-wrap">
       <table class="main-table" id="woTable">
         <thead><tr><th data-col="WorkOrder">CM #</th></tr></thead>
@@ -2864,6 +2934,32 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
   </div>
 </div>
 
+<div class="modal-overlay" id="planModal">
+  <div class="modal plan-modal">
+    <button class="modal-close" aria-label="Close" onclick="closeModal('planModal')">×</button>
+    <div class="modal-title"><i class="fas fa-truck"></i> Plan &amp; Dispatch <span class="md-count" id="plan-count">0</span></div>
+    <div class="plan-fields">
+      <label>Work date<input type="date" id="plan-date" class="filter-input"></label>
+      <label>Team / vehicles<input type="text" id="plan-team" class="filter-input" list="plan-team-list" placeholder="Choose or type a team"><datalist id="plan-team-list"></datalist></label>
+      <label style="grid-column:1/-1">Notes for the site team<textarea id="plan-notes" class="filter-input" rows="2" placeholder="Optional instructions"></textarea></label>
+    </div>
+    <div id="plan-list" class="plan-list"></div>
+    <div class="plan-actions">
+      <div class="plan-group"><span>Send the plan</span>
+        <button class="btn btn-ghost btn-sm" onclick="planWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        <button class="btn btn-ghost btn-sm" onclick="planEmail()"><i class="fas fa-envelope"></i> Email</button>
+        <button class="btn btn-ghost btn-sm" onclick="planShare()"><i class="fas fa-share-alt"></i> Share</button>
+        <button class="btn btn-ghost btn-sm" onclick="planCopy()"><i class="fas fa-copy"></i> Copy</button>
+      </div>
+      <div class="plan-group"><span>Print</span>
+        <button class="btn btn-ghost btn-sm" onclick="planPDF()"><i class="fas fa-file-pdf"></i> Work plan A4</button>
+        <button class="btn btn-ghost btn-sm" onclick="planFabPDF()"><i class="fas fa-print"></i> Fabrication sheets A4</button>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="planDispatch()"><i class="fas fa-paper-plane"></i> Mark as dispatched</button>
+    </div>
+  </div>
+</div>
+
 <div class="alarm-overlay" id="alarmOverlay" style="display:none">
     <div class="alarm-card">
       <div class="alarm-header">
@@ -3006,6 +3102,10 @@ textarea.filter-input, .reminder-textarea { height:auto; padding:9px 11px; }
       <div id="detail-status-badge"></div>
     </div>
       <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="btn btn-ghost btn-sm detail-share" onclick="shareWhatsApp(selectedWorkOrder)" title="Send on WhatsApp"><i class="fab fa-whatsapp"></i></button>
+      <button class="btn btn-ghost btn-sm detail-share" onclick="shareEmail(selectedWorkOrder)" title="Send by Email"><i class="fas fa-envelope"></i></button>
+      <button class="btn btn-ghost btn-sm detail-share" onclick="copyWODetails(selectedWorkOrder)" title="Copy details"><i class="fas fa-copy"></i></button>
+      <button class="btn btn-ghost btn-sm detail-share" onclick="openFabModal(selectedWorkOrder)" title="Print fabrication A4"><i class="fas fa-print"></i></button>
       <button class="btn btn-ghost btn-sm" id="detail-edit-btn" onclick="toggleDetailEdit()" title="Edit Work Order"><i class="fas fa-edit"></i> Edit</button>
       <button class="btn btn-green btn-sm" id="detail-save-btn" onclick="saveDetailChanges()" style="display:none;" title="Save Changes"><i class="fas fa-save"></i> Save</button>
       <button class="btn btn-red btn-sm" id="detail-cancel-btn" onclick="cancelDetailEdit()" style="display:none;" title="Cancel Edit"><i class="fas fa-times"></i> Cancel</button>
@@ -3275,7 +3375,7 @@ window.addEventListener('paste', async (e) => {
   }
 });
 
-window.addEventListener('load', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // No login screen: the app opens directly.
   currentUser = { id: LOCAL_USER_ID, email: PRIMARY_ADMIN_EMAIL, user_metadata: { full_name: 'Admin' } };
   isAdmin = true;
@@ -3697,6 +3797,9 @@ function showContextMenu(e, context, woId = null) {
     items = [
       { label: 'View Details', icon: 'fa-eye', action: () => openDetail(woId) },
       { label: 'Copy WO Details', icon: 'fa-copy', action: () => copyWODetails(woId) },
+      { label: 'Send on WhatsApp', icon: 'fa-share-alt', action: () => shareWhatsApp(woId) },
+      { label: 'Send by Email', icon: 'fa-envelope', action: () => shareEmail(woId) },
+      { label: 'Plan / Dispatch…', icon: 'fa-truck', action: () => openPlanModal([woId]) },
       { divider: true },
       { label: 'Show on Map', icon: 'fa-map-marker-alt', action: () => { 
         const r = allData.find(d => d.WorkOrder === woId);
@@ -4347,6 +4450,7 @@ document.getElementById('dash-global-search').oninput = function(e) {
 };
 }
 
+/* ═══ DASHBOARD (simple, action-first) ═══ */
 /* ═══════════════════════════════════════════════════════════════
    MONTH-BASED DASHBOARD  (month = Target Start Date)
    ═══════════════════════════════════════════════════════════════ */
@@ -4394,14 +4498,6 @@ function dashChart(id, cfg) {
 }
 const cssVar = n => getComputedStyle(document.body).getPropertyValue(n).trim();
 
-function dashDelta(cur, prev, prevLabel, goodWhenUp = true, suffix = '') {
-  if (prev == null) return '';
-  const d = cur - prev;
-  if (d === 0) return `<span class="md-delta flat">= same as ${prevLabel}</span>`;
-  const up = d > 0, good = up === goodWhenUp;
-  return `<span class="md-delta ${good ? 'good' : 'bad'}">${up ? '▲' : '▼'} ${Math.abs(Number.isInteger(d) ? d : d.toFixed(1))}${suffix} vs ${prevLabel}</span>`;
-}
-
 function dashBarList(id, entries, color) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -4424,6 +4520,7 @@ function dashGroup(sel, keyFn) {
   return Object.values(g).sort((a, b) => b.n - a.n);
 }
 
+
 function renderMonthDashboard() {
   const select = document.getElementById('dashMonthSelect');
   if (!select) return;
@@ -4436,150 +4533,79 @@ function renderMonthDashboard() {
     dashMonth = (saved && (saved === 'all' || model.months[saved])) ? saved : (model.months[curKey] ? curKey : (model.keys[model.keys.length - 1] || 'all'));
   }
   if (dashMonth !== 'all' && !model.months[dashMonth]) dashMonth = model.keys[model.keys.length - 1] || 'all';
-
   select.innerHTML = '<option value="all">All months</option>' + [...model.keys].reverse().map(k => `<option value="${k}">${dashMonthLabel(k)}</option>`).join('');
   select.value = dashMonth;
 
+  const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+  /* A) what needs action RIGHT NOW (all months) */
+  const all = model.items;
+  setT('actOverdue', all.filter(i => i.cat === 'red').length);
+  setT('actDue', all.filter(i => WO_QUICK.due48.fn(i.r)).length);
+  setT('actPermit', all.filter(i => i.r.Status === 'WPERM').length);
+  setT('actActive', all.filter(i => i.cat === 'blue').length);
+
+  /* B) the selected month in plain numbers */
   const isAll = dashMonth === 'all';
-  const sel = model.items.filter(it => isAll || it.mk === dashMonth);
-  dashFilteredRecords = sel.map(i => i.r);          // used by the KPI drill-down lists
+  const sel = all.filter(it => isAll || it.mk === dashMonth);
+  dashFilteredRecords = sel.map(i => i.r);               // used by the tile drill-down lists
   const c = { green: 0, amber: 0, red: 0, blue: 0 };
   sel.forEach(i => c[i.cat]++);
-  const total = sel.length;
-  const done = c.green + c.amber;
-  const pct = v => total ? (v / total * 100).toFixed(1) + '%' : '0%';
-  const scopeLabel = isAll ? 'All months' : dashMonthLabel(dashMonth);
-
-  const prevKey = isAll ? null : model.keys[model.keys.indexOf(dashMonth) - 1];
-  const prev = prevKey ? model.months[prevKey] : null;
-  const prevLabel = prevKey ? dashMonthShort(prevKey) : '';
-  const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  const setH = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
-
-  setT('kpiTotal', total.toLocaleString()); setT('kpiTotalLabel', scopeLabel);
-  setT('kpiGreen', c.green.toLocaleString()); setT('kpiGreenPct', pct(c.green));
-  setT('kpiAmber', c.amber.toLocaleString()); setT('kpiAmberPct', pct(c.amber));
-  setT('kpiRed', c.red.toLocaleString()); setT('kpiRedPct', pct(c.red));
-  setT('kpiBlue', c.blue.toLocaleString()); setT('kpiBluePct', pct(c.blue));
-  setH('mdDeltaTotal', dashDelta(total, prev ? prev.total : null, prevLabel, true));
-  setH('mdDeltaGreen', dashDelta(c.green, prev ? prev.green : null, prevLabel, true));
-  setH('mdDeltaAmber', dashDelta(c.amber, prev ? prev.amber : null, prevLabel, false));
-  setH('mdDeltaRed', dashDelta(c.red, prev ? prev.red : null, prevLabel, false));
-  setH('mdDeltaBlue', dashDelta(c.blue, prev ? prev.blue : null, prevLabel, true));
-
-  // performance strip
-  const rate = total ? done / total * 100 : 0;
-  const onTime = done ? c.green / done * 100 : 0;
-  setT('mdRate', total ? rate.toFixed(1) + '%' : '—');
-  setT('mdOnTime', done ? onTime.toFixed(1) + '%' : '—');
-  const prevRate = prev && prev.total ? (prev.green + prev.amber) / prev.total * 100 : null;
-  setH('mdRateDelta', dashDelta(rate, prevRate, prevLabel, true, ' pts'));
-  const prevOn = prev && (prev.green + prev.amber) ? prev.green / (prev.green + prev.amber) * 100 : null;
-  setH('mdOnTimeDelta', dashDelta(onTime, prevOn, prevLabel, true, ' pts'));
-  const hrs = sel.filter(i => i.cat === 'green' || i.cat === 'amber').map(i => {
-    const s = parseLocalDT(i.r.TargetStartDT || i.r.TargetStart), e = dashCompletionDate(i.r);
-    return (s && e && e >= s) ? (e - s) / 3600000 : null;
-  }).filter(v => v != null);
-  const avg = hrs.length ? hrs.reduce((a, b) => a + b, 0) / hrs.length : null;
-  setT('mdAvg', avg == null ? '—' : (avg < 48 ? avg.toFixed(1) + ' h' : (avg / 24).toFixed(1) + ' d'));
+  const total = sel.length, done = c.green + c.amber;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  setT('mdMonthTitle', isAll ? 'All months' : dashMonthLabel(dashMonth));
+  setT('kpiTotal', total); setT('kpiGreen', c.green); setT('kpiAmber', c.amber); setT('kpiRed', c.red); setT('kpiBlue', c.blue);
+  setT('kpiTotalLabel', ''); ['Green', 'Amber', 'Red', 'Blue'].forEach(k => setT('kpi' + k + 'Pct', ''));
+  setT('mdProgressText', `${done} of ${total} completed`);
+  setT('mdProgressPct', pct + '%');
+  const bar = document.getElementById('mdProgressBar'); if (bar) bar.style.width = pct + '%';
   setT('waitingPermitsCount', sel.filter(i => i.r.Status === 'WPERM').length);
-  const dispatched = sel.filter(i => i.r.Status === 'DISPATCH').length;
-  setT('mdDispatched', dispatched);
 
-  // daily activity (selected month only)
-  const dailyCard = document.getElementById('mdDailyCard');
-  if (dailyCard) dailyCard.classList.toggle('md-hidden', isAll);
-  if (!isAll) {
-    const [y, m] = dashMonth.split('-').map(Number);
-    const days = new Date(y, m, 0).getDate();
-    const started = Array(days).fill(0), completed = Array(days).fill(0);
-    sel.forEach(i => {
-      const sd = parseLocalDT(i.r.TargetStartDT || i.r.TargetStart);
-      if (sd && sd.getFullYear() === y && sd.getMonth() + 1 === m) started[sd.getDate() - 1]++;
-      if (i.cat === 'green' || i.cat === 'amber') {
-        const cd = dashCompletionDate(i.r);
-        if (cd && cd.getFullYear() === y && cd.getMonth() + 1 === m) completed[cd.getDate() - 1]++;
-      }
-    });
-    const tick = cssVar('--muted'), grid = cssVar('--border');
-    dashChart('dashDailyCanvas', {
-      type: 'bar',
-      data: { labels: Array.from({ length: days }, (_, i) => i + 1), datasets: [
-        { label: 'Started (target start)', data: started, backgroundColor: cssVar('--blue'), borderRadius: 3 },
-        { label: 'Completed', data: completed, backgroundColor: cssVar('--green'), borderRadius: 3 }
-      ] },
-      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { labels: { color: tick, boxWidth: 10 } } },
-        scales: { x: { ticks: { color: tick }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: tick, precision: 0 }, grid: { color: grid } } } }
-    });
-  }
-
-  // status mix donut
-  dashChart('dashDonutCanvas', {
-    type: 'doughnut',
-    data: { labels: ['Completed on time', 'Completed late', 'Overdue', 'Pending'], datasets: [{ data: [c.green, c.amber, c.red, c.blue], backgroundColor: [cssVar('--green'), cssVar('--amber'), cssVar('--red'), cssVar('--blue')], borderWidth: 0 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { color: cssVar('--muted'), boxWidth: 10 } } } }
-  });
-
-  // month by month
+  /* C) month by month – three clear colours */
   const labels = model.keys.map(k => dashMonthShort(k) + ' ' + k.slice(2, 4));
-  const tickC = cssVar('--muted'), gridC = cssVar('--border');
+  const tick = cssVar('--muted'), grid = cssVar('--border');
   dashChart('monthlyVolumeCanvas', {
+    type: 'bar',
     data: { labels, datasets: [
-      { type: 'bar', label: 'On time', data: model.keys.map(k => model.months[k].green), backgroundColor: cssVar('--green'), stack: 's', borderRadius: 2 },
-      { type: 'bar', label: 'Completed late', data: model.keys.map(k => model.months[k].amber), backgroundColor: cssVar('--amber'), stack: 's' },
-      { type: 'bar', label: 'Overdue', data: model.keys.map(k => model.months[k].red), backgroundColor: cssVar('--red'), stack: 's' },
-      { type: 'bar', label: 'Pending', data: model.keys.map(k => model.months[k].blue), backgroundColor: cssVar('--blue'), stack: 's' },
-      { type: 'line', label: 'Completion %', data: model.keys.map(k => { const m = model.months[k]; return m.total ? +((m.green + m.amber) / m.total * 100).toFixed(1) : 0; }),
-        yAxisID: 'y1', borderColor: cssVar('--text'), backgroundColor: cssVar('--text'), pointRadius: 3, tension: .3, borderWidth: 2 }
+      { label: 'Completed', data: model.keys.map(k => model.months[k].green + model.months[k].amber), backgroundColor: cssVar('--green'), stack: 's' },
+      { label: 'In progress', data: model.keys.map(k => model.months[k].blue), backgroundColor: cssVar('--blue'), stack: 's' },
+      { label: 'Overdue', data: model.keys.map(k => model.months[k].red), backgroundColor: cssVar('--red'), stack: 's' }
     ] },
     options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-      onClick: (e, els) => { const b = els.find(x => x.datasetIndex < 4) || els[0]; if (b) dashSetMonth(model.keys[b.index]); },
-      plugins: { legend: { labels: { color: tickC, boxWidth: 10 } } },
-      scales: {
-        x: { stacked: true, ticks: { color: tickC }, grid: { display: false } },
-        y: { stacked: true, beginAtZero: true, ticks: { color: tickC, precision: 0 }, grid: { color: gridC } },
-        y1: { position: 'right', min: 0, max: 100, ticks: { color: tickC, callback: v => v + '%' }, grid: { display: false } }
-      } }
+      onClick: (e, els) => { if (els[0]) dashSetMonth(model.keys[els[0].index]); },
+      plugins: { legend: { position: 'bottom', labels: { color: tick, boxWidth: 10 } } },
+      scales: { x: { stacked: true, ticks: { color: tick }, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { color: tick, precision: 0 }, grid: { color: grid } } } }
   });
-
-  // month table
   const tb = document.getElementById('dashMonthBody');
   if (tb) {
     tb.innerHTML = [...model.keys].reverse().map(k => {
       const m = model.months[k], dn = m.green + m.amber;
-      return `<tr class="${k === dashMonth ? 'sel' : ''}" onclick="dashSetMonth('${k}')">
-        <td><b>${dashMonthLabel(k)}</b></td><td>${m.total}</td>
-        <td style="color:var(--green)">${m.green}</td><td style="color:var(--amber)">${m.amber}</td><td style="color:var(--red)">${m.red}</td><td style="color:var(--blue)">${m.blue}</td>
-        <td><div class="md-mini-bar"><i style="width:${m.total ? dn / m.total * 100 : 0}%"></i></div>${m.total ? (dn / m.total * 100).toFixed(0) : 0}%</td></tr>`;
-    }).join('') || '<tr><td colspan="7" class="md-empty">No data</td></tr>';
+      return `<tr class="${k === dashMonth ? 'sel' : ''}" onclick="dashSetMonth('${k}')"><td><b>${dashMonthLabel(k)}</b></td><td>${m.total}</td><td style="color:var(--green)">${dn}</td><td style="color:var(--blue)">${m.blue}</td><td style="color:var(--red)">${m.red}</td><td>${m.total ? Math.round(dn / m.total * 100) : 0}%</td></tr>`;
+    }).join('') || '<tr><td colspan="6" class="md-empty">No data</td></tr>';
   }
 
-  // breakdowns
+  /* D) issue categories of the selected month */
   dashBarList('mdCatList', dashGroup(sel, r => r.IssueCategory), cssVar('--accent'));
-  dashBarList('mdByList', dashGroup(sel, r => r.ReportedBy), cssVar('--indigo'));
-  const cnt = fn => sel.filter(i => fn(i.r)).length;
-  setH('mdClosure', `
-    <div class="md-chip-row"><span>Closure required</span><b>${cnt(r => r.ClosureRequired === 'Yes')}</b><small>Yes</small><b>${cnt(r => r.ClosureRequired === 'No')}</b><small>No</small></div>
-    <div class="md-chip-row"><span>Responsible</span><b>${cnt(r => r.ClosureBy === 'Egis')}</b><small>Egis</small><b>${cnt(r => r.ClosureBy === 'QBC')}</b><small>QBC</small></div>
-    <div class="md-chip-row"><span>RO / TDP / NCP</span><b>${cnt(r => r.ROTDP === 'Received')}</b><small>Received</small><b>${cnt(r => r.ROTDP === 'Not Received')}</b><small>Not received</small></div>
-    <div class="md-chip-row"><span>With team / vehicles</span><b>${cnt(r => r.TeamsVehicles)}</b><small>CMs</small></div>`);
 
-  // needs attention
+  /* E) overdue list (all months) with one-tap sharing */
   const today = new Date(); today.setHours(0, 0, 0, 0);
-  const late = sel.filter(i => i.cat === 'red').map(i => {
+  const late = all.filter(i => i.cat === 'red').map(i => {
     const tf = parseLocalDT(i.r.TargetFinishDT || i.r.TargetFinish);
     return { r: i.r, days: tf ? Math.max(0, Math.floor((today - tf) / 86400000)) : 0 };
   }).sort((a, b) => b.days - a.days);
   setT('mdAttentionCount', late.length);
   const attEl = document.getElementById('mdAttention');
   if (attEl) {
-    attEl.innerHTML = late.slice(0, 8).map(x => `
-      <div class="md-att" onclick="openDetail('${escapeHtml(x.r.WorkOrder)}')">
-        <b>#${escapeHtml(x.r.WorkOrder)}</b>
-        <span>${escapeHtml(x.r.IssueCategory || x.r.EmailSubject || x.r.Status)}</span>
-        <em>${x.days ? x.days + ' d late' : 'due today'}</em>
-      </div>`).join('') + (late.length > 8 ? `<button class="btn btn-ghost btn-sm w-100" onclick="drillDown('breached-pending')">View all ${late.length}</button>` : '')
+    attEl.innerHTML = late.slice(0, 8).map(x => {
+      const id = escapeHtml(x.r.WorkOrder);
+      return `<div class="md-att" onclick="openDetail('${id}')">
+        <b>${id}</b><span>${escapeHtml(x.r.IssueCategory || x.r.EmailSubject || x.r.Status)}</span><em>${x.days ? x.days + ' d late' : 'due today'}</em>
+        <div class="md-att-actions" onclick="event.stopPropagation()">
+          <button onclick="shareWhatsApp('${id}')" title="WhatsApp"><i class="fab fa-whatsapp"></i></button>
+          <button onclick="shareEmail('${id}')" title="Email"><i class="fas fa-envelope"></i></button>
+          <button onclick="copyWODetails('${id}')" title="Copy"><i class="fas fa-copy"></i></button>
+        </div></div>`;
+    }).join('') + (late.length > 8 ? `<button class="btn btn-ghost btn-sm w-100" onclick="goWo('overdue')">View all ${late.length} overdue</button>` : '')
       || '<div class="md-empty">Nothing overdue 🎉</div>';
   }
 }
@@ -4589,6 +4615,7 @@ function updateDashboard() {
   allData.forEach(r => { stats[getStatusCat(r)]++; });
   updateGisKpis(stats);                // the GIS "Dashboard View" keeps showing system-wide numbers
   renderMonthDashboard();
+  renderWoChips();
   const el = document.getElementById('dash-last-refresh');
   if (el) el.textContent = formatLastUpdated(lastCsvUpload);
 }
@@ -4683,6 +4710,7 @@ function buildEngineerFilter() {
 
 function applyFilters(rebuildFilters = true, keepPage = false) {
   filteredData = allData.filter(r => {
+    if (woQuick !== 'all' && !WO_QUICK[woQuick].fn(r)) return false;
     for (let col in columnSearches) {
       const val = columnSearches[col]?.toLowerCase();
       if (val && !String(r[col] || '').toLowerCase().includes(val)) return false;
@@ -4700,6 +4728,7 @@ function applyFilters(rebuildFilters = true, keepPage = false) {
   if (rebuildFilters) buildColumnFilters('woTable', allData);
   const label = document.getElementById('woCountLabel');
   if (label) label.textContent = `(${filteredData.length} of ${allData.length})`;
+  renderWoChips();
 }
 
 function selectWorkOrderRow(woId, scrollIntoView = false) {
@@ -6401,6 +6430,7 @@ function toggleGisSidebar() {
 }
 
 // Global resize listener for map sync
+window.matchMedia('(max-width: 768px)').addEventListener('change', () => { if (allData.length) renderTable(); });
 window.addEventListener('resize', () => {
   if (allData.length > 0 && document.getElementById('page-map').classList.contains('active')) {
     if(map) map.invalidateSize();
@@ -7171,49 +7201,296 @@ function showOnMap(lat, lng, wo) {
   }, 300);
 }
 
-async function copyWODetails(woId) {
-  const r = allData.find(d => String(d.WorkOrder) === String(woId));
-  if (!r) return;
-  const tfRaw = String(r.TargetFinishDT || r.TargetFinish || '').replace('T', ' ');
-  const m = tfRaw.match(/^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}):(\d{2}))?/);
-  const tf = m ? `${m[3]}/${m[2]}/${m[1].slice(2)}${m[4] ? ` ${m[4]}:${m[5]}` : ''}` : (tfRaw || '—');
-  const loc = (r.Lat && r.Lng) ? `https://www.google.com/maps?q=${r.Lat},${r.Lng}` : 'Not available';
-  const photoUrl = photos[r.WorkOrder];
-
-  const lines = ['Work Order Details:', '', `* CM: ${r.WorkOrder}`, '', `* Target Finish Date: ${tf}`, '', `* Location: ${loc}`, '', `* Site Photo:${photoUrl ? '' : ' Not available'}`];
-  const text = lines.join('\n');
-  const htmlHead = `<div style="font-family:Calibri,Arial,sans-serif;font-size:14px"><b>Work Order Details:</b><br><br>* CM: ${escapeHtml(r.WorkOrder)}<br><br>* Target Finish Date: ${escapeHtml(tf)}<br><br>* Location: ${(r.Lat && r.Lng) ? `<a href="${loc}">${loc}</a>` : 'Not available'}<br><br>* Site Photo:`;
-
-  // photo → PNG (clipboard only accepts PNG images)
-  let pngBlob = null;
-  if (photoUrl) {
-    try {
-      const resp = await fetch(photoUrl, { mode: 'cors' });
-      const bmp = await createImageBitmap(await resp.blob());
-      const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
-      const cv = document.createElement('canvas');
-      cv.width = Math.round(bmp.width * scale); cv.height = Math.round(bmp.height * scale);
-      cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
-      pngBlob = await new Promise(res => cv.toBlob(res, 'image/png'));
-    } catch (e) { console.warn('Photo could not be read for the clipboard:', e); }
-  }
-
-  try {
-    const items = { 'text/plain': new Blob([text + (pngBlob ? ' (photo copied)' : '')], { type: 'text/plain' }) };
-    if (pngBlob) {
-      const dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(pngBlob); });
-      items['text/html'] = new Blob([`${htmlHead}<br><img src="${dataUrl}" style="max-width:480px"></div>`], { type: 'text/html' });
-      items['image/png'] = pngBlob;
-    } else {
-      items['text/html'] = new Blob([`${htmlHead}${photoUrl ? '' : ' Not available'}</div>`], { type: 'text/html' });
-    }
-    await navigator.clipboard.write([new ClipboardItem(items)]);
-    showToast(pngBlob ? 'Work order details and photo copied' : (photoUrl ? 'Details copied (photo could not be copied)' : 'Work order details copied'), photoUrl && !pngBlob ? 'warning' : undefined);
-  } catch (e) {
-    try { await navigator.clipboard.writeText(text); showToast('Work order details copied (text only)'); }
-    catch (e2) { showToast('Copy failed – allow clipboard access for this site', 'error'); }
-  }
+/* ═══════════════════════════════════════════════════════════════
+   SHARE · COPY · PLAN · DISPATCH
+   ═══════════════════════════════════════════════════════════════ */
+const woById = id => allData.find(d => String(d.WorkOrder) === String(id));
+function woTargetShort(r) {
+  const s = String(r.TargetFinishDT || r.TargetFinish || '').replace('T', ' ');
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}):(\d{2}))?/);
+  return m ? `${m[3]}/${m[2]}/${m[1].slice(2)}${m[4] ? ` ${m[4]}:${m[5]}` : ''}` : (s || '—');
 }
+const woMapLink = r => (r.Lat && r.Lng) ? `https://www.google.com/maps?q=${r.Lat},${r.Lng}` : '';
+
+// The exact message format requested: one block of text; the photo is a link so it travels inside the same message
+function buildWOMessage(r) {
+  const photo = photos[r.WorkOrder];
+  return [
+    'Work Order Details:', '',
+    `* CM: ${r.WorkOrder}`, '',
+    `* Target Finish Date: ${woTargetShort(r)}`, '',
+    `* Location: ${woMapLink(r) || 'Not available'}`, '',
+    `* Site Photo: ${photo || 'Not available'}`
+  ].join('\n');
+}
+function buildWOHtml(r) {
+  const photo = photos[r.WorkOrder], loc = woMapLink(r);
+  return `<div style="font-family:Calibri,Arial,sans-serif;font-size:14px"><b>Work Order Details:</b><br><br>* CM: ${escapeHtml(r.WorkOrder)}<br><br>* Target Finish Date: ${escapeHtml(woTargetShort(r))}<br><br>* Location: ${loc ? `<a href="${loc}">${loc}</a>` : 'Not available'}<br><br>* Site Photo: ${photo ? `<br><img src="${escapeHtml(photo)}" style="max-width:480px">` : 'Not available'}</div>`;
+}
+
+async function copyToClipboard(text, html) {
+  try {
+    if (window.ClipboardItem && html) {
+      // text + html only. (An image/png flavour makes most apps paste ONLY the picture, so it is not included.)
+      await navigator.clipboard.write([new ClipboardItem({ 'text/plain': new Blob([text], { type: 'text/plain' }), 'text/html': new Blob([html], { type: 'text/html' }) })]);
+      return true;
+    }
+  } catch (e) {}
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+  ta.remove(); return ok;
+}
+async function copyWODetails(woId) {
+  const r = woById(woId); if (!r) return;
+  const ok = await copyToClipboard(buildWOMessage(r), buildWOHtml(r));
+  showToast(ok ? 'Work order details copied – paste anywhere' : 'Copy failed – allow clipboard access', ok ? undefined : 'error');
+}
+function openWhatsApp(text) { window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener'); }
+function openEmail(subject, body) {
+  const max = 1800;                                    // mailto links break above ~2000 chars
+  const b = body.length > max ? body.slice(0, max) + '\n…(message shortened – use Copy for the full text)' : body;
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(b)}`;
+}
+const shareWhatsApp = woId => { const r = woById(woId); if (r) openWhatsApp(buildWOMessage(r)); };
+const shareEmail = woId => { const r = woById(woId); if (r) openEmail(`Work Order ${r.WorkOrder}`, buildWOMessage(r)); };
+// Phone share sheet: text + the photo file in one go (WhatsApp, Gmail, Teams …)
+async function shareNative(woId) {
+  const r = woById(woId); if (!r) return;
+  const text = buildWOMessage(r);
+  try {
+    const photo = photos[r.WorkOrder];
+    let files = [];
+    if (photo) { try { const b = await (await fetch(photo, { mode: 'cors' })).blob(); files = [new File([b], `CM_${r.WorkOrder}.jpg`, { type: b.type || 'image/jpeg' })]; } catch (e) {} }
+    const data = { title: `Work Order ${r.WorkOrder}`, text };
+    if (files.length && navigator.canShare && navigator.canShare({ files })) data.files = files;
+    if (navigator.share) { await navigator.share(data); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  copyWODetails(woId);
+}
+
+/* ── selection ── */
+let woSelected = new Set();
+function toggleWoSelect(id, on) { if (on) woSelected.add(String(id)); else woSelected.delete(String(id)); updateSelectionBar(); }
+function updateSelectionBar() {
+  const bar = document.getElementById('woSelBar'); if (!bar) return;
+  bar.style.display = woSelected.size ? 'flex' : 'none';
+  const c = document.getElementById('woSelCount'); if (c) c.textContent = woSelected.size;
+  document.querySelectorAll('.wo-sel').forEach(cb => { cb.checked = woSelected.has(cb.dataset.wo); });
+}
+function clearWoSelection() { woSelected.clear(); updateSelectionBar(); }
+function selectWoPage() {
+  const start = (currentPage - 1) * PAGE_SIZE;
+  filteredData.slice(start, start + PAGE_SIZE).forEach(r => woSelected.add(String(r.WorkOrder)));
+  updateSelectionBar();
+}
+
+/* ── plan / dispatch ── */
+let planIds = [];
+const planList = () => planIds.map(woById).filter(Boolean);
+function planMeta() {
+  return {
+    date: document.getElementById('plan-date').value || new Date().toISOString().slice(0, 10),
+    team: document.getElementById('plan-team').value.trim(),
+    notes: document.getElementById('plan-notes').value.trim()
+  };
+}
+function buildPlanMessage(list, meta) {
+  const d = meta.date.split('-').reverse().join('/');
+  const lines = [`*Work Plan – ${d}*`];
+  if (meta.team) lines.push(`Team / Vehicles: ${meta.team}`);
+  if (meta.notes) lines.push(`Notes: ${meta.notes}`);
+  lines.push('');
+  list.forEach((r, i) => {
+    lines.push(`${i + 1}) CM ${r.WorkOrder}`);
+    lines.push(`   Target Finish: ${woTargetShort(r)}`);
+    if (r.IssueCategory) lines.push(`   Issue: ${r.IssueCategory}`);
+    lines.push(`   Location: ${woMapLink(r) || 'Not available'}`);
+    if (photos[r.WorkOrder]) lines.push(`   Photo: ${photos[r.WorkOrder]}`);
+    lines.push('');
+  });
+  lines.push(`Total: ${list.length} work order${list.length === 1 ? '' : 's'}`);
+  return lines.join('\n');
+}
+function openPlanModal(ids) {
+  planIds = (ids && ids.length ? ids : [...woSelected]).map(String);
+  if (!planIds.length) { showToast('Select work orders first (tick the boxes)', 'error'); return; }
+  document.getElementById('plan-date').value = new Date().toISOString().slice(0, 10);
+  const teams = document.getElementById('plan-team-list');
+  if (teams && !teams.children.length) teams.innerHTML = TEAM_OPTIONS.map(t => `<option value="${escapeHtml(t)}">`).join('');
+  renderPlanList();
+  openModal('planModal');
+}
+function renderPlanList() {
+  const list = planList();
+  document.getElementById('plan-count').textContent = list.length;
+  document.getElementById('plan-list').innerHTML = list.map((r, i) => `
+    <div class="plan-row">
+      <span class="plan-n">${i + 1}</span>
+      <div class="plan-main"><b>CM ${escapeHtml(r.WorkOrder)}</b> <span class="status-badge badge-${escapeHtml(r.Status)}">${escapeHtml(r.Status)}</span>
+        <div class="plan-sub">${escapeHtml(r.IssueCategory || r.EmailSubject || '')}</div>
+        <div class="plan-sub">Target finish ${woTargetShort(r)}${woMapLink(r) ? '' : ' · <span style="color:var(--red)">no coordinates</span>'}</div></div>
+      <button class="btn btn-ghost btn-xs" onclick="planRemove('${escapeHtml(r.WorkOrder)}')" title="Remove"><i class="fas fa-times"></i></button>
+    </div>`).join('') || '<div class="md-empty">No work orders</div>';
+}
+function planRemove(id) { planIds = planIds.filter(x => x !== String(id)); renderPlanList(); }
+const planText = () => buildPlanMessage(planList(), planMeta());
+async function planCopy() { const ok = await copyToClipboard(planText()); showToast(ok ? 'Plan copied – paste anywhere' : 'Copy failed', ok ? undefined : 'error'); }
+function planWhatsApp() { openWhatsApp(planText()); }
+function planEmail() { openEmail(`Work Plan – ${planMeta().date.split('-').reverse().join('/')}`, planText()); }
+async function planShare() {
+  try { if (navigator.share) { await navigator.share({ title: 'Work Plan', text: planText() }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  planCopy();
+}
+function planPDF() {
+  if (!window.jspdf) { showToast('PDF library is still loading – try again', 'error'); return; }
+  const list = planList(), meta = planMeta();
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const W = 210, M = 12;
+  const cols = { n: M, cm: M + 8, desc: M + 34, tf: M + 112, loc: M + 142, done: M + 172 };
+  const header = () => {
+    pdf.setFillColor(15, 118, 110); pdf.rect(0, 0, W, 26, 'F');
+    pdf.setTextColor(255); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(17);
+    pdf.text('Daily Work Plan', M, 12);
+    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10);
+    pdf.text(`Date: ${meta.date.split('-').reverse().join('/')}`, M, 19);
+    if (meta.team) pdf.text(`Team / Vehicles: ${pdf.splitTextToSize(meta.team, 120)[0]}`, M + 45, 19);
+    pdf.text(`${list.length} work order${list.length === 1 ? '' : 's'}`, W - M, 12, { align: 'right' });
+    return 32;
+  };
+  const th = y => {
+    pdf.setFillColor(241, 245, 249); pdf.rect(M, y - 5, W - 2 * M, 8, 'F');
+    pdf.setTextColor(51, 65, 85); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8.5);
+    pdf.text('#', cols.n + 1, y); pdf.text('CM #', cols.cm, y); pdf.text('Work / Issue', cols.desc, y);
+    pdf.text('Target finish', cols.tf, y); pdf.text('Location', cols.loc, y); pdf.text('Done', cols.done, y);
+    return y + 7;
+  };
+  let y = header();
+  if (meta.notes) {
+    pdf.setTextColor(71, 85, 105); pdf.setFont('helvetica', 'italic'); pdf.setFontSize(9);
+    const nl = pdf.splitTextToSize('Notes: ' + meta.notes, W - 2 * M); pdf.text(nl, M, y); y += nl.length * 4.5 + 2;
+  }
+  y = th(y);
+  list.forEach((r, i) => {
+    const desc = pdf.splitTextToSize([r.IssueCategory, r.EmailSubject].filter(Boolean).join(' – ') || '—', 76).slice(0, 4);
+    const h = Math.max(12, desc.length * 4.2 + 4);
+    if (y + h > 282) { pdf.addPage(); y = th(header()); }
+    pdf.setDrawColor(226, 232, 240); pdf.line(M, y + h - 3, W - M, y + h - 3);
+    pdf.setTextColor(15, 23, 42); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9);
+    pdf.text(String(i + 1), cols.n + 1, y);
+    pdf.setFont('helvetica', 'bold'); pdf.text(String(r.WorkOrder), cols.cm, y);
+    pdf.setFont('helvetica', 'normal'); pdf.text(desc, cols.desc, y);
+    pdf.setTextColor(185, 28, 28); pdf.text(woTargetShort(r), cols.tf, y);
+    const link = woMapLink(r);
+    if (link) { pdf.setTextColor(37, 99, 235); pdf.textWithLink('Open map', cols.loc, y, { url: link }); }
+    else { pdf.setTextColor(148, 163, 184); pdf.text('—', cols.loc, y); }
+    pdf.setDrawColor(148, 163, 184); pdf.rect(cols.done + 2, y - 3.6, 4.5, 4.5);
+    y += h;
+  });
+  const pages = pdf.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) { pdf.setPage(p); pdf.setFontSize(8); pdf.setTextColor(148, 163, 184); pdf.text(`QBC Operations Center · page ${p}/${pages}`, W / 2, 292, { align: 'center' }); }
+  pdf.save(`Work_Plan_${meta.date}.pdf`);
+  showToast('Work plan PDF created');
+}
+async function planFabPDF() {
+  if (!window.jspdf || typeof html2canvas === 'undefined') { showToast('PDF library is still loading – try again', 'error'); return; }
+  const list = planList(); if (!list.length) return;
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  for (let i = 0; i < list.length; i++) {
+    showToast(`Preparing fabrication sheet ${i + 1} / ${list.length}…`);
+    const img = await getFabPDFData(list[i].WorkOrder);
+    if (i) pdf.addPage();
+    pdf.addImage(img, 'JPEG', 0, 0, 210, 297);
+  }
+  pdf.save(`Fabrication_Sheets_${planMeta().date}.pdf`);
+  showToast(`${list.length} fabrication sheets exported (one A4 page each)`);
+}
+async function planDispatch() {
+  const list = planList().filter(r => r.Status !== 'COMP');
+  const meta = planMeta();
+  if (!list.length) { showToast('Nothing to dispatch (all selected are completed)', 'error'); return; }
+  if (!confirm(`Mark ${list.length} work order(s) as DISPATCH${meta.team ? ' for: ' + meta.team : ''}?`)) return;
+  const now = inputToNaive(new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16));
+  let ok = 0, fail = 0;
+  for (const r of list) {
+    const before = { Status: r.Status, DispatchedDate: r.DispatchedDate, StatusDT: r.StatusDT, TeamsVehicles: r.TeamsVehicles };
+    r.Status = 'DISPATCH'; r.DispatchedDate = now; r.StatusDT = now;
+    if (meta.team) r.TeamsVehicles = meta.team;
+    syncDerivedDates(r);
+    try { await saveWorkOrderToSupabase(r); ok++; } catch (e) { Object.assign(r, before); fail++; console.error(e); }
+  }
+  logAudit('Dispatched work orders', `${ok} dispatched${meta.team ? ' – ' + meta.team : ''}`);
+  showToast(fail ? `${ok} dispatched, ${fail} failed` : `${ok} work order(s) dispatched`, fail ? 'error' : undefined);
+  applyFilters(false, true); updateDashboard(); renderPlanList();
+}
+
+/* ── quick views (what needs action) ── */
+let woQuick = 'all';
+const WO_QUICK = {
+  all:      { label: 'All',              fn: () => true },
+  overdue:  { label: 'Overdue',          fn: r => getStatusCat(r) === 'red', tone: 'red' },
+  due48:    { label: 'Due in 48 h',      fn: r => { if (getStatusCat(r) !== 'blue') return false; const tf = parseLocalDT(r.TargetFinishDT || r.TargetFinish); return !!tf && tf - Date.now() <= 48 * 3600e3; }, tone: 'amber' },
+  wperm:    { label: 'Waiting permits',  fn: r => r.Status === 'WPERM', tone: 'purple' },
+  dispatch: { label: 'Dispatched',       fn: r => r.Status === 'DISPATCH', tone: 'blue' },
+  inprg:    { label: 'In progress',      fn: r => r.Status === 'INPRG', tone: 'blue' },
+  done:     { label: 'Completed',        fn: r => { const c = getStatusCat(r); return c === 'green' || c === 'amber'; }, tone: 'green' }
+};
+function renderWoChips() {
+  const el = document.getElementById('woChips'); if (!el) return;
+  el.innerHTML = Object.entries(WO_QUICK).map(([k, q]) => {
+    const n = k === 'all' ? allData.length : allData.reduce((s, r) => s + (q.fn(r) ? 1 : 0), 0);
+    return `<button class="wo-chip ${q.tone || ''} ${woQuick === k ? 'active' : ''}" onclick="setWoQuick('${k}')">${q.label} <b>${n}</b></button>`;
+  }).join('');
+}
+function setWoQuick(k) { woQuick = WO_QUICK[k] ? k : 'all'; applyFilters(false); }
+function goWo(k) { showPage('workorders'); setWoQuick(k); }
+
+/* ── phone layout: work orders as cards ── */
+const isMobileView = () => window.matchMedia('(max-width: 768px)').matches;
+function woCardHTML(r, activeRems) {
+  const id = escapeHtml(r.WorkOrder), photo = photos[r.WorkOrder];
+  const cat = getStatusCat(r);
+  const due = (cat === 'red') ? '<span class="wc-due red">Overdue</span>' : (WO_QUICK.due48.fn(r) ? '<span class="wc-due amber">Due soon</span>' : '');
+  return `<div class="wo-card ${woSelected.has(String(r.WorkOrder)) ? 'sel' : ''}" onclick="openDetail('${id}')">
+    <div class="wc-top">
+      <input type="checkbox" class="wo-sel" data-wo="${id}" ${woSelected.has(String(r.WorkOrder)) ? 'checked' : ''} onclick="event.stopPropagation(); toggleWoSelect('${id}', this.checked)" aria-label="Select">
+      <b class="wc-cm">${id}</b>
+      <span class="status-badge badge-${escapeHtml(r.Status || 'COMP')}">${escapeHtml(r.Status || '–')}</span>${due}
+      ${activeRems ? `<span class="ctx-badge">📌 ${activeRems}</span>` : ''}
+    </div>
+    <div class="wc-body">
+      ${photo ? `<img class="wc-photo" src="${escapeHtml(photo)}" loading="lazy" alt="Site photo" onclick="event.stopPropagation(); viewPhoto('${id}')">` : ''}
+      <div class="wc-info">
+        <div class="wc-line"><i class="far fa-clock"></i> Target finish <b>${fmtDT(r.TargetFinishDT || r.TargetFinish)}</b></div>
+        ${r.IssueCategory ? `<div class="wc-line"><i class="fas fa-tag"></i> ${escapeHtml(r.IssueCategory)}</div>` : ''}
+        ${r.ReportedBy ? `<div class="wc-line"><i class="far fa-user"></i> ${escapeHtml(r.ReportedBy)}</div>` : ''}
+        ${r.Remarks ? `<div class="wc-remarks">${escapeHtml(r.Remarks)}</div>` : ''}
+      </div>
+    </div>
+    <div class="wc-actions" onclick="event.stopPropagation()">
+      <button onclick="shareNative('${id}')" title="Share"><i class="fas fa-share-alt"></i><span>Share</span></button>
+      <button onclick="shareWhatsApp('${id}')" title="WhatsApp"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></button>
+      <button onclick="shareEmail('${id}')" title="Email"><i class="fas fa-envelope"></i><span>Email</span></button>
+      <button onclick="copyWODetails('${id}')" title="Copy"><i class="fas fa-copy"></i><span>Copy</span></button>
+      <button onclick="openFabModal('${id}')" title="Fabrication A4"><i class="fas fa-print"></i><span>Print</span></button>
+      ${(r.Lat && r.Lng) ? `<button onclick="showOnMap(${r.Lat}, ${r.Lng}, '${id}')" title="Map"><i class="fas fa-map-marker-alt"></i><span>Map</span></button>` : ''}
+    </div>
+  </div>`;
+}
+function renderWoCards() {
+  const wrap = document.getElementById('woCards'); if (!wrap) return;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const slice = filteredData.slice(start, start + PAGE_SIZE);
+  const rems = new Map();
+  reminders.forEach(rem => { if (!['completed', 'cancelled'].includes(rem.status)) rems.set(String(rem.work_order_number), (rems.get(String(rem.work_order_number)) || 0) + 1); });
+  wrap.innerHTML = slice.map(r => woCardHTML(r, rems.get(String(r.WorkOrder)) || 0)).join('') || '<div class="md-empty">No work orders match this view</div>';
+  renderPagination();
+}
+
 
 function copyCoords(lat, lng) {
   const str = `${lat}, ${lng}`;
@@ -7447,9 +7724,13 @@ async function exportDashboardPDF() {
   pdf.text("Detailed Monthly Summary", margin, currentY);
   currentY += 5;
 
+  const tableDet = document.getElementById('monthlySummaryCard');
+  const wasOpen = tableDet ? tableDet.open : true;
+  if (tableDet) tableDet.open = true;           // a closed <details> has no size to capture
   const tableEl = document.querySelector('#monthlySummaryCard table');
   if (tableEl) {
     const tableCanvas = await html2canvas(tableEl, { scale: 2, backgroundColor: '#ffffff' });
+    if (tableDet) tableDet.open = wasOpen;
     const tableImg = tableCanvas.toDataURL('image/png');
     
     let displayWidth = contentWidth;
@@ -7574,7 +7855,7 @@ const WO_TEMPLATE_HEADERS = [
 
 // Table columns. "def" = visible by default (the default set fits one screen without horizontal scrolling)
 const WO_COLS = [
-  { k: 'WorkOrder',        label: 'CM #',                                   w: 96,  def: true },
+  { k: 'WorkOrder',        label: 'CM #',                                   w: 112, def: true },
   { k: 'Photo',            label: 'Photo',                                  w: 72,  def: true,  nofilter: true },
   { k: 'Coordinates',      label: 'Coordinates',                            w: 160, def: false, nofilter: true },
   { k: 'Status',           label: 'Status',                                 w: 96,  def: true },
@@ -7586,13 +7867,14 @@ const WO_COLS = [
   { k: 'CompDate',         label: 'Comp Date',                              w: 132, def: false, nodrop: true },
   { k: 'InstallationDate', label: 'Installation Date',                      w: 108, def: true,  nodrop: true },
   { k: 'ReportedDate',     label: 'Date Reported',                          w: 104, def: false, nodrop: true },
-  { k: 'ReportedBy',       label: 'Reported by',                            w: 104, def: true },
+  { k: 'ReportedBy',       label: 'Reported by',                            w: 104, def: false },
   { k: 'EmailSubject',     label: 'Email Subject',                          w: 240, def: false, nodrop: true },
   { k: 'IssueCategory',    label: 'Issue Category',                         w: 150, def: true },
   { k: 'ClosureRequired',  label: 'Closure Required?',                      w: 96,  def: false },
   { k: 'ClosureBy',        label: 'The responsible for the closure',        w: 130, def: false },
   { k: 'TeamsVehicles',    label: 'Teams and Vehicles (If Provided By QBC)', w: 220, def: false },
-  { k: 'Remarks',          label: 'Remarks',                                w: 280, def: true,  nodrop: true }
+  { k: 'Remarks',          label: 'Remarks',                                w: 250, def: true,  nodrop: true },
+  { k: 'Actions',          label: 'Share / Print',                          w: 150, def: true,  nofilter: true }
 ];
 
 /* ── date helpers (all values are naive local wall-clock times, no timezone shifting) ── */
@@ -7713,6 +7995,7 @@ function woCellHTML(c, r, ctx) {
   switch (c.k) {
     case 'WorkOrder':
       return `<div style="display:flex; align-items:center; gap:6px;">
+        <input type="checkbox" class="wo-sel" data-wo="${escapeHtml(r.WorkOrder)}" ${woSelected.has(String(r.WorkOrder)) ? 'checked' : ''} onclick="event.stopPropagation(); toggleWoSelect('${escapeHtml(r.WorkOrder)}', this.checked)" aria-label="Select CM ${escapeHtml(r.WorkOrder)}">
         <span class="wo-num">${escapeHtml(r.WorkOrder)}</span>
         ${(r.Lat && r.Lng) ? `<button class="wo-pin" title="Show on map" onclick="event.stopPropagation(); showOnMap(${r.Lat}, ${r.Lng}, '${escapeHtml(r.WorkOrder)}')"><i class="fas fa-map-marker-alt"></i></button>` : ''}
         ${ctx.active > 0 ? `<span class="ctx-badge" title="${ctx.active} active reminders" onclick="event.stopPropagation(); showPage('followup');">📌 ${ctx.active}</span>` : ''}
@@ -7733,11 +8016,23 @@ function woCellHTML(c, r, ctx) {
       return v ? `<span class="chip ${v === 'Received' ? 'chip-ok' : 'chip-warn'}">${escapeHtml(v)}</span>` : '<span class="cell-empty">—</span>';
     }
     case 'ClosureRequired': return txt(r.ClosureRequired);
+    case 'Actions': {
+      const id = escapeHtml(r.WorkOrder);
+      return `<div class="row-actions" onclick="event.stopPropagation()">
+        <button title="Send on WhatsApp" onclick="shareWhatsApp('${id}')"><i class="fab fa-whatsapp"></i></button>
+        <button title="Send by Email" onclick="shareEmail('${id}')"><i class="fas fa-envelope"></i></button>
+        <button title="Copy details" onclick="copyWODetails('${id}')"><i class="fas fa-copy"></i></button>
+        <button title="Print fabrication A4" onclick="openFabModal('${id}')"><i class="fas fa-print"></i></button>
+        <button title="Plan / Dispatch" onclick="openPlanModal(['${id}'])"><i class="fas fa-truck"></i></button>
+      </div>`;
+    }
     default: return txt(r[c.k]);
   }
 }
 
 function renderTable() {
+  if (isMobileView()) { const tb = document.getElementById('woBody'); if (tb) tb.innerHTML = ''; renderWoCards(); return; }
+  const wc = document.getElementById('woCards'); if (wc) wc.innerHTML = '';
   const tbody = document.getElementById('woBody');
   const cols = activeWoCols();
   const sig = cols.map(c => c.k).join();
@@ -7763,6 +8058,7 @@ function renderTable() {
       oncontextmenu="showContextMenu(event, 'row-wo', '${wo}')">${cols.map(c => `<td data-k="${c.k}">${woCellHTML(c, r, ctx)}</td>`).join('')}</tr>`;
   }).join('');
   renderPagination();
+  updateSelectionBar();
 }
 
 /* ── template download (xlsx) ── */
