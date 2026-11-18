@@ -2129,6 +2129,23 @@ details.md-card summary { list-style:none; } details.md-card summary::-webkit-de
 }
 @media (max-width: 480px) { .act-grid { grid-template-columns:1fr 1fr; } .md-tiles { grid-template-columns:1fr 1fr; } .tile b { font-size:22px; } }
 @media (min-width: 769px) { .wo-cards { display:none !important; } }
+
+/* Teams & per-team plan */
+.teams-list { margin:10px 0; max-height:260px; overflow:auto; }
+.team-row { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:9px 10px; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; background:var(--surface); }
+.team-row.off { opacity:.55; } .team-main { min-width:0; } .team-main b { display:block; } .team-main small { color:var(--muted); font-size:11.5px; }
+.team-btns { display:flex; gap:4px; flex-shrink:0; }
+.team-form { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; } .team-form #team-name, .team-form .team-cap, .team-form > div { grid-column:1/-1; }
+.team-cap { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted); font-weight:600; } .team-cap input { width:90px; }
+.team-warn { background:rgba(245,158,11,.12); color:var(--amber); border-radius:8px; padding:7px 10px; font-size:12px; margin:6px 0; }
+.plan-h { font-size:13px; margin:6px 0 8px; } .plan-h small { color:var(--muted); font-weight:500; }
+.plan-team { border:1px solid var(--border); border-radius:12px; padding:10px 12px; margin-bottom:10px; background:var(--surface2); }
+.pt-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; } .pt-count { font-size:12px; font-weight:700; color:var(--accent); } .pt-count.warn { color:var(--red); }
+.pt-routes { display:flex; gap:6px; flex-wrap:wrap; margin:6px 0; } .pt-route { background:var(--accent); color:var(--color-text-inverse); border-radius:999px; padding:5px 12px; font-size:12px; font-weight:600; text-decoration:none; }
+.pt-actions { display:flex; gap:6px; flex-wrap:wrap; }
+.plan-team-sel { max-width:150px; font-size:12px; height:32px; border-radius:8px; border:1px solid var(--color-border-default); background:var(--surface); color:var(--text); }
+.plan-check { flex-direction:row !important; align-items:center; gap:8px !important; }
+@media (max-width:768px) { .plan-row { flex-wrap:wrap; } .plan-team-sel { max-width:none; flex:1; } .team-form { grid-template-columns:1fr; } }
 </style>
 </head>
 <body data-theme="light">
@@ -2786,6 +2803,20 @@ details.md-card summary { list-style:none; } details.md-card summary::-webkit-de
     </div>
     
     <div class="upload-grid">
+      <div class="upload-card" id="teamsCard">
+        <h3>🚚 Dispatch Teams</h3>
+        <p>Teams used in <b>Plan &amp; Dispatch</b>. Saved in Supabase and shared by everyone. Only an admin can change them.</p>
+        <div id="teamsList" class="teams-list"></div>
+        <div class="team-form">
+          <input type="hidden" id="team-id">
+          <input type="text" id="team-name" class="filter-input" placeholder="Team name *  (e.g. Team A)">
+          <input type="text" id="team-vehicle" class="filter-input" placeholder="Vehicle / plate">
+          <input type="text" id="team-leader" class="filter-input" placeholder="Team leader">
+          <input type="text" id="team-phone" class="filter-input" placeholder="Phone / WhatsApp">
+          <label class="team-cap">Locations per day <input type="number" id="team-capacity" class="filter-input" value="20" min="1" max="100"></label>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" id="team-save-btn" onclick="saveTeam()"><i class="fas fa-plus"></i> Add team</button><button class="btn btn-ghost btn-sm" onclick="resetTeamForm()">Clear</button></div>
+        </div>
+      </div>
       <div class="upload-card">
         <h3>📊 Data Management</h3>
         <p>Update Work Orders from the <b>Project Issues Register</b> Excel template (.xlsx). Pictures placed in the Photo column are imported too.</p>
@@ -2939,21 +2970,27 @@ details.md-card summary { list-style:none; } details.md-card summary::-webkit-de
     <button class="modal-close" aria-label="Close" onclick="closeModal('planModal')">×</button>
     <div class="modal-title"><i class="fas fa-truck"></i> Plan &amp; Dispatch <span class="md-count" id="plan-count">0</span></div>
     <div class="plan-fields">
-      <label>Work date<input type="date" id="plan-date" class="filter-input"></label>
-      <label>Team / vehicles<input type="text" id="plan-team" class="filter-input" list="plan-team-list" placeholder="Choose or type a team"><datalist id="plan-team-list"></datalist></label>
+      <label>Work date<input type="date" id="plan-date" class="filter-input" onchange="renderPlanList()"></label>
+      <label>Assign all to<span style="display:flex;gap:6px"><select id="plan-assign-all" class="filter-input" style="flex:1"></select><button class="btn btn-ghost btn-sm" onclick="planAssignAll()">Apply</button></span></label>
       <label style="grid-column:1/-1">Notes for the site team<textarea id="plan-notes" class="filter-input" rows="2" placeholder="Optional instructions"></textarea></label>
+      <label class="plan-check" style="grid-column:1/-1"><input type="checkbox" id="plan-optimize" checked onchange="renderPlanList()"> Suggest the visiting order (nearest next location)</label>
     </div>
+    <div class="team-warn" id="plan-no-teams" style="display:none">No teams yet. An admin can add teams in <a href="#" onclick="closeModal('planModal'); showPage('settings'); return false;">Settings → Dispatch Teams</a>.</div>
     <div id="plan-list" class="plan-list"></div>
+    <h4 class="plan-h">Per team <small>one route, CSV and KML for each team</small></h4>
+    <div id="plan-teams"></div>
     <div class="plan-actions">
-      <div class="plan-group"><span>Send the plan</span>
+      <div class="plan-group"><span>All teams</span>
+        <button class="btn btn-ghost btn-sm" onclick="planAllCSV()"><i class="fas fa-file-csv"></i> One CSV</button>
+        <button class="btn btn-ghost btn-sm" onclick="planAllKML()" title="Import into Google My Maps: one map, one layer per team"><i class="fas fa-map"></i> One KML map</button>
+        <button class="btn btn-ghost btn-sm" onclick="planPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+        <button class="btn btn-ghost btn-sm" onclick="planFabPDF()"><i class="fas fa-print"></i> Fabrication A4</button>
+      </div>
+      <div class="plan-group"><span>Send all</span>
         <button class="btn btn-ghost btn-sm" onclick="planWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
         <button class="btn btn-ghost btn-sm" onclick="planEmail()"><i class="fas fa-envelope"></i> Email</button>
         <button class="btn btn-ghost btn-sm" onclick="planShare()"><i class="fas fa-share-alt"></i> Share</button>
         <button class="btn btn-ghost btn-sm" onclick="planCopy()"><i class="fas fa-copy"></i> Copy</button>
-      </div>
-      <div class="plan-group"><span>Print</span>
-        <button class="btn btn-ghost btn-sm" onclick="planPDF()"><i class="fas fa-file-pdf"></i> Work plan A4</button>
-        <button class="btn btn-ghost btn-sm" onclick="planFabPDF()"><i class="fas fa-print"></i> Fabrication sheets A4</button>
       </div>
       <button class="btn btn-primary" style="width:100%" onclick="planDispatch()"><i class="fas fa-paper-plane"></i> Mark as dispatched</button>
     </div>
@@ -3506,6 +3543,7 @@ async function onAuthenticated() {
   loadLogo();
   loadSystemSettings().then(() => { if (allData.length) updateDashboard(); });   // contract start date affects KPIs
   loadNotifications();
+  loadDispatchTeams();
   fetchReminders();
   fetchFollowUpNotes();
   setupNotifListener();
@@ -7210,7 +7248,7 @@ function woTargetShort(r) {
   const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}):(\d{2}))?/);
   return m ? `${m[3]}/${m[2]}/${m[1].slice(2)}${m[4] ? ` ${m[4]}:${m[5]}` : ''}` : (s || '—');
 }
-const woMapLink = r => (r.Lat && r.Lng) ? `https://www.google.com/maps?q=${r.Lat},${r.Lng}` : '';
+const woMapLink = r => (r.Lat && r.Lng) ? `https://www.google.com/maps?q=${+Number(r.Lat).toFixed(6)},${+Number(r.Lng).toFixed(6)}` : '';
 
 // The exact message format requested: one block of text; the photo is a link so it travels inside the same message
 function buildWOMessage(r) {
@@ -7290,111 +7328,6 @@ function selectWoPage() {
 /* ── plan / dispatch ── */
 let planIds = [];
 const planList = () => planIds.map(woById).filter(Boolean);
-function planMeta() {
-  return {
-    date: document.getElementById('plan-date').value || new Date().toISOString().slice(0, 10),
-    team: document.getElementById('plan-team').value.trim(),
-    notes: document.getElementById('plan-notes').value.trim()
-  };
-}
-function buildPlanMessage(list, meta) {
-  const d = meta.date.split('-').reverse().join('/');
-  const lines = [`*Work Plan – ${d}*`];
-  if (meta.team) lines.push(`Team / Vehicles: ${meta.team}`);
-  if (meta.notes) lines.push(`Notes: ${meta.notes}`);
-  lines.push('');
-  list.forEach((r, i) => {
-    lines.push(`${i + 1}) CM ${r.WorkOrder}`);
-    lines.push(`   Target Finish: ${woTargetShort(r)}`);
-    if (r.IssueCategory) lines.push(`   Issue: ${r.IssueCategory}`);
-    lines.push(`   Location: ${woMapLink(r) || 'Not available'}`);
-    if (photos[r.WorkOrder]) lines.push(`   Photo: ${photos[r.WorkOrder]}`);
-    lines.push('');
-  });
-  lines.push(`Total: ${list.length} work order${list.length === 1 ? '' : 's'}`);
-  return lines.join('\n');
-}
-function openPlanModal(ids) {
-  planIds = (ids && ids.length ? ids : [...woSelected]).map(String);
-  if (!planIds.length) { showToast('Select work orders first (tick the boxes)', 'error'); return; }
-  document.getElementById('plan-date').value = new Date().toISOString().slice(0, 10);
-  const teams = document.getElementById('plan-team-list');
-  if (teams && !teams.children.length) teams.innerHTML = TEAM_OPTIONS.map(t => `<option value="${escapeHtml(t)}">`).join('');
-  renderPlanList();
-  openModal('planModal');
-}
-function renderPlanList() {
-  const list = planList();
-  document.getElementById('plan-count').textContent = list.length;
-  document.getElementById('plan-list').innerHTML = list.map((r, i) => `
-    <div class="plan-row">
-      <span class="plan-n">${i + 1}</span>
-      <div class="plan-main"><b>CM ${escapeHtml(r.WorkOrder)}</b> <span class="status-badge badge-${escapeHtml(r.Status)}">${escapeHtml(r.Status)}</span>
-        <div class="plan-sub">${escapeHtml(r.IssueCategory || r.EmailSubject || '')}</div>
-        <div class="plan-sub">Target finish ${woTargetShort(r)}${woMapLink(r) ? '' : ' · <span style="color:var(--red)">no coordinates</span>'}</div></div>
-      <button class="btn btn-ghost btn-xs" onclick="planRemove('${escapeHtml(r.WorkOrder)}')" title="Remove"><i class="fas fa-times"></i></button>
-    </div>`).join('') || '<div class="md-empty">No work orders</div>';
-}
-function planRemove(id) { planIds = planIds.filter(x => x !== String(id)); renderPlanList(); }
-const planText = () => buildPlanMessage(planList(), planMeta());
-async function planCopy() { const ok = await copyToClipboard(planText()); showToast(ok ? 'Plan copied – paste anywhere' : 'Copy failed', ok ? undefined : 'error'); }
-function planWhatsApp() { openWhatsApp(planText()); }
-function planEmail() { openEmail(`Work Plan – ${planMeta().date.split('-').reverse().join('/')}`, planText()); }
-async function planShare() {
-  try { if (navigator.share) { await navigator.share({ title: 'Work Plan', text: planText() }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
-  planCopy();
-}
-function planPDF() {
-  if (!window.jspdf) { showToast('PDF library is still loading – try again', 'error'); return; }
-  const list = planList(), meta = planMeta();
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const W = 210, M = 12;
-  const cols = { n: M, cm: M + 8, desc: M + 34, tf: M + 112, loc: M + 142, done: M + 172 };
-  const header = () => {
-    pdf.setFillColor(15, 118, 110); pdf.rect(0, 0, W, 26, 'F');
-    pdf.setTextColor(255); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(17);
-    pdf.text('Daily Work Plan', M, 12);
-    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10);
-    pdf.text(`Date: ${meta.date.split('-').reverse().join('/')}`, M, 19);
-    if (meta.team) pdf.text(`Team / Vehicles: ${pdf.splitTextToSize(meta.team, 120)[0]}`, M + 45, 19);
-    pdf.text(`${list.length} work order${list.length === 1 ? '' : 's'}`, W - M, 12, { align: 'right' });
-    return 32;
-  };
-  const th = y => {
-    pdf.setFillColor(241, 245, 249); pdf.rect(M, y - 5, W - 2 * M, 8, 'F');
-    pdf.setTextColor(51, 65, 85); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8.5);
-    pdf.text('#', cols.n + 1, y); pdf.text('CM #', cols.cm, y); pdf.text('Work / Issue', cols.desc, y);
-    pdf.text('Target finish', cols.tf, y); pdf.text('Location', cols.loc, y); pdf.text('Done', cols.done, y);
-    return y + 7;
-  };
-  let y = header();
-  if (meta.notes) {
-    pdf.setTextColor(71, 85, 105); pdf.setFont('helvetica', 'italic'); pdf.setFontSize(9);
-    const nl = pdf.splitTextToSize('Notes: ' + meta.notes, W - 2 * M); pdf.text(nl, M, y); y += nl.length * 4.5 + 2;
-  }
-  y = th(y);
-  list.forEach((r, i) => {
-    const desc = pdf.splitTextToSize([r.IssueCategory, r.EmailSubject].filter(Boolean).join(' – ') || '—', 76).slice(0, 4);
-    const h = Math.max(12, desc.length * 4.2 + 4);
-    if (y + h > 282) { pdf.addPage(); y = th(header()); }
-    pdf.setDrawColor(226, 232, 240); pdf.line(M, y + h - 3, W - M, y + h - 3);
-    pdf.setTextColor(15, 23, 42); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9);
-    pdf.text(String(i + 1), cols.n + 1, y);
-    pdf.setFont('helvetica', 'bold'); pdf.text(String(r.WorkOrder), cols.cm, y);
-    pdf.setFont('helvetica', 'normal'); pdf.text(desc, cols.desc, y);
-    pdf.setTextColor(185, 28, 28); pdf.text(woTargetShort(r), cols.tf, y);
-    const link = woMapLink(r);
-    if (link) { pdf.setTextColor(37, 99, 235); pdf.textWithLink('Open map', cols.loc, y, { url: link }); }
-    else { pdf.setTextColor(148, 163, 184); pdf.text('—', cols.loc, y); }
-    pdf.setDrawColor(148, 163, 184); pdf.rect(cols.done + 2, y - 3.6, 4.5, 4.5);
-    y += h;
-  });
-  const pages = pdf.getNumberOfPages();
-  for (let p = 1; p <= pages; p++) { pdf.setPage(p); pdf.setFontSize(8); pdf.setTextColor(148, 163, 184); pdf.text(`QBC Operations Center · page ${p}/${pages}`, W / 2, 292, { align: 'center' }); }
-  pdf.save(`Work_Plan_${meta.date}.pdf`);
-  showToast('Work plan PDF created');
-}
 async function planFabPDF() {
   if (!window.jspdf || typeof html2canvas === 'undefined') { showToast('PDF library is still loading – try again', 'error'); return; }
   const list = planList(); if (!list.length) return;
@@ -7409,25 +7342,6 @@ async function planFabPDF() {
   pdf.save(`Fabrication_Sheets_${planMeta().date}.pdf`);
   showToast(`${list.length} fabrication sheets exported (one A4 page each)`);
 }
-async function planDispatch() {
-  const list = planList().filter(r => r.Status !== 'COMP');
-  const meta = planMeta();
-  if (!list.length) { showToast('Nothing to dispatch (all selected are completed)', 'error'); return; }
-  if (!confirm(`Mark ${list.length} work order(s) as DISPATCH${meta.team ? ' for: ' + meta.team : ''}?`)) return;
-  const now = inputToNaive(new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16));
-  let ok = 0, fail = 0;
-  for (const r of list) {
-    const before = { Status: r.Status, DispatchedDate: r.DispatchedDate, StatusDT: r.StatusDT, TeamsVehicles: r.TeamsVehicles };
-    r.Status = 'DISPATCH'; r.DispatchedDate = now; r.StatusDT = now;
-    if (meta.team) r.TeamsVehicles = meta.team;
-    syncDerivedDates(r);
-    try { await saveWorkOrderToSupabase(r); ok++; } catch (e) { Object.assign(r, before); fail++; console.error(e); }
-  }
-  logAudit('Dispatched work orders', `${ok} dispatched${meta.team ? ' – ' + meta.team : ''}`);
-  showToast(fail ? `${ok} dispatched, ${fail} failed` : `${ok} work order(s) dispatched`, fail ? 'error' : undefined);
-  applyFilters(false, true); updateDashboard(); renderPlanList();
-}
-
 /* ── quick views (what needs action) ── */
 let woQuick = 'all';
 const WO_QUICK = {
@@ -7489,6 +7403,368 @@ function renderWoCards() {
   reminders.forEach(rem => { if (!['completed', 'cancelled'].includes(rem.status)) rems.set(String(rem.work_order_number), (rems.get(String(rem.work_order_number)) || 0) + 1); });
   wrap.innerHTML = slice.map(r => woCardHTML(r, rems.get(String(r.WorkOrder)) || 0)).join('') || '<div class="md-empty">No work orders match this view</div>';
   renderPagination();
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   DISPATCH TEAMS (managed by Admin in Settings, stored in Supabase)
+   ═══════════════════════════════════════════════════════════════ */
+let dispatchTeams = [];
+let dispatchTeamsError = null;
+const activeTeams = () => dispatchTeams.filter(t => t.active !== false);
+const teamByName = n => dispatchTeams.find(t => t.name === n);
+
+async function loadDispatchTeams() {
+  if (!supabaseClient) return;
+  const { data, error } = await supabaseClient.from('dispatch_teams').select('*').order('sort_order', { ascending: true }).order('name', { ascending: true });
+  dispatchTeamsError = error || null;
+  if (error) console.warn('dispatch_teams not available (run dispatch_teams_setup.sql):', error.message);
+  dispatchTeams = data || [];
+  // team names are also valid values for the "Teams and Vehicles" field of a work order
+  dispatchTeams.forEach(t => { if (!TEAM_OPTIONS.includes(t.name)) TEAM_OPTIONS.push(t.name); });
+  const sel = document.getElementById('det-teams');
+  if (sel) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">—</option>' + TEAM_OPTIONS.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
+    sel.value = cur;
+  }
+  renderTeamsAdmin();
+}
+
+function renderTeamsAdmin() {
+  const el = document.getElementById('teamsList');
+  if (!el) return;
+  if (dispatchTeamsError) {
+    el.innerHTML = `<div class="team-warn"><i class="fas fa-exclamation-triangle"></i> The teams table is missing in Supabase. Run <b>dispatch_teams_setup.sql</b> in the SQL Editor, then reload.</div>`;
+    return;
+  }
+  el.innerHTML = dispatchTeams.map(t => `
+    <div class="team-row ${t.active === false ? 'off' : ''}">
+      <div class="team-main"><b>${escapeHtml(t.name)}</b>
+        <small>${[t.vehicle, t.leader, t.phone].filter(Boolean).map(escapeHtml).join(' · ') || 'No details'} · up to ${t.daily_capacity || 20} locations/day</small></div>
+      <div class="team-btns">
+        <button class="btn btn-ghost btn-xs" onclick="toggleTeamActive('${t.id}')" title="${t.active === false ? 'Enable' : 'Disable'}">${t.active === false ? 'Enable' : 'Disable'}</button>
+        <button class="btn btn-ghost btn-xs" onclick="editTeam('${t.id}')"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-ghost btn-xs" onclick="deleteTeam('${t.id}')"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`).join('') || '<div class="md-empty">No teams yet – add your first team below.</div>';
+}
+function requireAdminForTeams() {
+  if (isAdmin) return true;
+  showToast('Admin mode required', 'error'); openModal('adminModal'); return false;
+}
+function editTeam(id) {
+  const t = dispatchTeams.find(x => String(x.id) === String(id)); if (!t) return;
+  document.getElementById('team-id').value = t.id;
+  document.getElementById('team-name').value = t.name || '';
+  document.getElementById('team-vehicle').value = t.vehicle || '';
+  document.getElementById('team-leader').value = t.leader || '';
+  document.getElementById('team-phone').value = t.phone || '';
+  document.getElementById('team-capacity').value = t.daily_capacity || 20;
+  document.getElementById('team-save-btn').innerHTML = '<i class="fas fa-save"></i> Update team';
+  document.getElementById('team-name').focus();
+}
+function resetTeamForm() {
+  ['team-id', 'team-name', 'team-vehicle', 'team-leader', 'team-phone'].forEach(i => { document.getElementById(i).value = ''; });
+  document.getElementById('team-capacity').value = 20;
+  document.getElementById('team-save-btn').innerHTML = '<i class="fas fa-plus"></i> Add team';
+}
+async function saveTeam() {
+  if (!requireAdminForTeams()) return;
+  const name = document.getElementById('team-name').value.trim();
+  if (!name) { showToast('Team name is required', 'error'); return; }
+  const id = document.getElementById('team-id').value;
+  const row = {
+    name,
+    vehicle: document.getElementById('team-vehicle').value.trim() || null,
+    leader: document.getElementById('team-leader').value.trim() || null,
+    phone: document.getElementById('team-phone').value.trim() || null,
+    daily_capacity: parseInt(document.getElementById('team-capacity').value, 10) || 20
+  };
+  if (!id) row.sort_order = dispatchTeams.length + 1;
+  const q = id ? supabaseClient.from('dispatch_teams').update(row).eq('id', id) : supabaseClient.from('dispatch_teams').insert([row]);
+  const { error } = await q;
+  if (error) { showToast(error.message.includes('duplicate') ? 'A team with this name already exists' : error.message, 'error'); return; }
+  showToast(id ? 'Team updated' : 'Team added');
+  resetTeamForm();
+  await loadDispatchTeams();
+}
+async function toggleTeamActive(id) {
+  if (!requireAdminForTeams()) return;
+  const t = dispatchTeams.find(x => String(x.id) === String(id)); if (!t) return;
+  const { error } = await supabaseClient.from('dispatch_teams').update({ active: t.active === false }).eq('id', id);
+  if (error) { showToast(error.message, 'error'); return; }
+  await loadDispatchTeams();
+}
+async function deleteTeam(id) {
+  if (!requireAdminForTeams()) return;
+  const t = dispatchTeams.find(x => String(x.id) === String(id)); if (!t) return;
+  if (!confirm(`Delete team "${t.name}"? Work orders already assigned keep the name.`)) return;
+  const { error } = await supabaseClient.from('dispatch_teams').delete().eq('id', id);
+  if (error) { showToast(error.message, 'error'); return; }
+  showToast('Team deleted');
+  await loadDispatchTeams();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PLAN & DISPATCH – grouped by team, one route / CSV / KML per team
+   ═══════════════════════════════════════════════════════════════ */
+let planTeam = {};                                    // CM # → team name
+const UNASSIGNED = 'Unassigned';
+const hasXY = r => !!(r.Lat && r.Lng);
+const ll = r => `${+Number(r.Lat).toFixed(6)},${+Number(r.Lng).toFixed(6)}`;   // 6 decimals ≈ 10 cm
+const TEAM_KML_COLORS = ['ff3b3be6', 'ffe6892f', 'ff3bb54a', 'ff2b8cf0', 'ffc44ab5', 'ff9bb800', 'ff1f6df5', 'ff8b5a2b'];
+
+function planMeta() {
+  return {
+    date: document.getElementById('plan-date').value || new Date().toISOString().slice(0, 10),
+    notes: document.getElementById('plan-notes').value.trim(),
+    order: document.getElementById('plan-optimize') ? document.getElementById('plan-optimize').checked : true
+  };
+}
+const planDateLabel = d => d.split('-').reverse().join('/');
+function distKm(a, b) {
+  const R = 6371, rad = x => x * Math.PI / 180;
+  const dLat = rad(b.Lat - a.Lat), dLng = rad(b.Lng - a.Lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.Lat)) * Math.cos(rad(b.Lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+// suggested visiting order: nearest next stop (work orders without coordinates go last)
+function orderByNearest(items) {
+  const withXY = items.filter(hasXY), without = items.filter(r => !hasXY(r));
+  if (withXY.length < 3) return [...withXY, ...without];
+  const left = [...withXY], out = [left.shift()];
+  while (left.length) {
+    const last = out[out.length - 1];
+    let bi = 0, bd = Infinity;
+    left.forEach((r, i) => { const d = distKm(last, r); if (d < bd) { bd = d; bi = i; } });
+    out.push(left.splice(bi, 1)[0]);
+  }
+  return [...out, ...without];
+}
+function planGroups() {
+  const meta = planMeta();
+  const by = {};
+  planList().forEach(r => { const t = planTeam[String(r.WorkOrder)] || UNASSIGNED; (by[t] = by[t] || []).push(r); });
+  const names = [...dispatchTeams.map(t => t.name).filter(n => by[n]), ...Object.keys(by).filter(n => n !== UNASSIGNED && !teamByName(n)), ...(by[UNASSIGNED] ? [UNASSIGNED] : [])];
+  return names.map((name, i) => {
+    const team = teamByName(name) || null;
+    return { name, team, color: TEAM_KML_COLORS[i % TEAM_KML_COLORS.length], items: meta.order ? orderByNearest(by[name]) : by[name] };
+  });
+}
+// Google Maps directions links – at most 10 stops per link (Google's limit), consecutive links share one stop
+function routeLinks(items) {
+  const pts = items.filter(hasXY);
+  if (!pts.length) return [];
+  if (pts.length === 1) return [{ from: 1, to: 1, url: `https://www.google.com/maps?q=${ll(pts[0])}` }];
+  const out = [], CH = 10;
+  for (let i = 0; i < pts.length - 1; i += CH - 1) {
+    const chunk = pts.slice(i, i + CH);
+    if (chunk.length < 2) break;
+    const o = chunk[0], d = chunk[chunk.length - 1], w = chunk.slice(1, -1);
+    out.push({ from: i + 1, to: i + chunk.length,
+      url: `https://www.google.com/maps/dir/?api=1&origin=${ll(o)}&destination=${ll(d)}${w.length ? '&waypoints=' + w.map(ll).join('%7C') : ''}&travelmode=driving` });
+  }
+  return out;
+}
+function buildTeamMessage(g, meta) {
+  const lines = [`*Work Plan – ${planDateLabel(meta.date)}*`, `*Team: ${g.name}*${g.team && g.team.vehicle ? ` (${g.team.vehicle})` : ''} – ${g.items.length} location${g.items.length === 1 ? '' : 's'}`];
+  if (meta.notes) lines.push(`Notes: ${meta.notes}`);
+  const routes = routeLinks(g.items);
+  if (routes.length) { lines.push('', 'Route (Google Maps):'); routes.forEach(r => lines.push(`• Stops ${r.from}–${r.to}: ${r.url}`)); }
+  lines.push('');
+  g.items.forEach((r, i) => {
+    lines.push(`${i + 1}) CM ${r.WorkOrder} – target ${woTargetShort(r)}`);
+    if (r.IssueCategory) lines.push(`   ${r.IssueCategory}`);
+    lines.push(`   Location: ${woMapLink(r) || 'Not available'}`);
+    if (photos[r.WorkOrder]) lines.push(`   Photo: ${photos[r.WorkOrder]}`);
+    lines.push('');
+  });
+  return lines.join('\n').trim();
+}
+const buildPlanMessage = (groups, meta) => groups.map(g => buildTeamMessage(g, meta)).join('\n\n――――――――――\n\n');
+
+function downloadFile(name, content, mime) {
+  const url = URL.createObjectURL(new Blob([content], { type: mime }));
+  const a = document.createElement('a'); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+const safeName = s => String(s).replace(/[^\w\-]+/g, '_');
+function csvFor(groups) {
+  const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const head = ['Team', 'Order', 'CM #', 'Latitude', 'Longitude', 'Target Finish', 'Issue Category', 'Email Subject', 'Remarks', 'Google Maps', 'Photo'];
+  const rows = [];
+  groups.forEach(g => g.items.forEach((r, i) => rows.push([g.name, i + 1, r.WorkOrder, r.Lat || '', r.Lng || '', woTargetShort(r), r.IssueCategory, r.EmailSubject, r.Remarks, woMapLink(r), photos[r.WorkOrder] || ''].map(esc).join(','))));
+  return '\uFEFF' + head.map(esc).join(',') + '\n' + rows.join('\n');
+}
+function kmlFor(groups, title) {
+  const x = s => String(s ?? '').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+  const styles = groups.map((g, i) => `<Style id="t${i}"><IconStyle><color>${g.color}</color><scale>1.15</scale><Icon><href>http://maps.google.com/mapfiles/kml/paddle/wht-blank.png</href></Icon></IconStyle></Style>`).join('');
+  const folders = groups.map((g, i) => `<Folder><name>${x(g.name)} (${g.items.filter(hasXY).length})</name>` + g.items.filter(hasXY).map((r, k) =>
+    `<Placemark><name>${k + 1} · CM ${x(r.WorkOrder)}</name><description><![CDATA[Team: ${g.name}<br>Target finish: ${woTargetShort(r)}<br>${r.IssueCategory || ''}<br>${r.EmailSubject || ''}<br><a href="${woMapLink(r)}">Open in Google Maps</a>${photos[r.WorkOrder] ? `<br><img src="${photos[r.WorkOrder]}" width="240">` : ''}]]></description><styleUrl>#t${i}</styleUrl><Point><coordinates>${r.Lng},${r.Lat},0</coordinates></Point></Placemark>`).join('') + '</Folder>').join('');
+  return `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>${x(title)}</name>${styles}${folders}</Document></kml>`;
+}
+const gByName = n => planGroups().find(g => g.name === n);
+const planDateTag = () => planMeta().date;
+function planTeamCSV(name) { const g = gByName(name); if (g) downloadFile(`Team_${safeName(name)}_${planDateTag()}.csv`, csvFor([g]), 'text/csv;charset=utf-8'); }
+function planTeamKML(name) { const g = gByName(name); if (g) downloadFile(`Team_${safeName(name)}_${planDateTag()}.kml`, kmlFor([g], `${name} – ${planDateTag()}`), 'application/vnd.google-earth.kml+xml'); }
+function planAllCSV() { downloadFile(`Work_Plan_All_Teams_${planDateTag()}.csv`, csvFor(planGroups()), 'text/csv;charset=utf-8'); }
+function planAllKML() { downloadFile(`Work_Plan_All_Teams_${planDateTag()}.kml`, kmlFor(planGroups(), `Work plan ${planDateTag()}`), 'application/vnd.google-earth.kml+xml'); }
+async function planTeamCopy(name) { const g = gByName(name); if (!g) return; const ok = await copyToClipboard(buildTeamMessage(g, planMeta())); showToast(ok ? `Plan for ${name} copied` : 'Copy failed', ok ? undefined : 'error'); }
+function planTeamWhatsApp(name) { const g = gByName(name); if (g) openWhatsApp(buildTeamMessage(g, planMeta())); }
+function planTeamEmail(name) { const g = gByName(name); if (g) openEmail(`Work Plan ${planDateLabel(planMeta().date)} – ${name}`, buildTeamMessage(g, planMeta())); }
+
+function openPlanModal(ids) {
+  planIds = (ids && ids.length ? ids : [...woSelected]).map(String);
+  if (!planIds.length) { showToast('Select work orders first (tick the boxes)', 'error'); return; }
+  document.getElementById('plan-date').value = new Date().toISOString().slice(0, 10);
+  planTeam = {};
+  planIds.forEach(id => { const r = woById(id); if (r && r.TeamsVehicles && activeTeams().some(t => t.name === r.TeamsVehicles)) planTeam[id] = r.TeamsVehicles; });
+  const opts = '<option value="">— choose team —</option>' + activeTeams().map(t => `<option value="${escapeHtml(t.name)}">${escapeHtml(t.name)}</option>`).join('');
+  document.getElementById('plan-assign-all').innerHTML = opts;
+  document.getElementById('plan-no-teams').style.display = activeTeams().length ? 'none' : 'block';
+  renderPlanList();
+  openModal('planModal');
+}
+function planSetTeam(id, name) { if (name) planTeam[String(id)] = name; else delete planTeam[String(id)]; renderPlanList(); }
+function planAssignAll() {
+  const name = document.getElementById('plan-assign-all').value;
+  if (!name) { showToast('Choose a team first', 'error'); return; }
+  planIds.forEach(id => { planTeam[id] = name; });
+  renderPlanList();
+}
+function planRemove(id) { planIds = planIds.filter(x => x !== String(id)); delete planTeam[String(id)]; renderPlanList(); }
+
+function renderPlanList() {
+  const list = planList();
+  document.getElementById('plan-count').textContent = list.length;
+  const teamOpts = sel => '<option value="">— unassigned —</option>' + activeTeams().map(t => `<option value="${escapeHtml(t.name)}" ${sel === t.name ? 'selected' : ''}>${escapeHtml(t.name)}</option>`).join('');
+  document.getElementById('plan-list').innerHTML = list.map((r, i) => `
+    <div class="plan-row">
+      <span class="plan-n">${i + 1}</span>
+      <div class="plan-main"><b>CM ${escapeHtml(r.WorkOrder)}</b> <span class="status-badge badge-${escapeHtml(r.Status)}">${escapeHtml(r.Status)}</span>
+        <div class="plan-sub">${escapeHtml(r.IssueCategory || r.EmailSubject || '')}</div>
+        <div class="plan-sub">Target finish ${woTargetShort(r)}${hasXY(r) ? '' : ' · <span style="color:var(--red)">no coordinates</span>'}</div></div>
+      <select class="plan-team-sel" onchange="planSetTeam('${escapeHtml(r.WorkOrder)}', this.value)" aria-label="Team">${teamOpts(planTeam[String(r.WorkOrder)] || '')}</select>
+      <button class="btn btn-ghost btn-xs" onclick="planRemove('${escapeHtml(r.WorkOrder)}')" title="Remove"><i class="fas fa-times"></i></button>
+    </div>`).join('') || '<div class="md-empty">No work orders</div>';
+
+  const groups = planGroups();
+  document.getElementById('plan-teams').innerHTML = groups.map(g => {
+    const cap = g.team ? (g.team.daily_capacity || 20) : null;
+    const over = cap && g.items.length > cap;
+    const n = escapeHtml(g.name).replace(/'/g, '&#39;');
+    const routes = routeLinks(g.items);
+    const noXY = g.items.filter(r => !hasXY(r)).length;
+    return `<div class="plan-team">
+      <div class="pt-head"><b style="border-left:4px solid ${kmlToCss(g.color)}; padding-left:8px;">${escapeHtml(g.name)}</b>
+        <span class="pt-count ${over ? 'warn' : ''}">${g.items.length}${cap ? ' / ' + cap : ''} locations</span></div>
+      ${over ? `<div class="team-warn">More than the team's daily capacity (${cap}).</div>` : ''}
+      ${noXY ? `<div class="team-warn">${noXY} without coordinates (not in the route).</div>` : ''}
+      <div class="pt-routes">${routes.map(r => `<a class="pt-route" href="${r.url}" target="_blank" rel="noopener"><i class="fas fa-route"></i> ${routes.length === 1 && r.from === r.to ? 'Open location' : `Route · stops ${r.from}–${r.to}`}</a>`).join('') || '<span class="plan-sub">No coordinates for a route</span>'}</div>
+      <div class="pt-actions">
+        <button class="btn btn-ghost btn-xs" onclick="planTeamCSV('${n}')"><i class="fas fa-file-csv"></i> CSV</button>
+        <button class="btn btn-ghost btn-xs" onclick="planTeamKML('${n}')"><i class="fas fa-map"></i> KML</button>
+        <button class="btn btn-ghost btn-xs" onclick="planTeamWhatsApp('${n}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        <button class="btn btn-ghost btn-xs" onclick="planTeamEmail('${n}')"><i class="fas fa-envelope"></i> Email</button>
+        <button class="btn btn-ghost btn-xs" onclick="planTeamCopy('${n}')"><i class="fas fa-copy"></i> Copy</button>
+        <button class="btn btn-ghost btn-xs" onclick="planPDF('${n}')"><i class="fas fa-file-pdf"></i> PDF</button>
+      </div></div>`;
+  }).join('');
+}
+const kmlToCss = k => `#${k.slice(6, 8)}${k.slice(4, 6)}${k.slice(2, 4)}`;   // aabbggrr → #rrggbb
+
+const planText = () => buildPlanMessage(planGroups(), planMeta());
+async function planCopy() { const ok = await copyToClipboard(planText()); showToast(ok ? 'Plan copied – paste anywhere' : 'Copy failed', ok ? undefined : 'error'); }
+function planWhatsApp() { openWhatsApp(planText()); }
+function planEmail() { openEmail(`Work Plan – ${planDateLabel(planMeta().date)}`, planText()); }
+async function planShare() {
+  try { if (navigator.share) { await navigator.share({ title: 'Work Plan', text: planText() }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  planCopy();
+}
+function planPDF(onlyTeam) {
+  if (!window.jspdf) { showToast('PDF library is still loading – try again', 'error'); return; }
+  const meta = planMeta();
+  const groups = planGroups().filter(g => !onlyTeam || g.name === onlyTeam);
+  if (!groups.length) return;
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const W = 210, M = 12;
+  const cols = { n: M, cm: M + 8, desc: M + 34, tf: M + 112, loc: M + 142, done: M + 172 };
+  let first = true;
+  groups.forEach(g => {
+    if (!first) pdf.addPage(); first = false;
+    const header = () => {
+      pdf.setFillColor(15, 118, 110); pdf.rect(0, 0, W, 26, 'F');
+      pdf.setTextColor(255); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16);
+      pdf.text(`Work Plan – ${g.name}`, M, 12);
+      pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10);
+      pdf.text(`Date: ${planDateLabel(meta.date)}${g.team && g.team.vehicle ? `   Vehicle: ${g.team.vehicle}` : ''}${g.team && g.team.leader ? `   Leader: ${g.team.leader}` : ''}`, M, 19);
+      pdf.text(`${g.items.length} location${g.items.length === 1 ? '' : 's'}`, W - M, 12, { align: 'right' });
+      return 32;
+    };
+    const th = y => {
+      pdf.setFillColor(241, 245, 249); pdf.rect(M, y - 5, W - 2 * M, 8, 'F');
+      pdf.setTextColor(51, 65, 85); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8.5);
+      pdf.text('#', cols.n + 1, y); pdf.text('CM #', cols.cm, y); pdf.text('Work / Issue', cols.desc, y);
+      pdf.text('Target finish', cols.tf, y); pdf.text('Location', cols.loc, y); pdf.text('Done', cols.done, y);
+      return y + 7;
+    };
+    let y = header();
+    const routes = routeLinks(g.items);
+    if (routes.length) {
+      pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9); pdf.setTextColor(37, 99, 235);
+      let x = M; pdf.setTextColor(71, 85, 105); pdf.text('Google Maps route:', x, y); x += 32;
+      routes.forEach(r => { const label = routes.length === 1 ? 'Open route' : `Stops ${r.from}-${r.to}`; pdf.setTextColor(37, 99, 235); pdf.textWithLink(label, x, y, { url: r.url }); x += pdf.getTextWidth(label) + 6; });
+      y += 7;
+    }
+    if (meta.notes) {
+      pdf.setTextColor(71, 85, 105); pdf.setFont('helvetica', 'italic'); pdf.setFontSize(9);
+      const nl = pdf.splitTextToSize('Notes: ' + meta.notes, W - 2 * M); pdf.text(nl, M, y); y += nl.length * 4.5 + 2;
+    }
+    y = th(y);
+    g.items.forEach((r, i) => {
+      const desc = pdf.splitTextToSize([r.IssueCategory, r.EmailSubject].filter(Boolean).join(' – ') || '—', 76).slice(0, 4);
+      const h = Math.max(12, desc.length * 4.2 + 4);
+      if (y + h > 282) { pdf.addPage(); y = th(header()); }
+      pdf.setDrawColor(226, 232, 240); pdf.line(M, y + h - 3, W - M, y + h - 3);
+      pdf.setTextColor(15, 23, 42); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9);
+      pdf.text(String(i + 1), cols.n + 1, y);
+      pdf.setFont('helvetica', 'bold'); pdf.text(String(r.WorkOrder), cols.cm, y);
+      pdf.setFont('helvetica', 'normal'); pdf.text(desc, cols.desc, y);
+      pdf.setTextColor(185, 28, 28); pdf.text(woTargetShort(r), cols.tf, y);
+      const link = woMapLink(r);
+      if (link) { pdf.setTextColor(37, 99, 235); pdf.textWithLink('Open map', cols.loc, y, { url: link }); }
+      else { pdf.setTextColor(148, 163, 184); pdf.text('—', cols.loc, y); }
+      pdf.setDrawColor(148, 163, 184); pdf.rect(cols.done + 2, y - 3.6, 4.5, 4.5);
+      y += h;
+    });
+  });
+  const pages = pdf.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) { pdf.setPage(p); pdf.setFontSize(8); pdf.setTextColor(148, 163, 184); pdf.text(`QBC Operations Center · page ${p}/${pages}`, W / 2, 292, { align: 'center' }); }
+  pdf.save(`Work_Plan_${onlyTeam ? safeName(onlyTeam) + '_' : ''}${meta.date}.pdf`);
+  showToast('Work plan PDF created');
+}
+async function planDispatch() {
+  const list = planList().filter(r => r.Status !== 'COMP');
+  if (!list.length) { showToast('Nothing to dispatch (all selected are completed)', 'error'); return; }
+  const unassigned = list.filter(r => !planTeam[String(r.WorkOrder)]).length;
+  const summary = planGroups().map(g => `${g.name}: ${g.items.filter(r => r.Status !== 'COMP').length}`).join('\n');
+  if (!confirm(`Mark ${list.length} work order(s) as DISPATCH?\n\n${summary}${unassigned ? '\n\n(' + unassigned + ' without a team)' : ''}`)) return;
+  const now = inputToNaive(new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16));
+  let ok = 0, fail = 0;
+  for (const r of list) {
+    const before = { Status: r.Status, DispatchedDate: r.DispatchedDate, StatusDT: r.StatusDT, TeamsVehicles: r.TeamsVehicles };
+    r.Status = 'DISPATCH'; r.DispatchedDate = now; r.StatusDT = now;
+    const team = planTeam[String(r.WorkOrder)];
+    if (team) r.TeamsVehicles = team;
+    syncDerivedDates(r);
+    try { await saveWorkOrderToSupabase(r); ok++; } catch (e) { Object.assign(r, before); fail++; console.error(e); }
+  }
+  logAudit('Dispatched work orders', `${ok} dispatched`);
+  showToast(fail ? `${ok} dispatched, ${fail} failed` : `${ok} work order(s) dispatched`, fail ? 'error' : undefined);
+  applyFilters(false, true); updateDashboard(); renderPlanList();
 }
 
 
