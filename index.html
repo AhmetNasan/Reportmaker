@@ -2171,6 +2171,12 @@ details.md-card summary { list-style:none; } details.md-card summary::-webkit-de
 .pm-pop-btns button { border:2px solid var(--c, #94a3b8); background:#fff; border-radius:999px; padding:4px 10px; font:600 11.5px Arial; cursor:pointer; }
 
 .badge-CANCELLED { background:rgba(100,116,139,.16); color:#64748b; }
+
+/* TS / DS + shop drawings */
+.chip-TS { background:rgba(37,99,235,.14); color:var(--blue); } .chip-DS { background:rgba(124,58,237,.14); color:var(--purple); }
+.wo-chip.purple:not(.active) b { color:var(--purple); } .wo-chip.blue:not(.active) b { color:var(--blue); }
+.shop-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
+.shop-main { flex:1; min-width:0; } .shop-main b { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .shop-main small { color:var(--muted); font-size:11px; }
 </style>
 </head>
 <body data-theme="light">
@@ -3319,7 +3325,7 @@ details.md-card summary { list-style:none; } details.md-card summary::-webkit-de
       <div class="detail-section">
         <div class="detail-section-title">Sign Specifications</div>
         <div class="detail-info-grid">
-          <div class="info-item"><label>Sign Type</label><span id="val-signtype">--</span><input type="text" id="det-signtype"></div>
+          <div class="info-item"><label>Asset Type (TS / DS)</label><span id="val-signtype">--</span><input type="text" id="det-signtype"></div>
           <div class="info-item"><label>Sign Reference</label><span id="val-signref">--</span><input type="text" id="det-signref"></div>
           <div class="info-item"><label>Sign Shape</label><span id="val-signshape">--</span><input type="text" id="det-signshape"></div>
           <div class="info-item"><label>Dimensions (mm)</label><span id="val-signsize">--</span><input type="text" id="det-signsize"></div>
@@ -3378,6 +3384,15 @@ details.md-card summary { list-style:none; } details.md-card summary::-webkit-de
           <div class="info-item"><label>Scrap Removal</label><span id="val-scrap">--</span><input type="text" id="det-scrap"></div>
           <div class="info-item" style="grid-column: span 2;"><label>Fabrication Notes</label><span id="val-fabdetails">--</span><textarea id="det-fabdetails" rows="3"></textarea></div>
         </div>
+      </div>
+    </div>
+
+    <div class="detail-pane" id="pane-shop">
+      <div class="detail-section">
+        <div class="detail-section-title">Shop Drawing (PDF)</div>
+        <div id="shop-list"></div>
+        <label class="btn btn-ghost btn-sm" style="margin-top:8px; cursor:pointer"><i class="fas fa-upload"></i> Upload PDF<input type="file" accept="application/pdf,.pdf" multiple hidden onchange="uploadShopDrawing(this)"></label>
+        <span class="plan-sub" id="shop-status" style="margin-left:8px"></span>
       </div>
     </div>
 
@@ -3645,6 +3660,7 @@ async function onAuthenticated() {
   loadNotifications();
   loadDispatchTeams();
   loadLastUpdate();
+  loadShopDrawingIndex();
   fetchReminders();
   fetchFollowUpNotes();
   setupNotifListener();
@@ -4133,7 +4149,8 @@ async function fetchData() {
       created_at: r.created_at,
       last_modified_at: r.last_modified_at,
       Priority: r.priority || 'Normal',
-      ...woCoreFromRow(r)
+      ...woCoreFromRow(r),
+      SignCat: catOf(r.sign_type) || catOf(r.road_catg)
     }));
 
     if (photoRes.error) throw photoRes.error;
@@ -5041,6 +5058,7 @@ async function openDetail(woId) {
   renderDetailAttachments(woId);
   loadComments(woId);
   renderDetailReminderList();
+  renderShopDrawings(woId);
   
   // Update UI mode
   document.getElementById('detail-edit-btn').style.display = 'block';
@@ -7389,6 +7407,8 @@ async function planFabPDF() {
 let woQuick = 'all';
 const WO_QUICK = {
   all:      { label: 'All',              fn: () => true },
+  ts:       { label: 'TS',               fn: r => signCat(r) === 'TS', tone: 'blue' },
+  ds:       { label: 'DS',               fn: r => signCat(r) === 'DS', tone: 'purple' },
   overdue:  { label: 'Overdue',          fn: r => r.Status !== 'CANCELLED' && getStatusCat(r) === 'red', tone: 'red' },
   due48:    { label: 'Due in 48 h',      fn: r => { if (r.Status === 'CANCELLED' || getStatusCat(r) !== 'blue') return false; const tf = parseLocalDT(r.TargetFinishDT || r.TargetFinish); return !!tf && tf - Date.now() <= 48 * 3600e3; }, tone: 'amber' },
   wperm:    { label: 'Waiting permits',  fn: r => r.Status === 'WPERM', tone: 'purple' },
@@ -7980,6 +8000,21 @@ function tplStatusTable(xml, rels, rows, fit, startMedia, zip) {
      statusRows: [{ wo, photo, coords, status, statusDT, start, disp, finish, ro }],
      fitMode: 'contain' | 'stretch', placeholders: {before, during, after} (PNG bytes) }
    images: { bytes:Uint8Array, w, h } or null (→ grey placeholder picture the user can replace in PowerPoint) */
+/* "Installed Signs Summary": Traffic Signs (TS) / Directional Signs (DS) for the selected installation date(s) */
+function tplSignsSlide(xml, s) {
+  const bd = c => `<a:solidFill><a:srgbClr val="${c}"/></a:solidFill>`;
+  const cell = (text, o = {}) => `<a:tc><a:txBody><a:bodyPr/><a:lstStyle/><a:p><a:pPr algn="${o.al || 'ctr'}"/><a:r><a:rPr lang="en-US" sz="${o.sz || 1600}" b="${o.b ? 1 : 0}" dirty="0"><a:solidFill><a:srgbClr val="${o.color || '1F1F1F'}"/></a:solidFill><a:latin typeface="Calibri"/></a:rPr><a:t>${xmlEsc(text)}</a:t></a:r></a:p></a:txBody><a:tcPr marL="108000" marR="108000" anchor="ctr">${['lnL', 'lnR', 'lnT', 'lnB'].map(t => `<a:${t} w="12700">${bd('8064A2')}</a:${t}>`).join('')}${bd(o.fill || 'FFFFFF')}</a:tcPr></a:tc>`;
+  const H = 0.62;
+  const head = `<a:tr h="${Math.round(H * EMU)}">${[['Sign type', 'ctr'], ['Number of work orders', 'ctr'], ['Total number of signs', 'ctr']].map(([t]) => cell(t, { b: 1, fill: 'E6B8B7', sz: 1500 })).join('')}</a:tr>`;
+  const body = s.rows.map((r, i) => `<a:tr h="${Math.round(H * EMU)}">${cell(r.label, { al: 'l', b: 1, fill: i % 2 ? 'EFEDF7' : 'FFFFFF' })}${cell(String(r.wo), { fill: i % 2 ? 'EFEDF7' : 'FFFFFF' })}${cell(String(r.signs), { b: 1, fill: i % 2 ? 'EFEDF7' : 'FFFFFF', color: '7A1F5C' })}</a:tr>`).join('');
+  const total = `<a:tr h="${Math.round(H * EMU)}">${cell('Total', { al: 'l', b: 1, fill: 'F2DCDB' })}${cell(String(s.total.wo), { b: 1, fill: 'F2DCDB' })}${cell(String(s.total.signs), { b: 1, fill: 'F2DCDB', color: '7A1F5C', sz: 1800 })}</a:tr>`;
+  const w = [5.4, 2.6, 2.8], totalW = w.reduce((a, b) => a + b, 0);
+  const frame = `<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="940" name="Signs Table"/><p:cNvGraphicFramePr><a:graphicFrameLocks noGrp="1"/></p:cNvGraphicFramePr><p:nvPr/></p:nvGraphicFramePr><p:xfrm><a:off x="${Math.round((11.69 - totalW) / 2 * EMU)}" y="${Math.round(2.1 * EMU)}"/><a:ext cx="${Math.round(totalW * EMU)}" cy="${Math.round(H * (s.rows.length + 2) * EMU)}"/></p:xfrm><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table"><a:tbl><a:tblPr firstRow="1"/><a:tblGrid>${w.map(x => `<a:gridCol w="${Math.round(x * EMU)}"/>`).join('')}</a:tblGrid>${head}${body}${total}</a:tbl></a:graphicData></a:graphic></p:graphicFrame>`;
+  let out = tplSetText(xml, 'Executed Works Summary for day 19 Nov 2026', s.title);
+  const g = out.match(/<p:graphicFrame>.*?<\/p:graphicFrame>/s)[0];
+  return out.replace(g, frame);
+}
+
 async function buildReportFromTemplate(JSZipCtor, tplB64, d) {
   const zip = await JSZipCtor.loadAsync(tplB64, { base64: true });
   const read = p => zip.file(p).async('string');
@@ -8005,6 +8040,7 @@ async function buildReportFromTemplate(JSZipCtor, tplB64, d) {
     }
   };
   if (d.rows.length) summaryPages(s2, r2, 'slide2.xml', 'Executed Works Summary for day 19 Nov 2026', d.executedTitle, d.rows, r => [r.sn, r.wo, r.lat, r.lng, r.dispatch, r.status]);
+  if (d.signs) slides.push({ path: 'slide2_signs.xml', xml: tplSignsSlide(s2, d.signs), rels: r2 });
 
   /* 3 ─ one slide per executed work order (BEFORE / DURING / AFTER) */
   let mediaN = 0;
@@ -8354,7 +8390,13 @@ async function generateReport() {
     status.textContent = 'Building PowerPoint…';
     const ph = { before: await makePlaceholderPng('BEFORE photo'), during: await makePlaceholderPng('DURING photo'), after: await makePlaceholderPng('AFTER photo') };
     const same = range.from === range.to;
+    const tot = signTotals(picked);
+    const signRows = [{ label: SIGN_CATS.TS, ...tot.TS }, { label: SIGN_CATS.DS, ...tot.DS }];
+    if (tot.other.wo) signRows.push({ label: 'Not specified', ...tot.other });
+    const signs = picked.length ? { title: `Installed Signs Summary for ${same ? 'day ' + repDateLabel(range.from) : repRangeLabel(range.from, range.to)}`, rows: signRows,
+      total: { wo: tot.TS.wo + tot.DS.wo + tot.other.wo, signs: tot.TS.signs + tot.DS.signs + tot.other.signs } } : null;
     const zip = await buildReportFromTemplate(JSZip, REPORT_TEMPLATE_B64, {
+      signs,
       title,
       dateLine: same ? `Day of ${repDateLabel(range.from)}` : `Period: ${repRangeLabel(range.from, range.to)}`,
       executedTitle: same ? `Executed Works Summary for day ${repDateLabel(range.from)}` : `Executed Works Summary for ${repRangeLabel(range.from, range.to)}`,
@@ -8445,6 +8487,93 @@ function refreshPlanMap(fit) {
   const miss = planList().filter(r => !hasXY(r)).length;
   const note = document.getElementById('plan-map-note');
   if (note) note.textContent = `${pts.length} on the map${miss ? ` · ${miss} without coordinates` : ''}`;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SHOP DRAWINGS (PDF) – uploaded from the work-order details
+   ═══════════════════════════════════════════════════════════════ */
+let shopDrawings = {};                                   // CM # → [{id,name,url,path,size,at}]
+async function loadShopDrawingIndex() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient.from('shop_drawings').select('*').order('created_at', { ascending: true });
+    if (error) throw error;
+    shopDrawings = {};
+    (data || []).forEach(d => (shopDrawings[d.work_order] = shopDrawings[d.work_order] || []).push({ id: d.id, name: d.file_name, url: d.public_url, path: d.storage_path, size: d.file_size, at: d.created_at }));
+  } catch (e) { console.warn('shop_drawings not available (run template_v2_setup.sql):', e.message); }
+}
+const fmtSize = b => !b ? '' : (b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB');
+function renderShopDrawings(woId) {
+  const box = document.getElementById('shop-list'); if (!box) return;
+  const list = shopDrawings[String(woId)] || [];
+  box.innerHTML = list.map((d, i) => `
+    <div class="shop-row">
+      <i class="fas fa-file-pdf" style="color:var(--red); font-size:20px"></i>
+      <div class="shop-main"><a href="${escapeHtml(d.url)}" target="_blank" rel="noopener"><b>${escapeHtml(d.name)}</b></a>
+        <small>${fmtSize(d.size)}${d.at ? ' · ' + formatDateTime(d.at) : ''}</small></div>
+      <a class="btn btn-ghost btn-xs" href="${escapeHtml(d.url)}" target="_blank" rel="noopener" title="Open"><i class="fas fa-external-link-alt"></i></a>
+      <button class="btn btn-ghost btn-xs" onclick="deleteShopDrawing('${escapeHtml(String(woId))}', ${i})" title="Delete"><i class="fas fa-trash"></i></button>
+    </div>`).join('') || '<div class="plan-sub">No shop drawing uploaded yet.</div>';
+}
+async function uploadShopDrawing(input) {
+  const files = [...(input.files || [])]; input.value = '';
+  const wo = String(selectedWorkOrder || '');
+  if (!wo || !files.length) return;
+  if (!supabaseClient) { showToast('Offline – cannot upload', 'error'); return; }
+  const status = document.getElementById('shop-status');
+  for (const f of files) {
+    if (!/\.pdf$/i.test(f.name) && f.type !== 'application/pdf') { showToast(`${f.name}: only PDF files are allowed`, 'error'); continue; }
+    if (f.size > 25 * 1024 * 1024) { showToast(`${f.name}: larger than 25 MB`, 'error'); continue; }
+    try {
+      status.textContent = `Uploading ${f.name}…`;
+      const safe = f.name.replace(/[^\w.\-]+/g, '_');
+      const path = `shop-drawings/${wo}/${Date.now()}_${safe}`;
+      const { error: upErr } = await supabaseClient.storage.from('qbc-storage').upload(path, f, { contentType: 'application/pdf' });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabaseClient.storage.from('qbc-storage').getPublicUrl(path);
+      const { data, error } = await supabaseClient.from('shop_drawings').insert({
+        work_order: wo, file_name: f.name, storage_path: path, public_url: publicUrl, file_size: f.size, uploaded_by: currentUser ? currentUser.id : null
+      }).select().single();
+      if (error) throw error;
+      (shopDrawings[wo] = shopDrawings[wo] || []).push({ id: data.id, name: f.name, url: publicUrl, path, size: f.size, at: data.created_at });
+      showToast(`Shop drawing uploaded: ${f.name}`);
+    } catch (e) {
+      console.error(e);
+      showToast(/relation|schema cache|does not exist/i.test(e.message || '') ? 'Shop drawings table missing – run template_v2_setup.sql in Supabase' : (e.message || 'Upload failed'), 'error');
+    }
+  }
+  status.textContent = '';
+  renderShopDrawings(wo);
+  if (typeof renderTable === 'function') renderTable();
+}
+async function deleteShopDrawing(wo, idx) {
+  const list = shopDrawings[wo]; if (!list || !list[idx]) return;
+  if (!confirm(`Delete "${list[idx].name}"?`)) return;
+  const d = list[idx];
+  try {
+    await supabaseClient.storage.from('qbc-storage').remove([d.path]);
+    const { error } = await supabaseClient.from('shop_drawings').delete().eq('id', d.id);
+    if (error) throw error;
+    list.splice(idx, 1);
+    renderShopDrawings(wo);
+    renderTable();
+  } catch (e) { showToast(e.message || 'Delete failed', 'error'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TS (Traffic Sign) / DS (Directional Sign)
+   ═══════════════════════════════════════════════════════════════ */
+const SIGN_CATS = { TS: 'Traffic Signs (TS)', DS: 'Directional Signs (DS)' };
+const catOf = v => { const u = String(v || '').trim().toUpperCase(); return /^TS\b|TRAFFIC/.test(u) ? 'TS' : (/^DS\b|DIRECTION/.test(u) ? 'DS' : ''); };
+// TS / DS is written in the "Asset Type" column (the first "Type" of the template); "Road Catg." is used only if Asset Type has no TS / DS
+const signCat = r => catOf(r.SignType) || catOf(r.RoadCatg);
+// number of signs of one work order = the sign "Qty" when it is a number, otherwise 1 sign per work order
+const signCount = r => { const n = parseFloat(String(r.SignQty ?? '').replace(',', '.')); return Number.isFinite(n) && n > 0 ? Math.round(n) : 1; };
+function signTotals(list) {
+  const t = { TS: { wo: 0, signs: 0 }, DS: { wo: 0, signs: 0 }, other: { wo: 0, signs: 0 } };
+  list.forEach(r => { const k = signCat(r) || 'other'; t[k].wo++; t[k].signs += signCount(r); });
+  return t;
 }
 
 
@@ -8804,7 +8933,11 @@ const ENGINEER_OPTIONS = ['Eng. Ahmed', 'Eng. Nour', 'Eng. Ashwin'];
 
 // Template headers – identical to the Excel file (order matters)
 const WO_TEMPLATE_HEADERS = [
-  'CM #', 'Photo', 'Coordinates', 'Status', 'Status Date', 'Target Start Date', 'Dispatched Date', 'Target Finish Date',
+  'CM #', 'Before Photo', 'During Photo', 'After Photo',
+  'Road Catg.', 'Asset Type', 'Ref', 'Shape', 'Size (mm)', 'Material', 'Qty',      // SIGN FACE  (Asset Type: TS = Traffic Sign · DS = Directional Sign)
+  'Type', 'Height', 'Qty',                                                           // POST
+  'Size', 'Qty',                                                                     // FOUNDATION
+  'Coordinates', 'Status', 'Status Date', 'Target Start Date', 'Dispatched Date', 'Target Finish Date',
   'RO & TDP & NCP (If Req.)', 'Comp Date', 'Installation Date', 'Date Reported', 'Reported by', 'Email Subject',
   'Issue Category', 'Closure Required?', 'The responsible for the closure', 'Teams and Veihcles\n(If Provided By QBC)', 'Remarks'
 ];
@@ -8813,6 +8946,7 @@ const WO_TEMPLATE_HEADERS = [
 const WO_COLS = [
   { k: 'WorkOrder',        label: 'CM #',                                   w: 112, def: true },
   { k: 'Photo',            label: 'Photo',                                  w: 72,  def: true,  nofilter: true },
+  { k: 'SignCat',          label: 'TS / DS',                                w: 74,  def: true },
   { k: 'Coordinates',      label: 'Coordinates',                            w: 160, def: false, nofilter: true },
   { k: 'Status',           label: 'Status',                                 w: 96,  def: true },
   { k: 'StatusDT',         label: 'Status Date',                            w: 132, def: true,  nodrop: true },
@@ -8829,7 +8963,20 @@ const WO_COLS = [
   { k: 'ClosureRequired',  label: 'Closure Required?',                      w: 96,  def: false },
   { k: 'ClosureBy',        label: 'The responsible for the closure',        w: 130, def: false },
   { k: 'TeamsVehicles',    label: 'Teams and Vehicles (If Provided By QBC)', w: 220, def: false },
-  { k: 'Remarks',          label: 'Remarks',                                w: 250, def: true,  nodrop: true },
+  { k: 'RoadCatg',         label: 'Road Catg.',                             w: 110, def: false },
+  { k: 'SignType',         label: 'Asset Type',                             w: 120, def: false },
+  { k: 'SignRef',          label: 'Sign · Ref',                             w: 110, def: false },
+  { k: 'SignShape',        label: 'Sign · Shape',                           w: 120, def: false },
+  { k: 'SignSize',         label: 'Sign · Size (mm)',                       w: 110, def: false },
+  { k: 'SignMaterial',     label: 'Sign · Material',                        w: 110, def: false },
+  { k: 'SignQty',          label: 'Sign · Qty',                             w: 70,  def: false },
+  { k: 'PostType',         label: 'Post · Type',                            w: 110, def: false },
+  { k: 'PostHeight',       label: 'Post · Height',                          w: 130, def: false },
+  { k: 'PostQty',          label: 'Post · Qty',                             w: 70,  def: false },
+  { k: 'FoundSize',        label: 'Foundation · Size',                      w: 120, def: false },
+  { k: 'FoundQty',         label: 'Foundation · Qty',                       w: 90,  def: false },
+  { k: 'ShopDrawing',      label: 'Shop drawing (PDF)',                     w: 110, def: false, nofilter: true },
+  { k: 'Remarks',          label: 'Remarks',                                w: 230, def: true,  nodrop: true },
   { k: 'Actions',          label: 'Share / Print',                          w: 150, def: true,  nofilter: true }
 ];
 
@@ -8891,6 +9038,7 @@ function syncDerivedDates(r) {
   if (r.ReportedBy) r.PWA_ENG = r.ReportedBy;
   if (r.EmailSubject) r.Description = r.EmailSubject;
   r.Coordinates = (r.Lat && r.Lng) ? `${r.Lat}, ${r.Lng}` : '';
+  r.SignCat = signCat(r);
   return r;
 }
 
@@ -8954,6 +9102,7 @@ function woCellHTML(c, r, ctx) {
         <input type="checkbox" class="wo-sel" data-wo="${escapeHtml(r.WorkOrder)}" ${woSelected.has(String(r.WorkOrder)) ? 'checked' : ''} onclick="event.stopPropagation(); toggleWoSelect('${escapeHtml(r.WorkOrder)}', this.checked)" aria-label="Select CM ${escapeHtml(r.WorkOrder)}">
         <span class="wo-num">${escapeHtml(r.WorkOrder)}</span>
         ${(r.Lat && r.Lng) ? `<button class="wo-pin" title="Show on map" onclick="event.stopPropagation(); showOnMap(${r.Lat}, ${r.Lng}, '${escapeHtml(r.WorkOrder)}')"><i class="fas fa-map-marker-alt"></i></button>` : ''}
+        ${(shopDrawings[String(r.WorkOrder)] || []).length ? '<i class="fas fa-file-pdf" title="Shop drawing uploaded" style="color:var(--red); font-size:12px"></i>' : ''}
         ${ctx.active > 0 ? `<span class="ctx-badge" title="${ctx.active} active reminders" onclick="event.stopPropagation(); showPage('followup');">📌 ${ctx.active}</span>` : ''}
       </div>`;
     case 'Photo': {
@@ -8972,6 +9121,8 @@ function woCellHTML(c, r, ctx) {
       return v ? `<span class="chip ${v === 'Received' ? 'chip-ok' : 'chip-warn'}">${escapeHtml(v)}</span>` : '<span class="cell-empty">—</span>';
     }
     case 'ClosureRequired': return txt(r.ClosureRequired);
+    case 'SignCat': { const c = signCat(r); return c ? `<span class="chip chip-${c}" title="${SIGN_CATS[c]}">${c}</span>` : '<span class="cell-empty">—</span>'; }
+    case 'ShopDrawing': { const l = shopDrawings[String(r.WorkOrder)] || []; return l.length ? l.map(d => `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${escapeHtml(d.name)}"><i class="fas fa-file-pdf" style="color:var(--red)"></i></a>`).join(' ') : '<span class="cell-empty">—</span>'; }
     case 'Actions': {
       const id = escapeHtml(r.WorkOrder);
       return `<div class="row-actions" onclick="event.stopPropagation()">
@@ -9022,42 +9173,46 @@ function downloadCSVTemplate() {
   if (typeof XLSX === 'undefined') { showToast('Excel library is still loading – try again in a moment', 'error'); return; }
   const wb = XLSX.utils.book_new();
   const example = [
-    27700001, '', '25.093410, 51.520555', 'INPRG', new Date(2026, 7, 6, 12, 15, 10), new Date(2026, 7, 6, 12, 15, 10), new Date(2026, 7, 6, 13, 34, 0),
-    new Date(2026, 7, 10, 12, 15, 10), 'Received', 'Not Yet', 'Not Yet', new Date(2026, 7, 6), 'Eng. Ahmed',
+    27700001, '', '', '',
+    'Highway', 'TS', 'W301', 'RECTANGULAR', '900x800', 'Aluminium', 1,
+    '76mm Galvanized', 3000, 1,
+    '400x400x600', 1,
+    '25.093410, 51.520555', 'INPRG', new Date(2026, 7, 6, 12, 15, 10), new Date(2026, 7, 6, 12, 15, 10), new Date(2026, 7, 6, 13, 34, 0), new Date(2026, 7, 10, 12, 15, 10),
+    'Received', 'Not Yet', 'Not Yet', new Date(2026, 7, 6), 'Eng. Ahmed',
     'CM 27700001 - Example subject (delete this row)', ISSUE_CATEGORIES[3], 'No', 'QBC', TEAM_OPTIONS[0], 'Example remark'
   ];
   const ws = XLSX.utils.aoa_to_sheet([WO_TEMPLATE_HEADERS, example], { cellDates: true });
-  const dtCols = [4, 5, 6, 7];
-  dtCols.forEach(ci => { const a = XLSX.utils.encode_cell({ r: 1, c: ci }); if (ws[a]) ws[a].z = 'yyyy-mm-dd hh:mm:ss'; });
-  const a11 = XLSX.utils.encode_cell({ r: 1, c: 11 }); if (ws[a11]) ws[a11].z = 'yyyy-mm-dd';
-  ws['!cols'] = [12, 12, 28, 12, 20, 20, 20, 20, 22, 20, 16, 14, 16, 60, 48, 14, 24, 52, 60].map(w => ({ wch: w }));
+  [18, 19, 20, 21, 23].forEach(ci => { const a = XLSX.utils.encode_cell({ r: 1, c: ci }); if (ws[a]) ws[a].z = 'yyyy-mm-dd hh:mm:ss'; });
+  [24, 25].forEach(ci => { const a = XLSX.utils.encode_cell({ r: 1, c: ci }); if (ws[a]) ws[a].z = 'yyyy-mm-dd'; });
+  ws['!cols'] = [12, 14, 14, 14, 11, 16, 14, 16, 14, 14, 8, 14, 14, 8, 14, 8, 28, 12, 20, 20, 20, 20, 22, 20, 16, 14, 16, 60, 48, 14, 24, 52, 60].map(w => ({ wch: w }));
   ws['!freeze'] = { xSplit: 1, ySplit: 1 };
   XLSX.utils.book_append_sheet(wb, ws, 'Project Issues Register');
 
   const rows = Math.max(ISSUE_CATEGORIES.length, TEAM_OPTIONS.length, ENGINEER_OPTIONS.length);
-  const setup = [['Issue Category', 'Reported by', 'Teams and Veihcles (If Provided By QBC)', 'Status', 'RO & TDP & NCP', 'Closure Required? / Responsible']];
-  const extra = [['COMP', 'Received', 'Yes / No'], ['INPRG', 'Not Received', 'Egis / QBC'], ['DISPATCH'], ['WPERM']];
-  for (let i = 0; i < rows; i++) setup.push([ISSUE_CATEGORIES[i] || '', ENGINEER_OPTIONS[i] || '', TEAM_OPTIONS[i] || '', ...(extra[i] || ['', '', ''])]);
+  const setup = [['Issue Category', 'Reported by', 'Teams and Veihcles (If Provided By QBC)', 'Status', 'RO & TDP & NCP', 'Closure Required? / Responsible', 'Asset Type']];
+  const extra = [['COMP', 'Received', 'Yes / No', 'TS = Traffic Sign'], ['INPRG', 'Not Received', 'Egis / QBC', 'DS = Directional Sign'], ['DISPATCH'], ['WPERM'], ['CANCELLED']];
+  for (let i = 0; i < Math.max(rows, extra.length); i++) setup.push([ISSUE_CATEGORIES[i] || '', ENGINEER_OPTIONS[i] || '', TEAM_OPTIONS[i] || '', ...(extra[i] || ['', '', '', ''])]);
   const ws2 = XLSX.utils.aoa_to_sheet(setup);
-  ws2['!cols'] = [56, 16, 56, 12, 18, 30].map(w => ({ wch: w }));
+  ws2['!cols'] = [56, 16, 56, 12, 18, 30, 24].map(w => ({ wch: w }));
   XLSX.utils.book_append_sheet(wb, ws2, 'Setup');
 
   const notes = [
     ['How to fill the template'],
     ['1. Keep the header row of "Project Issues Register" unchanged. Delete the example row before uploading.'],
     ['2. CM # is the unique key – an existing CM # is updated, a new one is added.'],
-    ['3. Coordinates: "latitude, longitude" in one cell, e.g. 25.093410, 51.520555.'],
-    ['4. Dates: yyyy-mm-dd hh:mm:ss (Excel date/time cells are fine). Use "Not Yet" for a pending Comp Date / Installation Date.'],
-    ['5. Photo: insert the picture into the Photo cell (Insert > Pictures > Place in Cell). One picture per CM #.'],
-    ['6. Status: COMP, INPRG, DISPATCH, WPERM (RTNENG / APPR are also accepted).'],
-    ['7. Lists for the other columns are on the "Setup" sheet.']
+    ['3. Pictures: put the picture in the cell of Before Photo / During Photo / After Photo (Insert > Pictures > Place in Cell). One picture per cell.'],
+    ['4. Columns E–K = SIGN FACE (Road Catg., Asset Type, Ref, Shape, Size (mm), Material, Qty), L–N = POST (Type, Height, Qty), O–P = FOUNDATION (Size, Qty). They are read by position, so keep their order.'],
+    ['5. Asset Type: TS = Traffic Sign, DS = Directional Sign. The report counts them separately (Sign Qty = number of signs; empty = 1 sign per CM).'],
+    ['6. Coordinates: "latitude, longitude" in one cell, e.g. 25.093410, 51.520555.'],
+    ['7. Dates: yyyy-mm-dd hh:mm:ss (Excel date/time cells are fine). Use "Not Yet" for a pending Comp Date / Installation Date.'],
+    ['8. Status: COMP, INPRG, DISPATCH, WPERM, CANCELLED (RTNENG / APPR are also accepted).'],
+    ['9. Lists for the other columns are on the "Setup" sheet.']
   ];
   const ws3 = XLSX.utils.aoa_to_sheet(notes);
-  ws3['!cols'] = [{ wch: 120 }];
+  ws3['!cols'] = [{ wch: 140 }];
   XLSX.utils.book_append_sheet(wb, ws3, 'Instructions');
   XLSX.writeFile(wb, 'qbc_work_orders_template.xlsx', { cellDates: true });
 }
-
 /* ── export (same layout as the template, so it can be re-uploaded) ── */
 function exportTableCSV() {
   const data = filteredData;
@@ -9065,11 +9220,16 @@ function exportTableCSV() {
   const esc = v => `"${(v == null ? '' : String(v)).replace(/"/g, '""')}"`;
   const full = v => { if (!v) return ''; const s = String(v).replace('T', ' '); return s.length === 10 ? s : s.slice(0, 19); };
   const headers = WO_TEMPLATE_HEADERS.map(h => h.replace('\n', ' '));
-  const rows = data.map(r => [
-    r.WorkOrder, photos[r.WorkOrder] || '', r.Coordinates, r.Status, full(r.StatusDT), full(r.TargetStartDT), full(r.DispatchedDate), full(r.TargetFinishDT),
-    r.ROTDP, full(r.CompDate), full(r.InstallationDate), full(r.ReportedDate), r.ReportedBy, r.EmailSubject,
-    r.IssueCategory, r.ClosureRequired, r.ClosureBy, r.TeamsVehicles, r.Remarks
-  ].map(esc).join(','));
+  const rows = data.map(r => {
+    const rp = reportPhotos[String(r.WorkOrder)] || {};
+    return [
+      r.WorkOrder, photos[r.WorkOrder] || '', (rp.during && rp.during[0] && rp.during[0].url) || '', (rp.after && rp.after[0] && rp.after[0].url) || '',
+      r.RoadCatg, r.SignType, r.SignRef, r.SignShape, r.SignSize, r.SignMaterial, r.SignQty, r.PostType, r.PostHeight, r.PostQty, r.FoundSize, r.FoundQty,
+      r.Coordinates, r.Status, full(r.StatusDT), full(r.TargetStartDT), full(r.DispatchedDate), full(r.TargetFinishDT),
+      r.ROTDP, full(r.CompDate), full(r.InstallationDate), full(r.ReportedDate), r.ReportedBy, r.EmailSubject,
+      r.IssueCategory, r.ClosureRequired, r.ClosureBy, r.TeamsVehicles, r.Remarks
+    ].map(esc).join(',');
+  });
   const csvContent = '\uFEFF' + headers.map(esc).join(',') + '\n' + rows.join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -9078,11 +9238,13 @@ function exportTableCSV() {
   document.body.appendChild(link); link.click(); document.body.removeChild(link);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-
 /* ── pictures inside the workbook ── */
 /* Extract pictures embedded in worksheet cells (Excel "Place in cell" = rich values) and floating pictures */
-async function extractXlsxImages(arrayBuffer, photoColLetter) {
-  const out = new Map();   // sheet row number (1-based) -> { bytes:Uint8Array, mime:string }
+/* Extract pictures embedded in worksheet cells (Excel "Place in cell" = rich values) and floating pictures */
+async function extractXlsxImages(arrayBuffer, photoCols) {
+  const out = new Map();   // 'B377' (column letter + sheet row) -> { bytes:Uint8Array, mime:string }
+  const cols = Array.isArray(photoCols) ? photoCols : (photoCols ? [photoCols] : null);
+  const colLetter = n => { let s = ''; n++; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
   if (typeof JSZip === 'undefined') return out;
   const zip = await JSZip.loadAsync(arrayBuffer);
   const dp = new DOMParser();
@@ -9094,10 +9256,10 @@ async function extractXlsxImages(arrayBuffer, photoColLetter) {
     return parts.join('/');
   };
   const mimeOf = p => /\.jpe?g$/i.test(p) ? 'image/jpeg' : /\.gif$/i.test(p) ? 'image/gif' : /\.webp$/i.test(p) ? 'image/webp' : 'image/png';
-  const addImage = async (row, mediaPath) => {
-    if (out.has(row)) return;
+  const addImage = async (key, mediaPath) => {
+    if (out.has(key)) return;
     const f = zip.file(mediaPath);
-    if (f) out.set(row, { bytes: await f.async('uint8array'), mime: mimeOf(mediaPath) });
+    if (f) out.set(key, { bytes: await f.async('uint8array'), mime: mimeOf(mediaPath) });
   };
 
   // first worksheet path
@@ -9119,7 +9281,7 @@ async function extractXlsxImages(arrayBuffer, photoColLetter) {
   const re = /<c r="([A-Z]+)(\d+)"[^>]*?\bvm="(\d+)"/g;
   let m;
   while ((m = re.exec(sheetXml))) {
-    if (!photoColLetter || m[1] === photoColLetter) cellVm.push({ row: +m[2], vm: +m[3] });
+    if (!cols || cols.includes(m[1])) cellVm.push({ col: m[1], row: +m[2], vm: +m[3] });
   }
   if (cellVm.length) {
     const meta = await readXml('xl/metadata.xml');
@@ -9142,7 +9304,7 @@ async function extractXlsxImages(arrayBuffer, photoColLetter) {
         if (!rvEl) continue;
         const relIndex = +rvEl.getElementsByTagName('v')[0].textContent;   // _rvRel:LocalImageIdentifier
         const media = relTarget[relIds[relIndex]];
-        if (media) await addImage(c.row, media);
+        if (media) await addImage(c.col + c.row, media);
       }
     }
   }
@@ -9162,16 +9324,16 @@ async function extractXlsxImages(arrayBuffer, photoColLetter) {
       for (const anchor of [...dXml.getElementsByTagName('xdr:twoCellAnchor'), ...dXml.getElementsByTagName('xdr:oneCellAnchor')]) {
         const blip = anchor.getElementsByTagName('a:blip')[0];
         const rowEl = anchor.getElementsByTagName('xdr:row')[0];
+        const colEl = anchor.getElementsByTagName('xdr:col')[0];
         if (!blip || !rowEl) continue;
         const embed = blip.getAttribute('r:embed');
-        if (embed && dTarget[embed]) await addImage(+rowEl.textContent + 1, dTarget[embed]);
+        const letter = colEl ? colLetter(+colEl.textContent) : 'A';
+        if (embed && dTarget[embed] && (!cols || cols.includes(letter))) await addImage(letter + (+rowEl.textContent + 1), dTarget[embed]);
       }
     }
   }
   return out;
 }
-
-
 async function compressImageToJpeg(bytes, mime, maxDim = 1280, quality = 0.82) {
   const bmp = await createImageBitmap(new Blob([bytes], { type: mime }));
   const scale = Math.min(1, maxDim / Math.max(bmp.width, bmp.height));
@@ -9188,7 +9350,9 @@ async function compressImageToJpeg(bytes, mime, maxDim = 1280, quality = 0.82) {
 /* ── import ── */
 const HEADER_RULES = [
   [/^(cm|cmno|workorder|wo)$/, 'WorkOrder', 'text'],
-  [/^photo/, 'Photo', 'skip'],
+  [/^(before)?photo/, 'PhotoBefore', 'skip'],
+  [/^duringphoto/, 'PhotoDuring', 'skip'],
+  [/^afterphoto/, 'PhotoAfter', 'skip'],
   [/^coordinates?/, 'Coordinates', 'coord'],
   [/^status$/, 'Status', 'status'],
   [/^statusdate/, 'StatusDT', 'dt'],
@@ -9252,6 +9416,15 @@ async function processExcelUpload() {
       if (headerIdx < 0) { showToast('Column "CM #" not found – please use the new template', 'error'); finish(); return; }
       const rawHeaders = rows[headerIdx];
       const colMap = rawHeaders.map(h => { const n = normH(h); const rule = HEADER_RULES.find(x => x[0].test(n)); return rule ? { key: rule[1], type: rule[2] } : null; });
+      // SIGN FACE / POST / FOUNDATION block: the headers repeat (Type, Qty, Size …) so it is read by position after "Road Catg."
+      const FAB_BLOCK = ['RoadCatg', 'SignType', 'SignRef', 'SignShape', 'SignSize', 'SignMaterial', 'SignQty', 'PostType', 'PostHeight', 'PostQty', 'FoundSize', 'FoundQty'];
+      let rcIdx = rawHeaders.findIndex(h => /^roadcatg/.test(normH(h)));
+      if (rcIdx < 0) { const at = rawHeaders.findIndex(h => /^assettype/.test(normH(h))); if (at > 0) rcIdx = at - 1; }   // template without the Road Catg. column
+      if (rcIdx >= 0) {
+        const coordIdx = colMap.findIndex(c => c && c.key === 'Coordinates');
+        const hasRoad = /^roadcatg/.test(normH(rawHeaders[rcIdx]));
+        FAB_BLOCK.forEach((k, j) => { const ci = rcIdx + j; if ((j > 0 || hasRoad) && ci < rawHeaders.length && (coordIdx < 0 || ci < coordIdx)) colMap[ci] = { key: k, type: 'fab' }; });
+      }
       const woIdx = colMap.findIndex(c => c && c.key === 'WorkOrder');
       const dataRows = rows.slice(headerIdx + 1);
       const dataFirstRow = firstRow + headerIdx + 1;           // sheet row number of dataRows[0]
@@ -9287,6 +9460,10 @@ async function processExcelUpload() {
             let st = String(v).trim().toUpperCase();
             if (STATUS_MAP[st]) st = STATUS_MAP[st];
             if (!VALID.has(st)) errors.push(`Invalid Status: ${v}`); else r.Status = st;
+          } else if (m.type === 'fab') {
+            const s = String(v).trim();
+            if (m.key === 'SignType' || m.key === 'RoadCatg') r[m.key] = catOf(s) || s;      // "TS (Traffic Sign)" → TS · "Directional" → DS
+            else r[m.key] = s;
           } else if (m.type === 'yesno') {
             const s = String(v).trim().toLowerCase();
             r[m.key] = s === 'yes' ? 'Yes' : s === 'no' ? 'No' : null;
@@ -9337,7 +9514,15 @@ async function processExcelUpload() {
             completion_status: getCompletionStatusLabel({ Status: w.Status, TargetFinish: tFinish, InstallationDate: inst, StatusUpdateDate: sDate })
           };
         });
-        const mfgData = uniqueData.map(w => ({ work_order_number: w.WorkOrder, installation_date: dateOnly(w.InstallationDate) }));
+        const hasFab = colMap.some(c => c && c.type === 'fab');
+        const mfgData = uniqueData.map(w => {
+          const o = { work_order_number: w.WorkOrder, installation_date: dateOnly(w.InstallationDate) };
+          if (hasFab) Object.assign(o, {
+            road_catg: w.RoadCatg ?? null, sign_type: w.SignType ?? null, sign_ref: w.SignRef ?? null, sign_shape: w.SignShape ?? null, sign_size: w.SignSize ?? null,
+            sign_material: w.SignMaterial ?? null, sign_qty: w.SignQty ?? null, post_type: w.PostType ?? null, post_height: w.PostHeight ?? null, post_qty: w.PostQty ?? null,
+            found_size: w.FoundSize ?? null, found_qty: w.FoundQty ?? null });
+          return o;
+        });
 
         const chunkSize = 100;
         const totalChunks = Math.ceil(woData.length / chunkSize) + Math.ceil(mfgData.length / chunkSize);
@@ -9352,30 +9537,48 @@ async function processExcelUpload() {
           if (error) throw error; bump();
         }
 
-        // pictures placed in the "Photo" column
+        // pictures placed in the Before / During / After photo columns
         let photoCount = 0, photoFail = 0;
         if (!isCsv) {
           setProgress(76, 'Reading pictures...');
-          const photoIdx = colMap.findIndex(c => c && c.key === 'Photo');
-          const letter = photoIdx >= 0 ? XLSX.utils.encode_col(range.s.c + photoIdx) : 'B';
+          const letterOf = key => { const i = colMap.findIndex(c => c && c.key === key); return i >= 0 ? XLSX.utils.encode_col(range.s.c + i) : null; };
+          const letters = { before: letterOf('PhotoBefore'), during: letterOf('PhotoDuring'), after: letterOf('PhotoAfter') };
           let imgs = new Map();
-          try { imgs = await extractXlsxImages(buf, letter); } catch (err) { console.warn('Picture extraction failed:', err); }
+          try { imgs = await extractXlsxImages(buf, Object.values(letters).filter(Boolean)); } catch (err) { console.warn('Picture extraction failed:', err); }
           const rowToWO = new Map([...woRowNumber.entries()].map(([w, n]) => [n, w]));
-          const jobs = [...imgs.entries()].filter(([n]) => rowToWO.has(n)).map(([n, img]) => ({ wo: rowToWO.get(n), img }));
+          const jobs = [];
+          ['before', 'during', 'after'].forEach(phase => {
+            if (!letters[phase]) return;
+            imgs.forEach((img, key) => {
+              const m = key.match(/^([A-Z]+)(\d+)$/);
+              if (m && m[1] === letters[phase] && rowToWO.has(+m[2])) jobs.push({ wo: rowToWO.get(+m[2]), phase, img });
+            });
+          });
           let idx = 0, finished = 0;
           const worker = async () => {
             while (idx < jobs.length) {
               const job = jobs[idx++];
               try {
                 const blob = await compressImageToJpeg(job.img.bytes, job.img.mime);
-                const path = `photos/${job.wo}_${Date.now()}.jpg`;
+                const path = job.phase === 'before' ? `photos/${job.wo}_${Date.now()}.jpg` : `reports/${job.wo}/${job.phase}_${Date.now()}.jpg`;
                 const { error: upErr } = await supabaseClient.storage.from('qbc-storage').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
                 if (upErr) throw upErr;
                 const { data: { publicUrl } } = supabaseClient.storage.from('qbc-storage').getPublicUrl(path);
-                const { error: dbErr } = await supabaseClient.from('photos').upsert({ work_order: job.wo, url: publicUrl }, { onConflict: 'work_order' });
-                if (dbErr) throw dbErr;
+                if (job.phase === 'before') {
+                  const { error: dbErr } = await supabaseClient.from('photos').upsert({ work_order: job.wo, url: publicUrl }, { onConflict: 'work_order' });
+                  if (dbErr) throw dbErr;
+                } else {
+                  // one picture per phase: add the new one, then remove the previous ones
+                  const { data: old } = await supabaseClient.from('report_photos').select('id, storage_path').eq('work_order', job.wo).eq('phase', job.phase);
+                  const { error: dbErr } = await supabaseClient.from('report_photos').insert({ work_order: job.wo, phase: job.phase, storage_path: path, public_url: publicUrl });
+                  if (dbErr) throw dbErr;
+                  if (old && old.length) {
+                    await supabaseClient.storage.from('qbc-storage').remove(old.map(o => o.storage_path).filter(Boolean));
+                    await supabaseClient.from('report_photos').delete().in('id', old.map(o => o.id));
+                  }
+                }
                 photoCount++;
-              } catch (err) { photoFail++; console.warn('Photo upload failed for', job.wo, err); }
+              } catch (err) { photoFail++; console.warn('Photo upload failed for', job.wo, job.phase, err); }
               finished++;
               setProgress(76 + Math.round((finished / jobs.length) * 22), `Uploading pictures (${finished}/${jobs.length})...`);
             }
@@ -9451,7 +9654,7 @@ const MAIN_FIELDS = [
 ];
 
 const FAB_FIELDS = [ 
-  {k:'RoadCatg', l:'Road Catg.'}, {k:'SignType',l:'Sign Type'},{k:'SignRef',l:'Sign Ref'},
+  {k:'RoadCatg', l:'Road Catg.'}, {k:'SignType',l:'Asset Type (TS / DS)'},{k:'SignRef',l:'Sign Ref'},
   {k:'SignShape',l:'Sign Shape'}, {k:'SignSize',l:'Sign Size'}, {k:'SignMaterial',l:'Sign Material'}, 
   {k:'SignQty',l:'Sign Qty'}, {k:'PostType',l:'Post Type'},{k:'PostHeight',l:'Post Height (mm)'},
   {k:'PostQty',l:'Post Qty'}, {k:'FoundSize',l:'Found. Size (L×W×H)'},{k:'FoundQty',l:'Found. Qty'}, 
@@ -10078,6 +10281,7 @@ function setupNotifListener() {
           if (idx !== -1) {
              allData[idx] = {
                 ...allData[idx],
+                SignCat: catOf(d.sign_type) || catOf(d.road_catg),
                 RoadCatg: d.road_catg,
                 SignType: d.sign_type,
                 SignRef: d.sign_ref,
